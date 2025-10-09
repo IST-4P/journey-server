@@ -7,6 +7,7 @@
   "targets": {
     "build": {
       "executor": "nx:run-commands",
+      "dependsOn": ["push-prisma"],
       "options": {
         "command": "webpack-cli build",
         "args": ["--node-env=production"],
@@ -64,6 +65,29 @@
     "test": {
       "options": {
         "passWithNoTests": true
+      }
+    },
+    "generate-prisma": {
+      "command": "prisma generate",
+      "options": {
+        "cwd": "{projectRoot}",
+        "inputs": ["prisma/schema.prisma"]
+      },
+      "cache": true
+    },
+    "push-prisma": {
+      "command": "prisma db push",
+      "options": {
+        "cwd": "{projectRoot}",
+        "inputs": ["prisma/schema.prisma"]
+      },
+      "cache": true
+    },
+    "migrate-prisma": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "npx prisma migrate dev --name {args.name}",
+        "cwd": "{projectRoot}"
       }
     }
   }

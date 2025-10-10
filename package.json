@@ -3,10 +3,11 @@
   "version": "0.0.0",
   "license": "MIT",
   "scripts": {
-    "dev": "nx run-many -t serve -p auth user notification"
+    "dev": "nx run-many -t serve -p api auth"
   },
   "private": true,
   "dependencies": {
+    "@grpc/grpc-js": "^1.14.0",
     "@grpc/proto-loader": "^0.8.0",
     "@nestjs/common": "^11.0.0",
     "@nestjs/config": "^4.0.2",

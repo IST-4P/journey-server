@@ -15,6 +15,7 @@
     "skipDefaultLibCheck": true,
     "baseUrl": ".",
     "paths": {
+      "@hacmieu-journey/grpc": ["libs/grpc/src/index.ts"],
       "@hacmieu-journey/nestjs": ["libs/nestjs/src/index.ts"],
       "@hacmieu-journey/pulsar": ["libs/pulsar/src/index.ts"],
       "@hacmieu-journey/websocket": ["libs/websocket/src/index.ts"]

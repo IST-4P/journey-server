@@ -40,6 +40,7 @@ export class UserProfileService {
           email: event.email,
           fullName: event.name,
           phone: event.phone,
+          role: event.role as 'USER' | 'ADMIN' | 'SUPER_ADMIN',
         },
       });
 

@@ -3,7 +3,7 @@
   "version": "0.0.0",
   "license": "MIT",
   "scripts": {
-    "dev": "nx run-many -t serve -p auth user"
+    "dev": "nx run-many -t serve -p auth user notification"
   },
   "private": true,
   "dependencies": {
@@ -12,6 +12,8 @@
     "@nestjs/core": "^11.0.0",
     "@nestjs/jwt": "^11.0.0",
     "@nestjs/platform-express": "^11.0.0",
+    "@nestjs/platform-socket.io": "^11.1.6",
+    "@nestjs/websockets": "^11.1.6",
     "@prisma/client": "^6.17.0",
     "axios": "^1.6.0",
     "bcrypt": "^6.0.0",
@@ -24,6 +26,7 @@
     "reflect-metadata": "^0.1.13",
     "resend": "^6.1.2",
     "rxjs": "^7.8.0",
+    "socket.io": "^4.8.1",
     "zod": "^4.1.12"
   },
   "devDependencies": {

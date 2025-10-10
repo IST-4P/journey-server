@@ -1,0 +1,51 @@
+generator client {
+    provider = "prisma-client-js"
+    output   = "../../../node_modules/@prisma-clients/notification"
+}
+
+datasource db {
+    provider = "postgresql"
+    url      = env("DATABASE_URL")
+}
+
+enum NotificationType {
+    WELCOME // Chào mừng user mới
+    BOOKING_CREATED // Đơn thuê xe được tạo
+    BOOKING_CONFIRMED // Đơn thuê được xác nhận
+    BOOKING_CANCELLED // Đơn thuê bị hủy
+    PAYMENT_SUCCESS // Thanh toán thành công
+    PAYMENT_FAILED // Thanh toán thất bại
+    CHECK_IN_REMINDER // Nhắc nhở check-in
+    CHECK_OUT_REMINDER // Nhắc nhở check-out
+    REFUND_PROCESSED // Hoàn tiền đã xử lý
+    REVIEW_REQUEST // Yêu cầu đánh giá
+    PROMO_AVAILABLE // Có mã giảm giá mới
+    SYSTEM_ANNOUNCEMENT // Thông báo hệ thống
+    COMPLAINT_UPDATE // Cập nhật khiếu nại
+}
+
+model Notification {
+    id      String           @id @default(uuid())
+    userId  String           @map("user_id")
+    type    NotificationType
+    title   String
+    message String           @db.Text
+
+    // Metadata
+    read Boolean @default(false)
+
+    // Related entities (optional)
+    bookingId String? @map("booking_id")
+    vehicleId String? @map("vehicle_id")
+    paymentId String? @map("payment_id")
+
+    // Timestamps
+    createdAt DateTime @default(now()) @map("created_at")
+    updatedAt DateTime @updatedAt @map("updated_at")
+
+    @@index([userId, createdAt(sort: Desc)])
+    @@index([userId, read])
+    @@index([type])
+    @@index([createdAt])
+    @@map("notifications")
+}

@@ -1,13 +1,13 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
+import { NotificationModule } from './notification/notification.module';
 import { PrismaModule } from './prisma/prisma.module';
-import { UserProfileModule } from './user-profile/user-profile.module';
 
 @Module({
   imports: [
     ConfigModule.forRoot({ isGlobal: true }),
     PrismaModule,
-    UserProfileModule,
+    NotificationModule,
   ],
   controllers: [],
   providers: [],

@@ -1,7 +1,6 @@
 import { PulsarModule } from '@hacmieu-journey/pulsar';
 import { Module } from '@nestjs/common';
 import { JwtModule } from '@nestjs/jwt';
-import { PrismaService } from '../prisma/prisma.service';
 import { AuthController } from './auth.controller';
 import { AuthRepository } from './auth.repo';
 import { AuthService } from './auth.service';
@@ -20,7 +19,6 @@ import { UserRepository } from './user.repo';
     AuthService,
     AuthRepository,
     UserRepository,
-    PrismaService,
     EmailService,
     HashingService,
     TokenService,

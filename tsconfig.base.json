@@ -16,7 +16,8 @@
     "baseUrl": ".",
     "paths": {
       "@hacmieu-journey/nestjs": ["libs/nestjs/src/index.ts"],
-      "@hacmieu-journey/pulsar": ["libs/pulsar/src/index.ts"]
+      "@hacmieu-journey/pulsar": ["libs/pulsar/src/index.ts"],
+      "@hacmieu-journey/websocket": ["libs/websocket/src/index.ts"]
     }
   },
   "exclude": ["node_modules", "tmp"]

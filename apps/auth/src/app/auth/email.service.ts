@@ -4,15 +4,20 @@ import fs from 'fs';
 import path from 'path';
 import { Resend } from 'resend';
 
-const otpTemplate = fs.readFileSync(path.resolve('src/assets/otp.html'), {
-  encoding: 'utf-8',
-});
-
 @Injectable()
 export class EmailService {
   private resend: Resend;
+  private otpTemplate: string;
+
   constructor(private readonly configService: ConfigService) {
     this.resend = new Resend(this.configService.get('RESEND_API_KEY'));
+
+    // Load template dynamically
+    const templatePath = path.join(
+      process.cwd(),
+      'apps/auth/src/assets/otp.html'
+    );
+    this.otpTemplate = fs.readFileSync(templatePath, 'utf-8');
   }
 
   sendOTP(body: { email: string; code: string }) {
@@ -20,7 +25,7 @@ export class EmailService {
       from: 'Phi <no-reply@hacmieu.xyz>',
       to: [body.email],
       subject: 'Mã OTP',
-      html: otpTemplate.replace(/\{\{code\}\}/g, body.code),
+      html: this.otpTemplate.replace(/\{\{code\}\}/g, body.code),
     });
   }
 }

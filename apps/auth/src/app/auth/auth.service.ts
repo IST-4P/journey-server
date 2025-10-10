@@ -2,7 +2,8 @@ import {
   isNotFoundPrismaError,
   isUniqueConstraintPrismaError,
 } from '@hacmieu-journey/nestjs';
-import { HttpException, Injectable } from '@nestjs/common';
+import { PulsarClient } from '@hacmieu-journey/pulsar';
+import { HttpException, Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { randomInt } from 'crypto';
 import { addMilliseconds } from 'date-fns';
@@ -35,13 +36,16 @@ import { UserRepository } from './user.repo';
 
 @Injectable()
 export class AuthService {
+  private readonly logger = new Logger(AuthService.name);
+
   constructor(
     private readonly authRepository: AuthRepository,
     private readonly userRepository: UserRepository,
     private readonly configService: ConfigService,
     private readonly emailService: EmailService,
     private readonly hashingService: HashingService,
-    private readonly tokenService: TokenService
+    private readonly tokenService: TokenService,
+    private readonly pulsarClient: PulsarClient
   ) {}
 
   generateOTP = () => {
@@ -141,10 +145,10 @@ export class AuthService {
 
   async register(body: RegisterBodyType) {
     try {
-      await this.validateVerificationCode({
-        email: body.email,
-        type: TypeOfVerificationCode.REGISTER,
-      });
+      // await this.validateVerificationCode({
+      //   email: body.email,
+      //   type: TypeOfVerificationCode.REGISTER,
+      // });
 
       const hashedPassword = await this.hashingService.hash(body.password);
 
@@ -156,13 +160,49 @@ export class AuthService {
           password: hashedPassword,
           role: 'USER',
         }),
-        this.authRepository.deleteVerificationCode({
-          email_type: {
-            email: body.email,
-            type: TypeOfVerificationCode.REGISTER,
-          },
-        }),
+        // this.authRepository.deleteVerificationCode({
+        //   email_type: {
+        //     email: body.email,
+        //     type: TypeOfVerificationCode.REGISTER,
+        //   },
+        // }),
       ]);
+
+      // Tạo user-profile trong User Service qua Pulsar
+      try {
+        const producer = await this.pulsarClient.createProducer(
+          'persistent://journey/events/user-registered'
+        );
+
+        const eventData = {
+          userId: user.id,
+          email: user.email,
+          name: user.name,
+          phone: user.phone,
+          role: user.role,
+          createdAt: user.createdAt.toISOString(),
+        };
+
+        await producer.send({
+          data: Buffer.from(JSON.stringify(eventData)),
+          properties: {
+            eventType: 'user.registered',
+            version: '1.0',
+            source: 'auth-service',
+          },
+          eventTimestamp: Date.now(),
+        });
+
+        // this.logger.log(
+        //   `✅ Published user-registered event for user: ${user.id}`
+        // );
+      } catch (pulsarError) {
+        // Log error but don't fail registration
+        this.logger.error(
+          `❌ Failed to publish user-registered event:`,
+          pulsarError
+        );
+      }
 
       return user;
     } catch (error) {

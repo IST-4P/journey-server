@@ -2,7 +2,9 @@
   "name": "@hacmieu-journey/source",
   "version": "0.0.0",
   "license": "MIT",
-  "scripts": {},
+  "scripts": {
+    "dev": "nx run-many -t serve -p auth user"
+  },
   "private": true,
   "dependencies": {
     "@nestjs/common": "^11.0.0",
@@ -18,6 +20,7 @@
     "date-fns": "^4.1.0",
     "ms": "^2.1.3",
     "nestjs-zod": "^5.0.1",
+    "pulsar-client": "^1.14.0",
     "reflect-metadata": "^0.1.13",
     "resend": "^6.1.2",
     "rxjs": "^7.8.0",

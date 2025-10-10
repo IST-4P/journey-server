@@ -1,5 +1,5 @@
+import { PulsarModule } from '@hacmieu-journey/pulsar';
 import { Module } from '@nestjs/common';
-import { ConfigService } from '@nestjs/config';
 import { JwtModule } from '@nestjs/jwt';
 import { PrismaService } from '../prisma/prisma.service';
 import { AuthController } from './auth.controller';
@@ -11,17 +11,19 @@ import { TokenService } from './token.service';
 import { UserRepository } from './user.repo';
 
 @Module({
+  imports: [
+    JwtModule,
+    PulsarModule, // ← PHẢI import vì AuthService inject PulsarClient
+  ],
   controllers: [AuthController],
   providers: [
     AuthService,
     AuthRepository,
     UserRepository,
-    EmailService,
-    ConfigService,
     PrismaService,
+    EmailService,
     HashingService,
     TokenService,
   ],
-  imports: [JwtModule],
 })
 export class AuthModule {}

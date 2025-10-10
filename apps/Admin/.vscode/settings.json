@@ -1,0 +1,19 @@
+{
+    // ⚙️ Hiện danh sách gợi ý khi gõ
+    "editor.quickSuggestions": {
+        "other": true,
+        "comments": false,
+        "strings": false
+    },
+    // ⚙️ Hiện danh sách khi gõ ký tự kích hoạt như . hay chữ hoa đầu
+    "editor.suggestOnTriggerCharacters": true,
+    // ❌ TẮT ghost text
+    "editor.inlineSuggest.enabled": false,
+    // ⚙️ Cho phép danh sách gợi ý dựa vào từ trong project
+    "editor.wordBasedSuggestions": "matchingDocuments",
+    "omnisharp.enableRoslynAnalyzers": true,
+    "omnisharp.enableEditorConfigSupport": true,
+    // ⚙️ Giữ menu gợi ý hiện ra khi bạn gõ "IAction"
+    "editor.suggest.showWords": true,
+    "dotnet.completion.showCompletionItemsFromUnimportedNamespaces": true
+}

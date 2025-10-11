@@ -28,7 +28,7 @@ export class NotificationService {
         },
       });
 
-      this.logger.log(`✅ Created notification for user: ${event.userId}`);
+      // this.logger.log(`✅ Created notification for user: ${event.userId}`);
     } catch (error) {
       this.logger.error(
         `❌ Failed to create notification for user ${event.userId}:`,

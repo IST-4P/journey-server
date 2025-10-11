@@ -44,7 +44,7 @@ export class UserProfileService {
         },
       });
 
-      this.logger.log(`✅ Created profile for user: ${event.userId}`);
+      // this.logger.log(`✅ Created profile for user: ${event.userId}`);
       return profile;
     } catch (error) {
       this.logger.error(

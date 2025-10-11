@@ -98,4 +98,5 @@ export type VerificationCodeType = z.infer<typeof VerificationCodeSchema>;
 export type SendOTPBodyType = z.infer<typeof SendOTPBodySchema>;
 export type RefreshTokenType = z.infer<typeof RefreshTokenSchema>;
 export type RefreshTokenBodyType = z.infer<typeof RefreshTokenBodySchema>;
+export type LogoutBodyType = RefreshTokenBodyType;
 export type ForgotPasswordBodyType = z.infer<typeof ForgotPasswordBodySchema>;

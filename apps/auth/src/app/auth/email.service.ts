@@ -10,7 +10,7 @@ export class EmailService {
   private otpTemplate: string;
 
   constructor(private readonly configService: ConfigService) {
-    this.resend = new Resend(this.configService.get('RESEND_API_KEY'));
+    this.resend = new Resend(this.configService.getOrThrow('RESEND_API_KEY'));
 
     // Load template dynamically
     const templatePath = path.join(

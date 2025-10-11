@@ -7,7 +7,7 @@ service AuthService {
   rpc Login(LoginRequest) returns (LoginResponse);
   rpc RefreshToken(RefreshTokenRequest) returns (RefreshTokenResponse);
   rpc Logout(LogoutRequest) returns (LogoutResponse);
-  rpc SendOTP(SendOTPRequest) returns (SendOTPResponse);
+  rpc SendOtp(SendOTPRequest) returns (SendOTPResponse);
   rpc ForgotPassword(ForgotPasswordRequest) returns (ForgotPasswordResponse);
   rpc Authenticate(AuthenticateRequest) returns (AuthenticateResponse);
 }

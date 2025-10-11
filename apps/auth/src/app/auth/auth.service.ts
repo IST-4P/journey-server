@@ -21,6 +21,7 @@ import {
 import {
   ForgotPasswordBodyType,
   LoginBodyType,
+  LogoutBodyType,
   RefreshTokenBodyType,
   RegisterBodyType,
   SendOTPBodyType,
@@ -103,7 +104,7 @@ export class AuthService {
     return verificationCode;
   }
 
-  async sendOTP(body: SendOTPBodyType) {
+  async sendOtp(body: SendOTPBodyType) {
     // Kiểm tra email có tồn tại hay chưa
     const user = await this.userRepository.findUnique({
       email: body.email,
@@ -124,7 +125,7 @@ export class AuthService {
       code,
       expiresAt: addMilliseconds(
         new Date(),
-        ms(this.configService.get('OTP_EXPIRES') as StringValue)
+        ms(this.configService.getOrThrow('OTP_EXPIRES') as StringValue)
       ),
     });
 
@@ -139,7 +140,7 @@ export class AuthService {
     }
 
     return {
-      message: 'Gửi mã OTP thành công',
+      message: 'Message.SendOtpSuccessfully',
     };
   }
 
@@ -204,7 +205,9 @@ export class AuthService {
         );
       }
 
-      return user;
+      return {
+        message: 'Message.RegisterSuccessfully',
+      };
     } catch (error) {
       if (isUniqueConstraintPrismaError(error)) {
         throw EmailAlreadyExistsException;
@@ -277,13 +280,15 @@ export class AuthService {
     }
   }
 
-  async logout(refreshToken: string) {
+  async logout({ refreshToken }: LogoutBodyType) {
     try {
       // Kiểm tra token có hợp lệ không
       await this.tokenService.verifyRefreshToken(refreshToken);
 
       // Xoá token trong DB
       await this.authRepository.deleteRefreshToken({ token: refreshToken });
+
+      return { message: 'Message.LogoutSuccessfully' };
     } catch (error) {
       if (isNotFoundPrismaError(error)) {
         throw RefreshTokenAlreadyUsedException;
@@ -324,5 +329,7 @@ export class AuthService {
         },
       }),
     ]);
+
+    return { message: 'Message.ChangePasswordSuccessfully' };
   }
 }

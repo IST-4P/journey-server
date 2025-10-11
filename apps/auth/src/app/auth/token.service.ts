@@ -21,8 +21,8 @@ export class TokenService {
     return this.jwtService.signAsync(
       { ...payload, uuid: uuidv4() },
       {
-        secret: this.configService.get('ACCESS_TOKEN_SECRET'),
-        expiresIn: this.configService.get('ACCESS_TOKEN_EXPIRES_IN'),
+        secret: this.configService.getOrThrow('ACCESS_TOKEN_SECRET'),
+        expiresIn: this.configService.getOrThrow('ACCESS_TOKEN_EXPIRES_IN'),
         algorithm: 'HS256',
       }
     );
@@ -32,8 +32,8 @@ export class TokenService {
     return this.jwtService.signAsync(
       { ...payload, uuid: uuidv4() },
       {
-        secret: this.configService.get('REFRESH_TOKEN_SECRET'),
-        expiresIn: this.configService.get('REFRESH_TOKEN_EXPIRES_IN'),
+        secret: this.configService.getOrThrow('REFRESH_TOKEN_SECRET'),
+        expiresIn: this.configService.getOrThrow('REFRESH_TOKEN_EXPIRES_IN'),
         algorithm: 'HS256',
       }
     );
@@ -41,13 +41,13 @@ export class TokenService {
 
   verifyAccessToken(token: string): Promise<AccessTokenPayload> {
     return this.jwtService.verifyAsync(token, {
-      secret: this.configService.get('ACCESS_TOKEN_SECRET'),
+      secret: this.configService.getOrThrow('ACCESS_TOKEN_SECRET'),
     });
   }
 
   verifyRefreshToken(token: string): Promise<RefreshTokenPayload> {
     return this.jwtService.verifyAsync(token, {
-      secret: this.configService.get('REFRESH_TOKEN_SECRET'),
+      secret: this.configService.getOrThrow('REFRESH_TOKEN_SECRET'),
     });
   }
 }

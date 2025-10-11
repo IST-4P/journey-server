@@ -14,7 +14,9 @@ import { AuthService } from './auth.service';
         useFactory: (configService: ConfigService) => ({
           transport: Transport.GRPC,
           options: {
-            url: configService.get('AUTH_GRPC_SERVICE_URL') || 'localhost:5000',
+            url:
+              configService.getOrThrow('AUTH_GRPC_SERVICE_URL') ||
+              'localhost:5000',
             package: AUTH_PACKAGE_NAME,
             protoPath: join(__dirname, '../../libs/grpc/proto/auth.proto'),
           },

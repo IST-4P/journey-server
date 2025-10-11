@@ -87,3 +87,9 @@ secrets:
   accessTokenSecret: ''
   refreshTokenSecret: ''
   resendApiKey: ''
+
+# Ingress configuration
+ingress:
+  enabled: true
+  host: 'journey-api.hacmieu.xyz'
+  email: 'caophi565caophi@gmail.com'

@@ -1,37 +1,36 @@
-{{- if .Values.auth.enabled }}
+{{- if .Values.user.enabled }}
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: auth
+  name: user
   labels:
-    app: auth
+    app: user
 spec:
-  replicas: {{ .Values.auth.replicas }}
+  replicas: {{ .Values.user.replicas }}
   selector:
     matchLabels:
-      app: auth
+      app: user
   template:
     metadata:
       labels:
-        app: auth
+        app: user
     spec:
       containers:
-        - name: auth
-          image: {{ .Values.auth.image }}
+        - name: user
+          image: {{ .Values.user.image }}
           imagePullPolicy: {{ .Values.global.imagePullPolicy }}
           ports:
-            - containerPort: {{ .Values.auth.port.grpc }}
+            - containerPort: {{ .Values.user.port.grpc }}
+            - containerPort: {{ .Values.user.port.http }}
           env:
             - name: DATABASE_URL
               valueFrom:
                 secretKeyRef:
                   name: journey-secrets
-                  key: AUTH_DATABASE_URL
-            - name: AUTH_GRPC_SERVICE_URL
-              value: "0.0.0.0:{{ .Values.auth.port.grpc }}"
+                  key: USER_DATABASE_URL
+            - name: PORT
+              value: {{ .Values.user.port.http | quote }}
           envFrom:
             - configMapRef:
                 name: journey-config
-            - secretRef:
-                name: journey-secrets
 {{- end }}

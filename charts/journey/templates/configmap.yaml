@@ -1,0 +1,16 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: journey-config
+  labels:
+    app: journey
+data:
+  PULSAR_SERVICE_URL: { { .Values.config.pulsarUrl | quote } }
+  AUTH_GRPC_SERVICE_URL: { { .Values.config.authUrl | quote } }
+  USER_GRPC_SERVICE_URL: { { .Values.config.userUrl | quote } }
+  NOTIFICATION_GRPC_SERVICE_URL: { { .Values.config.notificationUrl | quote } }
+  ACCESS_TOKEN_EXPIRES_IN:
+    { { .Values.config.accessTokenExpiresIn | default "1h" | quote } }
+  REFRESH_TOKEN_EXPIRES_IN:
+    { { .Values.config.refreshTokenExpiresIn | default "7d" | quote } }
+  OTP_EXPIRES: { { .Values.config.otpExpires | default "5m" | quote } }

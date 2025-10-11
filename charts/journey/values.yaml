@@ -59,6 +59,7 @@ user:
   image: 'caophi562005/journey-user:latest'
   port:
     grpc: 5001
+    http: 3001
 
 notification:
   enabled: true
@@ -66,3 +67,23 @@ notification:
   image: 'caophi562005/journey-notification:latest'
   port:
     grpc: 5002
+    http: 3002
+
+# Configuration (non-sensitive)
+config:
+  pulsarUrl: ''
+  authUrl: ''
+  userUrl: ''
+  notificationUrl: ''
+  accessTokenExpiresIn: '1h'
+  refreshTokenExpiresIn: '7d'
+  otpExpires: '5m'
+
+# Secrets (sensitive - DO NOT COMMIT REAL VALUES)
+secrets:
+  authDatabaseUrl: ''
+  userDatabaseUrl: ''
+  notificationDatabaseUrl: ''
+  accessTokenSecret: ''
+  refreshTokenSecret: ''
+  resendApiKey: ''

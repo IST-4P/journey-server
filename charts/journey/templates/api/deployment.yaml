@@ -21,4 +21,12 @@ spec:
           imagePullPolicy: {{ .Values.global.imagePullPolicy }}
           ports:
             - containerPort: {{ .Values.api.port.http }}
+          env:
+            - name: PORT
+              value: {{ .Values.api.port.http | quote }}
+          envFrom:
+            - configMapRef:
+                name: journey-config
+            - secretRef:
+                name: journey-secrets
 {{- end }}

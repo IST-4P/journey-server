@@ -1,7 +1,7 @@
 import {
   isNotFoundPrismaError,
   isUniqueConstraintPrismaError,
-} from '@hacmieu-journey/nestjs';
+} from '@hacmieu-journey/prisma';
 import { PulsarClient } from '@hacmieu-journey/pulsar';
 import { HttpException, Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
@@ -19,12 +19,12 @@ import {
   UnauthorizedAccessException,
 } from './auth.error';
 import {
-  ForgotPasswordBodyType,
-  LoginBodyType,
-  LogoutBodyType,
-  RefreshTokenBodyType,
-  RegisterBodyType,
-  SendOTPBodyType,
+  ForgotPasswordRequestType,
+  LoginRequestType,
+  LogoutRequestType,
+  RefreshTokenRequestType,
+  RegisterRequestType,
+  SendOTPRequestType,
   TypeOfVerificationCode,
   TypeOfVerificationCodeType,
 } from './auth.model';
@@ -104,7 +104,7 @@ export class AuthService {
     return verificationCode;
   }
 
-  async sendOtp(body: SendOTPBodyType) {
+  async sendOtp(body: SendOTPRequestType) {
     // Kiểm tra email có tồn tại hay chưa
     const user = await this.userRepository.findUnique({
       email: body.email,
@@ -144,7 +144,7 @@ export class AuthService {
     };
   }
 
-  async register(body: RegisterBodyType) {
+  async register(body: RegisterRequestType) {
     try {
       // await this.validateVerificationCode({
       //   email: body.email,
@@ -216,7 +216,7 @@ export class AuthService {
     }
   }
 
-  async login(body: LoginBodyType) {
+  async login(body: LoginRequestType) {
     // Kiểm tra user có tồn tại không
     const user = await this.userRepository.findUnique({
       email: body.email,
@@ -243,7 +243,7 @@ export class AuthService {
     return tokens;
   }
 
-  async refreshToken({ refreshToken }: RefreshTokenBodyType) {
+  async refreshToken({ refreshToken }: RefreshTokenRequestType) {
     try {
       // Kiểm tra token có hợp lê không
       const { userId } = await this.tokenService.verifyRefreshToken(
@@ -280,7 +280,7 @@ export class AuthService {
     }
   }
 
-  async logout({ refreshToken }: LogoutBodyType) {
+  async logout({ refreshToken }: LogoutRequestType) {
     try {
       // Kiểm tra token có hợp lệ không
       await this.tokenService.verifyRefreshToken(refreshToken);
@@ -298,7 +298,7 @@ export class AuthService {
     }
   }
 
-  async forgotPassword(body: ForgotPasswordBodyType) {
+  async forgotPassword(body: ForgotPasswordRequestType) {
     const { email, code, newPassword } = body;
 
     // Kiểm tra email có tồn tại không

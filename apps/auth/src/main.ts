@@ -4,7 +4,6 @@
  */
 
 import { AUTH_PACKAGE_NAME } from '@hacmieu-journey/grpc';
-import { init } from '@hacmieu-journey/nestjs';
 import { ConfigService } from '@nestjs/config';
 import { NestFactory } from '@nestjs/core';
 import { GrpcOptions, Transport } from '@nestjs/microservices';
@@ -13,7 +12,7 @@ import { AppModule } from './app/app.module';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
-  await init(app);
+  // await init(app);
 
   app.connectMicroservice<GrpcOptions>({
     transport: Transport.GRPC,

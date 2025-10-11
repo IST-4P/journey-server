@@ -1,0 +1,39 @@
+FROM node:22-slim AS builder
+
+WORKDIR /workspace
+
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    openssl ca-certificates protobuf-compiler \
+  && rm -rf /var/lib/apt/lists/*
+
+COPY package*.json ./
+COPY nx.json ./
+COPY tsconfig.*.json ./
+COPY webpack.*.config.js ./
+
+COPY apps/user ./apps/user
+COPY libs/grpc ./libs/grpc
+COPY libs/pulsar ./libs/pulsar
+COPY libs/prisma ./libs/prisma
+COPY libs/nestjs ./libs/nestjs
+
+RUN npm install
+
+RUN sed -i 's/protoc-gen-ts_proto=.*node_modules.*protoc-gen-ts_proto.cmd/protoc-gen-ts_proto=..\/..\/..\/..\/node_modules\/.bin\/protoc-gen-ts_proto/g' libs/grpc/project.json
+
+RUN npx nx build user
+
+FROM node:22-slim AS runner
+
+WORKDIR /app
+
+COPY --from=builder /workspace/dist/apps/user/package.json ./
+
+ENV NODE_ENV=production
+
+RUN npm install --omit=dev
+
+COPY --from=builder /workspace/dist ./dist
+COPY --from=builder /workspace/node_modules/@prisma-clients/user/ ./node_modules/@prisma-clients/user/
+
+CMD ["node", "dist/apps/user/main.js"]

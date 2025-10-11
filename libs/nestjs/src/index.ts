@@ -1,2 +1,2 @@
 export * from './lib/init';
-export * from './lib/prisma-error.helper';
+export * from './lib/response.model';

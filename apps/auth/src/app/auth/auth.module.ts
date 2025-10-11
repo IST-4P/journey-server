@@ -2,7 +2,6 @@ import { PulsarModule } from '@hacmieu-journey/pulsar';
 import { Module } from '@nestjs/common';
 import { JwtModule } from '@nestjs/jwt';
 import { AuthGrpcController } from './auth-grpc.controller';
-import { AuthController } from './auth.controller';
 import { AuthRepository } from './auth.repo';
 import { AuthService } from './auth.service';
 import { EmailService } from './email.service';
@@ -11,11 +10,8 @@ import { TokenService } from './token.service';
 import { UserRepository } from './user.repo';
 
 @Module({
-  imports: [
-    JwtModule,
-    PulsarModule, // ← PHẢI import vì AuthService inject PulsarClient
-  ],
-  controllers: [AuthGrpcController, AuthController],
+  imports: [JwtModule, PulsarModule],
+  controllers: [AuthGrpcController],
   providers: [
     AuthService,
     AuthRepository,

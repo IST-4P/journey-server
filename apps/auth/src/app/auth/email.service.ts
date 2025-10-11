@@ -12,11 +12,8 @@ export class EmailService {
   constructor(private readonly configService: ConfigService) {
     this.resend = new Resend(this.configService.getOrThrow('RESEND_API_KEY'));
 
-    // Load template dynamically
-    const templatePath = path.join(
-      process.cwd(),
-      'apps/auth/src/assets/otp.html'
-    );
+    // Load template from dist/assets (works in both dev and production)
+    const templatePath = path.join(__dirname, 'assets', 'otp.html');
     this.otpTemplate = fs.readFileSync(templatePath, 'utf-8');
   }
 

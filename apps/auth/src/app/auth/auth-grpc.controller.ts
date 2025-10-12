@@ -10,8 +10,8 @@ import {
   RefreshTokenResponse,
   RegisterRequestType,
   SendOTPRequestType,
-} from './auth.model';
-import { AuthService } from './auth.service';
+} from './models/auth.model';
+import { AuthService } from './services/auth.service';
 
 @Controller()
 export class AuthGrpcController {

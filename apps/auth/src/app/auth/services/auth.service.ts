@@ -1,3 +1,4 @@
+import { AccessTokenPayloadCreate } from '@hacmieu-journey/nestjs';
 import {
   isNotFoundPrismaError,
   isUniqueConstraintPrismaError,
@@ -17,7 +18,7 @@ import {
   OTPExpiredException,
   RefreshTokenAlreadyUsedException,
   UnauthorizedAccessException,
-} from './auth.error';
+} from '../models/auth.error';
 import {
   ForgotPasswordRequestType,
   LoginRequestType,
@@ -27,13 +28,12 @@ import {
   SendOTPRequestType,
   TypeOfVerificationCode,
   TypeOfVerificationCodeType,
-} from './auth.model';
-import { AuthRepository } from './auth.repo';
+} from '../models/auth.model';
+import { AuthRepository } from '../repositories/auth.repo';
+import { UserRepository } from '../repositories/user.repo';
 import { EmailService } from './email.service';
 import { HashingService } from './hashing.service';
-import { AccessTokenPayloadCreate } from './token.interface';
 import { TokenService } from './token.service';
-import { UserRepository } from './user.repo';
 
 @Injectable()
 export class AuthService {

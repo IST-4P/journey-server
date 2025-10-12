@@ -1,14 +1,14 @@
 import { Injectable } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 
-import { ConfigService } from '@nestjs/config';
-import { v4 as uuidv4 } from 'uuid';
 import {
   AccessTokenPayload,
   AccessTokenPayloadCreate,
   RefreshTokenPayload,
   RefreshTokenPayloadCreate,
-} from './token.interface';
+} from '@hacmieu-journey/nestjs';
+import { ConfigService } from '@nestjs/config';
+import { v4 as uuidv4 } from 'uuid';
 
 @Injectable()
 export class TokenService {

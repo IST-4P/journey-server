@@ -1,35 +1,12 @@
 import { Injectable } from '@nestjs/common';
-import { RefreshTokenType, VerificationCodeType } from './auth.model';
+import { RefreshTokenType, VerificationCodeType } from '../models/auth.model';
 
 import { Prisma } from '@prisma-clients/auth';
-import { PrismaService } from '../prisma/prisma.service';
+import { PrismaService } from '../../prisma/prisma.service';
 
 @Injectable()
 export class AuthRepository {
   constructor(private readonly prismaService: PrismaService) {}
-
-  // createUser(
-  //   user: Pick<UserType, 'email' | 'name' | 'phoneNumber' | 'password' | 'roleId' | 'avatar'>,
-  // ): Promise<Omit<UserType, 'password' | 'totpSecret'>> {
-  //   return this.prismaService.user.create({
-  //     data: user,
-  //     omit: {
-  //       password: true,
-  //       totpSecret: true,
-  //     },
-  //   })
-  // }
-
-  // createUserIncludeRole(
-  //   user: Pick<UserType, 'email' | 'name' | 'phoneNumber' | 'password' | 'roleId' | 'avatar'>,
-  // ): Promise<UserType & { role: RoleType }> {
-  //   return this.prismaService.user.create({
-  //     data: user,
-  //     include: {
-  //       role: true,
-  //     },
-  //   })
-  // }
 
   findUniqueVerificationCode(
     uniqueValue: Prisma.VerificationCodeWhereUniqueInput
@@ -64,18 +41,6 @@ export class AuthRepository {
       },
     });
   }
-
-  // findUniqueUserIncludeRole(where: WhereUniqueUserType): Promise<(UserType & { role: RoleType }) | null> {
-  //   return this.prismaService.user.findFirst({
-  //     where: {
-  //       ...where,
-  //       deletedAt: null,
-  //     },
-  //     include: {
-  //       role: true,
-  //     },
-  //   })
-  // }
 
   createRefreshToken(
     data: Prisma.RefreshTokenUncheckedCreateInput

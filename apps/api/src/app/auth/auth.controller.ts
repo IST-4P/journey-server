@@ -1,12 +1,16 @@
+import { AuthProto } from '@hacmieu-journey/grpc';
 import {
-  ForgotPasswordRequest,
-  LoginRequest,
-  RegisterRequest,
-  SendOTPRequest,
-} from '@hacmieu-journey/grpc';
+  AccessTokenPayload,
+  ActiveUser,
+  Auth,
+  AuthType,
+  ConditionGuard,
+  IsPublic,
+} from '@hacmieu-journey/nestjs';
 import {
   Body,
   Controller,
+  Get,
   Post,
   Req,
   Res,
@@ -28,19 +32,22 @@ const cookieOptions: CookieOptions = {
 export class AuthController {
   constructor(private readonly authService: AuthService) {}
 
+  @IsPublic()
   @Post('otp')
-  async sendOTP(@Body() body: SendOTPRequest) {
+  async sendOTP(@Body() body: AuthProto.SendOTPRequest) {
     return this.authService.sendOTP(body);
   }
 
+  @IsPublic()
   @Post('register')
-  async register(@Body() body: RegisterRequest) {
+  async register(@Body() body: AuthProto.RegisterRequest) {
     return this.authService.register(body);
   }
 
+  @IsPublic()
   @Post('login')
   async login(
-    @Body() body: LoginRequest,
+    @Body() body: AuthProto.LoginRequest,
     @Res({ passthrough: true }) res: Response
   ) {
     const tokens = await this.authService.login(body);
@@ -83,6 +90,7 @@ export class AuthController {
     return { message: 'Message.RefreshTokenSuccessfully' };
   }
 
+  @IsPublic()
   @Post('logout')
   logout(@Req() req: Request, @Res({ passthrough: true }) res: Response) {
     res.clearCookie('accessToken', cookieOptions);
@@ -94,8 +102,61 @@ export class AuthController {
     }
   }
 
+  @IsPublic()
   @Post('forgot-password')
-  async forgotPassword(@Body() body: ForgotPasswordRequest) {
+  async forgotPassword(@Body() body: AuthProto.ForgotPasswordRequest) {
     return this.authService.forgotPassword(body);
+  }
+
+  // ===== PROTECTED ROUTES - Ví dụ sử dụng Guards =====
+
+  /**
+   * Route được bảo vệ bởi Access Token (Bearer)
+   * Mặc định nếu không khai báo @Auth() hoặc @IsPublic()
+   */
+  @Get('profile')
+  getProfile(@ActiveUser() user: AccessTokenPayload) {
+    return {
+      message: 'User profile',
+      user,
+    };
+  }
+
+  /**
+   * Lấy chỉ userId từ token
+   */
+  @Get('user-id')
+  getUserId(@ActiveUser('userId') userId: string) {
+    return {
+      userId,
+    };
+  }
+
+  /**
+   * Route được bảo vệ bởi Payment API Key
+   * Dành cho payment webhook hoặc internal services
+   */
+  @Auth([AuthType.PaymentAPIKey])
+  @Post('payment-webhook')
+  handlePaymentWebhook(@Body() body: any) {
+    return {
+      message: 'Payment webhook received',
+      data: body,
+    };
+  }
+
+  /**
+   * Route cho phép cả Bearer Token HOẶC Payment API Key
+   * Hữu ích khi endpoint có thể được gọi từ nhiều nguồn
+   */
+  @Auth([AuthType.Bearer, AuthType.PaymentAPIKey], {
+    condition: ConditionGuard.Or,
+  })
+  @Get('flexible')
+  flexibleAuth(@ActiveUser() user: AccessTokenPayload | undefined) {
+    return {
+      message: 'Flexible authentication',
+      user: user || 'Authenticated via API Key',
+    };
   }
 }

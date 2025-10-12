@@ -1,58 +1,53 @@
-import {
-  AUTH_PACKAGE_NAME,
-  AUTH_SERVICE_NAME,
-  AuthServiceClient,
-  ForgotPasswordRequest,
-  ForgotPasswordResponse,
-  LoginRequest,
-  LoginResponse,
-  LogoutRequest,
-  LogoutResponse,
-  RefreshTokenRequest,
-  RefreshTokenResponse,
-  RegisterRequest,
-  RegisterResponse,
-  SendOTPRequest,
-  SendOTPResponse,
-} from '@hacmieu-journey/grpc';
+import { AuthProto } from '@hacmieu-journey/grpc';
 import { Inject, Injectable, OnModuleInit } from '@nestjs/common';
 import { ClientGrpc } from '@nestjs/microservices';
 import { lastValueFrom } from 'rxjs';
 
 @Injectable()
 export class AuthService implements OnModuleInit {
-  private authService: AuthServiceClient;
+  private authService: AuthProto.AuthServiceClient;
 
-  constructor(@Inject(AUTH_PACKAGE_NAME) private client: ClientGrpc) {}
+  constructor(
+    @Inject(AuthProto.AUTH_PACKAGE_NAME) private client: ClientGrpc
+  ) {}
 
   onModuleInit() {
-    this.authService =
-      this.client.getService<AuthServiceClient>(AUTH_SERVICE_NAME);
+    this.authService = this.client.getService<AuthProto.AuthServiceClient>(
+      AuthProto.AUTH_SERVICE_NAME
+    );
   }
 
-  async sendOTP(data: SendOTPRequest): Promise<SendOTPResponse> {
+  async sendOTP(
+    data: AuthProto.SendOTPRequest
+  ): Promise<AuthProto.SendOTPResponse> {
     return lastValueFrom(this.authService.sendOtp(data));
   }
 
-  async register(data: RegisterRequest): Promise<RegisterResponse> {
+  async register(
+    data: AuthProto.RegisterRequest
+  ): Promise<AuthProto.RegisterResponse> {
     return lastValueFrom(this.authService.register(data));
   }
 
-  async login(data: LoginRequest): Promise<LoginResponse> {
+  async login(data: AuthProto.LoginRequest): Promise<AuthProto.LoginResponse> {
     return lastValueFrom(this.authService.login(data));
   }
 
-  async refreshToken(data: RefreshTokenRequest): Promise<RefreshTokenResponse> {
+  async refreshToken(
+    data: AuthProto.RefreshTokenRequest
+  ): Promise<AuthProto.RefreshTokenResponse> {
     return lastValueFrom(this.authService.refreshToken(data));
   }
 
-  async logout(data: LogoutRequest): Promise<LogoutResponse> {
+  async logout(
+    data: AuthProto.LogoutRequest
+  ): Promise<AuthProto.LogoutResponse> {
     return lastValueFrom(this.authService.logout(data));
   }
 
   async forgotPassword(
-    data: ForgotPasswordRequest
-  ): Promise<ForgotPasswordResponse> {
+    data: AuthProto.ForgotPasswordRequest
+  ): Promise<AuthProto.ForgotPasswordResponse> {
     return lastValueFrom(this.authService.forgotPassword(data));
   }
 }

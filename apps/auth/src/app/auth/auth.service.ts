@@ -1,3 +1,4 @@
+import { AuthProto } from '@hacmieu-journey/grpc';
 import {
   isNotFoundPrismaError,
   isUniqueConstraintPrismaError,
@@ -81,9 +82,11 @@ export class AuthService {
   async validateVerificationCode({
     email,
     type,
+    code,
   }: {
     email: string;
     type: TypeOfVerificationCodeType;
+    code: string;
   }) {
     const verificationCode =
       await this.authRepository.findUniqueVerificationCode({
@@ -101,7 +104,9 @@ export class AuthService {
       throw OTPExpiredException;
     }
 
-    return verificationCode;
+    if (verificationCode.code !== code) {
+      throw InvalidOTPException;
+    }
   }
 
   async sendOtp(body: SendOTPRequestType) {
@@ -146,10 +151,11 @@ export class AuthService {
 
   async register(body: RegisterRequestType) {
     try {
-      // await this.validateVerificationCode({
-      //   email: body.email,
-      //   type: TypeOfVerificationCode.REGISTER,
-      // });
+      await this.validateVerificationCode({
+        email: body.email,
+        type: TypeOfVerificationCode.REGISTER,
+        code: body.code,
+      });
 
       const hashedPassword = await this.hashingService.hash(body.password);
 
@@ -252,7 +258,7 @@ export class AuthService {
 
       // Kiểm tra có tồn tại trong DB không
       const refreshTokenInDB = await this.authRepository.findUniqueRefreshToken(
-        refreshToken
+        { token: refreshToken }
       );
       if (!refreshTokenInDB) {
         throw RefreshTokenAlreadyUsedException;
@@ -310,13 +316,11 @@ export class AuthService {
     }
 
     // Kiểm tra OTP có hợp lệ không
-    const codeInDB = await this.validateVerificationCode({
+    await this.validateVerificationCode({
       email,
       type: TypeOfVerificationCode.FORGOT_PASSWORD,
+      code,
     });
-    if (!codeInDB || codeInDB.code !== code) {
-      throw InvalidOTPException;
-    }
 
     // Cập nhập mật khẩu và xoá OTP trong DB
     const hashedPassword = await this.hashingService.hash(newPassword);
@@ -331,5 +335,31 @@ export class AuthService {
     ]);
 
     return { message: 'Message.ChangePasswordSuccessfully' };
+  }
+
+  async authenticate(
+    data: AuthProto.AuthenticateRequest
+  ): Promise<AuthProto.AuthenticateResponse> {
+    try {
+      // Verify access token
+      const payload = await this.tokenService.verifyAccessToken(data.token);
+
+      // Lấy thông tin user từ database
+      const user = await this.userRepository.findUnique({
+        id: payload.userId,
+      });
+
+      if (!user) {
+        throw UnauthorizedAccessException;
+      }
+
+      return {
+        userId: user.id,
+        email: user.email,
+        role: user.role,
+      };
+    } catch (error) {
+      throw UnauthorizedAccessException;
+    }
   }
 }

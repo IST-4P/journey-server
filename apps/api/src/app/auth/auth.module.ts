@@ -1,4 +1,4 @@
-import { AUTH_PACKAGE_NAME } from '@hacmieu-journey/grpc';
+import { AuthProto } from '@hacmieu-journey/grpc';
 import { Module } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { ClientsModule, Transport } from '@nestjs/microservices';
@@ -10,14 +10,14 @@ import { AuthService } from './auth.service';
   imports: [
     ClientsModule.registerAsync([
       {
-        name: AUTH_PACKAGE_NAME,
+        name: AuthProto.AUTH_PACKAGE_NAME,
         useFactory: (configService: ConfigService) => ({
           transport: Transport.GRPC,
           options: {
             url:
               configService.getOrThrow('AUTH_GRPC_SERVICE_URL') ||
               'localhost:5000',
-            package: AUTH_PACKAGE_NAME,
+            package: AuthProto.AUTH_PACKAGE_NAME,
             protoPath: join(__dirname, '../../libs/grpc/proto/auth.proto'),
           },
         }),
@@ -26,7 +26,13 @@ import { AuthService } from './auth.service';
     ]),
   ],
   controllers: [AuthController],
-  providers: [AuthService],
+  providers: [
+    AuthService,
+    {
+      provide: 'AUTH_SERVICE',
+      useExisting: AuthService,
+    },
+  ],
   exports: [AuthService],
 })
 export class AuthModule {}

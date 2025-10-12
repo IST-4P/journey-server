@@ -1,0 +1,58 @@
+import { Module } from '@nestjs/common';
+import { ConfigModule, ConfigService } from '@nestjs/config';
+import { APP_GUARD } from '@nestjs/core';
+import { JwtModule } from '@nestjs/jwt';
+import { PassportModule } from '@nestjs/passport';
+import { AccessTokenGuard } from './guards/access-token.guard';
+import { AuthenticationGuard } from './guards/authentication.guard';
+import { PaymentAPIKeyGuard } from './guards/payment-api-key.guard';
+import { JwtStrategy } from './strategies/jwt.strategy';
+
+/**
+ * Auth Module - Module tái sử dụng cho authentication
+ *
+ * Cung cấp:
+ * - JWT Strategy với Passport
+ * - Access Token Guard
+ * - Payment API Key Guard
+ * - Authentication Guard (guard tổng hợp)
+ *
+ * @example
+ * // Import vào app module
+ * @Module({
+ *   imports: [AuthModule],
+ *   // ...
+ * })
+ */
+@Module({
+  imports: [
+    PassportModule.register({ defaultStrategy: 'jwt' }),
+    JwtModule.registerAsync({
+      imports: [ConfigModule],
+      useFactory: async (configService: ConfigService) => ({
+        secret: configService.getOrThrow('ACCESS_TOKEN_SECRET'),
+        signOptions: {
+          expiresIn: configService.getOrThrow('ACCESS_TOKEN_EXPIRES_IN'),
+        },
+      }),
+      inject: [ConfigService],
+    }),
+  ],
+  providers: [
+    JwtStrategy,
+    AccessTokenGuard,
+    PaymentAPIKeyGuard,
+    AuthenticationGuard,
+    {
+      provide: APP_GUARD,
+      useClass: AuthenticationGuard,
+    },
+  ],
+  exports: [
+    JwtStrategy,
+    AccessTokenGuard,
+    PaymentAPIKeyGuard,
+    AuthenticationGuard,
+  ],
+})
+export class AuthGuardModule {}

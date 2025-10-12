@@ -3,37 +3,39 @@ import {
   UnprocessableEntityException,
 } from '@nestjs/common';
 
-export const InvalidOTPException = new UnprocessableEntityException(
-  'Error.InvalidOTP'
-);
+export const InvalidOTPException = new UnprocessableEntityException({
+  message: 'Error.InvalidOTP',
+});
 
-export const OTPExpiredException = new UnprocessableEntityException(
-  'Error.OTPExpired'
-);
+export const OTPExpiredException = new UnprocessableEntityException({
+  message: 'Error.OTPExpired',
+});
 
-export const FailedToSendOTPException = new UnprocessableEntityException(
-  'Error.FailedToSendOTP'
-);
+export const FailedToSendOTPException = new UnprocessableEntityException({
+  message: 'Error.FailedToSendOTP',
+});
 
-export const EmailAlreadyExistsException = new UnprocessableEntityException(
-  'Error.EmailAlreadyExists'
-);
+export const EmailAlreadyExistsException = new UnprocessableEntityException({
+  message: 'Error.EmailAlreadyExists',
+});
 
-export const EmailNotFoundException = new UnprocessableEntityException(
-  'Error.EmailNotFound'
-);
+export const EmailNotFoundException = new UnprocessableEntityException({
+  message: 'Error.EmailNotFound',
+});
 
 export const RefreshTokenAlreadyUsedException =
-  new UnprocessableEntityException('Error.RefreshTokenAlreadyUsed');
+  new UnprocessableEntityException({
+    message: 'Error.RefreshTokenAlreadyUsed',
+  });
 
-export const UnauthorizedAccessException = new UnprocessableEntityException(
-  'Error.UnauthorizedAccess'
-);
+export const UnauthorizedAccessException = new UnprocessableEntityException({
+  message: 'Error.UnauthorizedAccess',
+});
 
-export const InvalidPasswordException = new UnprocessableEntityException(
-  'Error.InvalidPassword'
-);
+export const InvalidPasswordException = new UnprocessableEntityException({
+  message: 'Error.InvalidPassword',
+});
 
-export const GoogleUserInfoException = new BadRequestException(
-  'Error.FailedToGetGoogleUserInfo'
-);
+export const GoogleUserInfoException = new BadRequestException({
+  message: 'Error.FailedToGetGoogleUserInfo',
+});

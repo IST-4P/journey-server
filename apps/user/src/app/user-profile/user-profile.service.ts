@@ -1,5 +1,10 @@
 import { Injectable, Logger } from '@nestjs/common';
-import { PrismaService } from '../prisma/prisma.service';
+import {
+  GetUserProfileRequestType,
+  RoleEnumType,
+  UpdateUserProfileRequestType,
+} from './user-profile.model';
+import { UserProfileRepository } from './user-profile.repo';
 
 interface UserRegisteredEvent {
   userId: string;
@@ -14,16 +19,12 @@ interface UserRegisteredEvent {
 export class UserProfileService {
   private readonly logger = new Logger(UserProfileService.name);
 
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(private readonly userProfileRepo: UserProfileRepository) {}
 
-  /**
-   * Create user profile when receiving event from Auth Service
-   */
   async createProfileFromAuthEvent(event: UserRegisteredEvent) {
     try {
-      // Check if profile already exists (idempotency)
-      const existingProfile = await this.prisma.userProfile.findUnique({
-        where: { id: event.userId },
+      const existingProfile = await this.userProfileRepo.findProfileById({
+        id: event.userId,
       });
 
       if (existingProfile) {
@@ -32,16 +33,12 @@ export class UserProfileService {
         );
         return existingProfile;
       }
-
-      // Create new user profile
-      const profile = await this.prisma.userProfile.create({
-        data: {
-          id: event.userId,
-          email: event.email,
-          fullName: event.name,
-          phone: event.phone,
-          role: event.role as 'USER' | 'ADMIN' | 'SUPER_ADMIN',
-        },
+      const profile = await this.userProfileRepo.createProfile({
+        id: event.userId,
+        email: event.email,
+        fullName: event.name,
+        phone: event.phone,
+        role: event.role as RoleEnumType,
       });
 
       // this.logger.log(`✅ Created profile for user: ${event.userId}`);
@@ -53,5 +50,13 @@ export class UserProfileService {
       );
       throw error;
     }
+  }
+
+  async getProfile(data: GetUserProfileRequestType) {
+    return this.userProfileRepo.findProfileById({ id: data.userId });
+  }
+
+  async updateProfile(userId: string, data: UpdateUserProfileRequestType) {
+    return this.userProfileRepo.updateProfile(userId, data);
   }
 }

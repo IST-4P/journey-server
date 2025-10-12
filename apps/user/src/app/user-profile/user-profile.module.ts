@@ -1,11 +1,13 @@
 import { PulsarModule } from '@hacmieu-journey/pulsar';
 import { Module } from '@nestjs/common';
+import { UserProfileGrpcController } from './user-profile-grpc.controller copy';
 import { UserProfileConsumer } from './user-profile.consumer';
+import { UserProfileRepository } from './user-profile.repo';
 import { UserProfileService } from './user-profile.service';
 
 @Module({
   imports: [PulsarModule],
-  providers: [UserProfileService, UserProfileConsumer],
-  exports: [UserProfileService],
+  providers: [UserProfileService, UserProfileConsumer, UserProfileRepository],
+  controllers: [UserProfileGrpcController],
 })
 export class UserProfileModule {}

@@ -9,7 +9,9 @@ export async function init(app: INestApplication) {
   app.setGlobalPrefix(globalPrefix);
   app.use(cookieParser());
 
-  // Apply global exception filter (phải đặt trước interceptor)
+  // Apply global exception filters (phải đặt trước interceptor)
+  // GrpcExceptionFilter để xử lý errors từ microservices
+  // HttpExceptionFilter để xử lý HTTP errors từ controller
   app.useGlobalFilters(new HttpExceptionFilter());
 
   // Apply global response interceptor

@@ -13,6 +13,7 @@ COPY apps/notification ./apps/notification
 COPY libs/pulsar ./libs/pulsar
 COPY libs/prisma ./libs/prisma
 COPY libs/nestjs ./libs/nestjs
+COPY libs/grpc ./libs/grpc
 
 RUN npm install
 

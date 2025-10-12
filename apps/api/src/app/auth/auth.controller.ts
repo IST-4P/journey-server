@@ -64,6 +64,7 @@ export class AuthController {
     return { message: 'Message.LoginSuccessfully' };
   }
 
+  @IsPublic()
   @Post('refresh-token')
   async refreshToken(
     @Req() req: Request,

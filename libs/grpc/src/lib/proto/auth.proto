@@ -24,7 +24,6 @@ message RegisterRequest {
 
 message RegisterResponse {
   string message = 1;
-  int32 statusCode = 2;
 }
 
 // Login
@@ -65,7 +64,6 @@ message SendOTPRequest {
 
 message SendOTPResponse {
   string message = 1;
-  int32 statusCode = 2;
 }
 
 // Forgot Password

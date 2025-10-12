@@ -4,26 +4,15 @@
  */
 
 import { AuthProto } from '@hacmieu-journey/grpc';
-import { Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { NestFactory } from '@nestjs/core';
 import { GrpcOptions, Transport } from '@nestjs/microservices';
-import cookieParser from 'cookie-parser';
 import { join } from 'path';
 import { AppModule } from './app/app.module';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
-
-  const globalPrefix = 'api';
-  app.setGlobalPrefix(globalPrefix);
-  app.use(cookieParser());
-
-  const port = app.get(ConfigService).getOrThrow('PORT');
-  await app.listen(port);
-  Logger.log(
-    `🚀 Application is running on: http://localhost:${port}/${globalPrefix}`
-  );
+  // await init(app);
 
   app.connectMicroservice<GrpcOptions>({
     transport: Transport.GRPC,

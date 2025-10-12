@@ -19,3 +19,7 @@ export * from './lib/constants/auth.constant';
 
 // Interfaces
 export * from './lib/interfaces/jwt.interface';
+
+// Filters
+export * from './lib/filters/grpc-exception.filter';
+export * from './lib/filters/http-exception.filter';

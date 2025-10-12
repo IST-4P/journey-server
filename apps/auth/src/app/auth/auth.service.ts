@@ -1,4 +1,3 @@
-import { status } from '@grpc/grpc-js';
 import { AuthProto } from '@hacmieu-journey/grpc';
 import {
   isNotFoundPrismaError,
@@ -7,7 +6,6 @@ import {
 import { PulsarClient } from '@hacmieu-journey/pulsar';
 import { HttpException, Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { RpcException } from '@nestjs/microservices';
 import { randomInt } from 'crypto';
 import { addMilliseconds } from 'date-fns';
 import ms, { StringValue } from 'ms';
@@ -99,10 +97,7 @@ export class AuthService {
       });
 
     if (!verificationCode) {
-      throw new RpcException({
-        code: status.INVALID_ARGUMENT,
-        message: 'Error.InvalidOTP',
-      });
+      throw InvalidOTPException;
     }
 
     if (verificationCode.expiresAt < new Date()) {

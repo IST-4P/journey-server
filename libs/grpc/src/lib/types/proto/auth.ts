@@ -22,7 +22,6 @@ export interface RegisterRequest {
 
 export interface RegisterResponse {
   message: string;
-  statusCode: number;
 }
 
 /** Login */
@@ -63,7 +62,6 @@ export interface SendOTPRequest {
 
 export interface SendOTPResponse {
   message: string;
-  statusCode: number;
 }
 
 /** Forgot Password */

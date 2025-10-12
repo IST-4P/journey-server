@@ -11,14 +11,14 @@ import { UserProfileService } from './user-profile.service';
 export class UserProfileGrpcController {
   constructor(private readonly userProfileService: UserProfileService) {}
 
-  @GrpcMethod('UserProfileService', 'GetUserProfile')
+  @GrpcMethod('UserService', 'GetUserProfile')
   getUserProfile(
     data: GetUserProfileRequestType
   ): Promise<GetUserProfileResponseType> {
     return this.userProfileService.getProfile(data);
   }
 
-  @GrpcMethod('UserProfileService', 'UpdateUserProfile')
+  @GrpcMethod('UserService', 'UpdateUserProfile')
   updateUserProfile(
     data: UpdateUserProfileRequestType
   ): Promise<GetUserProfileResponseType> {

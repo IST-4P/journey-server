@@ -3,7 +3,6 @@
  * This is only a minimal backend to get started.
  */
 
-import { AuthProto } from '@hacmieu-journey/grpc';
 import { ConfigService } from '@nestjs/config';
 import { NestFactory } from '@nestjs/core';
 import { GrpcOptions, Transport } from '@nestjs/microservices';
@@ -18,7 +17,7 @@ async function bootstrap() {
     transport: Transport.GRPC,
     options: {
       url: app.get(ConfigService).getOrThrow('AUTH_GRPC_SERVICE_URL'),
-      package: AuthProto.AUTH_PACKAGE_NAME,
+      package: 'auth',
       protoPath: join(__dirname, '../../libs/grpc/proto/auth.proto'),
     },
   });

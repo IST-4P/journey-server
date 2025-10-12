@@ -3,10 +3,10 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
 import { APP_GUARD } from '@nestjs/core';
 import { JwtModule } from '@nestjs/jwt';
 import { PassportModule } from '@nestjs/passport';
-import { AccessTokenGuard } from './guards/access-token.guard';
-import { AuthenticationGuard } from './guards/authentication.guard';
-import { PaymentAPIKeyGuard } from './guards/payment-api-key.guard';
-import { JwtStrategy } from './strategies/jwt.strategy';
+import { JwtStrategy } from '../strategies/jwt.strategy';
+import { AccessTokenGuard } from './access-token.guard';
+import { AuthenticationGuard } from './authentication.guard';
+import { PaymentAPIKeyGuard } from './payment-api-key.guard';
 
 /**
  * Auth Module - Module tái sử dụng cho authentication

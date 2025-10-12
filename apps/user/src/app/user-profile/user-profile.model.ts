@@ -12,7 +12,7 @@ export type RoleEnumType = z.infer<typeof RoleEnum>;
 
 export const UserProfileSchema = z.object({
   id: z.string(),
-  email: z.email(),
+  email: z.string().email(),
   fullName: z.string(),
   phone: z.string(),
   role: RoleEnum,
@@ -42,10 +42,10 @@ export const UpdateUserProfileRequestSchema = UserProfileSchema.pick({
   bio: true,
   birthDate: true,
 })
-  .partial()
   .extend({
     userId: z.string(),
-  });
+  })
+  .partial();
 
 export type GetUserProfileRequestType = z.infer<
   typeof GetUserProfileRequestSchema

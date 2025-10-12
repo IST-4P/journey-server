@@ -76,17 +76,6 @@ export interface ForgotPasswordResponse {
   message: string;
 }
 
-/** Authenticate (verify JWT token) */
-export interface AuthenticateRequest {
-  token: string;
-}
-
-export interface AuthenticateResponse {
-  userId: string;
-  email: string;
-  role: string;
-}
-
 export const AUTH_PACKAGE_NAME = "auth";
 
 export interface AuthServiceClient {
@@ -101,8 +90,6 @@ export interface AuthServiceClient {
   sendOtp(request: SendOTPRequest): Observable<SendOTPResponse>;
 
   forgotPassword(request: ForgotPasswordRequest): Observable<ForgotPasswordResponse>;
-
-  authenticate(request: AuthenticateRequest): Observable<AuthenticateResponse>;
 }
 
 export interface AuthServiceController {
@@ -121,23 +108,11 @@ export interface AuthServiceController {
   forgotPassword(
     request: ForgotPasswordRequest,
   ): Promise<ForgotPasswordResponse> | Observable<ForgotPasswordResponse> | ForgotPasswordResponse;
-
-  authenticate(
-    request: AuthenticateRequest,
-  ): Promise<AuthenticateResponse> | Observable<AuthenticateResponse> | AuthenticateResponse;
 }
 
 export function AuthServiceControllerMethods() {
   return function (constructor: Function) {
-    const grpcMethods: string[] = [
-      "register",
-      "login",
-      "refreshToken",
-      "logout",
-      "sendOtp",
-      "forgotPassword",
-      "authenticate",
-    ];
+    const grpcMethods: string[] = ["register", "login", "refreshToken", "logout", "sendOtp", "forgotPassword"];
     for (const method of grpcMethods) {
       const descriptor: any = Reflect.getOwnPropertyDescriptor(constructor.prototype, method);
       GrpcMethod("AuthService", method)(constructor.prototype[method], method, descriptor);

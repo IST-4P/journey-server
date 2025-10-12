@@ -9,7 +9,6 @@ service AuthService {
   rpc Logout(LogoutRequest) returns (LogoutResponse);
   rpc SendOtp(SendOTPRequest) returns (SendOTPResponse);
   rpc ForgotPassword(ForgotPasswordRequest) returns (ForgotPasswordResponse);
-  rpc Authenticate(AuthenticateRequest) returns (AuthenticateResponse);
 }
 
 // Register
@@ -76,15 +75,4 @@ message ForgotPasswordRequest {
 
 message ForgotPasswordResponse {
   string message = 1;
-}
-
-// Authenticate (verify JWT token)
-message AuthenticateRequest {
-  string token = 1;
-}
-
-message AuthenticateResponse {
-  string userId = 1;
-  string email = 2;
-  string role = 3;
 }

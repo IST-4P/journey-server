@@ -3,7 +3,6 @@
  * This is only a minimal backend to get started.
  */
 
-import { UserProto } from '@hacmieu-journey/grpc';
 import { init } from '@hacmieu-journey/nestjs';
 import { ConfigService } from '@nestjs/config';
 import { NestFactory } from '@nestjs/core';
@@ -19,7 +18,7 @@ async function bootstrap() {
     transport: Transport.GRPC,
     options: {
       url: app.get(ConfigService).getOrThrow('USER_GRPC_SERVICE_URL'),
-      package: UserProto.USER_PACKAGE_NAME,
+      package: 'user',
       protoPath: join(__dirname, '../../libs/grpc/proto/user.proto'),
     },
   });

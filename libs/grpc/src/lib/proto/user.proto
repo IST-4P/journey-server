@@ -7,20 +7,6 @@ service UserService {
   rpc UpdateUserProfile(UpdateUserProfileRequest) returns (GetUserProfileResponse);
 }
 
-enum Gender {
-  GENDER_UNSPECIFIED = 0;
-  MALE = 1;
-  FEMALE = 2;
-  OTHER = 3;
-}
-
-enum Role {
-  ROLE_UNSPECIFIED = 0;
-  USER = 1;
-  ADMIN = 2;
-  SUPER_ADMIN = 3;
-}
-
 // GetUserProfile
 message GetUserProfileRequest {
   string userId = 1;
@@ -32,7 +18,7 @@ message GetUserProfileResponse {
   string fullName = 3;
   string phone = 4;
   string role = 5;
-  optional Gender gender = 6;
+  optional string gender = 6;
   optional string avatarUrl = 7;
   optional string facebookUrl = 8;
   optional string bio = 9;
@@ -51,5 +37,6 @@ message UpdateUserProfileRequest {
   optional string facebookUrl = 5;
   optional string bio = 6;
   optional string birthDate = 7;
-  optional Gender gender = 8;
+  optional string gender = 8;
+  optional string email = 9;
 }

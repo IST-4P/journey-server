@@ -10,22 +10,6 @@ import { Observable } from "rxjs";
 
 export const protobufPackage = "user";
 
-export enum Gender {
-  GENDER_UNSPECIFIED = 0,
-  MALE = 1,
-  FEMALE = 2,
-  OTHER = 3,
-  UNRECOGNIZED = -1,
-}
-
-export enum Role {
-  ROLE_UNSPECIFIED = 0,
-  USER = 1,
-  ADMIN = 2,
-  SUPER_ADMIN = 3,
-  UNRECOGNIZED = -1,
-}
-
 /** GetUserProfile */
 export interface GetUserProfileRequest {
   userId: string;
@@ -37,7 +21,7 @@ export interface GetUserProfileResponse {
   fullName: string;
   phone: string;
   role: string;
-  gender?: Gender | undefined;
+  gender?: string | undefined;
   avatarUrl?: string | undefined;
   facebookUrl?: string | undefined;
   bio?: string | undefined;
@@ -56,7 +40,8 @@ export interface UpdateUserProfileRequest {
   facebookUrl?: string | undefined;
   bio?: string | undefined;
   birthDate?: string | undefined;
-  gender?: Gender | undefined;
+  gender?: string | undefined;
+  email?: string | undefined;
 }
 
 export const USER_PACKAGE_NAME = "user";

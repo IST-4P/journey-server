@@ -1,13 +1,15 @@
 import { INestApplication, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import cookieParser from 'cookie-parser';
-import { ResponseInterceptor } from './response.interceptor';
+import { CustomZodValidationPipe } from './pipe/custom-zod-validation.pipe';
+import { ResponseInterceptor } from './responses/response.interceptor';
 
 export async function init(app: INestApplication) {
   const globalPrefix = 'api';
   app.setGlobalPrefix(globalPrefix);
   app.use(cookieParser());
 
+  app.useGlobalPipes(new CustomZodValidationPipe());
   // Apply global response interceptor
   app.useGlobalInterceptors(new ResponseInterceptor());
 

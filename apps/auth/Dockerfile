@@ -10,7 +10,6 @@ COPY tsconfig.*.json ./
 COPY webpack.*.config.js ./
 
 COPY apps/auth ./apps/auth
-COPY libs/grpc ./libs/grpc
 COPY libs/pulsar ./libs/pulsar
 COPY libs/prisma ./libs/prisma
 COPY libs/nestjs ./libs/nestjs

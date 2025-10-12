@@ -19,9 +19,7 @@ export class UserProfileGrpcController {
   }
 
   @GrpcMethod('UserService', 'UpdateUserProfile')
-  updateUserProfile(
-    data: UpdateUserProfileRequestType
-  ): Promise<GetUserProfileResponseType> {
-    return this.userProfileService.updateProfile(data.userId, data);
+  updateUserProfile(data: UpdateUserProfileRequestType) {
+    return this.userProfileService.updateProfile(data);
   }
 }

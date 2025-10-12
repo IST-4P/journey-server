@@ -69,7 +69,7 @@ export class UserProfileService {
     }
   }
 
-  async updateProfile(userId: string, data: UpdateUserProfileRequestType) {
+  async updateProfile({ userId, ...data }: UpdateUserProfileRequestType) {
     return this.userProfileRepo.updateProfile(userId, data);
   }
 }

@@ -1,4 +1,3 @@
-import { AuthProto } from '@hacmieu-journey/grpc';
 import {
   isNotFoundPrismaError,
   isUniqueConstraintPrismaError,
@@ -126,7 +125,8 @@ export class AuthService {
     // Tạo mã OTP
     const code = this.generateOTP();
     await this.authRepository.createVerificationCode({
-      ...body,
+      email: body.email,
+      type: body.type,
       code,
       expiresAt: addMilliseconds(
         new Date(),
@@ -335,31 +335,5 @@ export class AuthService {
     ]);
 
     return { message: 'Message.ChangePasswordSuccessfully' };
-  }
-
-  async authenticate(
-    data: AuthProto.AuthenticateRequest
-  ): Promise<AuthProto.AuthenticateResponse> {
-    try {
-      // Verify access token
-      const payload = await this.tokenService.verifyAccessToken(data.token);
-
-      // Lấy thông tin user từ database
-      const user = await this.userRepository.findUnique({
-        id: payload.userId,
-      });
-
-      if (!user) {
-        throw UnauthorizedAccessException;
-      }
-
-      return {
-        userId: user.id,
-        email: user.email,
-        role: user.role,
-      };
-    } catch (error) {
-      throw UnauthorizedAccessException;
-    }
   }
 }

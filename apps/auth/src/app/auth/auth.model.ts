@@ -10,7 +10,7 @@ export type TypeOfVerificationCodeType =
 
 export const UserSchema = z.object({
   id: z.string(),
-  email: z.email({ message: 'Error.InvalidEmail' }),
+  email: z.string().email({ message: 'Error.InvalidEmail' }),
   name: z.string().min(1, 'Error.InvalidName').max(100, 'Error.InvalidName'),
   phone: z.string().min(9).max(15),
   password: z.string().min(4).max(100),
@@ -52,7 +52,7 @@ export const LoginResponseSchema = z.object({
 
 export const VerificationCodeSchema = z.object({
   id: z.number(),
-  email: z.email(),
+  email: z.string().email(),
   code: z.string().length(6),
   type: z.enum([
     TypeOfVerificationCode.REGISTER,
@@ -80,7 +80,7 @@ export const RefreshTokenRequestSchema = z.object({
 
 export const ForgotPasswordRequestSchema = z
   .object({
-    email: z.email(),
+    email: z.string().email(),
     code: z.string().length(6),
     newPassword: z.string().min(4).max(100),
     confirmNewPassword: z.string().min(4).max(100),

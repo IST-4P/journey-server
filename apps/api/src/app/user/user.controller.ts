@@ -1,6 +1,7 @@
 import { UserProto } from '@hacmieu-journey/grpc';
 import { ActiveUser } from '@hacmieu-journey/nestjs';
 import { Body, Controller, Get, Put } from '@nestjs/common';
+import { UpdateUserProfileRequestDTO } from './user.dto';
 import { UserService } from './user.service';
 
 @Controller('user')
@@ -15,7 +16,7 @@ export class UserController {
   @Put('profile')
   updateUserProfile(
     @ActiveUser('userId') userId: string,
-    @Body() body: UserProto.UpdateUserProfileRequest
+    @Body() body: UpdateUserProfileRequestDTO
   ) {
     return this.userService.updateUserProfile({ userId, ...body });
   }

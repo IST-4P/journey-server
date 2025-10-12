@@ -17,6 +17,8 @@ COPY libs/grpc ./libs/grpc
 
 RUN npm install
 
+RUN sed -i 's/protoc-gen-ts_proto=.*node_modules.*protoc-gen-ts_proto.cmd/protoc-gen-ts_proto=..\/..\/..\/..\/node_modules\/.bin\/protoc-gen-ts_proto/g' libs/grpc/project.json
+
 RUN apt-get update && apt-get install -y protobuf-compiler
 
 RUN npx nx build notification

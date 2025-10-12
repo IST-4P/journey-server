@@ -1,5 +1,14 @@
 import { AuthProto } from '@hacmieu-journey/grpc';
-import { Inject, Injectable, OnModuleInit } from '@nestjs/common';
+import {
+  ConflictException,
+  Inject,
+  Injectable,
+  InternalServerErrorException,
+  NotFoundException,
+  OnModuleInit,
+  UnauthorizedException,
+  UnprocessableEntityException,
+} from '@nestjs/common';
 import { ClientGrpc } from '@nestjs/microservices';
 import { lastValueFrom } from 'rxjs';
 
@@ -26,7 +35,40 @@ export class AuthService implements OnModuleInit {
   async register(
     data: AuthProto.RegisterRequest
   ): Promise<AuthProto.RegisterResponse> {
-    return lastValueFrom(this.authService.register(data));
+    try {
+      const result = await lastValueFrom(this.authService.register(data));
+      return result;
+    } catch (error) {
+      if (error.code === 3) {
+        // INVALID_ARGUMENT
+        throw new UnprocessableEntityException({
+          message: error.details || 'Invalid input',
+        });
+      }
+      if (error.code === 5) {
+        // NOT_FOUND
+        throw new NotFoundException({
+          message: error.details || 'Not found',
+        });
+      }
+      if (error.code === 6) {
+        // ALREADY_EXISTS
+        throw new ConflictException({
+          message: error.details || 'Already exists',
+        });
+      }
+      if (error.code === 16) {
+        // UNAUTHENTICATED
+        throw new UnauthorizedException({
+          message: error.details || 'Unauthorized',
+        });
+      }
+
+      // Default error
+      throw new InternalServerErrorException({
+        message: 'Internal server error',
+      });
+    }
   }
 
   async login(data: AuthProto.LoginRequest): Promise<AuthProto.LoginResponse> {

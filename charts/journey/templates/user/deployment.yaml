@@ -30,6 +30,8 @@ spec:
                   key: USER_DATABASE_URL
             - name: PORT
               value: {{ .Values.user.port.http | quote }}
+            - name: USER_GRPC_SERVICE_URL
+              value: "0.0.0.0:{{ .Values.user.port.grpc }}"
           envFrom:
             - configMapRef:
                 name: journey-config

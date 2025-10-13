@@ -9,7 +9,7 @@ datasource db {
     url      = env("DATABASE_URL")
 }
 
-model UserProfile {
+model Profile {
     id          String    @id // Same as Auth User ID (from auth_db.users.id)
     email       String    @unique
     fullName    String    @map("full_name")
@@ -46,55 +46,60 @@ enum Role {
 }
 
 model DriverLicense {
-    id             String    @id @default(uuid())
-    userId         String    @unique @map("user_id")
-    licenseNumber  String    @unique @map("license_number")
-    fullName       String    @map("full_name")
-    dateOfBirth    DateTime  @map("date_of_birth")
-    licenseClass   String    @map("license_class") // A1, A2, B1, B2, C, D, E, F
-    issueDate      DateTime  @map("issue_date")
-    expiryDate     DateTime  @map("expiry_date")
-    issuePlace     String    @map("issue_place")
-    frontImageUrl  String    @map("front_image_url")
-    backImageUrl   String    @map("back_image_url")
-    selfieImageUrl String    @map("selfie_image_url")
-    isVerified     Boolean   @default(false) @map("is_verified")
-    verifiedAt     DateTime? @map("verified_at")
-    verifiedBy     String?   @map("verified_by") // Admin ID
-    rejectedReason String?   @map("rejected_reason")
-    createdAt      DateTime  @default(now()) @map("created_at")
-    updatedAt      DateTime  @updatedAt @map("updated_at")
+    id             String       @id @default(uuid())
+    userId         String       @unique @map("user_id")
+    licenseNumber  String       @unique @map("license_number")
+    fullName       String       @map("full_name")
+    dateOfBirth    DateTime     @map("date_of_birth")
+    licenseClass   LicenseClass @map("license_class") // A1, A2, B1, B2, C, D, E, F
+    issueDate      DateTime     @map("issue_date")
+    expiryDate     DateTime     @map("expiry_date")
+    issuePlace     String       @map("issue_place")
+    frontImageUrl  String       @map("front_image_url")
+    backImageUrl   String       @map("back_image_url")
+    selfieImageUrl String       @map("selfie_image_url")
+    isVerified     Boolean      @default(false) @map("is_verified")
+    verifiedAt     DateTime?    @map("verified_at")
+    rejectedReason String?      @map("rejected_reason")
+    createdAt      DateTime     @default(now()) @map("created_at")
+    updatedAt      DateTime     @updatedAt @map("updated_at")
 
-    userProfile UserProfile @relation(fields: [userId], references: [id], onDelete: Cascade)
+    profile Profile @relation(fields: [userId], references: [id], onDelete: Cascade)
 
     @@index([licenseNumber])
     @@index([userId])
     @@map("driver_licenses")
 }
 
+enum LicenseClass {
+    A1
+    A2
+    B1
+    B2
+    C
+    D
+    E
+    F
+}
+
 model Address {
-    id        String      @id @default(uuid())
-    userId    String      @map("user_id")
-    type      AddressType @default(OTHER)
+    id        String   @id @default(uuid())
+    userId    String   @map("user_id")
     label     String // "Nhà riêng", "Công ty", "Nhà bạn"...
     city      String
-    ward      String?
+    ward      String
     detail    String // Số nhà, tên đường
     latitude  Float?
     longitude Float?
-    createdAt DateTime    @default(now()) @map("created_at")
-    updatedAt DateTime    @updatedAt @map("updated_at")
+    createdAt DateTime @default(now()) @map("created_at")
+    updatedAt DateTime @updatedAt @map("updated_at")
 
-    userProfile UserProfile @relation(fields: [userId], references: [id], onDelete: Cascade)
+    profile Profile @relation(fields: [userId], references: [id], onDelete: Cascade)
 
+    @@unique([userId, label])
+    @@index([userId, id])
     @@index([userId])
     @@map("addresses")
-}
-
-enum AddressType {
-    HOME
-    WORK
-    OTHER
 }
 
 model BankAccount {
@@ -104,12 +109,12 @@ model BankAccount {
     bankCode      String   @map("bank_code") // VCB, TCB, VTB, etc.
     accountNumber String   @unique @map("account_number") // Unique globally
     accountHolder String   @map("account_holder")
-    branch        String?
     createdAt     DateTime @default(now()) @map("created_at")
     updatedAt     DateTime @updatedAt @map("updated_at")
 
-    userProfile UserProfile @relation(fields: [userId], references: [id], onDelete: Cascade)
+    profile Profile @relation(fields: [userId], references: [id], onDelete: Cascade)
 
     @@index([accountNumber])
+    @@index([userId])
     @@map("bank_accounts")
 }

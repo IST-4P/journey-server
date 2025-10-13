@@ -1,15 +1,15 @@
 import { isNotFoundPrismaError } from '@hacmieu-journey/prisma';
 import { Injectable, Logger } from '@nestjs/common';
 import {
+  ProfileNotFoundException,
   UnauthorizedAccessException,
-  UserProfileNotFoundException,
-} from './user-profile.error';
+} from './profile.error';
 import {
-  GetUserProfileRequestType,
+  GetProfileRequestType,
   RoleEnumType,
-  UpdateUserProfileRequestType,
-} from './user-profile.model';
-import { UserProfileRepository } from './user-profile.repo';
+  UpdateProfileRequestType,
+} from './profile.model';
+import { ProfileRepository } from './profile.repo';
 
 interface UserRegisteredEvent {
   userId: string;
@@ -21,14 +21,14 @@ interface UserRegisteredEvent {
 }
 
 @Injectable()
-export class UserProfileService {
-  private readonly logger = new Logger(UserProfileService.name);
+export class ProfileService {
+  private readonly logger = new Logger(ProfileService.name);
 
-  constructor(private readonly userProfileRepo: UserProfileRepository) {}
+  constructor(private readonly profileRepo: ProfileRepository) {}
 
   async createProfileFromAuthEvent(event: UserRegisteredEvent) {
     try {
-      const existingProfile = await this.userProfileRepo.findProfileById({
+      const existingProfile = await this.profileRepo.findProfileById({
         id: event.userId,
       });
 
@@ -38,7 +38,7 @@ export class UserProfileService {
         );
         return existingProfile;
       }
-      const profile = await this.userProfileRepo.createProfile({
+      const profile = await this.profileRepo.createProfile({
         id: event.userId,
         email: event.email,
         fullName: event.name,
@@ -57,19 +57,19 @@ export class UserProfileService {
     }
   }
 
-  async getProfile(data: GetUserProfileRequestType) {
+  async getProfile(data: GetProfileRequestType) {
     try {
-      return this.userProfileRepo.findProfileById({ id: data.userId });
+      return this.profileRepo.findProfileById({ id: data.userId });
     } catch (error) {
       if (isNotFoundPrismaError(error)) {
-        throw UserProfileNotFoundException;
+        throw ProfileNotFoundException;
       }
 
       throw UnauthorizedAccessException;
     }
   }
 
-  async updateProfile({ userId, ...data }: UpdateUserProfileRequestType) {
-    return this.userProfileRepo.updateProfile(userId, data);
+  async updateProfile({ userId, ...data }: UpdateProfileRequestType) {
+    return this.profileRepo.updateProfile(userId, data);
   }
 }

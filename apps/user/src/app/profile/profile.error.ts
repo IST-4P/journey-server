@@ -1,9 +1,9 @@
 import { status } from '@grpc/grpc-js';
 import { RpcException } from '@nestjs/microservices';
 
-export const UserProfileNotFoundException = new RpcException({
+export const ProfileNotFoundException = new RpcException({
   code: status.NOT_FOUND,
-  message: 'Error.UserProfileNotFound',
+  message: 'Error.ProfileNotFound',
 });
 
 export const UnauthorizedAccessException = new RpcException({

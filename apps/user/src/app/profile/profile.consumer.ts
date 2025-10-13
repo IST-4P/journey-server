@@ -1,6 +1,6 @@
 import { PulsarClient, PulsarConsumer } from '@hacmieu-journey/pulsar';
 import { Injectable } from '@nestjs/common';
-import { UserProfileService } from './user-profile.service';
+import { ProfileService } from './profile.service';
 
 interface UserRegisteredEvent {
   userId: string;
@@ -12,10 +12,10 @@ interface UserRegisteredEvent {
 }
 
 @Injectable()
-export class UserProfileConsumer extends PulsarConsumer<UserRegisteredEvent> {
+export class ProfileConsumer extends PulsarConsumer<UserRegisteredEvent> {
   constructor(
     pulsarClient: PulsarClient,
-    private readonly userProfileService: UserProfileService
+    private readonly ProfileService: ProfileService
   ) {
     super(
       pulsarClient,
@@ -30,7 +30,7 @@ export class UserProfileConsumer extends PulsarConsumer<UserRegisteredEvent> {
     // );
 
     // Create user profile in User DB
-    await this.userProfileService.createProfileFromAuthEvent(event);
+    await this.ProfileService.createProfileFromAuthEvent(event);
 
     // this.logger.log(
     //   `✅ Successfully created profile for user: ${event.userId}`

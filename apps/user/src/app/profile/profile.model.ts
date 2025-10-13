@@ -10,7 +10,7 @@ export type RoleEnumType = z.infer<typeof RoleEnum>;
 
 // ==================== BASE SCHEMA ====================
 
-export const UserProfileSchema = z.object({
+export const ProfileSchema = z.object({
   id: z.string(),
   email: z.string().email(),
   fullName: z.string(),
@@ -28,13 +28,13 @@ export const UserProfileSchema = z.object({
   updatedAt: z.coerce.date(),
 });
 
-export const GetUserProfileRequestSchema = z.object({
+export const GetProfileRequestSchema = z.object({
   userId: z.string(),
 });
 
-export const GetUserProfileResponseSchema = UserProfileSchema;
+export const GetProfileResponseSchema = ProfileSchema;
 
-export const UpdateUserProfileRequestSchema = UserProfileSchema.pick({
+export const UpdateProfileRequestSchema = ProfileSchema.pick({
   fullName: true,
   phone: true,
   avatarUrl: true,
@@ -42,17 +42,13 @@ export const UpdateUserProfileRequestSchema = UserProfileSchema.pick({
   bio: true,
   birthDate: true,
 })
+  .partial()
   .extend({
     userId: z.string(),
-  })
-  .partial();
+  });
 
-export type GetUserProfileRequestType = z.infer<
-  typeof GetUserProfileRequestSchema
->;
-export type GetUserProfileResponseType = z.infer<
-  typeof GetUserProfileResponseSchema
->;
-export type UpdateUserProfileRequestType = z.infer<
-  typeof UpdateUserProfileRequestSchema
+export type GetProfileRequestType = z.infer<typeof GetProfileRequestSchema>;
+export type GetProfileResponseType = z.infer<typeof GetProfileResponseSchema>;
+export type UpdateProfileRequestType = z.infer<
+  typeof UpdateProfileRequestSchema
 >;

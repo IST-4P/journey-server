@@ -5,7 +5,7 @@ import { lastValueFrom } from 'rxjs';
 
 @Injectable()
 export class AuthService implements OnModuleInit {
-  private authService: AuthProto.AuthServiceClient;
+  private authService!: AuthProto.AuthServiceClient;
 
   constructor(
     @Inject(AuthProto.AUTH_PACKAGE_NAME) private client: ClientGrpc

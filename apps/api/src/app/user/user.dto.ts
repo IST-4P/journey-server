@@ -1,24 +1,126 @@
 import { createZodDto } from 'nestjs-zod';
 import { z } from 'zod';
 
-export const UpdateUserProfileRequestSchema = z.object({
-  fullName: z.string(),
-  phone: z.string(),
-  email: z.string().email(),
-  gender: z.enum(['MALE', 'FEMALE', 'OTHER']),
-  dateOfBirth: z.string(),
-  avatar: z.string(),
-});
-
-export class UpdateUserProfileRequestDTO extends createZodDto(
+export class UpdateProfileRequestDTO extends createZodDto(
   z
     .object({
-      fullName: z.string(),
-      phone: z.string(),
-      email: z.string().email(),
-      gender: z.enum(['MALE', 'FEMALE', 'OTHER']),
-      dateOfBirth: z.string(),
-      avatar: z.string(),
+      fullName: z.string({ message: 'Error.InvalidFullName' }),
+      phone: z.string({ message: 'Error.InvalidPhone' }),
+      email: z.email({ message: 'Error.InvalidEmail' }),
+      gender: z.enum(['MALE', 'FEMALE', 'OTHER'], {
+        message: 'Error.InvalidGender',
+      }),
+      dateOfBirth: z.coerce
+        .date({ message: 'Error.InvalidDateOfBirth' })
+        .transform((date) => date.toISOString()),
+      avatar: z.string({ message: 'Error.InvalidAvatar' }),
     })
-    .optional()
+    .partial()
+) {}
+
+const LicenseClassEnum = z.enum(['A1', 'A2', 'B1', 'B2', 'C', 'D', 'E', 'F']);
+
+export class CreateDriverLicenseRequestDTO extends createZodDto(
+  z.object({
+    licenseNumber: z.string().min(1, { message: 'Error.InvalidLicenseNumber' }),
+    fullName: z
+      .string({ message: 'Error.InvalidFullName' })
+      .min(2)
+      .max(100, { message: 'Error.InvalidFullName' }),
+    dateOfBirth: z.coerce
+      .date({ message: 'Error.InvalidDateOfBirth' })
+      .transform((date) => date.toISOString()),
+    licenseClass: z.string({ message: 'Error.InvalidLicenseClass' }),
+    issueDate: z.coerce
+      .date({ message: 'Error.InvalidIssueDate' })
+      .transform((date) => date.toISOString()),
+    expiryDate: z.coerce
+      .date({ message: 'Error.InvalidExpiryDate' })
+      .transform((date) => date.toISOString()),
+    issuePlace: z.string().min(1, { message: 'Error.InvalidIssuePlace' }),
+    frontImageUrl: z.string({ message: 'Error.InvalidFrontImage' }),
+    backImageUrl: z.string({ message: 'Error.InvalidBackImage' }),
+    selfieImageUrl: z.string({ message: 'Error.InvalidSelfieImage' }),
+  })
+) {}
+
+export class UpdateDriverLicenseRequestDTO extends createZodDto(
+  z
+    .object({
+      licenseNumber: z
+        .string()
+        .min(1, { message: 'Error.InvalidLicenseNumber' }),
+      fullName: z.string({ message: 'Error.InvalidFullName' }).min(2).max(100),
+      dateOfBirth: z.coerce
+        .date({ message: 'Error.InvalidDateOfBirth' })
+        .transform((date) => date.toISOString()),
+      licenseClass: LicenseClassEnum,
+      issueDate: z.coerce
+        .date({ message: 'Error.InvalidIssueDate' })
+        .transform((date) => date.toISOString()),
+      expiryDate: z.coerce
+        .date({ message: 'Error.InvalidExpiryDate' })
+        .transform((date) => date.toISOString()),
+      issuePlace: z.string().min(1, { message: 'Error.InvalidIssuePlace' }),
+      frontImageUrl: z.string({ message: 'Error.InvalidFrontImage' }),
+      backImageUrl: z.string({ message: 'Error.InvalidBackImage' }),
+      selfieImageUrl: z.string({ message: 'Error.InvalidSelfieImage' }),
+    })
+    .partial()
+) {}
+
+export class CreateBankAccountRequestDTO extends createZodDto(
+  z.object({
+    bankName: z.string().min(1, { message: 'Error.InvalidBankName' }),
+    bankCode: z.string().min(1, { message: 'Error.InvalidBankCode' }),
+    accountNumber: z.string().min(1, { message: 'Error.InvalidAccountNumber' }),
+    accountHolder: z
+      .string({ message: 'Error.InvalidAccountHolder' })
+      .min(2)
+      .max(100),
+  })
+) {}
+
+export class UpdateBankAccountRequestDTO extends createZodDto(
+  z
+    .object({
+      bankName: z.string({ message: 'Error.InvalidBankName' }).min(1),
+      bankCode: z.string({ message: 'Error.InvalidBankCode' }).min(1),
+      accountNumber: z.string({ message: 'Error.InvalidAccountNumber' }).min(1),
+      accountHolder: z
+        .string({ message: 'Error.InvalidAccountHolder' })
+        .min(2)
+        .max(100),
+    })
+    .partial()
+) {}
+
+export class CreateAddressRequestDTO extends createZodDto(
+  z.object({
+    label: z.string({ message: 'Error.InvalidLabel' }).min(1),
+    city: z.string({ message: 'Error.InvalidCity' }).min(1),
+    ward: z.string({ message: 'Error.InvalidWard' }).min(1),
+    detail: z.string({ message: 'Error.InvalidDetail' }).min(1),
+    latitude: z
+      .number({ message: 'Error.InvalidLatitude' })
+      .nullable()
+      .optional(),
+    longitude: z
+      .number({ message: 'Error.InvalidLongitude' })
+      .nullable()
+      .optional(),
+  })
+) {}
+
+export class UpdateAddressRequestDTO extends createZodDto(
+  z
+    .object({
+      label: z.string({ message: 'Error.InvalidLabel' }).min(1),
+      city: z.string({ message: 'Error.InvalidCity' }).min(1),
+      ward: z.string({ message: 'Error.InvalidWard' }).min(1),
+      detail: z.string({ message: 'Error.InvalidDetail' }).min(1),
+      latitude: z.number({ message: 'Error.InvalidLatitude' }).nullable(),
+      longitude: z.number({ message: 'Error.InvalidLongitude' }).nullable(),
+    })
+    .partial()
 ) {}

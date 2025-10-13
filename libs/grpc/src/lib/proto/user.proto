@@ -3,16 +3,29 @@ syntax = "proto3";
 package user;
 
 service UserService {
-  rpc GetUserProfile(GetUserProfileRequest) returns (GetUserProfileResponse);
-  rpc UpdateUserProfile(UpdateUserProfileRequest) returns (GetUserProfileResponse);
+  rpc GetProfile(GetProfileRequest) returns (GetProfileResponse);
+  rpc UpdateProfile(UpdateProfileRequest) returns (GetProfileResponse);
+
+  rpc GetDriverLicense(GetDriverLicenseRequest) returns (GetDriverLicenseResponse);
+  rpc CreateDriverLicense(CreateDriverLicenseRequest) returns (GetDriverLicenseResponse);
+  rpc UpdateDriverLicense(UpdateDriverLicenseRequest) returns (GetDriverLicenseResponse);
+
+  rpc GetBankAccount(GetBankAccountRequest) returns (GetBankAccountResponse);
+  rpc CreateBankAccount(CreateBankAccountRequest) returns (GetBankAccountResponse);
+  rpc UpdateBankAccount(UpdateBankAccountRequest) returns (GetBankAccountResponse);
+
+  rpc GetAddress(GetAddressRequest) returns (GetAddressResponse);
+  rpc GetManyAddress(GetManyAddressRequest) returns (GetManyAddressResponse);
+  rpc CreateAddress(CreateAddressRequest) returns (GetAddressResponse);
+  rpc UpdateAddress(UpdateAddressRequest) returns (GetAddressResponse);
 }
 
-// GetUserProfile
-message GetUserProfileRequest {
+// GetProfile
+message GetProfileRequest {
   string userId = 1;
 }
 
-message GetUserProfileResponse {
+message GetProfileResponse {
   string id = 1;
   string email = 2;
   string fullName = 3;
@@ -26,10 +39,13 @@ message GetUserProfileResponse {
   int32 creditScore = 11;
   string createdAt = 12;
   string updatedAt = 13;
+  optional GetDriverLicenseResponse driverLicense = 14;
+  optional GetBankAccountResponse bankAccount = 15;
+  repeated GetAddressResponse addresses = 16;
 }
 
-// UpdateUserProfile
-message UpdateUserProfileRequest {
+// UpdateProfile
+message UpdateProfileRequest {
   string userId = 1;
   optional string fullName = 2;
   optional string phone = 3;
@@ -39,4 +55,144 @@ message UpdateUserProfileRequest {
   optional string birthDate = 7;
   optional string gender = 8;
   optional string email = 9;
+}
+
+// GetDriverLicense
+message GetDriverLicenseRequest {
+  string userId = 1;
+}
+
+message GetDriverLicenseResponse {
+  string id = 1;
+  string userId = 2;
+  string licenseNumber = 3;
+  string fullName = 4;
+  string dateOfBirth = 5;
+  string licenseClass = 6;
+  string issueDate = 7;
+  string expiryDate = 8;
+  string issuePlace = 9;
+  string frontImageUrl = 10;
+  string backImageUrl = 11;
+  string selfieImageUrl = 12;
+  bool isVerified = 13;
+  string verifiedAt = 14;
+  string rejectedReason = 15;
+  string createdAt = 16;
+  string updatedAt = 17;
+}
+
+// CreateDriverLicense
+message CreateDriverLicenseRequest {
+  string userId = 1;
+  string licenseNumber = 2;
+  string fullName = 3;
+  string dateOfBirth = 4;
+  string licenseClass = 5;
+  string issueDate = 6;
+  string expiryDate = 7;
+  string issuePlace = 8;
+  string frontImageUrl = 9;
+  string backImageUrl = 10;
+  string selfieImageUrl = 11;
+}
+
+// UpdateDriverLicense
+message UpdateDriverLicenseRequest {
+  string userId = 1;
+  optional string licenseNumber = 2;
+  optional string fullName = 3;
+  optional string dateOfBirth = 4;
+  optional string licenseClass = 5;
+  optional string issueDate = 6;
+  optional string expiryDate = 7;
+  optional string issuePlace = 8;
+  optional string frontImageUrl = 9;
+  optional string backImageUrl = 10;
+  optional string selfieImageUrl = 11;
+}
+
+// GetBankAccount
+message GetBankAccountRequest {
+  string userId = 1;
+}
+
+message GetBankAccountResponse {
+  string id = 1;
+  string userId = 2;
+  string bankName = 3;
+  string bankCode = 4;
+  string accountNumber = 5;
+  string accountHolder = 6;
+  string createdAt = 7;
+  string updatedAt = 8;
+}
+
+// CreateBankAccount
+message CreateBankAccountRequest {
+  string userId = 1;
+  string bankName = 2;
+  string bankCode = 3;
+  string accountNumber = 4;
+  string accountHolder = 5;
+}
+
+// UpdateBankAccount
+message UpdateBankAccountRequest {
+  string userId = 1;
+  optional string bankName = 2;
+  optional string bankCode = 3;
+  optional string accountNumber = 4;
+  optional string accountHolder = 5;
+}
+
+// GetAddress
+message GetAddressRequest {
+  string id = 1;
+  string userId = 2;
+}
+
+message GetAddressResponse {
+  string id = 1;
+  string userId = 2;
+  string label = 3;
+  string city = 4;
+  string ward = 5;
+  string detail = 6;
+  optional int32 latitude = 7;
+  optional int32 longitude = 8;
+  string createdAt = 9;
+  string updatedAt = 10;
+}
+
+// GetManyAddress
+message GetManyAddressRequest {
+  string userId = 1;
+}
+
+message GetManyAddressResponse {
+  repeated GetAddressResponse addresses = 1;
+}
+
+// CreateAddress
+message CreateAddressRequest {
+  string userId = 1;
+  string label = 2;
+  string city = 3;
+  string ward = 4;
+  string detail = 5;
+  optional int32 latitude = 6;
+  optional int32 longitude = 7;
+}
+
+// UpdateAddress
+message UpdateAddressRequest {
+  string id = 1;
+  string userId = 2;
+  optional string label = 3;
+  optional string city = 4;
+  optional string ward = 5;
+  optional string detail = 6;
+  optional int32 latitude = 7;
+  optional int32 longitude = 8;
 }

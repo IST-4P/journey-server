@@ -35,7 +35,6 @@ export const RegisterRequestSchema = UserSchema.pick({
       ctx.addIssue({
         code: 'custom',
         message: 'Error.PasswordDoNotMatch',
-        path: ['confirmPassword'],
       });
     }
   });
@@ -91,7 +90,6 @@ export const ForgotPasswordRequestSchema = z
       ctx.addIssue({
         code: 'custom',
         message: 'Error.PasswordDoNotMatch',
-        path: ['confirmNewPassword'],
       });
     }
   });

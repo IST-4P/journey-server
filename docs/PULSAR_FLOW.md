@@ -146,7 +146,7 @@ async register(body: RegisterBodyType) {
 ### **2. User Service - Consumer**
 
 ```typescript
-// File: apps/user/src/app/user-profile/user-profile.consumer.ts
+// File: apps/user/src/app/profile/profile.consumer.ts
 
 async onModuleInit() {
   // 📡 Subscribe to user-registered events
@@ -160,7 +160,7 @@ private async handleUserRegisteredEvent(message: Message) {
   const eventData = JSON.parse(message.getData().toString());
 
   // Create profile in USER_DB
-  await this.userProfileService.createProfileFromAuthEvent(eventData);
+  await this.ProfileService.createProfileFromAuthEvent(eventData);
 }
 ```
 
@@ -213,7 +213,7 @@ private async handleUserRegisteredEvent(message: Message) {
 3. **Tạo Prisma schema cho User Service:**
 
    ```prisma
-   model UserProfile {
+   model Profile {
      id          String    @id @default(uuid())
      userId      String    @unique
      email       String

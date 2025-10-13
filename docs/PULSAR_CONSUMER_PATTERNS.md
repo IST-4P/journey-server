@@ -16,10 +16,10 @@
 ### **Code:**
 
 ```typescript
-// user-profile.consumer.ts
+// profile.consumer.ts
 import { Injectable } from '@nestjs/common';
 import { PulsarClient, PulsarConsumer } from '@hacmieu-journey/pulsar';
-import { UserProfileService } from './user-profile.service';
+import { ProfileService } from './profile.service';
 
 interface UserRegisteredEvent {
   userId: string;
@@ -31,8 +31,8 @@ interface UserRegisteredEvent {
 }
 
 @Injectable()
-export class UserProfileConsumer extends PulsarConsumer<UserRegisteredEvent> {
-  constructor(pulsarClient: PulsarClient, private readonly userProfileService: UserProfileService) {
+export class ProfileConsumer extends PulsarConsumer<UserRegisteredEvent> {
+  constructor(pulsarClient: PulsarClient, private readonly ProfileService: ProfileService) {
     super(
       pulsarClient,
       'persistent://journey/events/user-registered', // Topic
@@ -44,7 +44,7 @@ export class UserProfileConsumer extends PulsarConsumer<UserRegisteredEvent> {
   protected async onMessage(event: UserRegisteredEvent): Promise<void> {
     this.logger.log(`📥 Received event for user: ${event.userId}`);
 
-    await this.userProfileService.createProfileFromAuthEvent(event);
+    await this.ProfileService.createProfileFromAuthEvent(event);
 
     this.logger.log(`✅ Created profile for user: ${event.userId}`);
   }
@@ -76,11 +76,11 @@ export class UserProfileConsumer extends PulsarConsumer<UserRegisteredEvent> {
 ### **Code:**
 
 ```typescript
-// user-profile.consumer.ts (current)
+// profile.consumer.ts (current)
 import { Injectable, Logger, OnModuleInit } from '@nestjs/common';
 import { PulsarClient } from '@hacmieu-journey/pulsar';
 import { Message } from 'pulsar-client';
-import { UserProfileService } from './user-profile.service';
+import { ProfileService } from './profile.service';
 
 interface UserRegisteredEvent {
   userId: string;
@@ -92,10 +92,10 @@ interface UserRegisteredEvent {
 }
 
 @Injectable()
-export class UserProfileConsumer implements OnModuleInit {
-  private readonly logger = new Logger(UserProfileConsumer.name);
+export class ProfileConsumer implements OnModuleInit {
+  private readonly logger = new Logger(ProfileConsumer.name);
 
-  constructor(private readonly pulsarClient: PulsarClient, private readonly userProfileService: UserProfileService) {}
+  constructor(private readonly pulsarClient: PulsarClient, private readonly ProfileService: ProfileService) {}
 
   async onModuleInit() {
     await this.pulsarClient.createConsumer('persistent://journey/events/user-registered', 'user-service', this.handleUserRegisteredEvent.bind(this));
@@ -109,7 +109,7 @@ export class UserProfileConsumer implements OnModuleInit {
 
       this.logger.log(`📥 Received event for user: ${event.userId}`);
 
-      await this.userProfileService.createProfileFromAuthEvent(event);
+      await this.ProfileService.createProfileFromAuthEvent(event);
 
       this.logger.log(`✅ Created profile for user: ${event.userId}`);
     } catch (error) {
@@ -172,10 +172,10 @@ export class UserProfileConsumer implements OnModuleInit {
 
 ```typescript
 @Injectable()
-export class UserProfileConsumer implements OnModuleInit {
-  private readonly logger = new Logger(UserProfileConsumer.name);
+export class ProfileConsumer implements OnModuleInit {
+  private readonly logger = new Logger(ProfileConsumer.name);
 
-  constructor(private readonly pulsarClient: PulsarClient, private readonly userProfileService: UserProfileService) {}
+  constructor(private readonly pulsarClient: PulsarClient, private readonly ProfileService: ProfileService) {}
 
   async onModuleInit() {
     await this.pulsarClient.createConsumer('persistent://journey/events/user-registered', 'user-service', this.handleUserRegisteredEvent.bind(this));
@@ -184,7 +184,7 @@ export class UserProfileConsumer implements OnModuleInit {
   private async handleUserRegisteredEvent(message: Message) {
     try {
       const event = JSON.parse(message.getData().toString());
-      await this.userProfileService.createProfileFromAuthEvent(event);
+      await this.ProfileService.createProfileFromAuthEvent(event);
     } catch (error) {
       this.logger.error(error);
       throw error;
@@ -197,13 +197,13 @@ export class UserProfileConsumer implements OnModuleInit {
 
 ```typescript
 @Injectable()
-export class UserProfileConsumer extends PulsarConsumer<UserRegisteredEvent> {
-  constructor(pulsarClient: PulsarClient, private readonly userProfileService: UserProfileService) {
+export class ProfileConsumer extends PulsarConsumer<UserRegisteredEvent> {
+  constructor(pulsarClient: PulsarClient, private readonly ProfileService: ProfileService) {
     super(pulsarClient, 'persistent://journey/events/user-registered', 'user-service');
   }
 
   protected async onMessage(event: UserRegisteredEvent): Promise<void> {
-    await this.userProfileService.createProfileFromAuthEvent(event);
+    await this.ProfileService.createProfileFromAuthEvent(event);
   }
 }
 ```
@@ -306,7 +306,7 @@ User Service (Consumer)
    ├─ PulsarConsumer.listener(message)
    ├─ deserialize<UserRegisteredEvent>(message)
    ├─ onMessage(event) ← Your business logic
-   └─ userProfileService.createProfile(event)
+   └─ ProfileService.createProfile(event)
 ```
 
 **→ Clean, simple, maintainable!** 🚀

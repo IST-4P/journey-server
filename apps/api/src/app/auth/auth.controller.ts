@@ -18,6 +18,12 @@ import {
 } from '@nestjs/common';
 import { parse } from 'cookie';
 import { CookieOptions, Request, Response } from 'express';
+import {
+  ForgotPasswordRequestDTO,
+  LoginRequestDTO,
+  RegisterRequestDTO,
+  SendOTPRequestDTO,
+} from './auth.dto';
 import { AuthService } from './auth.service';
 
 const cookieOptions: CookieOptions = {
@@ -34,23 +40,23 @@ export class AuthController {
 
   @IsPublic()
   @Post('otp')
-  async sendOTP(@Body() body: AuthProto.SendOTPRequest) {
-    return this.authService.sendOTP(body);
+  async sendOTP(@Body() body: SendOTPRequestDTO) {
+    return this.authService.sendOTP(body as AuthProto.SendOTPRequest);
   }
 
   @IsPublic()
   @Post('register')
-  async register(@Body() body: AuthProto.RegisterRequest) {
-    return this.authService.register(body);
+  async register(@Body() body: RegisterRequestDTO) {
+    return this.authService.register(body as AuthProto.RegisterRequest);
   }
 
   @IsPublic()
   @Post('login')
   async login(
-    @Body() body: AuthProto.LoginRequest,
+    @Body() body: LoginRequestDTO,
     @Res({ passthrough: true }) res: Response
   ) {
-    const tokens = await this.authService.login(body);
+    const tokens = await this.authService.login(body as AuthProto.LoginRequest);
 
     res.cookie('accessToken', tokens.accessToken, {
       ...cookieOptions,
@@ -105,38 +111,14 @@ export class AuthController {
 
   @IsPublic()
   @Post('forgot-password')
-  async forgotPassword(@Body() body: AuthProto.ForgotPasswordRequest) {
-    return this.authService.forgotPassword(body);
+  async forgotPassword(@Body() body: ForgotPasswordRequestDTO) {
+    return this.authService.forgotPassword(
+      body as AuthProto.ForgotPasswordRequest
+    );
   }
 
   // ===== PROTECTED ROUTES - Ví dụ sử dụng Guards =====
 
-  /**
-   * Route được bảo vệ bởi Access Token (Bearer)
-   * Mặc định nếu không khai báo @Auth() hoặc @IsPublic()
-   */
-  @Get('profile')
-  getProfile(@ActiveUser() user: AccessTokenPayload) {
-    return {
-      message: 'User profile',
-      user,
-    };
-  }
-
-  /**
-   * Lấy chỉ userId từ token
-   */
-  @Get('user-id')
-  getUserId(@ActiveUser('userId') userId: string) {
-    return {
-      userId,
-    };
-  }
-
-  /**
-   * Route được bảo vệ bởi Payment API Key
-   * Dành cho payment webhook hoặc internal services
-   */
   @Auth([AuthType.PaymentAPIKey])
   @Post('payment-webhook')
   handlePaymentWebhook(@Body() body: any) {

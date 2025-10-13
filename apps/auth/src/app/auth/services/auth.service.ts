@@ -175,7 +175,7 @@ export class AuthService {
         // }),
       ]);
 
-      // Tạo user-profile trong User Service qua Pulsar
+      // Tạo profile trong User Service qua Pulsar
       try {
         const producer = await this.pulsarClient.createProducer(
           'persistent://journey/events/user-registered'
@@ -266,6 +266,10 @@ export class AuthService {
 
       // Lấy dữ liệu
       const user = await this.userRepository.findUnique({ id: userId });
+
+      if (!user) {
+        throw UnauthorizedAccessException;
+      }
 
       // Xoá tồn tại trong DB
       const deleteRefreshToken$ = this.authRepository.deleteRefreshToken({

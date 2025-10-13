@@ -11,7 +11,7 @@ export class AuthRepository {
   findUniqueVerificationCode(
     uniqueValue: Prisma.VerificationCodeWhereUniqueInput
   ): Promise<VerificationCodeType | null> {
-    return this.prismaService.verificationCode.findUnique({
+    return this.prismaService.verificationCode.findUniqueOrThrow({
       where: uniqueValue,
     });
   }
@@ -61,7 +61,7 @@ export class AuthRepository {
   findUniqueRefreshToken(
     token: Prisma.RefreshTokenWhereUniqueInput
   ): Promise<RefreshTokenType | null> {
-    return this.prismaService.refreshToken.findUnique({
+    return this.prismaService.refreshToken.findUniqueOrThrow({
       where: token,
     });
   }

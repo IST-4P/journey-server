@@ -10,12 +10,12 @@ import { Observable } from "rxjs";
 
 export const protobufPackage = "user";
 
-/** GetUserProfile */
-export interface GetUserProfileRequest {
+/** GetProfile */
+export interface GetProfileRequest {
   userId: string;
 }
 
-export interface GetUserProfileResponse {
+export interface GetProfileResponse {
   id: string;
   email: string;
   fullName: string;
@@ -29,10 +29,13 @@ export interface GetUserProfileResponse {
   creditScore: number;
   createdAt: string;
   updatedAt: string;
+  driverLicense?: GetDriverLicenseResponse | undefined;
+  bankAccount?: GetBankAccountResponse | undefined;
+  addresses: GetAddressResponse[];
 }
 
-/** UpdateUserProfile */
-export interface UpdateUserProfileRequest {
+/** UpdateProfile */
+export interface UpdateProfileRequest {
   userId: string;
   fullName?: string | undefined;
   phone?: string | undefined;
@@ -44,27 +47,240 @@ export interface UpdateUserProfileRequest {
   email?: string | undefined;
 }
 
+/** GetDriverLicense */
+export interface GetDriverLicenseRequest {
+  userId: string;
+}
+
+export interface GetDriverLicenseResponse {
+  id: string;
+  userId: string;
+  licenseNumber: string;
+  fullName: string;
+  dateOfBirth: string;
+  licenseClass: string;
+  issueDate: string;
+  expiryDate: string;
+  issuePlace: string;
+  frontImageUrl: string;
+  backImageUrl: string;
+  selfieImageUrl: string;
+  isVerified: boolean;
+  verifiedAt: string;
+  rejectedReason: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+/** CreateDriverLicense */
+export interface CreateDriverLicenseRequest {
+  userId: string;
+  licenseNumber: string;
+  fullName: string;
+  dateOfBirth: string;
+  licenseClass: string;
+  issueDate: string;
+  expiryDate: string;
+  issuePlace: string;
+  frontImageUrl: string;
+  backImageUrl: string;
+  selfieImageUrl: string;
+}
+
+/** UpdateDriverLicense */
+export interface UpdateDriverLicenseRequest {
+  userId: string;
+  licenseNumber?: string | undefined;
+  fullName?: string | undefined;
+  dateOfBirth?: string | undefined;
+  licenseClass?: string | undefined;
+  issueDate?: string | undefined;
+  expiryDate?: string | undefined;
+  issuePlace?: string | undefined;
+  frontImageUrl?: string | undefined;
+  backImageUrl?: string | undefined;
+  selfieImageUrl?: string | undefined;
+}
+
+/** GetBankAccount */
+export interface GetBankAccountRequest {
+  userId: string;
+}
+
+export interface GetBankAccountResponse {
+  id: string;
+  userId: string;
+  bankName: string;
+  bankCode: string;
+  accountNumber: string;
+  accountHolder: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+/** CreateBankAccount */
+export interface CreateBankAccountRequest {
+  userId: string;
+  bankName: string;
+  bankCode: string;
+  accountNumber: string;
+  accountHolder: string;
+}
+
+/** UpdateBankAccount */
+export interface UpdateBankAccountRequest {
+  userId: string;
+  bankName?: string | undefined;
+  bankCode?: string | undefined;
+  accountNumber?: string | undefined;
+  accountHolder?: string | undefined;
+}
+
+/** GetAddress */
+export interface GetAddressRequest {
+  id: string;
+  userId: string;
+}
+
+export interface GetAddressResponse {
+  id: string;
+  userId: string;
+  label: string;
+  city: string;
+  ward: string;
+  detail: string;
+  latitude?: number | undefined;
+  longitude?: number | undefined;
+  createdAt: string;
+  updatedAt: string;
+}
+
+/** GetManyAddress */
+export interface GetManyAddressRequest {
+  userId: string;
+}
+
+export interface GetManyAddressResponse {
+  addresses: GetAddressResponse[];
+}
+
+/** CreateAddress */
+export interface CreateAddressRequest {
+  userId: string;
+  label: string;
+  city: string;
+  ward: string;
+  detail: string;
+  latitude?: number | undefined;
+  longitude?: number | undefined;
+}
+
+/** UpdateAddress */
+export interface UpdateAddressRequest {
+  id: string;
+  userId: string;
+  label?: string | undefined;
+  city?: string | undefined;
+  ward?: string | undefined;
+  detail?: string | undefined;
+  latitude?: number | undefined;
+  longitude?: number | undefined;
+}
+
 export const USER_PACKAGE_NAME = "user";
 
 export interface UserServiceClient {
-  getUserProfile(request: GetUserProfileRequest): Observable<GetUserProfileResponse>;
+  getProfile(request: GetProfileRequest): Observable<GetProfileResponse>;
 
-  updateUserProfile(request: UpdateUserProfileRequest): Observable<GetUserProfileResponse>;
+  updateProfile(request: UpdateProfileRequest): Observable<GetProfileResponse>;
+
+  getDriverLicense(request: GetDriverLicenseRequest): Observable<GetDriverLicenseResponse>;
+
+  createDriverLicense(request: CreateDriverLicenseRequest): Observable<GetDriverLicenseResponse>;
+
+  updateDriverLicense(request: UpdateDriverLicenseRequest): Observable<GetDriverLicenseResponse>;
+
+  getBankAccount(request: GetBankAccountRequest): Observable<GetBankAccountResponse>;
+
+  createBankAccount(request: CreateBankAccountRequest): Observable<GetBankAccountResponse>;
+
+  updateBankAccount(request: UpdateBankAccountRequest): Observable<GetBankAccountResponse>;
+
+  getAddress(request: GetAddressRequest): Observable<GetAddressResponse>;
+
+  getManyAddress(request: GetManyAddressRequest): Observable<GetManyAddressResponse>;
+
+  createAddress(request: CreateAddressRequest): Observable<GetAddressResponse>;
+
+  updateAddress(request: UpdateAddressRequest): Observable<GetAddressResponse>;
 }
 
 export interface UserServiceController {
-  getUserProfile(
-    request: GetUserProfileRequest,
-  ): Promise<GetUserProfileResponse> | Observable<GetUserProfileResponse> | GetUserProfileResponse;
+  getProfile(
+    request: GetProfileRequest,
+  ): Promise<GetProfileResponse> | Observable<GetProfileResponse> | GetProfileResponse;
 
-  updateUserProfile(
-    request: UpdateUserProfileRequest,
-  ): Promise<GetUserProfileResponse> | Observable<GetUserProfileResponse> | GetUserProfileResponse;
+  updateProfile(
+    request: UpdateProfileRequest,
+  ): Promise<GetProfileResponse> | Observable<GetProfileResponse> | GetProfileResponse;
+
+  getDriverLicense(
+    request: GetDriverLicenseRequest,
+  ): Promise<GetDriverLicenseResponse> | Observable<GetDriverLicenseResponse> | GetDriverLicenseResponse;
+
+  createDriverLicense(
+    request: CreateDriverLicenseRequest,
+  ): Promise<GetDriverLicenseResponse> | Observable<GetDriverLicenseResponse> | GetDriverLicenseResponse;
+
+  updateDriverLicense(
+    request: UpdateDriverLicenseRequest,
+  ): Promise<GetDriverLicenseResponse> | Observable<GetDriverLicenseResponse> | GetDriverLicenseResponse;
+
+  getBankAccount(
+    request: GetBankAccountRequest,
+  ): Promise<GetBankAccountResponse> | Observable<GetBankAccountResponse> | GetBankAccountResponse;
+
+  createBankAccount(
+    request: CreateBankAccountRequest,
+  ): Promise<GetBankAccountResponse> | Observable<GetBankAccountResponse> | GetBankAccountResponse;
+
+  updateBankAccount(
+    request: UpdateBankAccountRequest,
+  ): Promise<GetBankAccountResponse> | Observable<GetBankAccountResponse> | GetBankAccountResponse;
+
+  getAddress(
+    request: GetAddressRequest,
+  ): Promise<GetAddressResponse> | Observable<GetAddressResponse> | GetAddressResponse;
+
+  getManyAddress(
+    request: GetManyAddressRequest,
+  ): Promise<GetManyAddressResponse> | Observable<GetManyAddressResponse> | GetManyAddressResponse;
+
+  createAddress(
+    request: CreateAddressRequest,
+  ): Promise<GetAddressResponse> | Observable<GetAddressResponse> | GetAddressResponse;
+
+  updateAddress(
+    request: UpdateAddressRequest,
+  ): Promise<GetAddressResponse> | Observable<GetAddressResponse> | GetAddressResponse;
 }
 
 export function UserServiceControllerMethods() {
   return function (constructor: Function) {
-    const grpcMethods: string[] = ["getUserProfile", "updateUserProfile"];
+    const grpcMethods: string[] = [
+      "getProfile",
+      "updateProfile",
+      "getDriverLicense",
+      "createDriverLicense",
+      "updateDriverLicense",
+      "getBankAccount",
+      "createBankAccount",
+      "updateBankAccount",
+      "getAddress",
+      "getManyAddress",
+      "createAddress",
+      "updateAddress",
+    ];
     for (const method of grpcMethods) {
       const descriptor: any = Reflect.getOwnPropertyDescriptor(constructor.prototype, method);
       GrpcMethod("UserService", method)(constructor.prototype[method], method, descriptor);

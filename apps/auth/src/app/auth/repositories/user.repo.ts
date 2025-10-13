@@ -8,7 +8,7 @@ export class UserRepository {
   constructor(private readonly prismaService: PrismaService) {}
 
   findUnique(where: Prisma.UserWhereUniqueInput): Promise<UserType | null> {
-    return this.prismaService.user.findUniqueOrThrow({
+    return this.prismaService.user.findUnique({
       where,
     });
   }

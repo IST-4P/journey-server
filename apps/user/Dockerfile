@@ -2,9 +2,12 @@ FROM node:22-slim AS builder
 
 WORKDIR /workspace
 
-RUN apt-get update && apt-get install -y openssl
+RUN corepack enable && corepack prepare pnpm@9 --activate
 
-COPY package*.json ./
+RUN apt-get update && apt-get install -y openssl protobuf-compiler
+
+COPY pnpm-lock.yaml pnpm-workspace.yaml ./
+COPY package.json ./
 COPY nx.json ./
 COPY tsconfig.*.json ./
 COPY webpack.*.config.js ./
@@ -15,17 +18,17 @@ COPY libs/prisma ./libs/prisma
 COPY libs/nestjs ./libs/nestjs
 COPY libs/grpc ./libs/grpc
 
-RUN npm install
+RUN pnpm install --frozen-lockfile
 
 RUN sed -i 's/protoc-gen-ts_proto=.*node_modules.*protoc-gen-ts_proto.cmd/protoc-gen-ts_proto=..\/..\/..\/..\/node_modules\/.bin\/protoc-gen-ts_proto/g' libs/grpc/project.json
 
-RUN apt-get update && apt-get install -y protobuf-compiler
-
-RUN npx nx build user
+RUN pnpm exec nx build user
 
 FROM node:22-slim AS runner
 
 WORKDIR /app
+
+RUN corepack enable && corepack prepare pnpm@9 --activate
 
 RUN apt-get update && apt-get install -y openssl
 
@@ -33,7 +36,7 @@ COPY --from=builder /workspace/dist/apps/user/package.json ./
 
 ENV NODE_ENV=production
 
-RUN npm install --omit=dev
+RUN pnpm install --prod --frozen-lockfile
 
 COPY --from=builder /workspace/dist ./dist
 COPY --from=builder /workspace/node_modules/@prisma-clients/user/ ./node_modules/@prisma-clients/user/

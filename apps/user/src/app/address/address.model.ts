@@ -37,7 +37,10 @@ export const CreateAddressRequestSchema = AddressSchema.pick({
 });
 
 export const UpdateAddressRequestSchema =
-  CreateAddressRequestSchema.partial().extend({ id: z.string() });
+  CreateAddressRequestSchema.partial().extend({
+    id: z.string(),
+    userId: z.string(),
+  });
 
 export type GetAddressRequestType = z.infer<typeof GetAddressRequestSchema>;
 export type GetManyAddressRequestType = z.infer<

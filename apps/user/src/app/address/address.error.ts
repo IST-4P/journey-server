@@ -6,7 +6,7 @@ export const AddressNotFoundException = new RpcException({
   message: 'Error.AddressNotFound',
 });
 
-export const UnauthorizedAccessException = new RpcException({
-  code: status.UNAUTHENTICATED,
-  message: 'Error.UnauthorizedAccess',
+export const AddressAlreadyExistsException = new RpcException({
+  code: status.ALREADY_EXISTS,
+  message: 'Error.AddressAlreadyExists',
 });

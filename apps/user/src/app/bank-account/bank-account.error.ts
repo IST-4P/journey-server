@@ -6,7 +6,7 @@ export const BankAccountNotFoundException = new RpcException({
   message: 'Error.BankAccountNotFound',
 });
 
-export const UnauthorizedAccessException = new RpcException({
-  code: status.UNAUTHENTICATED,
-  message: 'Error.UnauthorizedAccess',
+export const BankAccountAlreadyExistsException = new RpcException({
+  code: status.ALREADY_EXISTS,
+  message: 'Error.BankAccountAlreadyExists',
 });

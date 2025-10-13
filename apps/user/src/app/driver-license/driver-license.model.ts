@@ -60,7 +60,9 @@ export const CreateDriverLicenseRequestSchema = DriverLicenseSchema.pick({
 });
 
 export const UpdateDriverLicenseRequestSchema =
-  CreateDriverLicenseRequestSchema.partial();
+  CreateDriverLicenseRequestSchema.partial().extend({
+    userId: z.string(),
+  });
 
 export type GetDriverLicenseRequestType = z.infer<
   typeof GetDriverLicenseRequestSchema

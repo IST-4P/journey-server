@@ -23,7 +23,7 @@ export class AddressRepository {
     id: Prisma.AddressWhereUniqueInput['id'];
     userId: string;
   }) {
-    return this.prisma.address.findUniqueOrThrow({
+    return this.prisma.address.findUnique({
       where: { id, userId },
     });
   }

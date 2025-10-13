@@ -9,7 +9,7 @@ export class BankAccountRepository {
   async findBankAccountByUserId(
     userId: Prisma.BankAccountWhereUniqueInput['userId']
   ) {
-    return this.prisma.bankAccount.findUniqueOrThrow({
+    return this.prisma.bankAccount.findUnique({
       where: {
         userId,
       },

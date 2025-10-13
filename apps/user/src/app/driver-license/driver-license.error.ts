@@ -6,7 +6,7 @@ export const DriverLicenseNotFoundException = new RpcException({
   message: 'Error.DriverLicenseNotFound',
 });
 
-export const UnauthorizedAccessException = new RpcException({
-  code: status.UNAUTHENTICATED,
-  message: 'Error.UnauthorizedAccess',
+export const DriverLicenseAlreadyExistsException = new RpcException({
+  code: status.ALREADY_EXISTS,
+  message: 'Error.DriverLicenseAlreadyExists',
 });

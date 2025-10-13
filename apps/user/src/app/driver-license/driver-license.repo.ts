@@ -9,7 +9,7 @@ export class DriverLicenseRepository {
   async findDriverLicenseByUserId(
     userId: Prisma.DriverLicenseWhereUniqueInput['userId']
   ) {
-    return this.prisma.driverLicense.findUniqueOrThrow({
+    return this.prisma.driverLicense.findUnique({
       where: {
         userId,
       },

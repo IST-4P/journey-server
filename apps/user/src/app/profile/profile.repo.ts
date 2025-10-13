@@ -7,7 +7,7 @@ export class ProfileRepository {
   constructor(private readonly prisma: PrismaService) {}
 
   async findProfileById(userId: Prisma.ProfileWhereUniqueInput) {
-    return this.prisma.profile.findUniqueOrThrow({
+    return this.prisma.profile.findUnique({
       where: userId,
       include: {
         driverLicense: true,

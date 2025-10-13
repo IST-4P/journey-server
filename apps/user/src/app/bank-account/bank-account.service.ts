@@ -1,8 +1,7 @@
-import { isNotFoundPrismaError } from '@hacmieu-journey/prisma';
 import { Injectable } from '@nestjs/common';
 import {
+  BankAccountAlreadyExistsException,
   BankAccountNotFoundException,
-  UnauthorizedAccessException,
 } from './bank-account.error';
 import {
   CreateBankAccountRequestType,
@@ -18,25 +17,29 @@ export class BankAccountService {
   constructor(private readonly bankAccountRepo: BankAccountRepository) {}
 
   async getBankAccount(data: GetBankAccountRequestType) {
-    try {
-      const result = await this.bankAccountRepo.findBankAccountByUserId(
-        data.userId
-      );
-      return result;
-    } catch (error) {
-      if (isNotFoundPrismaError(error)) {
-        throw BankAccountNotFoundException;
-      }
+    const result = await this.bankAccountRepo.findBankAccountByUserId(
+      data.userId
+    );
 
-      throw UnauthorizedAccessException;
+    if (!result) {
+      throw BankAccountNotFoundException;
     }
+    return result;
   }
 
   async createBankAccount(data: CreateBankAccountRequestType) {
+    const result = await this.getBankAccount({ userId: data.userId });
+    if (result) {
+      throw BankAccountAlreadyExistsException;
+    }
     return this.bankAccountRepo.createBankAccount(data);
   }
 
   async updateBankAccount({ userId, ...data }: UpdateBankAccountRequestType) {
+    const result = await this.getBankAccount({ userId });
+    if (!result) {
+      throw BankAccountNotFoundException;
+    }
     return this.bankAccountRepo.updateBankAccount(userId, data);
   }
 }

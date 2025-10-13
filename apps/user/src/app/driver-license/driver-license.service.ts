@@ -1,8 +1,7 @@
-import { isNotFoundPrismaError } from '@hacmieu-journey/prisma';
 import { Injectable } from '@nestjs/common';
 import {
+  DriverLicenseAlreadyExistsException,
   DriverLicenseNotFoundException,
-  UnauthorizedAccessException,
 } from './driver-license.error';
 import {
   CreateDriverLicenseRequestType,
@@ -16,21 +15,20 @@ export class DriverLicenseService {
   constructor(private readonly driverLicenseRepo: DriverLicenseRepository) {}
 
   async getDriverLicense(data: GetDriverLicenseRequestType) {
-    try {
-      const result = await this.driverLicenseRepo.findDriverLicenseByUserId(
-        data.userId
-      );
-      return result;
-    } catch (error) {
-      if (isNotFoundPrismaError(error)) {
-        throw DriverLicenseNotFoundException;
-      }
-
-      throw UnauthorizedAccessException;
+    const result = await this.driverLicenseRepo.findDriverLicenseByUserId(
+      data.userId
+    );
+    if (!result) {
+      throw DriverLicenseNotFoundException;
     }
+    return result;
   }
 
   async createDriverLicense(data: CreateDriverLicenseRequestType) {
+    const result = await this.getDriverLicense({ userId: data.userId });
+    if (result) {
+      throw DriverLicenseAlreadyExistsException;
+    }
     return this.driverLicenseRepo.createDriverLicense(data);
   }
 
@@ -38,6 +36,10 @@ export class DriverLicenseService {
     userId,
     ...data
   }: UpdateDriverLicenseRequestType) {
+    const result = await this.getDriverLicense({ userId });
+    if (!result) {
+      throw DriverLicenseNotFoundException;
+    }
     return this.driverLicenseRepo.updateDriverLicense(userId, data);
   }
 }

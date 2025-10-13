@@ -29,7 +29,9 @@ export const CreateBankAccountRequestSchema = BankAccountSchema.pick({
 });
 
 export const UpdateBankAccountRequestSchema =
-  CreateBankAccountRequestSchema.partial();
+  CreateBankAccountRequestSchema.partial().extend({
+    userId: z.string(),
+  });
 
 export type GetBankAccountRequestType = z.infer<
   typeof GetBankAccountRequestSchema

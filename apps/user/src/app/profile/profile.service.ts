@@ -1,9 +1,5 @@
-import { isNotFoundPrismaError } from '@hacmieu-journey/prisma';
 import { Injectable, Logger } from '@nestjs/common';
-import {
-  ProfileNotFoundException,
-  UnauthorizedAccessException,
-} from './profile.error';
+import { ProfileNotFoundException } from './profile.error';
 import {
   GetProfileRequestType,
   RoleEnumType,
@@ -58,18 +54,21 @@ export class ProfileService {
   }
 
   async getProfile(data: GetProfileRequestType) {
-    try {
-      return this.profileRepo.findProfileById({ id: data.userId });
-    } catch (error) {
-      if (isNotFoundPrismaError(error)) {
-        throw ProfileNotFoundException;
-      }
+    const result = await this.profileRepo.findProfileById({
+      id: data.userId,
+    });
 
-      throw UnauthorizedAccessException;
+    if (!result) {
+      throw ProfileNotFoundException;
     }
+    return result;
   }
 
   async updateProfile({ userId, ...data }: UpdateProfileRequestType) {
+    const result = await this.getProfile({ userId });
+    if (!result) {
+      throw ProfileNotFoundException;
+    }
     return this.profileRepo.updateProfile(userId, data);
   }
 }

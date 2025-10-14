@@ -28,7 +28,9 @@ export class BankAccountService {
   }
 
   async createBankAccount(data: CreateBankAccountRequestType) {
-    const result = await this.getBankAccount({ userId: data.userId });
+    const result = await this.bankAccountRepo.findBankAccountByUserId(
+      data.userId
+    );
     if (result) {
       throw BankAccountAlreadyExistsException;
     }
@@ -36,7 +38,7 @@ export class BankAccountService {
   }
 
   async updateBankAccount({ userId, ...data }: UpdateBankAccountRequestType) {
-    const result = await this.getBankAccount({ userId });
+    const result = await this.bankAccountRepo.findBankAccountByUserId(userId);
     if (!result) {
       throw BankAccountNotFoundException;
     }

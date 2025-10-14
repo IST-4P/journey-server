@@ -25,7 +25,9 @@ export class DriverLicenseService {
   }
 
   async createDriverLicense(data: CreateDriverLicenseRequestType) {
-    const result = await this.getDriverLicense({ userId: data.userId });
+    const result = await this.driverLicenseRepo.findDriverLicenseByUserId(
+      data.userId
+    );
     if (result) {
       throw DriverLicenseAlreadyExistsException;
     }
@@ -36,7 +38,9 @@ export class DriverLicenseService {
     userId,
     ...data
   }: UpdateDriverLicenseRequestType) {
-    const result = await this.getDriverLicense({ userId });
+    const result = await this.driverLicenseRepo.findDriverLicenseByUserId(
+      userId
+    );
     if (!result) {
       throw DriverLicenseNotFoundException;
     }

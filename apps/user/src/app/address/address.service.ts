@@ -33,7 +33,7 @@ export class AddressService {
   }
 
   async updateAddress({ id, userId, ...data }: UpdateAddressRequestType) {
-    const result = await this.getAddressById({ id, userId });
+    const result = await this.addressRepo.findAddressById({ id, userId });
     if (!result) {
       throw AddressNotFoundException;
     }

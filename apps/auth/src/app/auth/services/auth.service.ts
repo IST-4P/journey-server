@@ -151,11 +151,11 @@ export class AuthService {
 
   async register(body: RegisterRequestType) {
     try {
-      // await this.validateVerificationCode({
-      //   email: body.email,
-      //   type: TypeOfVerificationCode.REGISTER,
-      //   code: body.code,
-      // });
+      await this.validateVerificationCode({
+        email: body.email,
+        type: TypeOfVerificationCode.REGISTER,
+        code: body.code,
+      });
 
       const hashedPassword = await this.hashingService.hash(body.password);
 

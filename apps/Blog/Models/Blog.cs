@@ -37,7 +37,7 @@ namespace Blog.Models
         public required string Title { get; set; }
         public required string Content { get; set; }
         public required string Region { get; set; }
-        public required string Thumnail { get; set; }
+        public required string Thumbnail { get; set; }
     }
 
     public class AddBlogRequestDto
@@ -55,7 +55,7 @@ namespace Blog.Models
         public required string Region { get; set; }
 
         [Url(ErrorMessage = "Thumbnail must be a valid URL")]
-        public required string Thumnail { get; set; }
+        public required string Thumbnail { get; set; }
     }
 
     public class UpdateBlogRequetsDto
@@ -73,7 +73,7 @@ namespace Blog.Models
         public required string Region { get; set; }
 
         [Url(ErrorMessage = "Thumbnail must be a valid URL")]
-        public required string Thumnail { get; set; }
+        public required string Thumbnail { get; set; }
     }
 
     public class BlogFilterDto

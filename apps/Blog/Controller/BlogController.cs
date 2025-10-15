@@ -117,6 +117,36 @@ namespace Blog.Controller
             }
         }
 
+        [HttpPost("html")]
+        public async Task<IActionResult> AddBlogWithHtml([FromForm] string title, [FromForm] string content, [FromForm] string region, [FromForm] string thumbnail)
+        {
+            try
+            {
+                var addBlogRequest = new AddBlogRequestDto
+                {
+                    Title = title,
+                    Content = content,
+                    Region = region,
+                    Thumbnail = thumbnail
+                };
+
+                if (!ModelState.IsValid)
+                {
+                    return BadRequest(ModelState);
+                }
+
+                var blog = _mapper.Map<Models.Blog>(addBlogRequest);
+                var createdBlog = await _blogRepository.AddBlogAsync(blog);
+                var blogDto = _mapper.Map<BlogDto>(createdBlog);
+
+                return CreatedAtAction(nameof(GetBlogById), new { id = blogDto.Id }, blogDto);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"Internal server error: {ex.Message}");
+            }
+        }
+
         [HttpPut("{id:guid}")]
         public async Task<IActionResult> UpdateBlog(Guid id, [FromBody] UpdateBlogRequetsDto updateBlogRequest)
         {

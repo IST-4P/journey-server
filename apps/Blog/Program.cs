@@ -2,6 +2,8 @@ using Blog.Data;
 using Blog.Repository;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi.Models;
+using System.Text.Encodings.Web;
+using System.Text.Json;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -15,7 +17,13 @@ if (!string.IsNullOrEmpty(dbPassword))
     connectionString = connectionString.Replace("${DB_PASSWORD}", dbPassword);
 }
 
-builder.Services.AddControllers();
+builder.Services.AddControllers()
+    .AddJsonOptions(options =>
+    {
+        // Cấu hình JSON serializer để xử lý ký tự Unicode và HTML
+        options.JsonSerializerOptions.Encoder = System.Text.Encodings.Web.JavaScriptEncoder.UnsafeRelaxedJsonEscaping;
+        options.JsonSerializerOptions.PropertyNamingPolicy = System.Text.Json.JsonNamingPolicy.CamelCase;
+    });
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(c =>
 {

@@ -25,7 +25,7 @@ namespace Blog.Models
         public required string Region { get; set; }
 
         [Url(ErrorMessage = "Thumbnail must be a valid URL")]
-        public required string Thumnail { get; set; }
+        public required string Thumbnail { get; set; }
 
         public DateTime CreateAt { get; set; }
         public DateTime UpdateAt { get; set; }

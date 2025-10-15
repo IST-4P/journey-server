@@ -130,7 +130,7 @@ namespace Blog.Repository
             existingBlog.Title = blog.Title;
             existingBlog.Content = blog.Content;
             existingBlog.Region = blog.Region;
-            existingBlog.Thumnail = blog.Thumnail;
+            existingBlog.Thumbnail = blog.Thumbnail;
             existingBlog.UpdateAt = DateTime.UtcNow;
 
             await _context.SaveChangesAsync();

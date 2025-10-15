@@ -22,7 +22,7 @@ namespace Blog.Data
                 entity.Property(e => e.Title).IsRequired().HasMaxLength(500);
                 entity.Property(e => e.Content).IsRequired(); // Content sẽ chứa HTML
                 entity.Property(e => e.Region).IsRequired().HasMaxLength(100);
-                entity.Property(e => e.Thumnail).HasMaxLength(1000);
+                entity.Property(e => e.Thumbnail).HasMaxLength(1000);
 
                 // Index for better performance
                 entity.HasIndex(e => e.Region);

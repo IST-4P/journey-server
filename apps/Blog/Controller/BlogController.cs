@@ -6,7 +6,7 @@ using Microsoft.AspNetCore.Mvc;
 namespace Blog.Controller
 {
     [ApiController]
-    [Route("api/[controller]")]
+    [Route("api/blog")] // Updated route to use 'api/blog'
     public class BlogController : ControllerBase
     {
         private readonly IBlogRepository _blogRepository;

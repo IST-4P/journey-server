@@ -51,3 +51,4 @@ obj/
 *.vs/
 *.vscode/
 *.DS_Store
+Migrations/

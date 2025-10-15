@@ -1,7 +1,9 @@
+import { MessageResponseType } from '@hacmieu-journey/nestjs';
 import { Controller } from '@nestjs/common';
 import { GrpcMethod } from '@nestjs/microservices';
 import {
   CreateAddressRequestType,
+  DeleteAddressRequestType,
   GetAddressRequestType,
   GetAddressResponseType,
   GetManyAddressRequestType,
@@ -37,5 +39,10 @@ export class AddressGrpcController {
     data: UpdateAddressRequestType
   ): Promise<GetAddressResponseType> {
     return this.addressService.updateAddress(data);
+  }
+
+  @GrpcMethod('UserService', 'DeleteAddress')
+  deleteAddress(data: DeleteAddressRequestType): Promise<MessageResponseType> {
+    return this.addressService.deleteAddress(data);
   }
 }

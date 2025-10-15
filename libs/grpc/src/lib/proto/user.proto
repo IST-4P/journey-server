@@ -4,6 +4,7 @@ package user;
 
 service UserService {
   rpc GetProfile(GetProfileRequest) returns (GetProfileResponse);
+  rpc FindAllProfiles(FindAllProfilesRequest) returns (FindAllProfilesResponse);
   rpc UpdateProfile(UpdateProfileRequest) returns (GetProfileResponse);
 
   rpc GetDriverLicense(GetDriverLicenseRequest) returns (GetDriverLicenseResponse);
@@ -18,6 +19,7 @@ service UserService {
   rpc GetManyAddress(GetManyAddressRequest) returns (GetManyAddressResponse);
   rpc CreateAddress(CreateAddressRequest) returns (GetAddressResponse);
   rpc UpdateAddress(UpdateAddressRequest) returns (GetAddressResponse);
+  rpc DeleteAddress(DeleteAddressRequest) returns (DeleteAddressResponse);
 }
 
 // GetProfile
@@ -42,6 +44,24 @@ message GetProfileResponse {
   optional GetDriverLicenseResponse driverLicense = 14;
   optional GetBankAccountResponse bankAccount = 15;
   repeated GetAddressResponse addresses = 16;
+}
+
+// FindAllProfiles
+message FindAllProfilesRequest {
+  optional string fullName = 1;
+  optional string email = 2;
+  optional string phone = 3;
+  optional string role = 4;
+  int32 page = 5;
+  int32 limit = 6;
+}
+
+message FindAllProfilesResponse {
+  repeated GetProfileResponse profiles = 1;
+  int32 totalItems = 2;
+  int32 page = 3;
+  int32 limit = 4;
+  int32 totalPages = 5;
 }
 
 // UpdateProfile
@@ -195,4 +215,14 @@ message UpdateAddressRequest {
   optional string detail = 6;
   optional int32 latitude = 7;
   optional int32 longitude = 8;
+}
+
+// DeleteAddress
+message DeleteAddressRequest {
+  string id = 1;
+  string userId = 2;
+}
+
+message DeleteAddressResponse {
+  string message = 1;
 }

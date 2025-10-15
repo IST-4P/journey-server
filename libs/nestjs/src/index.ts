@@ -1,4 +1,7 @@
 export * from './lib/init';
+
+// Models
+export * from './lib/responses/pagination.model';
 export * from './lib/responses/response.model';
 
 // Auth Module & Guards

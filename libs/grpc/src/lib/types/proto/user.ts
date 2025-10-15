@@ -34,6 +34,24 @@ export interface GetProfileResponse {
   addresses: GetAddressResponse[];
 }
 
+/** FindAllProfiles */
+export interface FindAllProfilesRequest {
+  fullName?: string | undefined;
+  email?: string | undefined;
+  phone?: string | undefined;
+  role?: string | undefined;
+  page: number;
+  limit: number;
+}
+
+export interface FindAllProfilesResponse {
+  profiles: GetProfileResponse[];
+  totalItems: number;
+  page: number;
+  limit: number;
+  totalPages: number;
+}
+
 /** UpdateProfile */
 export interface UpdateProfileRequest {
   userId: string;
@@ -187,10 +205,22 @@ export interface UpdateAddressRequest {
   longitude?: number | undefined;
 }
 
+/** DeleteAddress */
+export interface DeleteAddressRequest {
+  id: string;
+  userId: string;
+}
+
+export interface DeleteAddressResponse {
+  message: string;
+}
+
 export const USER_PACKAGE_NAME = "user";
 
 export interface UserServiceClient {
   getProfile(request: GetProfileRequest): Observable<GetProfileResponse>;
+
+  findAllProfiles(request: FindAllProfilesRequest): Observable<FindAllProfilesResponse>;
 
   updateProfile(request: UpdateProfileRequest): Observable<GetProfileResponse>;
 
@@ -213,12 +243,18 @@ export interface UserServiceClient {
   createAddress(request: CreateAddressRequest): Observable<GetAddressResponse>;
 
   updateAddress(request: UpdateAddressRequest): Observable<GetAddressResponse>;
+
+  deleteAddress(request: DeleteAddressRequest): Observable<DeleteAddressResponse>;
 }
 
 export interface UserServiceController {
   getProfile(
     request: GetProfileRequest,
   ): Promise<GetProfileResponse> | Observable<GetProfileResponse> | GetProfileResponse;
+
+  findAllProfiles(
+    request: FindAllProfilesRequest,
+  ): Promise<FindAllProfilesResponse> | Observable<FindAllProfilesResponse> | FindAllProfilesResponse;
 
   updateProfile(
     request: UpdateProfileRequest,
@@ -263,12 +299,17 @@ export interface UserServiceController {
   updateAddress(
     request: UpdateAddressRequest,
   ): Promise<GetAddressResponse> | Observable<GetAddressResponse> | GetAddressResponse;
+
+  deleteAddress(
+    request: DeleteAddressRequest,
+  ): Promise<DeleteAddressResponse> | Observable<DeleteAddressResponse> | DeleteAddressResponse;
 }
 
 export function UserServiceControllerMethods() {
   return function (constructor: Function) {
     const grpcMethods: string[] = [
       "getProfile",
+      "findAllProfiles",
       "updateProfile",
       "getDriverLicense",
       "createDriverLicense",
@@ -280,6 +321,7 @@ export function UserServiceControllerMethods() {
       "getManyAddress",
       "createAddress",
       "updateAddress",
+      "deleteAddress",
     ];
     for (const method of grpcMethods) {
       const descriptor: any = Reflect.getOwnPropertyDescriptor(constructor.prototype, method);

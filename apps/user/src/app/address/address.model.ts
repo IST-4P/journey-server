@@ -42,6 +42,11 @@ export const UpdateAddressRequestSchema =
     userId: z.string(),
   });
 
+export const DeleteAddressRequestSchema = AddressSchema.pick({
+  id: true,
+  userId: true,
+});
+
 export type GetAddressRequestType = z.infer<typeof GetAddressRequestSchema>;
 export type GetManyAddressRequestType = z.infer<
   typeof GetManyAddressRequestSchema
@@ -52,4 +57,7 @@ export type UpdateAddressRequestType = z.infer<
 >;
 export type CreateAddressRequestType = z.infer<
   typeof CreateAddressRequestSchema
+>;
+export type DeleteAddressRequestType = z.infer<
+  typeof DeleteAddressRequestSchema
 >;

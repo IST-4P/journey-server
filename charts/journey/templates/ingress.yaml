@@ -11,10 +11,10 @@ spec:
   ingressClassName: nginx
   tls:
   - hosts:
-    - {{ .Values.ingress.host }}
+    - {{ .Values.ingress.api.host }}
     secretName: api-tls-secret
   rules:
-  - host: {{ .Values.ingress.host }}
+  - host: {{ .Values.ingress.api.host }}
     http:
       paths:
       - path: /
@@ -24,4 +24,30 @@ spec:
             name: api
             port:
               number: {{ .Values.api.port.http }}
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: admin-ingress
+  namespace: journey
+  annotations:
+    cert-manager.io/cluster-issuer: "letsencrypt-prod"
+    nginx.ingress.kubernetes.io/ssl-redirect: "true"
+spec:
+  ingressClassName: nginx
+  tls:
+  - hosts:
+    - {{ .Values.ingress.admin.host }}
+    secretName: admin-tls-secret
+  rules:
+  - host: {{ .Values.ingress.admin.host }}
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: admin
+            port:
+              number: {{ .Values.admin.port.http }}
 {{- end }}

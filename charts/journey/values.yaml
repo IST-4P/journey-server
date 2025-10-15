@@ -46,6 +46,13 @@ api:
   port:
     http: 3000
 
+admin:
+  enabled: true
+  replicas: 1
+  image: 'caophi562005/journey-admin:latest'
+  port:
+    http: 3100
+
 auth:
   enabled: true
   replicas: 1
@@ -91,5 +98,8 @@ secrets:
 # Ingress configuration
 ingress:
   enabled: true
-  host: 'journey-api.hacmieu.xyz'
+  api:
+    host: 'journey-api.hacmieu.xyz'
+  admin:
+    host: 'journey-admin.hacmieu.xyz'
   email: 'caophi565caophi@gmail.com'

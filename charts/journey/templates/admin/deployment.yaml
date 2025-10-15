@@ -1,0 +1,32 @@
+{{- if .Values.admin.enabled }}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: admin
+  labels:
+    app: admin
+spec:
+  replicas: {{ .Values.admin.replicas }}
+  selector:
+    matchLabels:
+      app: admin
+  template:
+    metadata:
+      labels:
+        app: admin
+    spec:
+      containers:
+        - name: admin
+          image: {{ .Values.admin.image }}
+          imagePullPolicy: {{ .Values.global.imagePullPolicy }}
+          ports:
+            - containerPort: {{ .Values.admin.port.http }}
+          env:
+            - name: PORT
+              value: {{ .Values.admin.port.http | quote }}
+          envFrom:
+            - configMapRef:
+                name: journey-config
+            - secretRef:
+                name: journey-secrets
+{{- end }}

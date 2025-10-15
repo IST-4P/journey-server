@@ -16,13 +16,7 @@ export class AddressRepository {
     });
   }
 
-  async findAddressById({
-    id,
-    userId,
-  }: {
-    id: Prisma.AddressWhereUniqueInput['id'];
-    userId: string;
-  }) {
+  async findAddressById({ id, userId }: Prisma.AddressWhereUniqueInput) {
     return this.prisma.address.findUnique({
       where: { id, userId },
     });
@@ -35,18 +29,18 @@ export class AddressRepository {
   }
 
   async updateAddress(
-    {
-      id,
-      userId,
-    }: {
-      id: Prisma.AddressWhereUniqueInput['id'];
-      userId: string;
-    },
+    { id, userId }: Prisma.AddressWhereUniqueInput,
     data: Prisma.AddressUpdateInput
   ) {
     return this.prisma.address.update({
       where: { id, userId },
       data,
+    });
+  }
+
+  async deleteAddress({ id, userId }: Prisma.AddressWhereUniqueInput) {
+    return this.prisma.address.delete({
+      where: { id, userId },
     });
   }
 }

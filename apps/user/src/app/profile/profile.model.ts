@@ -1,3 +1,4 @@
+import { PaginationQuerySchema } from '@hacmieu-journey/nestjs';
 import { z } from 'zod';
 
 // ==================== ENUMS ====================
@@ -12,7 +13,7 @@ export type RoleEnumType = z.infer<typeof RoleEnum>;
 
 export const ProfileSchema = z.object({
   id: z.string(),
-  email: z.string().email(),
+  email: z.email(),
   fullName: z.string(),
   phone: z.string(),
   role: RoleEnum,
@@ -47,8 +48,31 @@ export const UpdateProfileRequestSchema = ProfileSchema.pick({
     userId: z.string(),
   });
 
+export const GetAllProfilesRequestSchema = ProfileSchema.pick({
+  fullName: true,
+  email: true,
+  phone: true,
+  role: true,
+})
+  .partial()
+  .extend(PaginationQuerySchema.shape);
+
+export const GetAllProfilesResponseSchema = z.object({
+  profiles: z.array(ProfileSchema),
+  totalItems: z.number().int(),
+  page: z.number().int(),
+  limit: z.number().int(),
+  totalPages: z.number().int(),
+});
+
 export type GetProfileRequestType = z.infer<typeof GetProfileRequestSchema>;
 export type GetProfileResponseType = z.infer<typeof GetProfileResponseSchema>;
+export type GetAllProfilesRequestType = z.infer<
+  typeof GetAllProfilesRequestSchema
+>;
+export type GetAllProfilesResponseType = z.infer<
+  typeof GetAllProfilesResponseSchema
+>;
 export type UpdateProfileRequestType = z.infer<
   typeof UpdateProfileRequestSchema
 >;

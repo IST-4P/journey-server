@@ -60,6 +60,8 @@ jobs:
         service:
           - name: api
             dockerfile: apps/api/Dockerfile
+          - name: admin
+            dockerfile: apps/admin/Dockerfile
           - name: auth
             dockerfile: apps/auth/Dockerfile
           - name: notification
@@ -138,10 +140,12 @@ jobs:
             -f secrets.production.yaml \
             --namespace journey \
             --set api.enabled=true \
+            --set admin.enabled=true \
             --set auth.enabled=true \
             --set user.enabled=true \
             --set notification.enabled=true \
             --set api.image=${{ secrets.DOCKERHUB_USERNAME }}/journey-api:${{ steps.tag.outputs.TAG }} \
+            --set admin.image=${{ secrets.DOCKERHUB_USERNAME }}/journey-admin:${{ steps.tag.outputs.TAG }} \
             --set auth.image=${{ secrets.DOCKERHUB_USERNAME }}/journey-auth:${{ steps.tag.outputs.TAG }} \
             --set notification.image=${{ secrets.DOCKERHUB_USERNAME }}/journey-notification:${{ steps.tag.outputs.TAG }} \
             --set user.image=${{ secrets.DOCKERHUB_USERNAME }}/journey-user:${{ steps.tag.outputs.TAG }} \
@@ -152,6 +156,7 @@ jobs:
         run: |
           kubectl get pods -n journey
           kubectl rollout status deployment/api -n journey --timeout=3m
+          kubectl rollout status deployment/admin -n journey --timeout=3m
           kubectl rollout status deployment/auth -n journey --timeout=3m
           kubectl rollout status deployment/notification -n journey --timeout=3m
           kubectl rollout status deployment/user -n journey --timeout=3m

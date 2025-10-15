@@ -2,6 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { AddressNotFoundException } from './address.error';
 import {
   CreateAddressRequestType,
+  DeleteAddressRequestType,
   GetAddressRequestType,
   GetManyAddressRequestType,
   UpdateAddressRequestType,
@@ -38,5 +39,14 @@ export class AddressService {
       throw AddressNotFoundException;
     }
     return this.addressRepo.updateAddress({ id, userId: userId! }, data);
+  }
+
+  async deleteAddress(data: DeleteAddressRequestType) {
+    const result = await this.addressRepo.findAddressById(data);
+    if (!result) {
+      throw AddressNotFoundException;
+    }
+    await this.addressRepo.deleteAddress(data);
+    return { message: 'Message.AddressDeleteSuccessfully' };
   }
 }

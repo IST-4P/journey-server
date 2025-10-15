@@ -1,6 +1,7 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { ProfileNotFoundException } from './profile.error';
 import {
+  GetAllProfilesRequestType,
   GetProfileRequestType,
   RoleEnumType,
   UpdateProfileRequestType,
@@ -24,9 +25,9 @@ export class ProfileService {
 
   async createProfileFromAuthEvent(event: UserRegisteredEvent) {
     try {
-      const existingProfile = await this.profileRepo.findProfileById({
-        id: event.userId,
-      });
+      const existingProfile = await this.profileRepo.findProfileById(
+        event.userId
+      );
 
       if (existingProfile) {
         this.logger.warn(
@@ -54,14 +55,16 @@ export class ProfileService {
   }
 
   async getProfile(data: GetProfileRequestType) {
-    const result = await this.profileRepo.findProfileById({
-      id: data.userId,
-    });
+    const result = await this.profileRepo.findProfileById(data.userId);
 
     if (!result) {
       throw ProfileNotFoundException;
     }
     return result;
+  }
+
+  async findAllProfiles(query: GetAllProfilesRequestType) {
+    return this.profileRepo.findAllProfiles(query);
   }
 
   async updateProfile({ userId, ...data }: UpdateProfileRequestType) {

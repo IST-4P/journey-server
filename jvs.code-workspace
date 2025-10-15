@@ -1,0 +1,12 @@
+{
+    "folders": [
+        {
+            "path": "."
+        },
+        {
+            "name": "Admin",
+            "path": "apps/Admin"
+        }
+    ],
+    "settings": {}
+}

@@ -2,6 +2,7 @@ using AutoMapper;
 using Blog.Models;
 using Blog.Repository;
 using Microsoft.AspNetCore.Mvc;
+using System.Linq;
 
 namespace Blog.Controller
 {
@@ -23,57 +24,38 @@ namespace Blog.Controller
         {
             try
             {
+                // Nếu không có filter hoặc không có search term, lấy tất cả blogs với pagination
                 if (filter == null)
                 {
-                    var blogs = await _blogRepository.GetBlogsAsync();
-                    var blogDtos = _mapper.Map<List<BlogDto>>(blogs);
-                    return Ok(blogDtos);
+                    filter = new BlogFilterDto(); // Sử dụng default values
                 }
-                else
-                {
-                    var pagedResult = await _blogRepository.GetBlogsWithFilterAsync(filter);
-                    var blogDtos = _mapper.Map<List<BlogDto>>(pagedResult.Items);
 
-                    var result = new PagedResult<BlogDto>
-                    {
-                        Items = blogDtos,
-                        TotalCount = pagedResult.TotalCount,
-                        Page = pagedResult.Page,
-                        PageSize = pagedResult.PageSize
-                    };
-
-                    return Ok(result);
-                }
-            }
-            catch (Exception ex)
-            {
-                return StatusCode(500, $"Internal server error: {ex.Message}");
-            }
-        }
-
-        [HttpGet("search")]
-        public async Task<IActionResult> SearchBlogs([FromQuery] BlogFilterDto filter)
-        {
-            try
-            {
                 var pagedResult = await _blogRepository.GetBlogsWithFilterAsync(filter);
                 var blogDtos = _mapper.Map<List<BlogDto>>(pagedResult.Items);
 
-                var result = new PagedResult<BlogDto>
+                var result = new BlogListResponse
                 {
-                    Items = blogDtos,
-                    TotalCount = pagedResult.TotalCount,
+                    Blogs = blogDtos,
                     Page = pagedResult.Page,
-                    PageSize = pagedResult.PageSize
+                    Limit = pagedResult.PageSize,
+                    TotalItems = pagedResult.TotalCount,
+                    TotalPages = pagedResult.TotalPages
                 };
 
                 return Ok(result);
             }
             catch (Exception ex)
             {
-                return StatusCode(500, $"Internal server error: {ex.Message}");
+                var errorResponse = new ApiErrorResponse
+                {
+                    Message = $"Error.Internal: {ex.Message}",
+                    StatusCode = 500
+                };
+                return StatusCode(500, errorResponse);
             }
         }
+
+
 
         [HttpGet("{id:guid}")]
         public async Task<IActionResult> GetBlogById(Guid id)
@@ -83,7 +65,12 @@ namespace Blog.Controller
                 var blog = await _blogRepository.GetBlogByIdAsync(id);
                 if (blog == null)
                 {
-                    return NotFound($"Blog with ID {id} not found");
+                    var errorResponse = new ApiErrorResponse
+                    {
+                        Message = "Error.NotFound",
+                        StatusCode = 404
+                    };
+                    return NotFound(errorResponse);
                 }
 
                 var blogDto = _mapper.Map<BlogDto>(blog);
@@ -91,7 +78,12 @@ namespace Blog.Controller
             }
             catch (Exception ex)
             {
-                return StatusCode(500, $"Internal server error: {ex.Message}");
+                var errorResponse = new ApiErrorResponse
+                {
+                    Message = $"Error.Internal: {ex.Message}",
+                    StatusCode = 500
+                };
+                return StatusCode(500, errorResponse);
             }
         }
 
@@ -102,7 +94,16 @@ namespace Blog.Controller
             {
                 if (!ModelState.IsValid)
                 {
-                    return BadRequest(ModelState);
+                    var errors = string.Join(", ", ModelState.Values
+                        .SelectMany(v => v.Errors)
+                        .Select(e => e.ErrorMessage));
+
+                    var errorResponse = new ApiErrorResponse
+                    {
+                        Message = $"Error.Validation: {errors}",
+                        StatusCode = 400
+                    };
+                    return BadRequest(errorResponse);
                 }
 
                 var blog = _mapper.Map<Models.Blog>(addBlogRequest);
@@ -113,39 +114,16 @@ namespace Blog.Controller
             }
             catch (Exception ex)
             {
-                return StatusCode(500, $"Internal server error: {ex.Message}");
-            }
-        }
-
-        [HttpPost("html")]
-        public async Task<IActionResult> AddBlogWithHtml([FromForm] string title, [FromForm] string content, [FromForm] string region, [FromForm] string thumbnail)
-        {
-            try
-            {
-                var addBlogRequest = new AddBlogRequestDto
+                var errorResponse = new ApiErrorResponse
                 {
-                    Title = title,
-                    Content = content,
-                    Region = region,
-                    Thumbnail = thumbnail
+                    Message = $"Error.Internal: {ex.Message}",
+                    StatusCode = 500
                 };
-
-                if (!ModelState.IsValid)
-                {
-                    return BadRequest(ModelState);
-                }
-
-                var blog = _mapper.Map<Models.Blog>(addBlogRequest);
-                var createdBlog = await _blogRepository.AddBlogAsync(blog);
-                var blogDto = _mapper.Map<BlogDto>(createdBlog);
-
-                return CreatedAtAction(nameof(GetBlogById), new { id = blogDto.Id }, blogDto);
-            }
-            catch (Exception ex)
-            {
-                return StatusCode(500, $"Internal server error: {ex.Message}");
+                return StatusCode(500, errorResponse);
             }
         }
+
+
 
         [HttpPut("{id:guid}")]
         public async Task<IActionResult> UpdateBlog(Guid id, [FromBody] UpdateBlogRequetsDto updateBlogRequest)
@@ -154,7 +132,16 @@ namespace Blog.Controller
             {
                 if (!ModelState.IsValid)
                 {
-                    return BadRequest(ModelState);
+                    var errors = string.Join(", ", ModelState.Values
+                        .SelectMany(v => v.Errors)
+                        .Select(e => e.ErrorMessage));
+
+                    var errorResponse = new ApiErrorResponse
+                    {
+                        Message = $"Error.Validation: {errors}",
+                        StatusCode = 400
+                    };
+                    return BadRequest(errorResponse);
                 }
 
                 var blog = _mapper.Map<Models.Blog>(updateBlogRequest);
@@ -162,7 +149,12 @@ namespace Blog.Controller
 
                 if (updatedBlog == null)
                 {
-                    return NotFound($"Blog with ID {id} not found");
+                    var errorResponse = new ApiErrorResponse
+                    {
+                        Message = "Error.NotFound",
+                        StatusCode = 404
+                    };
+                    return NotFound(errorResponse);
                 }
 
                 var blogDto = _mapper.Map<BlogDto>(updatedBlog);
@@ -170,7 +162,12 @@ namespace Blog.Controller
             }
             catch (Exception ex)
             {
-                return StatusCode(500, $"Internal server error: {ex.Message}");
+                var errorResponse = new ApiErrorResponse
+                {
+                    Message = $"Error.Internal: {ex.Message}",
+                    StatusCode = 500
+                };
+                return StatusCode(500, errorResponse);
             }
         }
 
@@ -182,14 +179,28 @@ namespace Blog.Controller
                 var result = await _blogRepository.DeleteBlogAsync(id);
                 if (!result)
                 {
-                    return NotFound($"Blog with ID {id} not found");
+                    var errorResponse = new ApiErrorResponse
+                    {
+                        Message = "Error.NotFound",
+                        StatusCode = 404
+                    };
+                    return NotFound(errorResponse);
                 }
 
-                return NoContent();
+                var successResponse = new ApiResponse
+                {
+                    Message = "Message.DeleteSuccessfully"
+                };
+                return Ok(successResponse);
             }
             catch (Exception ex)
             {
-                return StatusCode(500, $"Internal server error: {ex.Message}");
+                var errorResponse = new ApiErrorResponse
+                {
+                    Message = $"Error.Internal: {ex.Message}",
+                    StatusCode = 500
+                };
+                return StatusCode(500, errorResponse);
             }
         }
     }

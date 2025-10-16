@@ -94,6 +94,7 @@ secrets:
   accessTokenSecret: ''
   refreshTokenSecret: ''
   resendApiKey: ''
+  redisUrl: ''
 
 # Ingress configuration
 ingress:

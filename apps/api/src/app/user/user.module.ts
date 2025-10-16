@@ -33,6 +33,5 @@ import { UserService } from './user.service';
       useExisting: UserService,
     },
   ],
-  exports: [UserService],
 })
 export class UserModule {}

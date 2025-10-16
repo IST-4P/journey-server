@@ -2,6 +2,7 @@ import { AuthGuardModule } from '@hacmieu-journey/nestjs';
 import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { AuthModule } from './auth/auth.module';
+import { NotificationModule } from './notification/notification.module';
 import { UserModule } from './user/user.module';
 
 @Module({
@@ -10,6 +11,7 @@ import { UserModule } from './user/user.module';
     AuthGuardModule,
     AuthModule,
     UserModule,
+    NotificationModule,
   ],
   providers: [],
 })

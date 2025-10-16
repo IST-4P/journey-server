@@ -18,5 +18,6 @@ services:
       sleep 15 &&
       bin/pulsar-admin tenants create journey --allowed-clusters standalone || true &&
       bin/pulsar-admin namespaces create journey/events || true &&
+      bin/pulsar-admin namespaces create journey/notifications || true &&
       wait $$PULSAR_PID
       "

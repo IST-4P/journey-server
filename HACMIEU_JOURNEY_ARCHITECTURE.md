@@ -378,7 +378,7 @@
 
 **APIs (gRPC)**:
 
-- `GetNotifications(userId, pagination)` → Notification[]
+- `GetManyNotifications(userId, pagination)` → Notification[]
 - `MarkAsRead(notificationId)` → Success
 - `MarkAllAsRead(userId)` → Success
 

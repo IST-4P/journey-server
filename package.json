@@ -20,6 +20,7 @@
     "@nestjs/platform-socket.io": "^11.1.6",
     "@nestjs/websockets": "^11.1.6",
     "@prisma/client": "^6.17.1",
+    "@socket.io/redis-adapter": "^8.3.0",
     "axios": "^1.6.0",
     "bcrypt": "^6.0.0",
     "cookie": "^1.0.2",
@@ -30,11 +31,13 @@
     "passport": "^0.7.0",
     "passport-jwt": "^4.0.1",
     "pulsar-client": "^1.14.0",
+    "redis": "^5.8.3",
     "reflect-metadata": "^0.1.13",
     "resend": "^6.1.2",
     "rxjs": "^7.8.0",
     "socket.io": "^4.8.1",
-    "ts-proto": "^2.7.7"
+    "ts-proto": "^2.7.7",
+    "uuid": "^13.0.0"
   },
   "devDependencies": {
     "@eslint/js": "^9.8.0",

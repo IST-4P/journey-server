@@ -167,12 +167,12 @@ export class AuthService {
           password: hashedPassword,
           role: 'USER',
         }),
-        // this.authRepository.deleteVerificationCode({
-        //   email_type: {
-        //     email: body.email,
-        //     type: TypeOfVerificationCode.REGISTER,
-        //   },
-        // }),
+        this.authRepository.deleteVerificationCode({
+          email_type: {
+            email: body.email,
+            type: TypeOfVerificationCode.REGISTER,
+          },
+        }),
       ]);
 
       // Tạo profile trong User Service qua Pulsar

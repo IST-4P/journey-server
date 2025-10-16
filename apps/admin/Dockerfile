@@ -12,6 +12,7 @@ COPY webpack.*.config.js ./
 COPY apps/admin ./apps/admin
 COPY libs/grpc ./libs/grpc
 COPY libs/nestjs ./libs/nestjs
+COPY libs/pulsar ./libs/pulsar
 
 RUN npm install
 

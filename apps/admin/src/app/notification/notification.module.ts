@@ -1,6 +1,5 @@
 import { NotificationProto } from '@hacmieu-journey/grpc';
 import { PulsarModule } from '@hacmieu-journey/pulsar';
-import { WebSocketModule } from '@hacmieu-journey/websocket';
 import { Module } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { ClientsModule, Transport } from '@nestjs/microservices';
@@ -10,7 +9,6 @@ import { NotificationService } from './notification.service';
 
 @Module({
   imports: [
-    WebSocketModule,
     PulsarModule,
     ClientsModule.registerAsync([
       {

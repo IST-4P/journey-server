@@ -1,0 +1,11 @@
+{
+  "name": "charts",
+  "targets": {
+    "encode": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "powershell -Command \"[Convert]::ToBase64String([System.IO.File]::ReadAllBytes('charts/journey/secrets.local.yaml')) | Out-File charts/journey/secrets.product.yaml -NoNewline\""
+      }
+    }
+  }
+}

@@ -5,17 +5,21 @@ using Microsoft.OpenApi.Models;
 using System.Text.Encodings.Web;
 using System.Text.Json;
 
+// Load .env file if exists
+DotNetEnv.Env.Load();
+
 var builder = WebApplication.CreateBuilder(args);
 
 // Đọc connection string từ appsettings.json
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
 
-// Thay ${DB_PASSWORD} bằng giá trị thật từ môi trường
-var dbPassword = Environment.GetEnvironmentVariable("DB_PASSWORD");
-if (!string.IsNullOrEmpty(dbPassword))
-{
-    connectionString = connectionString.Replace("${DB_PASSWORD}", dbPassword);
-}
+// Thay thế các biến môi trường trong connection string
+connectionString = connectionString
+    .Replace("${DB_HOST}", Environment.GetEnvironmentVariable("DB_HOST") ?? "localhost")
+    .Replace("${DB_PORT}", Environment.GetEnvironmentVariable("DB_PORT") ?? "5432")
+    .Replace("${DB_NAME}", Environment.GetEnvironmentVariable("DB_NAME") ?? "journey-blog")
+    .Replace("${DB_USERNAME}", Environment.GetEnvironmentVariable("DB_USERNAME") ?? "postgres")
+    .Replace("${DB_PASSWORD}", Environment.GetEnvironmentVariable("DB_PASSWORD") ?? "");
 
 builder.Services.AddControllers()
     .AddJsonOptions(options =>

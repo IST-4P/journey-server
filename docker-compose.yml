@@ -1,4 +1,22 @@
 services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: postgres-db
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_DB: journey-blog
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: password123
+      POSTGRES_HOST_AUTH_METHOD: md5
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U postgres" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
   pulsar:
     image: apachepulsar/pulsar
     container_name: pulsar
@@ -8,15 +26,7 @@ services:
     environment:
       - PULSAR_MEM=-Xms512m -Xmx512m -XX:MaxDirectMemorySize=1g
     command: >
-      sh -c "
-      bin/apply-config-from-env.py conf/standalone.conf &&
-      echo 'allowAutoTopicCreation=true' >> conf/standalone.conf &&
-      echo 'allowAutoTopicCreationType=partitioned' >> conf/standalone.conf &&
-      echo 'defaultNumPartitions=3' >> conf/standalone.conf &&
-      bin/pulsar standalone &
-      PULSAR_PID=$$! &&
-      sleep 15 &&
-      bin/pulsar-admin tenants create journey --allowed-clusters standalone || true &&
-      bin/pulsar-admin namespaces create journey/events || true &&
-      wait $$PULSAR_PID
-      "
+      sh -c " bin/apply-config-from-env.py conf/standalone.conf && echo 'allowAutoTopicCreation=true' >> conf/standalone.conf && echo 'allowAutoTopicCreationType=partitioned' >> conf/standalone.conf && echo 'defaultNumPartitions=3' >> conf/standalone.conf && bin/pulsar standalone & PULSAR_PID=$$! && sleep 15 && bin/pulsar-admin tenants create journey --allowed-clusters standalone || true && bin/pulsar-admin namespaces create journey/events || true && wait $$PULSAR_PID "
+
+volumes:
+  postgres_data:

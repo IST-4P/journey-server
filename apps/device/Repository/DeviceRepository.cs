@@ -1,6 +1,7 @@
 using device.Data;
 using device.Interface;
 using device.Model.Entities;
+using device.Model.Dto;
 using Microsoft.EntityFrameworkCore;
 
 namespace device.Repository
@@ -13,17 +14,87 @@ namespace device.Repository
             _dbContext = dbContext;
         }
 
-        public async Task<List<Device>> GetDevicesAsync()
+        private static IQueryable<Device> ApplyFilter(IQueryable<Device> queryable, DeviceQuery query)
         {
-            return await _dbContext.Devices
-                .Include(x => x.Category)
-                .ToListAsync();
+            if (!string.IsNullOrWhiteSpace(query.Search))
+            {
+                var search = query.Search.Trim().ToLower();
+                queryable = queryable.Where(d =>
+                    (d.Name != null && d.Name.ToLower().Contains(search)) ||
+                    (d.Description != null && d.Description.ToLower().Contains(search)));
+            }
+            if (query.CategoryId.HasValue)
+            {
+                queryable = queryable.Where(d => d.CategoryId == query.CategoryId.Value);
+            }
+            if (!string.IsNullOrWhiteSpace(query.Status))
+            {
+                queryable = queryable.Where(d => d.Status == query.Status);
+            }
+            if (query.MinPrice.HasValue)
+            {
+                queryable = queryable.Where(d => d.Price >= query.MinPrice.Value);
+            }
+            if (query.MaxPrice.HasValue)
+            {
+                queryable = queryable.Where(d => d.Price <= query.MaxPrice.Value);
+            }
+            return queryable;
+        }
+
+        private static IQueryable<Device> ApplySort(IQueryable<Device> queryable, DeviceQuery query)
+        {
+            var sortBy = (query.SortBy ?? "createAt").ToLower();
+            var desc = string.Equals(query.SortDir, "desc", StringComparison.OrdinalIgnoreCase);
+            return sortBy switch
+            {
+                "name" => desc ? queryable.OrderByDescending(d => d.Name) : queryable.OrderBy(d => d.Name),
+                "price" => desc ? queryable.OrderByDescending(d => d.Price) : queryable.OrderBy(d => d.Price),
+                "updateat" => desc ? queryable.OrderByDescending(d => d.UpdateAt) : queryable.OrderBy(d => d.UpdateAt),
+                _ => desc ? queryable.OrderByDescending(d => d.CreateAt) : queryable.OrderBy(d => d.CreateAt),
+            };
+        }
+
+        private static PagedResult<Device> ToPaged<T>(IQueryable<Device> source, DeviceQuery query, long totalCount)
+        {
+            var page = query.Page <= 0 ? 1 : query.Page;
+            var pageSize = query.PageSize <= 0 ? 10 : query.PageSize;
+            var totalPages = (int)Math.Ceiling(totalCount / (double)pageSize);
+            return new PagedResult<Device>
+            {
+                Page = page,
+                PageSize = pageSize,
+                TotalPages = totalPages,
+                TotalCount = totalCount,
+                Items = source.Skip((page - 1) * pageSize).Take(pageSize).ToList(),
+            };
+        }
+
+        public async Task<PagedResult<Device>> GetDevicesAsync(DeviceQuery query)
+        {
+            var q = _dbContext.Devices.Include(x => x.Category).AsQueryable();
+            q = ApplyFilter(q, query);
+            var total = await q.LongCountAsync();
+            q = ApplySort(q, query);
+            var page = query.Page <= 0 ? 1 : query.Page;
+            var pageSize = query.PageSize <= 0 ? 10 : query.PageSize;
+            var items = await q.Skip((page - 1) * pageSize).Take(pageSize).ToListAsync();
+            return new PagedResult<Device>
+            {
+                Page = page,
+                PageSize = pageSize,
+                TotalPages = (int)Math.Ceiling(total / (double)pageSize),
+                TotalCount = total,
+                Items = items
+            };
         }
 
         public async Task<Device?> GetDeviceByIdAsync(Guid id)
         {
             return await _dbContext.Devices
                 .Include(x => x.Category)
+                .Include(x => x.ComboDevices!) // for user combo projection when needed
+                    .ThenInclude(cd => cd.Combo)
                 .FirstOrDefaultAsync(x => x.Id == id);
         }
 
@@ -62,6 +133,32 @@ namespace device.Repository
             _dbContext.Devices.Remove(existing);
             await _dbContext.SaveChangesAsync();
             return true;
+        }
+
+        public async Task<PagedResult<Device>> GetAvailableDevicesAsync(DeviceQuery query)
+        {
+            // Force available status for user view
+            var q = _dbContext.Devices
+                .Include(x => x.Category)
+                .Include(x => x.ComboDevices!).ThenInclude(cd => cd.Combo)
+                .Where(d => d.Status == "available")
+                .AsQueryable();
+
+            q = ApplyFilter(q, query);
+            var total = await q.LongCountAsync();
+            q = ApplySort(q, query);
+            var page = query.Page <= 0 ? 1 : query.Page;
+            var pageSize = query.PageSize <= 0 ? 10 : query.PageSize;
+            var items = await q.Skip((page - 1) * pageSize).Take(pageSize).ToListAsync();
+
+            return new PagedResult<Device>
+            {
+                Page = page,
+                PageSize = pageSize,
+                TotalPages = (int)Math.Ceiling(total / (double)pageSize),
+                TotalCount = total,
+                Items = items
+            };
         }
     }
 }

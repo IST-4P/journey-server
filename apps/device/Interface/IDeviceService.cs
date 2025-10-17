@@ -11,13 +11,15 @@ namespace device.Interface
 {
     public interface IDeviceService
     {
-        Task<IEnumerable<DeviceDto>> GetDevicesAsync();
-        Task<DeviceDto?> GetDeviceByIdAsync(Guid id);
-        Task<DeviceDto> CreateDeviceAsync(DeviceCreateDto device);
-        Task<DeviceDto?> UpdateDeviceAsync(Guid id, DeviceUpdateDto dto);
+        // Admin
+        Task<PagedResult<AdminDeviceDto>> GetDevicesAsync(DeviceQuery query);
+        Task<AdminDeviceDto?> GetDeviceByIdAsync(Guid id);
+        Task<AdminDeviceDto> CreateDeviceAsync(AdminDeviceCreateDto device);
+        Task<AdminDeviceDto?> UpdateDeviceAsync(Guid id, AdminDeviceUpdateDto dto);
         Task<bool> DeleteDeviceAsync(Guid id);
-        Task<IEnumerable<UserDeviceDto>> GetDevicesForUserAsync();
-        Task<UserDeviceDto?> GetDeviceForUserByIdAsync(Guid id);
 
+        // User
+        Task<PagedResult<UserDeviceDto>> GetDevicesForUserAsync(DeviceQuery query);
+        Task<UserDeviceDto?> GetDeviceForUserByIdAsync(Guid id);
     }
 }

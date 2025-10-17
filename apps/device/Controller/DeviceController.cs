@@ -2,232 +2,104 @@ using Microsoft.AspNetCore.Mvc;
 using device.Interface;
 using device.Model.Dto;
 using device.Model.Entities;
+using Microsoft.AspNetCore.Authorization;
 
 namespace device.Controller
 {
+    [Authorize(Policy = "AdminOnly")]
     [ApiController]
-    [Route("api/[controller]")]
-    public class DeviceController : ControllerBase
+    [Route("api/admin/devices")]
+    public class AdminDevicesController : ControllerBase
     {
         private readonly IDeviceService service;
-        public DeviceController(IDeviceService service)
+        public AdminDevicesController(IDeviceService service)
         {
             this.service = service;
         }
 
         [HttpGet]
-        public async Task<IActionResult> GetAll()
+        public async Task<IActionResult> GetAll([FromQuery] DeviceQuery query)
         {
-            try
+            if (!ModelState.IsValid)
             {
-                if (!ModelState.IsValid)
-                {
-                    var errors = string.Join(", ", ModelState.Values
-                        .SelectMany(v => v.Errors)
-                        .Select(e => e.ErrorMessage));
-
-                    var errorResponse = new ApiErrorResponse
-                    {
-                        Message = $"Error.Validation: {errors}",
-                        StatusCode = 400
-                    };
-                    return BadRequest(errorResponse);
-                }
-                var device = await service.GetDevicesAsync();
-                return Ok(device);
+                var errors = string.Join(", ", ModelState.Values.SelectMany(v => v.Errors).Select(e => e.ErrorMessage));
+                return BadRequest(new ApiErrorResponse { Message = $"Error.Validation: {errors}", StatusCode = 400 });
             }
-            catch (Exception e)
-            {
-                var errorResponse = new ApiErrorResponse
-                {
-                    Message = $"Error.Internal: {e.Message}",
-                    StatusCode = 500
-                };
-                return StatusCode(500, errorResponse);
-            }
-
+            var result = await service.GetDevicesAsync(query);
+            return Ok(result);
         }
 
-        [HttpGet]
-        [Route("id:guid")]
+        [HttpGet("{id:guid}")]
         public async Task<IActionResult> GetById(Guid id)
         {
-            try
-            {
-                if (!ModelState.IsValid)
-                {
-                    var errors = string.Join(", ", ModelState.Values
-                        .SelectMany(v => v.Errors)
-                        .Select(e => e.ErrorMessage));
-
-                    var errorResponse = new ApiErrorResponse
-                    {
-                        Message = $"Error.Validation: {errors}",
-                        StatusCode = 400
-                    };
-                    return BadRequest(errorResponse);
-                }
-                var device = await service.GetDeviceByIdAsync(id);
-                if (device == null) return NotFound($"Device with ID{id} not found");
-                return Ok(device);
-            }
-            catch (Exception e)
-            {
-                var errorResponse = new ApiErrorResponse
-                {
-                    Message = $"Error.Internal: {e.Message}",
-                    StatusCode = 500
-                };
-                return StatusCode(500, errorResponse);
-            }
+            var device = await service.GetDeviceByIdAsync(id);
+            if (device == null) return NotFound($"Device with ID {id} not found");
+            return Ok(device);
         }
 
         [HttpPost]
-        public async Task<IActionResult> Create([FromBody] DeviceCreateDto dto)
+        public async Task<IActionResult> Create([FromBody] AdminDeviceCreateDto dto)
         {
-            try
+            if (!ModelState.IsValid)
             {
-                if (!ModelState.IsValid)
-                {
-                    var errors = string.Join(", ", ModelState.Values
-                        .SelectMany(v => v.Errors)
-                        .Select(e => e.ErrorMessage));
-
-                    var errorResponse = new ApiErrorResponse
-                    {
-                        Message = $"Error.Validation: {errors}",
-                        StatusCode = 400
-                    };
-                    return BadRequest(errorResponse);
-                }
-                var device = await service.CreateDeviceAsync(dto);
-                return CreatedAtAction(nameof(GetById), new { id = device }, device);
+                var errors = string.Join(", ", ModelState.Values.SelectMany(v => v.Errors).Select(e => e.ErrorMessage));
+                return BadRequest(new ApiErrorResponse { Message = $"Error.Validation: {errors}", StatusCode = 400 });
             }
-            catch (Exception e)
-            {
-                var errorResponse = new ApiErrorResponse
-                {
-                    Message = $"Error.Internal: {e.Message}",
-                    StatusCode = 500
-                };
-                return StatusCode(500, errorResponse);
-            }
+            var device = await service.CreateDeviceAsync(dto);
+            return CreatedAtAction(nameof(GetById), new { id = device.Id }, device);
         }
 
         [HttpPut("{id:guid}")]
-        public async Task<IActionResult> Update(Guid id, [FromBody] DeviceUpdateDto dto)
+        public async Task<IActionResult> Update(Guid id, [FromBody] AdminDeviceUpdateDto dto)
         {
-            try
+            if (!ModelState.IsValid)
             {
-                if (!ModelState.IsValid)
-                {
-                    var errors = string.Join(", ", ModelState.Values
-                        .SelectMany(v => v.Errors)
-                        .Select(e => e.ErrorMessage));
-
-                    var errorResponse = new ApiErrorResponse
-                    {
-                        Message = $"Error.Validation: {errors}",
-                        StatusCode = 400
-                    };
-                    return BadRequest(errorResponse);
-                }
-                var device = await service.UpdateDeviceAsync(id, dto);
-                if (device == null) return NotFound($"Device with ID{id} not found");
-                return Ok(device);
+                var errors = string.Join(", ", ModelState.Values.SelectMany(v => v.Errors).Select(e => e.ErrorMessage));
+                return BadRequest(new ApiErrorResponse { Message = $"Error.Validation: {errors}", StatusCode = 400 });
             }
-            catch (Exception e)
-            {
-                var errorResponse = new ApiErrorResponse
-                {
-                    Message = $"Error.Internal: {e.Message}",
-                    StatusCode = 500
-                };
-                return StatusCode(500, errorResponse);
-            }
+            var device = await service.UpdateDeviceAsync(id, dto);
+            if (device == null) return NotFound($"Device with ID {id} not found");
+            return Ok(device);
         }
 
         [HttpDelete("{id:guid}")]
         public async Task<IActionResult> Delete(Guid id)
         {
-            try
-            {
-                var success = await service.DeleteDeviceAsync(id);
-                if (!success)
-                    return NotFound($"Device with ID {id} not found");
-
-                return NoContent();
-            }
-            catch (Exception ex)
-            {
-                return StatusCode(500, "Internal server error: " + ex.Message);
-            }
+            var success = await service.DeleteDeviceAsync(id);
+            if (!success) return NotFound($"Device with ID {id} not found");
+            return NoContent();
         }
-
-        [HttpGet("user")]
-        public async Task<IActionResult> UserGetDeivce()
-        {
-            try
-            {
-                if (!ModelState.IsValid)
-                {
-                    var errors = string.Join(", ", ModelState.Values
-                        .SelectMany(v => v.Errors)
-                        .Select(e => e.ErrorMessage));
-
-                    var errorResponse = new ApiErrorResponse
-                    {
-                        Message = $"Error.Validation: {errors}",
-                        StatusCode = 400
-                    };
-                    return BadRequest(errorResponse);
-                }
-                var device = await service.GetDevicesForUserAsync();
-                return Ok(device);
-            }
-            catch (Exception e)
-            {
-                var errorResponse = new ApiErrorResponse
-                {
-                    Message = $"Error.Internal: {e.Message}",
-                    StatusCode = 500
-                };
-                return StatusCode(500, errorResponse);
-            }
-        }
-
-        [HttpGet("user/{id:guid}")]
-        public async Task<IActionResult> UserGetDeviceById(Guid id)
-        {
-            try
-            {
-                if (!ModelState.IsValid)
-                {
-                    var errors = string.Join(", ", ModelState.Values
-                        .SelectMany(v => v.Errors)
-                        .Select(e => e.ErrorMessage));
-
-                    var errorResponse = new ApiErrorResponse
-                    {
-                        Message = $"Error.Validation: {errors}",
-                        StatusCode = 400
-                    };
-                    return BadRequest(errorResponse);
-                }
-                var device = await service.GetDeviceForUserByIdAsync(id);
-                return Ok(device);
-            }
-            catch (Exception e)
-            {
-                var errorResponse = new ApiErrorResponse
-                {
-                    Message = $"Error.Internal: {e.Message}",
-                    StatusCode = 500
-                };
-                return StatusCode(500, errorResponse);
-            }
-        }
-
     }
 
+
+    [ApiController]
+    [Route("api/devices")]
+    public class UserDevicesController : ControllerBase
+    {
+        private readonly IDeviceService service;
+        public UserDevicesController(IDeviceService service)
+        {
+            this.service = service;
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> GetAll([FromQuery] DeviceQuery query)
+        {
+            if (!ModelState.IsValid)
+            {
+                var errors = string.Join(", ", ModelState.Values.SelectMany(v => v.Errors).Select(e => e.ErrorMessage));
+                return BadRequest(new ApiErrorResponse { Message = $"Error.Validation: {errors}", StatusCode = 400 });
+            }
+            var result = await service.GetDevicesForUserAsync(query);
+            return Ok(result);
+        }
+
+        [HttpGet("{id:guid}")]
+        public async Task<IActionResult> GetById(Guid id)
+        {
+            var device = await service.GetDeviceForUserByIdAsync(id);
+            if (device == null) return NotFound($"Device with ID {id} not found or unavailable");
+            return Ok(device);
+        }
+    }
 }

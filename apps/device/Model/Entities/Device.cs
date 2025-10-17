@@ -45,7 +45,7 @@ namespace device.Model.Entities
         public string? Description { get; set; }
         public List<string>? Images { get; set; }
 
-        public ICollection<ComboDevice>? ComboProducts { get; set; }
+        public ICollection<ComboDevice>? ComboDevices { get; set; }
 
         public DateTime CreateAt { get; set; } = DateTime.UtcNow;
         public DateTime UpdateAt { get; set; } = DateTime.UtcNow;
@@ -57,17 +57,17 @@ namespace device.Model.Entities
     {
         public Guid Id { get; set; } = Guid.NewGuid();
 
-        // 🔗 Many-to-many link between Product and Combo
-        public Guid ProductId { get; set; }
+        public Guid DeviceId { get; set; }
         public Device? Device { get; set; }
 
         public Guid ComboId { get; set; }
         public Combo? Combo { get; set; }
-
+        
         public int Quantity { get; set; } = 1;
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
     }
-    public class ApiResponse
+    
+        public class ApiResponse
     {
         public string Message { get; set; } = string.Empty;
     }

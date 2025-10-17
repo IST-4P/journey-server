@@ -5,6 +5,13 @@ using Microsoft.OpenApi.Models;
 using device.Service;
 using device.Interface;
 using DotNetEnv;
+using AuthGrpc;
+using device.Configuration;
+using device.Grpc.Clients;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using System.Security.Claims;
+
+AppContext.SetSwitch("System.Net.Http.SocketsHttpHandler.Http2UnencryptedSupport", true); // allow h2c if using http
 
 namespace device
 {
@@ -37,6 +44,31 @@ namespace device
             builder.Services.AddScoped<IDeviceRepository, DeviceRepository>();
             builder.Services.AddScoped<IDeviceService, DeviceService>();
 
+            builder.Services.AddAuthentication("Bearer")
+                .AddJwtBearer("Bearer", options =>
+                {
+                    options.Authority = "hacmieu-postgresql-caophi565caophi-d37b.e.aivencloud.com"; // URL Auth Service
+                    options.Audience = "journey-device"; // tên service này đăng ký trong Auth
+                    options.RequireHttpsMetadata = false;
+                });
+
+            builder.Services.AddAuthorization(options =>
+            {
+                options.AddPolicy("AdminOnly", policy => policy.RequireRole("ADMIN"));
+                options.AddPolicy("UserOrAdmin", policy => policy.RequireRole("USER", "ADMIN"));
+            });
+
+            // Bind options
+            builder.Services.Configure<AuthGrpcOptions>(builder.Configuration.GetSection("AuthGrpc"));
+
+            // gRPC Auth client
+            builder.Services.AddGrpcClient<Auth.AuthClient>((sp, o) =>
+            {
+                var cfg = builder.Configuration.GetSection("AuthGrpc").Get<AuthGrpcOptions>()!;
+                o.Address = new Uri(cfg.Address);
+            });
+            builder.Services.AddScoped<IAuthGrpcClient, AuthGrpcClient>();
+
             var app = builder.Build();
 
             if (app.Environment.IsDevelopment())
@@ -45,6 +77,11 @@ namespace device
                 app.UseSwaggerUI();
             }
 
+
+
+            app.UseAuthentication();
+            app.UseAuthorization();
+            app.UseGrpcAuthentication();
             app.UseHttpsRedirection();
             app.MapControllers();
             app.Run();

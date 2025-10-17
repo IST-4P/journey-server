@@ -1,0 +1,38 @@
+{{- if .Values.notification.enabled }}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: notification
+  labels:
+    app: notification
+spec:
+  replicas: {{ .Values.notification.replicas }}
+  selector:
+    matchLabels:
+      app: notification
+  template:
+    metadata:
+      labels:
+        app: notification
+    spec:
+      containers:
+        - name: notification
+          image: {{ .Values.notification.image }}
+          imagePullPolicy: {{ .Values.global.imagePullPolicy }}
+          ports:
+            - containerPort: {{ .Values.notification.port.grpc }}
+            - containerPort: {{ .Values.notification.port.http }}
+          env:
+            - name: DATABASE_URL
+              valueFrom:
+                secretKeyRef:
+                  name: journey-secrets
+                  key: NOTIFICATION_DATABASE_URL
+            - name: PORT
+              value: {{ .Values.notification.port.http | quote }}
+            - name: NOTIFICATION_GRPC_SERVICE_URL
+              value: "0.0.0.0:{{ .Values.notification.port.grpc }}"
+          envFrom:
+            - configMapRef:
+                name: journey-config
+{{- end }}

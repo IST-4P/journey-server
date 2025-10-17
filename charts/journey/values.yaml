@@ -1,0 +1,106 @@
+global:
+  imagePullPolicy: Always
+
+pulsar:
+  namespace: pulsar
+  namespaceCreate: true
+  initialize: true
+  zookeeper:
+    replicaCount: 1
+    podMonitor:
+      enabled: false
+  broker:
+    replicaCount: 1
+    configData:
+      allowAutoTopicCreation: 'true'
+      allowAutoTopicCreationType: 'partitioned'
+      defaultNumPartitions: '3'
+    podMonitor:
+      enabled: false
+  bookkeeper:
+    replicaCount: 1
+    podMonitor:
+      enabled: false
+  autorecovery:
+    podMonitor:
+      enabled: false
+  proxy:
+    replicaCount: 1
+    podMonitor:
+      enabled: false
+  kube-prometheus-stack:
+    enabled: false
+    prometheusOperator:
+      enabled: false
+    grafana:
+      enabled: false
+    alertmanager:
+      enabled: false
+    prometheus:
+      enabled: false
+
+api:
+  enabled: true
+  replicas: 1
+  image: 'caophi562005/journey-api:latest'
+  port:
+    http: 3000
+
+admin:
+  enabled: true
+  replicas: 1
+  image: 'caophi562005/journey-admin:latest'
+  port:
+    http: 3100
+
+auth:
+  enabled: true
+  replicas: 1
+  image: 'caophi562005/journey-auth:latest'
+  port:
+    grpc: 5000
+
+user:
+  enabled: true
+  replicas: 1
+  image: 'caophi562005/journey-user:latest'
+  port:
+    grpc: 5001
+    http: 3001
+
+notification:
+  enabled: true
+  replicas: 1
+  image: 'caophi562005/journey-notification:latest'
+  port:
+    grpc: 5002
+    http: 3002
+
+# Configuration (non-sensitive)
+config:
+  pulsarUrl: ''
+  authUrl: ''
+  userUrl: ''
+  notificationUrl: ''
+  accessTokenExpiresIn: '1h'
+  refreshTokenExpiresIn: '7d'
+  otpExpires: '5m'
+
+# Secrets (sensitive - DO NOT COMMIT REAL VALUES)
+secrets:
+  authDatabaseUrl: ''
+  userDatabaseUrl: ''
+  notificationDatabaseUrl: ''
+  accessTokenSecret: ''
+  refreshTokenSecret: ''
+  resendApiKey: ''
+  redisUrl: ''
+
+# Ingress configuration
+ingress:
+  enabled: true
+  api:
+    host: 'journey-api.hacmieu.xyz'
+  admin:
+    host: 'journey-admin.hacmieu.xyz'
+  email: 'caophi565caophi@gmail.com'

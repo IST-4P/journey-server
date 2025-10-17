@@ -1,5 +1,14 @@
 import { Injectable, Logger } from '@nestjs/common';
-import { PrismaService } from '../prisma/prisma.service';
+import { NotificationNotFoundException } from './notification.error';
+import {
+  CreateNotificationRequestType,
+  DeleteNotificationRequestType,
+  GetManyNotificationsRequestType,
+  GetNotificationRequestType,
+  MarkAsReadRequestType,
+  NotificationEnumType,
+} from './notification.model';
+import { NotificationRepository } from './notification.repo';
 
 interface UserRegisteredEvent {
   userId: string;
@@ -14,21 +23,18 @@ interface UserRegisteredEvent {
 export class NotificationService {
   private readonly logger = new Logger(NotificationService.name);
 
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(private readonly notificationRepo: NotificationRepository) {}
 
-  async createNotificationFromAuthEvent(event: UserRegisteredEvent) {
+  createNotificationFromAuthEvent(event: UserRegisteredEvent) {
     try {
-      // Create welcome notification for the new user
-      await this.prisma.notification.create({
-        data: {
-          userId: event.userId,
-          title: 'Welcome to HacMieu Journey!',
-          message: `Welcome to HacMieu Journey, ${event.name}!`,
-          type: 'WELCOME',
-        },
-      });
+      const data = {
+        userId: event.userId,
+        title: 'Welcome to HacMieu Journey!',
+        content: `Welcome to HacMieu Journey, ${event.name}!`,
+        type: 'WELCOME' as NotificationEnumType,
+      };
 
-      this.logger.log(`✅ Created notification for user: ${event.userId}`);
+      return this.notificationRepo.createNotification(data);
     } catch (error) {
       this.logger.error(
         `❌ Failed to create notification for user ${event.userId}:`,
@@ -36,5 +42,45 @@ export class NotificationService {
       );
       throw error;
     }
+  }
+
+  async getManyNotifications(data: GetManyNotificationsRequestType) {
+    const notifications = await this.notificationRepo.getManyNotifications(
+      data
+    );
+    if (notifications.length == 0) {
+      throw NotificationNotFoundException;
+    }
+    return { notifications };
+  }
+
+  async getNotification(data: GetNotificationRequestType) {
+    const notification = await this.notificationRepo.getNotificationById(data);
+    if (!notification) {
+      throw NotificationNotFoundException;
+    }
+    return notification;
+  }
+
+  createNotification(data: CreateNotificationRequestType) {
+    return this.notificationRepo.createNotification(data);
+  }
+
+  async markAsReadNotifications(data: MarkAsReadRequestType) {
+    await this.notificationRepo.makeAsRead(data);
+    return {
+      message: 'Message.MarkAsReadSuccessfully',
+    };
+  }
+
+  async deleteNotification(data: DeleteNotificationRequestType) {
+    const result = await this.notificationRepo.getNotificationById(data);
+    if (!result) {
+      throw NotificationNotFoundException;
+    }
+    await this.notificationRepo.deleteNotification(data);
+    return {
+      message: 'Message.DeleteNotificationSuccessfully',
+    };
   }
 }

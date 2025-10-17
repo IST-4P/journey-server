@@ -25,6 +25,12 @@ node_modules
 !.vscode/extensions.json
 
 .env
+
+# Helm secrets - DO NOT COMMIT
+*.local.yaml
+secrets.*.yaml
+charts/**/secrets.local.yaml
+
 # misc
 /.sass-cache
 /connect.lock

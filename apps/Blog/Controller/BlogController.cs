@@ -1,7 +1,9 @@
 using AutoMapper;
 using Blog.Models;
 using Blog.Repository;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using System.Security.Claims;
 
 namespace Blog.Controller
 {
@@ -19,6 +21,7 @@ namespace Blog.Controller
         }
 
         [HttpGet]
+        [AllowAnonymous] // Public endpoint - không cần auth
         public async Task<IActionResult> GetBlogs([FromQuery] BlogFilterDto? filter = null)
         {
             try
@@ -96,6 +99,7 @@ namespace Blog.Controller
         }
 
         [HttpPost]
+        [Authorize] // Yêu cầu authentication
         public async Task<IActionResult> AddBlog([FromBody] AddBlogRequestDto addBlogRequest)
         {
             try
@@ -104,6 +108,10 @@ namespace Blog.Controller
                 {
                     return BadRequest(ModelState);
                 }
+
+                // Lấy userId từ Claims để track ai tạo blog
+                var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+                var role = User.FindFirst(ClaimTypes.Role)?.Value;
 
                 var blog = _mapper.Map<Models.Blog>(addBlogRequest);
                 var createdBlog = await _blogRepository.AddBlogAsync(blog);
@@ -148,6 +156,7 @@ namespace Blog.Controller
         }
 
         [HttpPut("{id:guid}")]
+        [Authorize] // Yêu cầu authentication
         public async Task<IActionResult> UpdateBlog(Guid id, [FromBody] UpdateBlogRequetsDto updateBlogRequest)
         {
             try
@@ -175,6 +184,7 @@ namespace Blog.Controller
         }
 
         [HttpDelete("{id:guid}")]
+        [Authorize(Roles = "ADMIN")] // Chỉ ADMIN mới được xóa
         public async Task<IActionResult> DeleteBlog(Guid id)
         {
             try

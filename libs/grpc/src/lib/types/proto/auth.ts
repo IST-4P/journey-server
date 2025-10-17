@@ -76,6 +76,21 @@ export interface ForgotPasswordResponse {
   message: string;
 }
 
+/** Validate Token */
+export interface ValidateTokenRequest {
+  accessToken: string;
+}
+
+export interface ValidateTokenResponse {
+  isValid: boolean;
+  userId: string;
+  role: string;
+  uuid: string;
+  iat: number;
+  exp: number;
+  error: string;
+}
+
 export const AUTH_PACKAGE_NAME = "auth";
 
 export interface AuthServiceClient {
@@ -90,6 +105,8 @@ export interface AuthServiceClient {
   sendOtp(request: SendOTPRequest): Observable<SendOTPResponse>;
 
   forgotPassword(request: ForgotPasswordRequest): Observable<ForgotPasswordResponse>;
+
+  validateToken(request: ValidateTokenRequest): Observable<ValidateTokenResponse>;
 }
 
 export interface AuthServiceController {
@@ -108,11 +125,23 @@ export interface AuthServiceController {
   forgotPassword(
     request: ForgotPasswordRequest,
   ): Promise<ForgotPasswordResponse> | Observable<ForgotPasswordResponse> | ForgotPasswordResponse;
+
+  validateToken(
+    request: ValidateTokenRequest,
+  ): Promise<ValidateTokenResponse> | Observable<ValidateTokenResponse> | ValidateTokenResponse;
 }
 
 export function AuthServiceControllerMethods() {
   return function (constructor: Function) {
-    const grpcMethods: string[] = ["register", "login", "refreshToken", "logout", "sendOtp", "forgotPassword"];
+    const grpcMethods: string[] = [
+      "register",
+      "login",
+      "refreshToken",
+      "logout",
+      "sendOtp",
+      "forgotPassword",
+      "validateToken",
+    ];
     for (const method of grpcMethods) {
       const descriptor: any = Reflect.getOwnPropertyDescriptor(constructor.prototype, method);
       GrpcMethod("AuthService", method)(constructor.prototype[method], method, descriptor);

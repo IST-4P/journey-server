@@ -10,6 +10,8 @@ import {
   RefreshTokenResponse,
   RegisterRequestType,
   SendOTPRequestType,
+  ValidateTokenRequestType,
+  ValidateTokenResponseType,
 } from './models/auth.model';
 import { AuthService } from './services/auth.service';
 
@@ -50,5 +52,12 @@ export class AuthGrpcController {
     data: ForgotPasswordRequestType
   ): Promise<MessageResponseType> {
     return this.authService.forgotPassword(data);
+  }
+
+  @GrpcMethod('AuthService', 'ValidateToken')
+  validateToken(
+    data: ValidateTokenRequestType
+  ): Promise<ValidateTokenResponseType> {
+    return this.authService.validateToken(data.accessToken);
   }
 }

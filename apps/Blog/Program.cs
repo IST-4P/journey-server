@@ -1,4 +1,5 @@
 using Blog.Data;
+using Blog.Middleware;
 using Blog.Repository;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi.Models;
@@ -37,6 +38,10 @@ builder.Services.AddDbContext<BlogDbContext>(options =>
 builder.Services.AddAutoMapper(typeof(Program));
 builder.Services.AddScoped<IBlogRepository, BlogRepository>();
 
+// Thêm Authentication và Authorization
+builder.Services.AddAuthentication();
+builder.Services.AddAuthorization();
+
 var app = builder.Build();
 
 if (app.Environment.IsDevelopment())
@@ -46,5 +51,12 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
+
+// Thêm GrpcAuthentication middleware (phải đặt trước MapControllers)
+app.UseGrpcAuthentication();
+
+app.UseAuthentication();
+app.UseAuthorization();
+
 app.MapControllers();
 app.Run();

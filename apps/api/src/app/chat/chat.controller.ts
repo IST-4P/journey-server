@@ -1,7 +1,7 @@
 import { ChatProto } from '@hacmieu-journey/grpc';
 import { ActiveUser } from '@hacmieu-journey/nestjs';
-import { Body, Controller, Get, Post, Query } from '@nestjs/common';
-import { CreateChatRequestDTO, GetChatsRequestDTO } from './chat.dto';
+import { Controller, Get, Query } from '@nestjs/common';
+import { GetChatsRequestDTO } from './chat.dto';
 import { ChatService } from './chat.service';
 
 @Controller('chat')
@@ -19,17 +19,5 @@ export class ChatController {
       ...query,
       fromUserId: userId,
     } as ChatProto.GetChatsRequest);
-  }
-
-  @Post()
-  getChat(
-    @ActiveUser('userId') userId: string,
-    @Body() body: CreateChatRequestDTO
-  ) {
-    console.log(userId);
-    return this.chatService.createChat({
-      fromUserId: userId,
-      ...body,
-    } as ChatProto.CreateChatRequest);
   }
 }

@@ -30,7 +30,6 @@ import { ChatService } from './chat.service';
   controllers: [ChatController],
   providers: [
     ChatService,
-
     {
       provide: 'CHAT_SERVICE',
       useExisting: ChatService,

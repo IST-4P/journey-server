@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Chat Application</title>
+    <title>Realtime Chat Application</title>
     <style>
       * {
         margin: 0;
@@ -63,7 +63,6 @@
         box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
       }
 
-      /* Login Section */
       .login-section {
         padding: 40px;
       }
@@ -149,11 +148,40 @@
         border: 1px solid #c3e6cb;
       }
 
-      /* Chat Section */
+      .loading-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.5);
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        z-index: 9999;
+      }
+
+      .loading-spinner {
+        width: 50px;
+        height: 50px;
+        border: 5px solid #f3f3f3;
+        border-top: 5px solid #667eea;
+        border-radius: 50%;
+        animation: spin 1s linear infinite;
+      }
+
+      @keyframes spin {
+        0% {
+          transform: rotate(0deg);
+        }
+        100% {
+          transform: rotate(360deg);
+        }
+      }
+
       .chat-section {
         display: none;
         height: 600px;
-        display: flex;
         flex-direction: column;
       }
 
@@ -163,12 +191,32 @@
         border-bottom: 2px solid #dee2e6;
       }
 
+      .connection-status {
+        display: inline-block;
+        padding: 4px 12px;
+        border-radius: 12px;
+        font-size: 12px;
+        font-weight: 600;
+        margin-left: 10px;
+      }
+
+      .connection-status.connected {
+        background: #d4edda;
+        color: #155724;
+      }
+
+      .connection-status.disconnected {
+        background: #f8d7da;
+        color: #721c24;
+      }
+
       .chat-header input {
         padding: 10px 15px;
         border: 1px solid #ced4da;
         border-radius: 8px;
-        width: 250px;
+        width: 300px;
         font-size: 14px;
+        margin-top: 10px;
       }
 
       .chat-messages {
@@ -177,7 +225,7 @@
         padding: 20px;
         background: #f8f9fa;
         display: flex;
-        flex-direction: column-reverse;
+        flex-direction: column;
       }
 
       .load-more {
@@ -291,14 +339,14 @@
         box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
       }
 
-      .hidden {
-        display: none !important;
+      .chat-input-area button:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+        transform: none;
       }
 
-      .loading {
-        text-align: center;
-        padding: 10px;
-        color: #6c757d;
+      .hidden {
+        display: none !important;
       }
 
       .user-info {
@@ -315,9 +363,13 @@
     </style>
   </head>
   <body>
+    <div id="loadingOverlay" class="loading-overlay hidden">
+      <div class="loading-spinner"></div>
+    </div>
+
     <div class="container">
       <div class="header">
-        <h1>💬 Chat Application</h1>
+        <h1>💬 Realtime Chat Application</h1>
       </div>
 
       <div class="config-section">
@@ -325,8 +377,8 @@
         <input
           type="text"
           id="baseUrl"
-          value="http://localhost:3000/api"
-          placeholder="http://localhost:3000/api"
+          value="http://localhost:3000"
+          placeholder="http://localhost:3000"
         />
       </div>
 
@@ -363,7 +415,12 @@
       <div class="chat-section hidden" id="chatSection">
         <div class="chat-header">
           <div class="user-info">
-            <span>Logged in as: <strong id="currentUserEmail"></strong></span>
+            <div>
+              <span>Logged in as: <strong id="currentUserEmail"></strong></span>
+              <span class="connection-status disconnected" id="connectionStatus"
+                >Disconnected</span
+              >
+            </div>
             <button
               class="btn btn-secondary"
               style="width: auto; padding: 8px 20px"
@@ -376,7 +433,7 @@
           <input
             type="text"
             id="toUserId"
-            placeholder="Enter recipient user ID"
+            placeholder="Enter recipient user ID (UUID)"
             required
           />
         </div>
@@ -399,11 +456,12 @@
             placeholder="Type a message..."
             onkeypress="handleKeyPress(event)"
           />
-          <button onclick="sendMessage()">Send</button>
+          <button onclick="sendMessage()" id="sendButton">Send</button>
         </div>
       </div>
     </div>
 
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.5.4/socket.io.min.js"></script>
     <script>
       let currentUserId = null;
       let currentUserEmail = null;
@@ -411,9 +469,19 @@
       const pageLimit = 20;
       let isLoadingMore = false;
       let hasMoreMessages = true;
+      let socket = null;
 
       function getBaseUrl() {
         return document.getElementById('baseUrl').value.trim();
+      }
+
+      function showLoading(show) {
+        const overlay = document.getElementById('loadingOverlay');
+        if (show) {
+          overlay.classList.remove('hidden');
+        } else {
+          overlay.classList.add('hidden');
+        }
       }
 
       function showError(elementId, message) {
@@ -434,6 +502,54 @@
         }, 3000);
       }
 
+      function updateConnectionStatus(connected) {
+        const statusElement = document.getElementById('connectionStatus');
+        const sendButton = document.getElementById('sendButton');
+
+        if (connected) {
+          statusElement.textContent = 'Connected';
+          statusElement.classList.remove('disconnected');
+          statusElement.classList.add('connected');
+          sendButton.disabled = false;
+        } else {
+          statusElement.textContent = 'Disconnected';
+          statusElement.classList.remove('connected');
+          statusElement.classList.add('disconnected');
+          sendButton.disabled = true;
+        }
+      }
+
+      function initializeWebSocket() {
+        const baseUrl = getBaseUrl();
+
+        socket = io(`${baseUrl}/chat`, {
+          withCredentials: true,
+          transports: ['websocket', 'polling'],
+        });
+
+        socket.on('connect', () => {
+          console.log('WebSocket connected');
+          updateConnectionStatus(true);
+        });
+
+        socket.on('disconnect', () => {
+          console.log('WebSocket disconnected');
+          updateConnectionStatus(false);
+        });
+
+        socket.on('connect_error', (error) => {
+          console.error('WebSocket connection error:', error);
+          updateConnectionStatus(false);
+        });
+
+        // Lắng nghe tin nhắn mới - chỉ dùng event 'newChat'
+        socket.on('newChat', (message) => {
+          console.log('Received new chat message:', message);
+          addMessageToUI(message);
+          scrollToBottom();
+        });
+      }
+
       async function login() {
         const email = document.getElementById('email').value.trim();
         const password = document.getElementById('password').value.trim();
@@ -444,13 +560,15 @@
           return;
         }
 
+        showLoading(true);
+
         try {
-          const response = await fetch(`${baseUrl}/auth/login`, {
+          const response = await fetch(`${baseUrl}/api/auth/login`, {
             method: 'POST',
             headers: {
               'Content-Type': 'application/json',
             },
-            credentials: 'include', // IMPORTANT: Để nhận cookie từ server
+            credentials: 'include',
             body: JSON.stringify({ email, password }),
           });
 
@@ -460,14 +578,15 @@
             throw new Error(result.message || 'Login failed');
           }
 
-          // Lưu thông tin user - lấy từ result.data nếu có
           const data = result.data || result;
           currentUserId = data.userId || data.user?.id || data.id;
           currentUserEmail = email;
 
           showSuccess('loginSuccess', 'Login successful!');
 
-          // Chuyển sang giao diện chat
+          // Khởi tạo WebSocket sau khi login thành công
+          initializeWebSocket();
+
           setTimeout(() => {
             document.getElementById('loginSection').classList.add('hidden');
             document.getElementById('chatSection').classList.remove('hidden');
@@ -480,10 +599,17 @@
             'loginError',
             error.message || 'Login failed. Please check your credentials.'
           );
+        } finally {
+          showLoading(false);
         }
       }
 
       function logout() {
+        if (socket) {
+          socket.disconnect();
+          socket = null;
+        }
+
         currentUserId = null;
         currentUserEmail = null;
         currentPage = 1;
@@ -496,12 +622,12 @@
         document.getElementById('password').value = '';
         document.getElementById('toUserId').value = '';
         document.getElementById('messageInput').value = '';
+        updateConnectionStatus(false);
       }
 
-      async function sendMessage() {
+      function sendMessage() {
         const toUserId = document.getElementById('toUserId').value.trim();
         const content = document.getElementById('messageInput').value.trim();
-        const baseUrl = getBaseUrl();
 
         if (!toUserId) {
           alert('Please enter recipient user ID');
@@ -513,41 +639,19 @@
           return;
         }
 
-        try {
-          const response = await fetch(`${baseUrl}/chat`, {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-            },
-            credentials: 'include', // IMPORTANT: Gửi cookie lên server
-            body: JSON.stringify({
-              toUserId: toUserId,
-              content: content,
-            }),
-          });
-
-          const result = await response.json();
-
-          if (!response.ok) {
-            throw new Error(result.message || 'Failed to send message');
-          }
-
-          // Lấy data từ result.data
-          const data = result.data || result;
-
-          // Clear input
-          document.getElementById('messageInput').value = '';
-
-          // Add message to UI
-          addMessageToUI(data, true);
-
-          // Scroll to bottom
-          const messagesContainer = document.getElementById('chatMessages');
-          messagesContainer.scrollTop = messagesContainer.scrollHeight;
-        } catch (error) {
-          console.error('Send message error:', error);
-          alert(error.message || 'Failed to send message. Please try again.');
+        if (!socket || !socket.connected) {
+          alert('WebSocket is not connected. Please try again.');
+          return;
         }
+
+        // Gửi tin nhắn qua WebSocket với event 'sendChat'
+        socket.emit('sendChat', {
+          toUserId: toUserId,
+          content: content,
+        });
+
+        // Clear input
+        document.getElementById('messageInput').value = '';
       }
 
       async function loadMessages(page = 1) {
@@ -560,10 +664,10 @@
 
         try {
           const response = await fetch(
-            `${baseUrl}/chat?toUserId=${toUserId}&page=${page}&limit=${pageLimit}`,
+            `${baseUrl}/api/chat?toUserId=${toUserId}&page=${page}&limit=${pageLimit}`,
             {
               method: 'GET',
-              credentials: 'include', // IMPORTANT: Gửi cookie lên server
+              credentials: 'include',
             }
           );
 
@@ -572,7 +676,6 @@
           }
 
           const result = await response.json();
-          // Xử lý cấu trúc data có thể là result.data.chats hoặc result.chats hoặc result.data
           const data = result.data || result;
           const messages = data.chats || data || [];
 
@@ -603,10 +706,9 @@
         const messages = await loadMessages(currentPage);
 
         messages.forEach((message) => {
-          addMessageToUI(message, false, true);
+          addMessageToUI(message, true);
         });
 
-        // Maintain scroll position
         const newScrollHeight = messagesContainer.scrollHeight;
         const chatMessages = document.getElementById('chatMessages');
         chatMessages.scrollTop = newScrollHeight - oldScrollHeight;
@@ -614,14 +716,28 @@
         isLoadingMore = false;
       }
 
-      function addMessageToUI(message, isSent, prepend = false) {
+      function addMessageToUI(message, prepend = false) {
         const messagesContainer = document.getElementById('messagesContainer');
-        const messageDiv = document.createElement('div');
 
-        // Kiểm tra xem tin nhắn này do user hiện tại gửi hay nhận
+        // Kiểm tra xem tin nhắn đã tồn tại chưa (tránh duplicate)
+        const messageId =
+          message.id || `${message.fromUserId}-${message.createdAt}`;
+        const existingMessage = messagesContainer.querySelector(
+          `[data-message-id="${messageId}"]`
+        );
+        if (existingMessage) {
+          return;
+        }
+
+        const messageDiv = document.createElement('div');
+        messageDiv.setAttribute('data-message-id', messageId);
+
+        // QUAN TRỌNG: Xác định tin nhắn là của mình hay người khác
+        // Tin nhắn từ currentUserId là tin nhắn MÌNH GỬI -> hiển thị bên PHẢI
+        // Tin nhắn từ userId khác là tin nhắn NHẬN -> hiển thị bên TRÁI
         const isFromCurrentUser =
           message.fromUserId === currentUserId ||
-          message.fromUserId === parseInt(currentUserId);
+          message.fromUserId === String(currentUserId);
 
         messageDiv.className = `message ${
           isFromCurrentUser ? 'sent' : 'received'
@@ -634,15 +750,15 @@
         });
 
         messageDiv.innerHTML = `
-                <div class="message-bubble">
-                    ${message.content}
-                </div>
-                <div class="message-info">
-                    ${
-                      isFromCurrentUser ? 'You' : `User ${message.fromUserId}`
-                    } • ${timeString}
-                </div>
-            `;
+          <div class="message-bubble">
+            ${message.content}
+          </div>
+          <div class="message-info">
+            ${
+              isFromCurrentUser ? 'You' : `User ${message.fromUserId}`
+            } • ${timeString}
+          </div>
+        `;
 
         if (prepend) {
           messagesContainer.insertBefore(
@@ -652,6 +768,11 @@
         } else {
           messagesContainer.appendChild(messageDiv);
         }
+      }
+
+      function scrollToBottom() {
+        const chatMessages = document.getElementById('chatMessages');
+        chatMessages.scrollTop = chatMessages.scrollHeight;
       }
 
       function handleKeyPress(event) {
@@ -672,12 +793,10 @@
 
             const messages = await loadMessages(1);
             messages.reverse().forEach((message) => {
-              addMessageToUI(message, false);
+              addMessageToUI(message);
             });
 
-            // Scroll to bottom
-            const chatMessages = document.getElementById('chatMessages');
-            chatMessages.scrollTop = chatMessages.scrollHeight;
+            scrollToBottom();
           }
         });
 
@@ -698,6 +817,54 @@
             login();
           }
         });
+
+      // Kiểm tra auth khi tải trang
+      async function checkAuth() {
+        showLoading(true);
+        const baseUrl = getBaseUrl();
+
+        try {
+          // Gọi API để refresh token và verify
+          const response = await fetch(`${baseUrl}/api/auth/refresh-token`, {
+            method: 'POST',
+            credentials: 'include',
+          });
+
+          if (response.ok) {
+            const result = await response.json();
+            const data = result.data || result;
+
+            currentUserId = data.userId || data.user?.id || data.id;
+            currentUserEmail = data.email || data.user?.email;
+
+            // Chuyển đến trang chat
+            document.getElementById('loginSection').classList.add('hidden');
+            document.getElementById('chatSection').classList.remove('hidden');
+            document.getElementById('chatSection').style.display = 'flex';
+            document.getElementById('currentUserEmail').textContent =
+              currentUserEmail;
+
+            // Khởi tạo WebSocket
+            initializeWebSocket();
+          } else {
+            // Token hết hạn hoặc không hợp lệ, hiện trang login
+            document.getElementById('loginSection').classList.remove('hidden');
+            document.getElementById('chatSection').classList.add('hidden');
+          }
+        } catch (error) {
+          console.error('Auth check error:', error);
+          // Lỗi, hiện trang login
+          document.getElementById('loginSection').classList.remove('hidden');
+          document.getElementById('chatSection').classList.add('hidden');
+        } finally {
+          showLoading(false);
+        }
+      }
+
+      // Chạy check auth khi tải trang
+      window.addEventListener('load', () => {
+        checkAuth();
+      });
     </script>
   </body>
 </html>

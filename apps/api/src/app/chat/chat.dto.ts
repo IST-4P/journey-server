@@ -10,6 +10,7 @@ export class GetChatsRequestDTO extends createZodDto(
 
 export class CreateChatRequestDTO extends createZodDto(
   z.object({
+    fromUserId: z.uuid({ message: 'Error.InvalidFromUserId' }),
     toUserId: z.uuid({ message: 'Error.InvalidToUserId' }),
     content: z
       .string({ message: 'Error.InvalidContent' })

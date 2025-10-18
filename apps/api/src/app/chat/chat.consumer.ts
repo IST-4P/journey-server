@@ -26,6 +26,6 @@ export class ChatConsumer extends PulsarConsumer<DataEvent> {
     // this.logger.log(
     //   `Received notification.created event: ${JSON.stringify(event)}`
     // );
-    this.chatGateway.handleChatCreated(event);
+    // this.chatGateway.handleChatCreated(event);
   }
 }

@@ -68,6 +68,8 @@ jobs:
             dockerfile: apps/notification/Dockerfile
           - name: user
             dockerfile: apps/user/Dockerfile
+          - name: chat
+            dockerfile: apps/chat/Dockerfile
 
     steps:
       - uses: actions/checkout@v4
@@ -149,6 +151,7 @@ jobs:
             --set auth.image=${{ secrets.DOCKERHUB_USERNAME }}/journey-auth:${{ steps.tag.outputs.TAG }} \
             --set notification.image=${{ secrets.DOCKERHUB_USERNAME }}/journey-notification:${{ steps.tag.outputs.TAG }} \
             --set user.image=${{ secrets.DOCKERHUB_USERNAME }}/journey-user:${{ steps.tag.outputs.TAG }} \
+            --set chat.image=${{ secrets.DOCKERHUB_USERNAME }}/journey-chat:${{ steps.tag.outputs.TAG }} \
             --wait \
             --timeout 5m
 
@@ -160,3 +163,4 @@ jobs:
           kubectl rollout status deployment/auth -n journey --timeout=3m
           kubectl rollout status deployment/notification -n journey --timeout=3m
           kubectl rollout status deployment/user -n journey --timeout=3m
+          kubectl rollout status deployment/chat -n journey --timeout=3m

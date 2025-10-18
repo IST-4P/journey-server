@@ -35,4 +35,6 @@ spec:
           envFrom:
             - configMapRef:
                 name: journey-config
+            - secretRef:
+                name: journey-secrets
 {{- end }}

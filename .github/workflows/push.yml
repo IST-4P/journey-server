@@ -146,6 +146,7 @@ jobs:
             --set auth.enabled=true \
             --set user.enabled=true \
             --set notification.enabled=true \
+            --set chat.enabled=true \
             --set api.image=${{ secrets.DOCKERHUB_USERNAME }}/journey-api:${{ steps.tag.outputs.TAG }} \
             --set admin.image=${{ secrets.DOCKERHUB_USERNAME }}/journey-admin:${{ steps.tag.outputs.TAG }} \
             --set auth.image=${{ secrets.DOCKERHUB_USERNAME }}/journey-auth:${{ steps.tag.outputs.TAG }} \

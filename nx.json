@@ -45,7 +45,8 @@
         "apps/notification-e2e/**/*",
         "apps/api-e2e/**/*",
         "apps/admin-e2e/**/*",
-        "apps/vehicle-e2e/**/*"
+        "apps/vehicle-e2e/**/*",
+        "apps/chat-e2e/**/*"
       ]
     }
   ]

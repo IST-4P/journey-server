@@ -19,7 +19,7 @@ export class NotificationGrpcController {
   @GrpcMethod('NotificationService', 'GetManyNotifications')
   getManyNotifications(
     data: GetManyNotificationsRequestType
-  ): Promise<{ notifications: GetManyNotificationsResponseType }> {
+  ): Promise<GetManyNotificationsResponseType> {
     return this.notificationService.getManyNotifications(data);
   }
 

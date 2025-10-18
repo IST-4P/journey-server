@@ -76,12 +76,21 @@ notification:
     grpc: 5002
     http: 3002
 
+chat:
+  enabled: true
+  replicas: 1
+  image: 'caophi562005/journey-chat:latest'
+  port:
+    grpc: 5003
+    http: 3003
+
 # Configuration (non-sensitive)
 config:
   pulsarUrl: ''
   authUrl: ''
   userUrl: ''
   notificationUrl: ''
+  chatUrl: ''
   accessTokenExpiresIn: '1h'
   refreshTokenExpiresIn: '7d'
   otpExpires: '5m'
@@ -91,6 +100,7 @@ secrets:
   authDatabaseUrl: ''
   userDatabaseUrl: ''
   notificationDatabaseUrl: ''
+  chatDatabaseUrl: ''
   accessTokenSecret: ''
   refreshTokenSecret: ''
   resendApiKey: ''

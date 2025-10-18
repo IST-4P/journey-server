@@ -38,13 +38,17 @@ export const GetManyNotificationsRequestSchema = NotificationSchema.pick({
   userId: true,
 }).extend(PaginationQuerySchema.shape);
 
-export const GetManyNotificationsResponseSchema = NotificationSchema.pick({
-  id: true,
-  title: true,
-  type: true,
-  read: true,
-  createdAt: true,
-}).array();
+export const GetManyNotificationsResponseSchema = z.object({
+  notifications: z.array(
+    NotificationSchema.pick({
+      id: true,
+      title: true,
+      type: true,
+      read: true,
+      createdAt: true,
+    })
+  ),
+});
 
 export const GetNotificationRequestSchema = NotificationSchema.pick({
   id: true,

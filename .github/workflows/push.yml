@@ -136,23 +136,45 @@ jobs:
         run: |
           echo "${{ secrets.HELM_SECRETS_PRODUCTION }}" | base64 -d > secrets.production.yaml
 
+      - name: Create dynamic values file
+        run: |
+          cat > values.override.yaml <<EOF
+          api:
+            enabled: true
+            image: ${{ secrets.DOCKERHUB_USERNAME }}/journey-api:${{ steps.tag.outputs.TAG }}
+          admin:
+            enabled: true
+            image: ${{ secrets.DOCKERHUB_USERNAME }}/journey-admin:${{ steps.tag.outputs.TAG }}
+          auth:
+            enabled: true
+            image: ${{ secrets.DOCKERHUB_USERNAME }}/journey-auth:${{ steps.tag.outputs.TAG }}
+          user:
+            enabled: true
+            image: ${{ secrets.DOCKERHUB_USERNAME }}/journey-user:${{ steps.tag.outputs.TAG }}
+          notification:
+            enabled: true
+            image: ${{ secrets.DOCKERHUB_USERNAME }}/journey-notification:${{ steps.tag.outputs.TAG }}
+          chat:
+            enabled: true
+            image: ${{ secrets.DOCKERHUB_USERNAME }}/journey-chat:${{ steps.tag.outputs.TAG }}
+          EOF
+
+      - name: Check and cleanup pending operations
+        run: |
+          if helm status journey -n journey 2>&1 | grep -q "another operation"; then
+            echo "Cleaning up pending operations..."
+            kubectl delete secrets -n journey -l owner=helm,status=pending-upgrade || true
+            sleep 5
+          fi
+
       - name: Upgrade Helm Release
         run: |
           helm upgrade journey ./charts/journey \
             -f secrets.production.yaml \
+            -f values.override.yaml \
             --namespace journey \
-            --set api.enabled=true \
-            --set admin.enabled=true \
-            --set auth.enabled=true \
-            --set user.enabled=true \
-            --set notification.enabled=true \
-            --set chat.enabled=true \
-            --set api.image=${{ secrets.DOCKERHUB_USERNAME }}/journey-api:${{ steps.tag.outputs.TAG }} \
-            --set admin.image=${{ secrets.DOCKERHUB_USERNAME }}/journey-admin:${{ steps.tag.outputs.TAG }} \
-            --set auth.image=${{ secrets.DOCKERHUB_USERNAME }}/journey-auth:${{ steps.tag.outputs.TAG }} \
-            --set notification.image=${{ secrets.DOCKERHUB_USERNAME }}/journey-notification:${{ steps.tag.outputs.TAG }} \
-            --set user.image=${{ secrets.DOCKERHUB_USERNAME }}/journey-user:${{ steps.tag.outputs.TAG }} \
-            --set chat.image=${{ secrets.DOCKERHUB_USERNAME }}/journey-chat:${{ steps.tag.outputs.TAG }} \
+            --atomic \
+            --cleanup-on-fail \
             --wait \
             --timeout 5m
 

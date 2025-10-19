@@ -76,12 +76,30 @@ notification:
     grpc: 5002
     http: 3002
 
+chat:
+  enabled: true
+  replicas: 1
+  image: 'caophi562005/journey-chat:latest'
+  port:
+    grpc: 5003
+    http: 3003
+
+blog:
+  enabled: true
+  replicas: 1
+  image: 'caophi562005/journey-blog:latest'
+  port:
+    grpc: 5005
+    http: 3005
+
 # Configuration (non-sensitive)
 config:
   pulsarUrl: ''
   authUrl: ''
   userUrl: ''
   notificationUrl: ''
+  chatUrl: ''
+  blogUrl: ''
   accessTokenExpiresIn: '1h'
   refreshTokenExpiresIn: '7d'
   otpExpires: '5m'
@@ -91,9 +109,12 @@ secrets:
   authDatabaseUrl: ''
   userDatabaseUrl: ''
   notificationDatabaseUrl: ''
+  chatDatabaseUrl: ''
   accessTokenSecret: ''
+  blogDatabaseUrl: ''
   refreshTokenSecret: ''
   resendApiKey: ''
+  redisUrl: ''
 
 # Ingress configuration
 ingress:

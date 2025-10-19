@@ -8,12 +8,21 @@ import {
   HttpExceptionFilter,
   init,
 } from '@hacmieu-journey/nestjs';
+import { WebsocketAdapter } from '@hacmieu-journey/websocket';
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app/app.module';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
   app.useGlobalFilters(new GrpcExceptionFilter(), new HttpExceptionFilter());
+  app.enableCors({
+    origin: true,
+    credentials: true,
+  });
+  const websocketAdapter = new WebsocketAdapter(app);
+  await websocketAdapter.connectToRedis();
+  app.useWebSocketAdapter(websocketAdapter);
+
   await init(app);
 }
 

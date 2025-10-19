@@ -9,6 +9,7 @@ service AuthService {
   rpc Logout(LogoutRequest) returns (LogoutResponse);
   rpc SendOtp(SendOTPRequest) returns (SendOTPResponse);
   rpc ForgotPassword(ForgotPasswordRequest) returns (ForgotPasswordResponse);
+  rpc ValidateToken(ValidateTokenRequest) returns (ValidateTokenResponse);
 }
 
 // Register
@@ -75,4 +76,19 @@ message ForgotPasswordRequest {
 
 message ForgotPasswordResponse {
   string message = 1;
+}
+
+// Validate Token
+message ValidateTokenRequest {
+  string accessToken = 1;
+}
+
+message ValidateTokenResponse {
+  bool isValid = 1;
+  string userId = 2;
+  string role = 3;
+  string uuid = 4;
+  int64 iat = 5;
+  int64 exp = 6;
+  string error = 7;
 }

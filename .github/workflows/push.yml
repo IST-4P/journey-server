@@ -51,29 +51,130 @@ jobs:
           path: node_modules
           retention-days: 1
 
-  docker:
+  cleanup-docker:
     runs-on: ubuntu-latest
     needs: install
+    if: github.event_name != 'pull_request'
+
+    steps:
+      - name: Login to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - name: Delete old images from Docker Hub (keep latest 5 versions)
+        run: |
+          echo "=== Cleaning up old Docker images (keeping latest 5 versions) ==="
+
+          SERVICES="api admin auth notification user chat blog"
+          KEEP_COUNT=5
+
+          for SERVICE in $SERVICES; do
+            REPO="journey-${SERVICE}"
+            echo "Processing repository: ${REPO}"
+
+            # Lấy token để gọi Docker Hub API
+            TOKEN=$(curl -s -H "Content-Type: application/json" -X POST \
+              -d '{"username": "${{ secrets.DOCKERHUB_USERNAME }}", "password": "${{ secrets.DOCKERHUB_TOKEN }}"}' \
+              https://hub.docker.com/v2/users/login/ | jq -r .token)
+
+            if [ -z "$TOKEN" ] || [ "$TOKEN" == "null" ]; then
+              echo "⚠️ Failed to get Docker Hub token for ${REPO}"
+              continue
+            fi
+
+            # Lấy tất cả tags với thông tin last_updated, sắp xếp theo thời gian
+            TAGS_JSON=$(curl -s -H "Authorization: JWT ${TOKEN}" \
+              "https://hub.docker.com/v2/repositories/${{ secrets.DOCKERHUB_USERNAME }}/${REPO}/tags/?page_size=100")
+
+            # Đếm số lượng tags
+            TOTAL_TAGS=$(echo "$TAGS_JSON" | jq -r '.results | length')
+
+            if [ "$TOTAL_TAGS" -eq 0 ]; then
+              echo "ℹ️ No tags found for ${REPO}"
+              continue
+            fi
+
+            echo "Found ${TOTAL_TAGS} tags for ${REPO}"
+
+            # Lấy danh sách tags cần XÓA (bỏ qua 5 tags mới nhất và tag 'latest')
+            # Sort theo last_updated descending, bỏ qua 5 tags đầu và tag 'latest'
+            TAGS_TO_DELETE=$(echo "$TAGS_JSON" | jq -r \
+              '.results | sort_by(.last_updated) | reverse | 
+              map(select(.name != "latest" and .name != "buildcache")) | 
+              .['"$KEEP_COUNT"':] | .[].name')
+
+            if [ -z "$TAGS_TO_DELETE" ]; then
+              echo "ℹ️ No old tags to delete for ${REPO} (keeping latest ${KEEP_COUNT} versions + 'latest' tag)"
+              continue
+            fi
+
+            echo "Tags to delete for ${REPO}:"
+            echo "$TAGS_TO_DELETE"
+            echo "---"
+
+            # Xóa từng tag
+            for TAG in $TAGS_TO_DELETE; do
+              echo "Deleting tag: ${REPO}:${TAG}"
+
+              DELETE_RESPONSE=$(curl -s -w "\n%{http_code}" -X DELETE \
+                -H "Authorization: JWT ${TOKEN}" \
+                "https://hub.docker.com/v2/repositories/${{ secrets.DOCKERHUB_USERNAME }}/${REPO}/tags/${TAG}/")
+
+              HTTP_CODE=$(echo "$DELETE_RESPONSE" | tail -n1)
+
+              if [ "$HTTP_CODE" == "204" ] || [ "$HTTP_CODE" == "200" ]; then
+                echo "✅ Deleted ${REPO}:${TAG}"
+              else
+                echo "⚠️ Failed to delete ${REPO}:${TAG} (HTTP ${HTTP_CODE})"
+              fi
+
+              # Rate limiting protection
+              sleep 1
+            done
+            echo "✅ Completed cleanup for ${REPO}"
+            echo "Keeping latest ${KEEP_COUNT} versions + 'latest' tag + 'buildcache' tag"
+            echo "==="
+          done
+
+          echo "✅ Cleanup completed! Kept latest ${KEEP_COUNT} versions for each service"
+
+  docker:
+    runs-on: ubuntu-latest
+    needs: cleanup-docker
 
     strategy:
       matrix:
         service:
           - name: api
             dockerfile: apps/api/Dockerfile
+            type: nodejs
           - name: admin
             dockerfile: apps/admin/Dockerfile
+            type: nodejs
           - name: auth
             dockerfile: apps/auth/Dockerfile
+            type: nodejs
           - name: notification
             dockerfile: apps/notification/Dockerfile
+            type: nodejs
           - name: user
             dockerfile: apps/user/Dockerfile
+            type: nodejs
+          - name: chat
+            dockerfile: apps/chat/Dockerfile
+            type: nodejs
+          - name: blog
+            dockerfile: apps/blog/Dockerfile
+            type: dotnet
 
     steps:
       - uses: actions/checkout@v4
 
-      # Download node_modules đã được build
+      # Download node_modules đã được build (chỉ cho Node.js services)
       - name: Download node_modules
+        if: matrix.service.type == 'nodejs'
         uses: actions/download-artifact@v4
         with:
           name: node_modules
@@ -134,29 +235,117 @@ jobs:
         run: |
           echo "${{ secrets.HELM_SECRETS_PRODUCTION }}" | base64 -d > secrets.production.yaml
 
-      - name: Upgrade Helm Release
+      - name: Create dynamic values file
         run: |
-          helm upgrade journey ./charts/journey \
-            -f secrets.production.yaml \
-            --namespace journey \
-            --set api.enabled=true \
-            --set admin.enabled=true \
-            --set auth.enabled=true \
-            --set user.enabled=true \
-            --set notification.enabled=true \
-            --set api.image=${{ secrets.DOCKERHUB_USERNAME }}/journey-api:${{ steps.tag.outputs.TAG }} \
-            --set admin.image=${{ secrets.DOCKERHUB_USERNAME }}/journey-admin:${{ steps.tag.outputs.TAG }} \
-            --set auth.image=${{ secrets.DOCKERHUB_USERNAME }}/journey-auth:${{ steps.tag.outputs.TAG }} \
-            --set notification.image=${{ secrets.DOCKERHUB_USERNAME }}/journey-notification:${{ steps.tag.outputs.TAG }} \
-            --set user.image=${{ secrets.DOCKERHUB_USERNAME }}/journey-user:${{ steps.tag.outputs.TAG }} \
-            --wait \
-            --timeout 5m
+          cat > values.override.yaml <<EOF
+          api:
+            enabled: true
+            image: ${{ secrets.DOCKERHUB_USERNAME }}/journey-api:${{ steps.tag.outputs.TAG }}
+          admin:
+            enabled: true
+            image: ${{ secrets.DOCKERHUB_USERNAME }}/journey-admin:${{ steps.tag.outputs.TAG }}
+          auth:
+            enabled: true
+            image: ${{ secrets.DOCKERHUB_USERNAME }}/journey-auth:${{ steps.tag.outputs.TAG }}
+          user:
+            enabled: true
+            image: ${{ secrets.DOCKERHUB_USERNAME }}/journey-user:${{ steps.tag.outputs.TAG }}
+          notification:
+            enabled: true
+            image: ${{ secrets.DOCKERHUB_USERNAME }}/journey-notification:${{ steps.tag.outputs.TAG }}
+          chat:
+            enabled: true
+            image: ${{ secrets.DOCKERHUB_USERNAME }}/journey-chat:${{ steps.tag.outputs.TAG }}
+          blog:
+            enabled: true
+            image: ${{ secrets.DOCKERHUB_USERNAME }}/journey-blog:${{ steps.tag.outputs.TAG }}
+          EOF
+
+      - name: List and cleanup all pending Helm operations
+        run: |
+          echo "=== Checking for pending Helm operations ==="
+
+          # List tất cả pending operations
+          echo "Current pending secrets:"
+          kubectl get secrets -n journey -l owner=helm 2>/dev/null | grep -E "pending-(install|upgrade|rollback)" || echo "No pending operations found"
+
+          # Đếm số lượng pending
+          PENDING_COUNT=$(kubectl get secrets -n journey -l owner=helm -o name 2>/dev/null | grep -c pending || echo "0")
+          echo "Found $PENDING_COUNT pending operation(s)"
+
+          if [ "$PENDING_COUNT" -gt 0 ]; then
+            echo "=== Deleting all pending operations ==="
+
+            # Xóa tất cả loại pending với ignore-not-found
+            kubectl delete secrets -n journey -l owner=helm,status=pending-install --ignore-not-found=true
+            kubectl delete secrets -n journey -l owner=helm,status=pending-upgrade --ignore-not-found=true
+            kubectl delete secrets -n journey -l owner=helm,status=pending-rollback --ignore-not-found=true
+
+            # Backup: xóa tất cả secrets có chứa "pending" trong metadata
+            kubectl get secrets -n journey -l owner=helm -o name 2>/dev/null | grep pending | xargs -r kubectl delete -n journey || true
+
+            echo "✅ Cleanup completed"
+            sleep 5
+          else
+            echo "✅ No cleanup needed"
+          fi
+
+          # Kiểm tra status sau cleanup
+          echo "=== Current Helm release status ==="
+          helm status journey -n journey || echo "Release not found or in clean state"
+
+      - name: Upgrade Helm Release with retry
+        run: |
+          MAX_RETRIES=3
+          RETRY_COUNT=0
+
+          until [ $RETRY_COUNT -ge $MAX_RETRIES ]
+          do
+            echo "=== Attempt $((RETRY_COUNT+1))/$MAX_RETRIES ==="
+
+            helm upgrade journey ./charts/journey \
+              -f secrets.production.yaml \
+              -f values.override.yaml \
+              --namespace journey \
+              --atomic \
+              --cleanup-on-fail \
+              --wait \
+              --timeout 5m && break
+
+            RETRY_COUNT=$((RETRY_COUNT+1))
+
+            if [ $RETRY_COUNT -lt $MAX_RETRIES ]; then
+              echo "⚠️ Upgrade failed, cleaning up and retrying..."
+
+              # Cleanup trước khi retry
+              kubectl delete secrets -n journey -l owner=helm,status=pending-upgrade --ignore-not-found=true || true
+              kubectl delete secrets -n journey -l owner=helm,status=pending-install --ignore-not-found=true || true
+              kubectl delete secrets -n journey -l owner=helm,status=pending-rollback --ignore-not-found=true || true
+
+              echo "Waiting 10 seconds before retry..."
+              sleep 10
+            fi
+          done
+
+          if [ $RETRY_COUNT -ge $MAX_RETRIES ]; then
+            echo "❌ Upgrade failed after $MAX_RETRIES retries"
+            exit 1
+          fi
+
+          echo "✅ Helm upgrade successful!"
 
       - name: Verify Deployment
         run: |
+          echo "=== Checking pods status ==="
           kubectl get pods -n journey
+
+          echo "=== Verifying deployments rollout ==="
           kubectl rollout status deployment/api -n journey --timeout=3m
           kubectl rollout status deployment/admin -n journey --timeout=3m
           kubectl rollout status deployment/auth -n journey --timeout=3m
           kubectl rollout status deployment/notification -n journey --timeout=3m
           kubectl rollout status deployment/user -n journey --timeout=3m
+          kubectl rollout status deployment/chat -n journey --timeout=3m
+          kubectl rollout status deployment/blog -n journey --timeout=3m
+
+          echo "✅ All deployments verified successfully!"

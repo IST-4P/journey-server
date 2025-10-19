@@ -167,12 +167,12 @@ export class AuthService {
           password: hashedPassword,
           role: 'USER',
         }),
-        // this.authRepository.deleteVerificationCode({
-        //   email_type: {
-        //     email: body.email,
-        //     type: TypeOfVerificationCode.REGISTER,
-        //   },
-        // }),
+        this.authRepository.deleteVerificationCode({
+          email_type: {
+            email: body.email,
+            type: TypeOfVerificationCode.REGISTER,
+          },
+        }),
       ]);
 
       // Tạo profile trong User Service qua Pulsar
@@ -339,5 +339,31 @@ export class AuthService {
     ]);
 
     return { message: 'Message.ChangePasswordSuccessfully' };
+  }
+
+  /**
+   * Validate Access Token - dùng cho gRPC call từ các service khác (bao gồm .NET)
+   */
+  async validateToken(accessToken: string) {
+    try {
+      const payload = await this.tokenService.verifyAccessToken(accessToken);
+
+      return {
+        isValid: true,
+        userId: payload.userId,
+        role: payload.role,
+        uuid: payload.uuid,
+        iat: payload.iat,
+        exp: payload.exp,
+      };
+    } catch (error) {
+      const errorMessage =
+        error instanceof Error ? error.message : 'Invalid token';
+      this.logger.warn(`Token validation failed: ${errorMessage}`);
+      return {
+        isValid: false,
+        error: errorMessage,
+      };
+    }
   }
 }

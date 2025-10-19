@@ -1,0 +1,147 @@
+generator client {
+    provider      = "prisma-client-js"
+    output        = "../../../node_modules/@prisma-clients/vehicle"
+    binaryTargets = ["native", "debian-openssl-1.1.x"]
+}
+
+datasource db {
+    provider = "postgresql"
+    url      = env("DATABASE_URL")
+}
+
+// ==================== ENUMS ====================
+
+enum VehicleType {
+    CAR // Ô tô
+    MOTORCYCLE // Xe máy
+}
+
+enum VehicleStatus {
+    ACTIVE // Đang hoạt động, sẵn sàng cho thuê
+    INACTIVE // Tạm ngừng cho thuê
+    MAINTENANCE // Đang bảo trì
+    RESERVED // Đang được đặt
+    RENTED // Đang được thuê
+}
+
+enum TransmissionType {
+    MANUAL // Số sàn
+    AUTOMATIC // Số tự động
+}
+
+enum FuelType {
+    GASOLINE // Xăng
+    DIESEL // Dầu diesel
+    ELECTRIC // Điện
+    HYBRID // Hybrid
+}
+
+// ==================== MAIN MODELS ====================
+
+model Vehicle {
+    id           String      @id @default(uuid())
+    type         VehicleType
+    name         String // Tên xe (VD: "Toyota Vios 2023")
+    brand        String // Hãng xe (VD: "Toyota")
+    model        String // Model (VD: "Vios")
+    licensePlate String      @unique @map("license_plate") // Biển số xe
+
+    // Thông số kỹ thuật
+    seats        Int // Số chỗ ngồi
+    fuelType     FuelType         @map("fuel_type")
+    transmission TransmissionType
+
+    // Giá thuê
+    pricePerHour Decimal @map("price_per_hour") @db.Decimal(10, 2)
+    pricePerDay  Decimal @map("price_per_day") @db.Decimal(10, 2)
+
+    // Vị trí
+    location  String // Địa chỉ text (VD: "123 Nguyễn Văn A, Quận 1, TP.HCM")
+    city      String // Thành phố
+    ward      String // Phường/Xã
+    latitude  Decimal @db.Decimal(10, 8) // Vĩ độ
+    longitude Decimal @db.Decimal(11, 8) // Kinh độ
+
+    // Mô tả và điều khoản
+    description String   @db.Text
+    terms       String[] // Array of terms
+
+    // Trạng thái
+    status VehicleStatus @default(ACTIVE)
+
+    // Thống kê
+    totalTrips     Int      @default(0) @map("total_trips") // Tổng số chuyến
+    averageRating  Decimal? @default(0) @map("average_rating") @db.Decimal(3, 2) // Đánh giá trung bình
+    totalReviewIds String[] @map("total_review_ids") // Danh sách review IDs
+
+    // Timestamps
+    createdAt DateTime @default(now()) @map("created_at")
+    updatedAt DateTime @updatedAt @map("updated_at")
+
+    // Relations
+    images          String[] // Array of image URLs
+    vehicleFeatures VehicleOnFeature[]
+    availability    VehicleAvailability[]
+
+    @@index([type])
+    @@index([status])
+    @@index([brand])
+    @@index([city, ward])
+    @@index([pricePerDay])
+    @@index([latitude, longitude])
+    @@index([averageRating])
+    @@index([createdAt])
+    @@map("vehicles")
+}
+
+model VehicleFeature {
+    id          String  @id @default(uuid())
+    name        String  @unique // Tên feature (VD: "Bluetooth", "Camera lùi")
+    description String? @db.Text // Mô tả chi tiết về feature (optional)
+    icon        String? // Icon URL hoặc icon name (optional)
+
+    // Timestamps
+    createdAt DateTime @default(now()) @map("created_at")
+    updatedAt DateTime @updatedAt @map("updated_at")
+
+    // Relations
+    vehicles VehicleOnFeature[]
+
+    @@index([name])
+    @@map("vehicle_features")
+}
+
+model VehicleOnFeature {
+    id        String @id @default(uuid())
+    vehicleId String @map("vehicle_id")
+    featureId String @map("feature_id")
+
+    // Timestamps
+    createdAt DateTime @default(now()) @map("created_at")
+
+    vehicle Vehicle        @relation(fields: [vehicleId], references: [id], onDelete: Cascade)
+    feature VehicleFeature @relation(fields: [featureId], references: [id], onDelete: Cascade)
+
+    @@unique([vehicleId, featureId])
+    @@index([vehicleId])
+    @@index([featureId])
+    @@map("vehicle_on_features")
+}
+
+model VehicleAvailability {
+    id          String   @id @default(uuid())
+    vehicleId   String   @map("vehicle_id")
+    date        DateTime @db.Date // Ngày cụ thể
+    isAvailable Boolean  @default(true) @map("is_available") // Xe có sẵn trong ngày này không
+
+    // Timestamps
+    createdAt DateTime @default(now()) @map("created_at")
+    updatedAt DateTime @updatedAt @map("updated_at")
+
+    vehicle Vehicle @relation(fields: [vehicleId], references: [id], onDelete: Cascade)
+
+    @@unique([vehicleId, date])
+    @@index([vehicleId, date])
+    @@index([date, isAvailable])
+    @@map("vehicle_availability")
+}

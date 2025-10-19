@@ -30,7 +30,7 @@ model Notification {
     userId  String           @map("user_id")
     type    NotificationType
     title   String
-    message String           @db.Text
+    content String           @db.Text
 
     // Metadata
     read Boolean @default(false)
@@ -42,7 +42,6 @@ model Notification {
 
     // Timestamps
     createdAt DateTime @default(now()) @map("created_at")
-    updatedAt DateTime @updatedAt @map("updated_at")
 
     @@index([userId, createdAt(sort: Desc)])
     @@index([userId, read])

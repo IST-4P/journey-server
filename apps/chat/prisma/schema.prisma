@@ -1,0 +1,18 @@
+generator client {
+    provider      = "prisma-client-js"
+    output        = "../../../node_modules/@prisma-clients/chat"
+    binaryTargets = ["native", "debian-openssl-1.1.x"]
+}
+
+datasource db {
+    provider = "postgresql"
+    url      = env("DATABASE_URL")
+}
+
+model Chat {
+    id         String   @id @default(uuid())
+    fromUserId String
+    toUserId   String
+    content    String
+    createdAt  DateTime @default(now())
+}

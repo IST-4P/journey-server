@@ -1,0 +1,16 @@
+{
+    "folders": [
+        {
+            "path": "."
+        },
+        {
+            "name": "Blog",
+            "path": "apps/Blog"
+        },
+        {
+            "name": "device",
+            "path": "apps/device"
+        }
+    ],
+    "settings": {}
+}

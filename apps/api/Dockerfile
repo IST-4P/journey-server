@@ -12,6 +12,8 @@ COPY webpack.*.config.js ./
 COPY apps/api ./apps/api
 COPY libs/grpc ./libs/grpc
 COPY libs/nestjs ./libs/nestjs
+COPY libs/pulsar ./libs/pulsar
+COPY libs/websocket ./libs/websocket
 
 RUN npm install
 

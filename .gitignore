@@ -49,3 +49,12 @@ Thumbs.db
 .nx/workspace-data
 .cursor/rules/nx-rules.mdc
 .github/instructions/nx.instructions.md
+
+bin/
+obj/
+*.user
+*.suo
+*.vs/
+*.vscode/
+*.DS_Store
+Migrations/

@@ -3,7 +3,7 @@ import z from 'zod';
 
 export const UserSchema = z.object({
   id: z.string(),
-  email: z.email({ message: 'Error.InvalidEmail' }),
+  email: z.string().email({ message: 'Error.InvalidEmail' }),
   name: z.string().min(1, 'Error.InvalidName').max(100, 'Error.InvalidName'),
   phone: z.string().min(9).max(15),
   password: z.string().min(4).max(100),
@@ -49,7 +49,7 @@ export class RefreshTokenRequestDTO extends createZodDto(
 
 export class SendOTPRequestDTO extends createZodDto(
   z.object({
-    email: z.email({ message: 'Error.InvalidEmail' }),
+    email: z.string().email({ message: 'Error.InvalidEmail' }),
     type: z.enum(['REGISTER', 'FORGOT_PASSWORD']),
   })
 ) {}
@@ -57,7 +57,7 @@ export class SendOTPRequestDTO extends createZodDto(
 export class ForgotPasswordRequestDTO extends createZodDto(
   z
     .object({
-      email: z.email({ message: 'Error.InvalidEmail' }),
+      email: z.string().email({ message: 'Error.InvalidEmail' }),
       code: z.string().length(6),
       newPassword: z.string().min(4).max(100),
       confirmNewPassword: z.string().min(4).max(100),

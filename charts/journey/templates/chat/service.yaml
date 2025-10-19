@@ -1,0 +1,17 @@
+{{- if .Values.chat.enabled }}
+apiVersion: v1
+kind: Service
+metadata:
+  name: chat
+  labels:
+    app: chat
+spec:
+  type: ClusterIP
+  selector:
+    app: chat
+  ports:
+    - protocol: TCP
+      port: {{ .Values.chat.port.grpc }}
+      targetPort: {{ .Values.chat.port.grpc }}
+      name: grpc
+{{- end }}

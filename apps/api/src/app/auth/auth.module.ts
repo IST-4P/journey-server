@@ -33,6 +33,5 @@ import { AuthService } from './auth.service';
       useExisting: AuthService,
     },
   ],
-  exports: [AuthService],
 })
 export class AuthModule {}

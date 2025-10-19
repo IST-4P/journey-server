@@ -1,10 +1,7 @@
 using Blog.Data;
 using Blog.Repository;
+using Blog.Services;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.OpenApi.Models;
-using System.Text.Encodings.Web;
-using System.Text.Json;
-
 
 // Load .env file if exists
 DotNetEnv.Env.Load();
@@ -15,49 +12,45 @@ var builder = WebApplication.CreateBuilder(args);
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
 
 // Thay thế các biến môi trường trong connection string
-connectionString = connectionString
-    .Replace("${DB_HOST}", Environment.GetEnvironmentVariable("DB_HOST") ?? "localhost")
-    .Replace("${DB_PORT}", Environment.GetEnvironmentVariable("DB_PORT") ?? "5432")
-    .Replace("${DB_NAME}", Environment.GetEnvironmentVariable("DB_NAME") ?? "journey-blog")
-    .Replace("${DB_USERNAME}", Environment.GetEnvironmentVariable("DB_USERNAME") ?? "postgres")
-    .Replace("${DB_PASSWORD}", Environment.GetEnvironmentVariable("DB_PASSWORD") ?? "");
-Console.WriteLine($"Connect: {connectionString}");
-builder.Services.AddControllers()
-    .AddJsonOptions(options =>
-    {
-        // Cấu hình JSON serializer để xử lý ký tự Unicode và HTML
-        options.JsonSerializerOptions.Encoder = System.Text.Encodings.Web.JavaScriptEncoder.UnsafeRelaxedJsonEscaping;
-        options.JsonSerializerOptions.PropertyNamingPolicy = System.Text.Json.JsonNamingPolicy.CamelCase;
-    });
-builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen(c =>
+if (!string.IsNullOrEmpty(connectionString))
 {
-    c.SwaggerDoc("v1", new OpenApiInfo { Title = "Blog API", Version = "v1" });
-});
+    connectionString = connectionString
+        .Replace("${DB_HOST}", Environment.GetEnvironmentVariable("DB_HOST") ?? "localhost")
+        .Replace("${DB_PORT}", Environment.GetEnvironmentVariable("DB_PORT") ?? "5432")
+        .Replace("${DB_NAME}", Environment.GetEnvironmentVariable("DB_NAME") ?? "journey-blog")
+        .Replace("${DB_USERNAME}", Environment.GetEnvironmentVariable("DB_USERNAME") ?? "postgres")
+        .Replace("${DB_PASSWORD}", Environment.GetEnvironmentVariable("DB_PASSWORD") ?? "");
 
+    Console.WriteLine($"Database Connection: {connectionString.Split("Password=")[0]}Password=***");
+}
+else
+{
+    throw new InvalidOperationException("Connection string not found in configuration");
+}
+
+// Add gRPC services
+builder.Services.AddGrpc();
+
+// Add DbContext
 builder.Services.AddDbContext<BlogDbContext>(options =>
     options.UseNpgsql(connectionString));
 
+// Add AutoMapper
 builder.Services.AddAutoMapper(typeof(Program));
-builder.Services.AddScoped<IBlogRepository, BlogRepository>();
 
-// Thêm Authentication và Authorization
-builder.Services.AddAuthentication();
-builder.Services.AddAuthorization();
+// Add Repository
+builder.Services.AddScoped<IBlogRepository, BlogRepository>();
 
 var app = builder.Build();
 
-if (app.Environment.IsDevelopment())
-{
-    app.UseSwagger();
-    app.UseSwaggerUI();
-}
+// Configure gRPC endpoint
+var grpcUrl = Environment.GetEnvironmentVariable("BLOG_GRPC_SERVICE_URL") ?? "0.0.0.0:5005";
+Console.WriteLine($"Blog gRPC Service listening on: {grpcUrl}");
 
-app.UseHttpsRedirection();
+// Map gRPC service
+app.MapGrpcService<BlogGrpcService>();
 
+// Health check endpoint (optional)
+app.MapGet("/health", () => Results.Ok(new { status = "healthy", service = "blog-grpc" }));
 
-app.UseAuthentication();
-app.UseAuthorization();
-
-app.MapControllers();
 app.Run();

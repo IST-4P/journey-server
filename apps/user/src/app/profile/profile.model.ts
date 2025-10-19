@@ -13,7 +13,7 @@ export type RoleEnumType = z.infer<typeof RoleEnum>;
 
 export const ProfileSchema = z.object({
   id: z.string(),
-  email: z.email(),
+  email: z.string().email(),
   fullName: z.string(),
   phone: z.string(),
   role: RoleEnum,

@@ -1,4 +1,3 @@
-import { AuthProto } from '@hacmieu-journey/grpc';
 import {
   AccessTokenPayload,
   ActiveUser,
@@ -41,13 +40,13 @@ export class AuthController {
   @IsPublic()
   @Post('otp')
   async sendOTP(@Body() body: SendOTPRequestDTO) {
-    return this.authService.sendOTP(body as AuthProto.SendOTPRequest);
+    return this.authService.sendOTP(body);
   }
 
   @IsPublic()
   @Post('register')
   async register(@Body() body: RegisterRequestDTO) {
-    return this.authService.register(body as AuthProto.RegisterRequest);
+    return this.authService.register(body);
   }
 
   @IsPublic()
@@ -56,7 +55,7 @@ export class AuthController {
     @Body() body: LoginRequestDTO,
     @Res({ passthrough: true }) res: Response
   ) {
-    const tokens = await this.authService.login(body as AuthProto.LoginRequest);
+    const tokens = await this.authService.login(body);
 
     res.cookie('accessToken', tokens.accessToken, {
       ...cookieOptions,
@@ -112,9 +111,7 @@ export class AuthController {
   @IsPublic()
   @Post('forgot-password')
   async forgotPassword(@Body() body: ForgotPasswordRequestDTO) {
-    return this.authService.forgotPassword(
-      body as AuthProto.ForgotPasswordRequest
-    );
+    return this.authService.forgotPassword(body);
   }
 
   // ===== PROTECTED ROUTES - Ví dụ sử dụng Guards =====

@@ -1,4 +1,3 @@
-import { UserProto } from '@hacmieu-journey/grpc';
 import {
   Body,
   Controller,
@@ -32,9 +31,7 @@ export class UserController {
 
   @Get('profiles')
   findAllProfiles(@Query() query: FindAllProfilesQueryDTO) {
-    return this.userService.findAllProfiles(
-      query as UserProto.FindAllProfilesRequest
-    );
+    return this.userService.findAllProfiles(query);
   }
 
   @Get('profiles/:userId')
@@ -50,7 +47,7 @@ export class UserController {
     return this.userService.updateProfile({
       userId,
       ...body,
-    } as UserProto.UpdateProfileRequest);
+    });
   }
 
   @Get('driver-license/:userId')
@@ -66,7 +63,7 @@ export class UserController {
     return this.userService.createDriverLicense({
       userId,
       ...body,
-    } as UserProto.CreateDriverLicenseRequest);
+    });
   }
 
   @Put('driver-license/:userId')
@@ -90,7 +87,7 @@ export class UserController {
     return this.userService.createBankAccount({
       userId,
       ...body,
-    } as UserProto.CreateBankAccountRequest);
+    });
   }
 
   @Put('bank-account/:userId')
@@ -101,7 +98,7 @@ export class UserController {
     return this.userService.updateBankAccount({
       userId,
       ...body,
-    } as UserProto.UpdateBankAccountRequest);
+    });
   }
 
   @Get('address')
@@ -123,7 +120,7 @@ export class UserController {
     return this.userService.createAddress({
       userId,
       ...body,
-    } as UserProto.CreateAddressRequest);
+    });
   }
 
   @Put('address')
@@ -135,7 +132,7 @@ export class UserController {
       id: query.id,
       userId: query.userId,
       ...body,
-    } as UserProto.UpdateAddressRequest);
+    });
   }
 
   @Delete('address')

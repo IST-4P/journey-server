@@ -7,7 +7,7 @@ export class FindAllProfilesQueryDTO extends createZodDto(
     .object({
       fullName: z.string({ message: 'Error.InvalidFullName' }),
       phone: z.string({ message: 'Error.InvalidPhone' }),
-      email: z.email({ message: 'Error.InvalidEmail' }),
+      email: z.string().email({ message: 'Error.InvalidEmail' }),
       role: z.enum(['USER', 'ADMIN'], { message: 'Error.InvalidRole' }),
     })
     .partial()
@@ -19,7 +19,7 @@ export class UpdateProfileRequestDTO extends createZodDto(
     .object({
       fullName: z.string({ message: 'Error.InvalidFullName' }),
       phone: z.string({ message: 'Error.InvalidPhone' }),
-      email: z.email({ message: 'Error.InvalidEmail' }),
+      email: z.string().email({ message: 'Error.InvalidEmail' }),
       gender: z.enum(['MALE', 'FEMALE', 'OTHER'], {
         message: 'Error.InvalidGender',
       }),
@@ -123,22 +123,20 @@ export class CreateAddressRequestDTO extends createZodDto(
     detail: z.string({ message: 'Error.InvalidDetail' }).min(1),
     latitude: z
       .number({ message: 'Error.InvalidLatitude' })
-      .nullable()
+
       .optional(),
     longitude: z
       .number({ message: 'Error.InvalidLongitude' })
-      .nullable()
+
       .optional(),
   })
 ) {}
 
 export class UpdateAddressQueryDTO extends createZodDto(
-  z
-    .object({
-      id: z.string({ message: 'Error.InvalidId' }).min(1),
-      userId: z.string({ message: 'Error.InvalidUserId' }).min(1),
-    })
-    .partial()
+  z.object({
+    id: z.string({ message: 'Error.InvalidId' }).min(1),
+    userId: z.string({ message: 'Error.InvalidUserId' }).min(1),
+  })
 ) {}
 
 export class UpdateAddressRequestDTO extends createZodDto(
@@ -148,8 +146,8 @@ export class UpdateAddressRequestDTO extends createZodDto(
       city: z.string({ message: 'Error.InvalidCity' }).min(1),
       ward: z.string({ message: 'Error.InvalidWard' }).min(1),
       detail: z.string({ message: 'Error.InvalidDetail' }).min(1),
-      latitude: z.number({ message: 'Error.InvalidLatitude' }).nullable(),
-      longitude: z.number({ message: 'Error.InvalidLongitude' }).nullable(),
+      latitude: z.number({ message: 'Error.InvalidLatitude' }),
+      longitude: z.number({ message: 'Error.InvalidLongitude' }),
     })
     .partial()
 ) {}

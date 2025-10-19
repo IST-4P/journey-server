@@ -8,6 +8,8 @@ export class GetManyNotificationsQueryDTO extends createZodDto(
 
 export class MarkAsReadRequestDTO extends createZodDto(
   z.object({
-    notificationIds: z.array(z.uuid({ message: 'Error.InvalidId' })).min(1),
+    notificationIds: z
+      .array(z.string().uuid({ message: 'Error.InvalidId' }))
+      .min(1),
   })
 ) {}

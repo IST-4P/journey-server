@@ -41,8 +41,8 @@ export class ChatGateway implements OnGatewayConnection {
   ) {
     const fromUserId = client.data['userId'];
     const newMessage = await this.chatService.createChat({
-      fromUserId,
       ...message,
+      fromUserId,
     } as ChatProto.CreateChatRequest);
     const recipientRoom = generateRoomUserId(message.toUserId);
     this.server.to(recipientRoom).emit('newChat', newMessage);

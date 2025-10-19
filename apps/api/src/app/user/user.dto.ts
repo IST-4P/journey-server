@@ -6,7 +6,7 @@ export class UpdateProfileRequestDTO extends createZodDto(
     .object({
       fullName: z.string({ message: 'Error.InvalidFullName' }),
       phone: z.string({ message: 'Error.InvalidPhone' }),
-      email: z.email({ message: 'Error.InvalidEmail' }),
+      email: z.string().email({ message: 'Error.InvalidEmail' }),
       gender: z.enum(['MALE', 'FEMALE', 'OTHER'], {
         message: 'Error.InvalidGender',
       }),
@@ -101,14 +101,8 @@ export class CreateAddressRequestDTO extends createZodDto(
     city: z.string({ message: 'Error.InvalidCity' }).min(1),
     ward: z.string({ message: 'Error.InvalidWard' }).min(1),
     detail: z.string({ message: 'Error.InvalidDetail' }).min(1),
-    latitude: z
-      .number({ message: 'Error.InvalidLatitude' })
-      .nullable()
-      .optional(),
-    longitude: z
-      .number({ message: 'Error.InvalidLongitude' })
-      .nullable()
-      .optional(),
+    latitude: z.number({ message: 'Error.InvalidLatitude' }).optional(),
+    longitude: z.number({ message: 'Error.InvalidLongitude' }).optional(),
   })
 ) {}
 
@@ -119,8 +113,8 @@ export class UpdateAddressRequestDTO extends createZodDto(
       city: z.string({ message: 'Error.InvalidCity' }).min(1),
       ward: z.string({ message: 'Error.InvalidWard' }).min(1),
       detail: z.string({ message: 'Error.InvalidDetail' }).min(1),
-      latitude: z.number({ message: 'Error.InvalidLatitude' }).nullable(),
-      longitude: z.number({ message: 'Error.InvalidLongitude' }).nullable(),
+      latitude: z.number({ message: 'Error.InvalidLatitude' }),
+      longitude: z.number({ message: 'Error.InvalidLongitude' }),
     })
     .partial()
 ) {}

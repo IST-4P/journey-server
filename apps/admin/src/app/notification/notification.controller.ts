@@ -1,4 +1,3 @@
-import { NotificationProto } from '@hacmieu-journey/grpc';
 import { Body, Controller, Delete, Get, Post, Query } from '@nestjs/common';
 import {
   CreateNotificationRequestDTO,
@@ -16,29 +15,21 @@ export class NotificationController {
 
   @Get('detail')
   getNotification(@Query() query: GetNotificationQueryDTO) {
-    return this.notificationService.getNotification(
-      query as NotificationProto.GetNotificationRequest
-    );
+    return this.notificationService.getNotification(query);
   }
 
   @Get('list')
   getManyNotifications(@Query() query: GetManyNotificationsQueryDTO) {
-    return this.notificationService.getManyNotifications(
-      query as NotificationProto.GetManyNotificationsRequest
-    );
+    return this.notificationService.getManyNotifications(query);
   }
 
   @Post()
   createNotification(@Body() body: CreateNotificationRequestDTO) {
-    return this.notificationService.createNotification(
-      body as NotificationProto.CreateNotificationRequest
-    );
+    return this.notificationService.createNotification(body);
   }
 
   @Delete(':id')
   deleteNotification(@Query() query: DeleteNotificationQueryDTO) {
-    return this.notificationService.deleteNotification(
-      query as NotificationProto.DeleteNotificationRequest
-    );
+    return this.notificationService.deleteNotification(query);
   }
 }

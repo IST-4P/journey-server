@@ -67,7 +67,7 @@ jobs:
         run: |
           echo "=== Cleaning up old Docker images (keeping latest 5 versions) ==="
 
-          SERVICES="api admin auth notification user chat"
+          SERVICES="api admin auth notification user chat blog"
           KEEP_COUNT=5
 
           for SERVICE in $SERVICES; do
@@ -149,22 +149,32 @@ jobs:
         service:
           - name: api
             dockerfile: apps/api/Dockerfile
+            type: nodejs
           - name: admin
             dockerfile: apps/admin/Dockerfile
+            type: nodejs
           - name: auth
             dockerfile: apps/auth/Dockerfile
+            type: nodejs
           - name: notification
             dockerfile: apps/notification/Dockerfile
+            type: nodejs
           - name: user
             dockerfile: apps/user/Dockerfile
+            type: nodejs
           - name: chat
             dockerfile: apps/chat/Dockerfile
+            type: nodejs
+          - name: blog
+            dockerfile: apps/blog/Dockerfile
+            type: dotnet
 
     steps:
       - uses: actions/checkout@v4
 
-      # Download node_modules đã được build
+      # Download node_modules đã được build (chỉ cho Node.js services)
       - name: Download node_modules
+        if: matrix.service.type == 'nodejs'
         uses: actions/download-artifact@v4
         with:
           name: node_modules
@@ -246,6 +256,9 @@ jobs:
           chat:
             enabled: true
             image: ${{ secrets.DOCKERHUB_USERNAME }}/journey-chat:${{ steps.tag.outputs.TAG }}
+          blog:
+            enabled: true
+            image: ${{ secrets.DOCKERHUB_USERNAME }}/journey-blog:${{ steps.tag.outputs.TAG }}
           EOF
 
       - name: List and cleanup all pending Helm operations
@@ -333,5 +346,6 @@ jobs:
           kubectl rollout status deployment/notification -n journey --timeout=3m
           kubectl rollout status deployment/user -n journey --timeout=3m
           kubectl rollout status deployment/chat -n journey --timeout=3m
+          kubectl rollout status deployment/blog -n journey --timeout=3m
 
           echo "✅ All deployments verified successfully!"

@@ -2,16 +2,16 @@ import { PaginationQuerySchema } from '@hacmieu-journey/nestjs';
 import { z } from 'zod';
 
 export const ChatSchema = z.object({
-  id: z.uuid(),
-  fromUserId: z.uuid(),
-  toUserId: z.uuid(),
+  id: z.string().uuid(),
+  fromUserId: z.string().uuid(),
+  toUserId: z.string().uuid(),
   content: z.string(),
   createdAt: z.date(),
 });
 
 export const GetChatsRequestSchema = PaginationQuerySchema.extend({
-  fromUserId: z.uuid(),
-  toUserId: z.uuid(),
+  fromUserId: z.string().uuid(),
+  toUserId: z.string().uuid(),
 });
 
 export const GetChatsResponseSchema = z.object({

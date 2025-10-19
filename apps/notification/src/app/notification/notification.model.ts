@@ -22,15 +22,15 @@ export type NotificationEnumType = z.infer<typeof NotificationEnum>;
 
 // ==================== BASE SCHEMA ====================
 export const NotificationSchema = z.object({
-  id: z.uuid(),
-  userId: z.uuid(),
+  id: z.string().uuid(),
+  userId: z.string().uuid(),
   type: NotificationEnum,
   title: z.string(),
   content: z.string(),
   read: z.boolean(),
-  bookingId: z.uuid().nullable().optional(),
-  vehicleId: z.uuid().nullable().optional(),
-  paymentId: z.uuid().nullable().optional(),
+  bookingId: z.string().uuid().nullable().optional(),
+  vehicleId: z.string().uuid().nullable().optional(),
+  paymentId: z.string().uuid().nullable().optional(),
   createdAt: z.date(),
 });
 
@@ -70,9 +70,9 @@ export const DeleteNotificationRequestSchema = NotificationSchema.pick({
 });
 
 export const MarkAsReadRequestSchema = z.object({
-  userId: z.uuid(),
+  userId: z.string().uuid(),
   notificationIds: z
-    .array(z.uuid())
+    .array(z.string().uuid())
     .min(1, 'At least one notification ID is required'),
 });
 

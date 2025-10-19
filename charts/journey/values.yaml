@@ -84,6 +84,14 @@ chat:
     grpc: 5003
     http: 3003
 
+blog:
+  enabled: true
+  replicas: 1
+  image: 'caophi562005/journey-blog:latest'
+  port:
+    grpc: 5005
+    http: 3005
+
 # Configuration (non-sensitive)
 config:
   pulsarUrl: ''
@@ -91,6 +99,7 @@ config:
   userUrl: ''
   notificationUrl: ''
   chatUrl: ''
+  blogUrl: ''
   accessTokenExpiresIn: '1h'
   refreshTokenExpiresIn: '7d'
   otpExpires: '5m'
@@ -102,6 +111,7 @@ secrets:
   notificationDatabaseUrl: ''
   chatDatabaseUrl: ''
   accessTokenSecret: ''
+  blogDatabaseUrl: ''
   refreshTokenSecret: ''
   resendApiKey: ''
   redisUrl: ''

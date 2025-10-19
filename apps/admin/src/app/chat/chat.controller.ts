@@ -1,4 +1,3 @@
-import { ChatProto } from '@hacmieu-journey/grpc';
 import { Body, Controller, Get, Post, Query } from '@nestjs/common';
 import { CreateChatRequestDTO, GetChatsQueryDTO } from './chat.dto';
 import { ChatService } from './chat.service';
@@ -11,11 +10,11 @@ export class ChatController {
 
   @Get()
   getManyChats(@Query() query: GetChatsQueryDTO) {
-    return this.chatService.getChats(query as ChatProto.GetChatsRequest);
+    return this.chatService.getChats(query);
   }
 
   @Post()
   getChat(@Body() body: CreateChatRequestDTO) {
-    return this.chatService.createChat(body as ChatProto.CreateChatRequest);
+    return this.chatService.createChat(body);
   }
 }

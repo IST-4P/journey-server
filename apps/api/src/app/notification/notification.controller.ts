@@ -1,4 +1,3 @@
-import { NotificationProto } from '@hacmieu-journey/grpc';
 import { ActiveUser } from '@hacmieu-journey/nestjs';
 import {
   Body,
@@ -29,7 +28,7 @@ export class NotificationController {
     return this.notificationService.getManyNotifications({
       userId,
       ...query,
-    } as NotificationProto.GetManyNotificationsRequest);
+    });
   }
 
   @Get(':id')
@@ -51,7 +50,7 @@ export class NotificationController {
     return this.notificationService.markAllAsRead({
       userId,
       ...body,
-    } as NotificationProto.MarkAsReadRequest);
+    });
   }
 
   @Delete(':id')

@@ -1,4 +1,3 @@
-import { UserProto } from '@hacmieu-journey/grpc';
 import { ActiveUser } from '@hacmieu-journey/nestjs';
 import { Body, Controller, Get, Param, Post, Put } from '@nestjs/common';
 import {
@@ -31,7 +30,7 @@ export class UserController {
     return this.userService.updateProfile({
       userId,
       ...body,
-    } as UserProto.UpdateProfileRequest);
+    });
   }
 
   @Get('driver-license')
@@ -47,7 +46,7 @@ export class UserController {
     return this.userService.createDriverLicense({
       userId,
       ...body,
-    } as UserProto.CreateDriverLicenseRequest);
+    });
   }
 
   @Put('driver-license')
@@ -71,7 +70,7 @@ export class UserController {
     return this.userService.createBankAccount({
       userId,
       ...body,
-    } as UserProto.CreateBankAccountRequest);
+    });
   }
 
   @Put('bank-account')
@@ -82,7 +81,7 @@ export class UserController {
     return this.userService.updateBankAccount({
       userId,
       ...body,
-    } as UserProto.UpdateBankAccountRequest);
+    });
   }
 
   @Get('address')
@@ -103,7 +102,7 @@ export class UserController {
     return this.userService.createAddress({
       userId,
       ...body,
-    } as UserProto.CreateAddressRequest);
+    });
   }
 
   @Put('address/:id')
@@ -116,6 +115,6 @@ export class UserController {
       id,
       userId,
       ...body,
-    } as UserProto.UpdateAddressRequest);
+    });
   }
 }

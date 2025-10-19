@@ -1,0 +1,66 @@
+{{- if .Values.blog.enabled }}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: blog
+  labels:
+    app: blog
+spec:
+  replicas: {{ .Values.blog.replicas }}
+  selector:
+    matchLabels:
+      app: blog
+  template:
+    metadata:
+      labels:
+        app: blog
+    spec:
+      containers:
+        - name: blog
+          image: {{ .Values.blog.image }}
+          imagePullPolicy: {{ .Values.global.imagePullPolicy }}
+          ports:
+            - name: grpc
+              containerPort: {{ .Values.blog.port.grpc }}
+              protocol: TCP
+          env:
+            - name: ASPNETCORE_URLS
+              value: "http://+:{{ .Values.blog.port.grpc }}"
+            - name: ASPNETCORE_ENVIRONMENT
+              value: "Production"
+            - name: BLOG_GRPC_SERVICE_URL
+              value: "0.0.0.0:{{ .Values.blog.port.grpc }}"
+            - name: ConnectionStrings__DefaultConnection
+              valueFrom:
+                secretKeyRef:
+                  name: journey-secrets
+                  key: BLOG_DATABASE_URL
+          envFrom:
+            - configMapRef:
+                name: journey-config
+            - secretRef:
+                name: journey-secrets
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: {{ .Values.blog.port.grpc }}
+            initialDelaySeconds: 30
+            periodSeconds: 10
+            timeoutSeconds: 5
+            failureThreshold: 3
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: {{ .Values.blog.port.grpc }}
+            initialDelaySeconds: 10
+            periodSeconds: 5
+            timeoutSeconds: 3
+            failureThreshold: 3
+          resources:
+            requests:
+              memory: "256Mi"
+              cpu: "100m"
+            limits:
+              memory: "512Mi"
+              cpu: "500m"
+{{- end }}

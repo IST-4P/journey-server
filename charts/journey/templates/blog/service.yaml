@@ -1,0 +1,17 @@
+{{- if .Values.blog.enabled }}
+apiVersion: v1
+kind: Service
+metadata:
+  name: blog
+  labels:
+    app: blog
+spec:
+  type: ClusterIP
+  ports:
+    - name: grpc
+      port: {{ .Values.blog.port.grpc }}
+      targetPort: grpc
+      protocol: TCP
+  selector:
+    app: blog
+{{- end }}

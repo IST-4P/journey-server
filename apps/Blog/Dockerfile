@@ -1,14 +1,17 @@
 # Stage 1: Build stage
 FROM mcr.microsoft.com/dotnet/sdk:9.0 AS build
+
 WORKDIR /src
 
 # Copy project file và restore dependencies
-COPY apps/blog/Blog.csproj apps/blog/
-RUN dotnet restore apps/blog/Blog.csproj
+COPY ["apps/blog/Blog.csproj", "apps/blog/"]
+RUN dotnet restore "apps/blog/Blog.csproj"
 
-# Copy toàn bộ source code
-COPY apps/blog/ apps/blog/
-COPY libs/grpc/src/lib/proto/blog.proto apps/blog/Protos/
+# Copy proto file trước
+COPY ["libs/grpc/src/lib/proto/blog.proto", "apps/blog/Protos/blog.proto"]
+
+# Copy toàn bộ source code của blog app
+COPY ["apps/blog/", "apps/blog/"]
 
 # Build project
 WORKDIR /src/apps/blog

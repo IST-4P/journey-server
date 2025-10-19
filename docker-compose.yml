@@ -37,6 +37,7 @@ services:
       bin/pulsar-admin tenants create journey --allowed-clusters standalone || true &&
       bin/pulsar-admin namespaces create journey/events || true &&
       bin/pulsar-admin namespaces create journey/notifications || true &&
+      bin/pulsar-admin namespaces create journey/chats || true &&
       wait $$PULSAR_PID
       "
       sh -c " bin/apply-config-from-env.py conf/standalone.conf && echo 'allowAutoTopicCreation=true' >> conf/standalone.conf && echo 'allowAutoTopicCreationType=partitioned' >> conf/standalone.conf && echo 'defaultNumPartitions=3' >> conf/standalone.conf && bin/pulsar standalone & PULSAR_PID=$$! && sleep 15 && bin/pulsar-admin tenants create journey --allowed-clusters standalone || true && bin/pulsar-admin namespaces create journey/events || true && wait $$PULSAR_PID "

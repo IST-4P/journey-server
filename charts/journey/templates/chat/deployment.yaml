@@ -1,37 +1,37 @@
-{{- if .Values.user.enabled }}
+{{- if .Values.chat.enabled }}
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: user
+  name: chat
   labels:
-    app: user
+    app: chat
 spec:
-  replicas: {{ .Values.user.replicas }}
+  replicas: {{ .Values.chat.replicas }}
   selector:
     matchLabels:
-      app: user
+      app: chat
   template:
     metadata:
       labels:
-        app: user
+        app: chat
     spec:
       containers:
-        - name: user
-          image: {{ .Values.user.image }}
+        - name: chat
+          image: {{ .Values.chat.image }}
           imagePullPolicy: {{ .Values.global.imagePullPolicy }}
           ports:
-            - containerPort: {{ .Values.user.port.grpc }}
-            - containerPort: {{ .Values.user.port.http }}
+            - containerPort: {{ .Values.chat.port.grpc }}
+            - containerPort: {{ .Values.chat.port.http }}
           env:
             - name: DATABASE_URL
               valueFrom:
                 secretKeyRef:
                   name: journey-secrets
-                  key: USER_DATABASE_URL
+                  key: CHAT_DATABASE_URL
             - name: PORT
-              value: {{ .Values.user.port.http | quote }}
-            - name: USER_GRPC_SERVICE_URL
-              value: "0.0.0.0:{{ .Values.user.port.grpc }}"
+              value: {{ .Values.chat.port.http | quote }}
+            - name: CHAT_GRPC_SERVICE_URL
+              value: "0.0.0.0:{{ .Values.chat.port.grpc }}"
           envFrom:
             - configMapRef:
                 name: journey-config

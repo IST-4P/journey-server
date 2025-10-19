@@ -79,9 +79,9 @@ model Vehicle {
     updatedAt DateTime @updatedAt @map("updated_at")
 
     // Relations
-    images       String[] // Array of image URLs
-    features     VehicleFeature[]
-    availability VehicleAvailability[]
+    images          String[] // Array of image URLs
+    vehicleFeatures VehicleOnFeature[]
+    availability    VehicleAvailability[]
 
     @@index([type])
     @@index([status])
@@ -95,15 +95,37 @@ model Vehicle {
 }
 
 model VehicleFeature {
-    id          String @id @default(uuid())
-    vehicleId   String @map("vehicle_id")
-    featureName String @map("feature_name") // VD: "Bluetooth", "Camera lùi", "Cảm biến lùi"
+    id          String  @id @default(uuid())
+    name        String  @unique // Tên feature (VD: "Bluetooth", "Camera lùi")
+    description String? @db.Text // Mô tả chi tiết về feature (optional)
+    icon        String? // Icon URL hoặc icon name (optional)
 
-    vehicle Vehicle @relation(fields: [vehicleId], references: [id], onDelete: Cascade)
+    // Timestamps
+    createdAt DateTime @default(now()) @map("created_at")
+    updatedAt DateTime @updatedAt @map("updated_at")
 
-    @@unique([vehicleId, featureName])
-    @@index([vehicleId])
+    // Relations
+    vehicles VehicleOnFeature[]
+
+    @@index([name])
     @@map("vehicle_features")
+}
+
+model VehicleOnFeature {
+    id        String @id @default(uuid())
+    vehicleId String @map("vehicle_id")
+    featureId String @map("feature_id")
+
+    // Timestamps
+    createdAt DateTime @default(now()) @map("created_at")
+
+    vehicle Vehicle        @relation(fields: [vehicleId], references: [id], onDelete: Cascade)
+    feature VehicleFeature @relation(fields: [featureId], references: [id], onDelete: Cascade)
+
+    @@unique([vehicleId, featureId])
+    @@index([vehicleId])
+    @@index([featureId])
+    @@map("vehicle_on_features")
 }
 
 model VehicleAvailability {

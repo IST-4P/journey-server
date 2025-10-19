@@ -6,7 +6,6 @@ using Microsoft.AspNetCore.Authorization;
 
 namespace device.Controller
 {
-    [Authorize(Policy = "AdminOnly")]
     [ApiController]
     [Route("api/admin/devices")]
     public class AdminDevicesController : ControllerBase

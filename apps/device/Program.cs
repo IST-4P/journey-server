@@ -5,86 +5,47 @@ using Microsoft.OpenApi.Models;
 using device.Service;
 using device.Interface;
 using DotNetEnv;
-using AuthGrpc;
-using device.Configuration;
-using device.Grpc.Clients;
-using Microsoft.AspNetCore.Authentication.JwtBearer;
-using System.Security.Claims;
 
-AppContext.SetSwitch("System.Net.Http.SocketsHttpHandler.Http2UnencryptedSupport", true); // allow h2c if using http
+Env.Load();
 
-namespace device
-{
-    public class Program
+var builder = WebApplication.CreateBuilder(args);
+
+var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
+connectionString = connectionString
+    .Replace("${DB_HOST}", Environment.GetEnvironmentVariable("DB_HOST") ?? "localhost")
+    .Replace("${DB_PORT}", Environment.GetEnvironmentVariable("DB_PORT") ?? "5432")
+    .Replace("${DB_NAME}", Environment.GetEnvironmentVariable("DB_NAME") ?? "journey-blog")
+    .Replace("${DB_USERNAME}", Environment.GetEnvironmentVariable("DB_USERNAME") ?? "postgres")
+    .Replace("${DB_PASSWORD}", Environment.GetEnvironmentVariable("DB_PASSWORD") ?? "");
+Console.WriteLine($"Connect: {connectionString}");
+builder.Services.AddControllers()
+    .AddJsonOptions(options =>
     {
-        public static void Main(string[] args)
-        {
-            Env.Load();
+        options.JsonSerializerOptions.PropertyNamingPolicy = System.Text.Json.JsonNamingPolicy.CamelCase;
+    });
 
-            var builder = WebApplication.CreateBuilder(args);
+builder.Services.AddEndpointsApiExplorer();
+builder.Services.AddSwaggerGen(c =>
+{
+    c.SwaggerDoc("v1", new OpenApiInfo { Title = "Device API", Version = "v1" });
+});
 
-            var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
+builder.Services.AddDbContext<DeviceDbContext>(options =>
+    options.UseNpgsql(connectionString));
 
-            builder.Services.AddControllers()
-                .AddJsonOptions(options =>
-                {
-                    options.JsonSerializerOptions.PropertyNamingPolicy = System.Text.Json.JsonNamingPolicy.CamelCase;
-                });
-
-            builder.Services.AddEndpointsApiExplorer();
-            builder.Services.AddSwaggerGen(c =>
-            {
-                c.SwaggerDoc("v1", new OpenApiInfo { Title = "Device API", Version = "v1" });
-            });
-
-            builder.Services.AddDbContext<DeviceDbContext>(options =>
-                options.UseNpgsql(connectionString));
-
-            builder.Services.AddAutoMapper(typeof(Program));
-            builder.Services.AddScoped<IDeviceRepository, DeviceRepository>();
-            builder.Services.AddScoped<IDeviceService, DeviceService>();
-
-            builder.Services.AddAuthentication("Bearer")
-                .AddJwtBearer("Bearer", options =>
-                {
-                    options.Authority = "hacmieu-postgresql-caophi565caophi-d37b.e.aivencloud.com"; // URL Auth Service
-                    options.Audience = "journey-device"; // tên service này đăng ký trong Auth
-                    options.RequireHttpsMetadata = false;
-                });
-
-            builder.Services.AddAuthorization(options =>
-            {
-                options.AddPolicy("AdminOnly", policy => policy.RequireRole("ADMIN"));
-                options.AddPolicy("UserOrAdmin", policy => policy.RequireRole("USER", "ADMIN"));
-            });
-
-            // Bind options
-            builder.Services.Configure<AuthGrpcOptions>(builder.Configuration.GetSection("AuthGrpc"));
-
-            // gRPC Auth client
-            builder.Services.AddGrpcClient<Auth.AuthClient>((sp, o) =>
-            {
-                var cfg = builder.Configuration.GetSection("AuthGrpc").Get<AuthGrpcOptions>()!;
-                o.Address = new Uri(cfg.Address);
-            });
-            builder.Services.AddScoped<IAuthGrpcClient, AuthGrpcClient>();
-
-            var app = builder.Build();
-
-            if (app.Environment.IsDevelopment())
-            {
-                app.UseSwagger();
-                app.UseSwaggerUI();
-            }
+builder.Services.AddAutoMapper(typeof(Program));
+builder.Services.AddScoped<IDeviceRepository, DeviceRepository>();
+builder.Services.AddScoped<IDeviceService, DeviceService>();
 
 
+var app = builder.Build();
 
-            app.UseAuthentication();
-            app.UseAuthorization();
-            app.UseGrpcAuthentication();
-            app.UseHttpsRedirection();
-            app.MapControllers();
-            app.Run();
-        }
-    }
+if (app.Environment.IsDevelopment())
+{
+    app.UseSwagger();
+    app.UseSwaggerUI();
 }
+
+app.UseHttpsRedirection();
+app.MapControllers();
+app.Run();

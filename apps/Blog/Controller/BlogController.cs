@@ -8,6 +8,7 @@ using System.Security.Claims;
 
 namespace Blog.Controller
 {
+    // [Authorize]
     [ApiController]
     [Route("api/blog")] // Updated route to use 'api/blog'
     public class BlogController : ControllerBase
@@ -22,7 +23,7 @@ namespace Blog.Controller
         }
 
         [HttpGet]
-        [AllowAnonymous] // Public endpoint - không cần auth
+        // [AllowAnonymous] // Public endpoint - không cần auth
         public async Task<IActionResult> GetBlogs([FromQuery] BlogFilterDto? filter = null)
         {
             try
@@ -59,7 +60,7 @@ namespace Blog.Controller
         }
 
 
-
+        // [AllowAnonymous]
         [HttpGet("{id:guid}")]
         public async Task<IActionResult> GetBlogById(Guid id)
         {
@@ -91,7 +92,7 @@ namespace Blog.Controller
         }
 
         [HttpPost]
-        [Authorize] // Yêu cầu authentication
+        // [Authorize] // Yêu cầu authentication
         public async Task<IActionResult> AddBlog([FromBody] AddBlogRequestDto addBlogRequest)
         {
             try
@@ -134,7 +135,7 @@ namespace Blog.Controller
 
 
         [HttpPut("{id:guid}")]
-        [Authorize] // Yêu cầu authentication
+        // [Authorize] // Yêu cầu authentication
         public async Task<IActionResult> UpdateBlog(Guid id, [FromBody] UpdateBlogRequetsDto updateBlogRequest)
         {
             try
@@ -181,7 +182,7 @@ namespace Blog.Controller
         }
 
         [HttpDelete("{id:guid}")]
-        [Authorize(Roles = "ADMIN")] // Chỉ ADMIN mới được xóa
+        // [Authorize(Roles = "ADMIN")] // Chỉ ADMIN mới được xóa
         public async Task<IActionResult> DeleteBlog(Guid id)
         {
             try

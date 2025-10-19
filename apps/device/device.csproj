@@ -25,14 +25,5 @@
     <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="9.0.4" />
     <PackageReference Include="Swashbuckle.AspNetCore" Version="9.0.6" />
 
-    <!-- gRPC -->
-    <PackageReference Include="Grpc.Net.Client" Version="2.62.0" />
-    <PackageReference Include="Google.Protobuf" Version="3.27.2" />
-    <PackageReference Include="Grpc.Tools" Version="2.62.0" PrivateAssets="All" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <Protobuf Include="Grpc\Protos\auth.proto" GrpcServices="Client" ProtoRoot="Grpc\Protos" />
-  </ItemGroup>
-
+</ItemGroup>
 </Project>

@@ -1,10 +1,10 @@
 using Blog.Data;
-using Blog.Middleware;
 using Blog.Repository;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi.Models;
 using System.Text.Encodings.Web;
 using System.Text.Json;
+
 
 // Load .env file if exists
 DotNetEnv.Env.Load();
@@ -21,7 +21,7 @@ connectionString = connectionString
     .Replace("${DB_NAME}", Environment.GetEnvironmentVariable("DB_NAME") ?? "journey-blog")
     .Replace("${DB_USERNAME}", Environment.GetEnvironmentVariable("DB_USERNAME") ?? "postgres")
     .Replace("${DB_PASSWORD}", Environment.GetEnvironmentVariable("DB_PASSWORD") ?? "");
-
+Console.WriteLine($"Connect: {connectionString}");
 builder.Services.AddControllers()
     .AddJsonOptions(options =>
     {
@@ -35,7 +35,6 @@ builder.Services.AddSwaggerGen(c =>
     c.SwaggerDoc("v1", new OpenApiInfo { Title = "Blog API", Version = "v1" });
 });
 
-// Dùng Npgsql và connection string có mật khẩu từ biến môi trường
 builder.Services.AddDbContext<BlogDbContext>(options =>
     options.UseNpgsql(connectionString));
 
@@ -56,8 +55,6 @@ if (app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 
-// Thêm GrpcAuthentication middleware (phải đặt trước MapControllers)
-app.UseGrpcAuthentication();
 
 app.UseAuthentication();
 app.UseAuthorization();

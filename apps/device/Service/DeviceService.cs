@@ -70,11 +70,8 @@ namespace device.Service
     public async Task<UserDeviceDto?> GetDeviceForUserByIdAsync(Guid id)
     {
       var device = await repository.GetDeviceByIdAsync(id);
-      if (device == null || device.Status != "available") return null;
+      if (device == null || device.Status != "Available") return null;
       return mapper.Map<UserDeviceDto>(device);
     }
-
-
-
   }
 }

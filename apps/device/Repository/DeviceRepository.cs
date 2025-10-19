@@ -93,7 +93,7 @@ namespace device.Repository
         {
             return await _dbContext.Devices
                 .Include(x => x.Category)
-                .Include(x => x.ComboDevices!) // for user combo projection when needed
+                .Include(x => x.ComboDevices!)
                     .ThenInclude(cd => cd.Combo)
                 .FirstOrDefaultAsync(x => x.Id == id);
         }
@@ -137,11 +137,10 @@ namespace device.Repository
 
         public async Task<PagedResult<Device>> GetAvailableDevicesAsync(DeviceQuery query)
         {
-            // Force available status for user view
             var q = _dbContext.Devices
                 .Include(x => x.Category)
                 .Include(x => x.ComboDevices!).ThenInclude(cd => cd.Combo)
-                .Where(d => d.Status == "available")
+                .Where(d => d.Status == "Available")
                 .AsQueryable();
 
             q = ApplyFilter(q, query);

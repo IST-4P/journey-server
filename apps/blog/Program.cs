@@ -3,30 +3,36 @@ using Blog.Repository;
 using Blog.Services;
 using Microsoft.EntityFrameworkCore;
 
-// Load .env file if exists
+// Load .env file if exists (for local development)
 DotNetEnv.Env.Load();
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Đọc connection string từ appsettings.json
-var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
+// Get connection string - prefer environment variable (for Kubernetes), fallback to appsettings.json with env substitution
+var connectionString = Environment.GetEnvironmentVariable("ConnectionStrings__DefaultConnection");
 
-// Thay thế các biến môi trường trong connection string
-if (!string.IsNullOrEmpty(connectionString))
+if (string.IsNullOrEmpty(connectionString))
 {
-    connectionString = connectionString
-        .Replace("${DB_HOST}", Environment.GetEnvironmentVariable("DB_HOST") ?? "localhost")
-        .Replace("${DB_PORT}", Environment.GetEnvironmentVariable("DB_PORT") ?? "5432")
-        .Replace("${DB_NAME}", Environment.GetEnvironmentVariable("DB_NAME") ?? "journey-blog")
-        .Replace("${DB_USERNAME}", Environment.GetEnvironmentVariable("DB_USERNAME") ?? "postgres")
-        .Replace("${DB_PASSWORD}", Environment.GetEnvironmentVariable("DB_PASSWORD") ?? "");
+    // Fallback to appsettings.json with environment variable substitution
+    connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
 
-    Console.WriteLine($"Database Connection: {connectionString.Split("Password=")[0]}Password=***");
+    if (!string.IsNullOrEmpty(connectionString))
+    {
+        connectionString = connectionString
+            .Replace("${DB_HOST}", Environment.GetEnvironmentVariable("DB_HOST") ?? "localhost")
+            .Replace("${DB_PORT}", Environment.GetEnvironmentVariable("DB_PORT") ?? "5432")
+            .Replace("${DB_NAME}", Environment.GetEnvironmentVariable("DB_NAME") ?? "journey-blog")
+            .Replace("${DB_USERNAME}", Environment.GetEnvironmentVariable("DB_USERNAME") ?? "postgres")
+            .Replace("${DB_PASSWORD}", Environment.GetEnvironmentVariable("DB_PASSWORD") ?? "");
+    }
 }
-else
+
+if (string.IsNullOrEmpty(connectionString))
 {
-    throw new InvalidOperationException("Connection string not found in configuration");
+    throw new InvalidOperationException("Database connection string not found. Set either ConnectionStrings__DefaultConnection environment variable or configure DefaultConnection in appsettings.json");
 }
+
+Console.WriteLine($"Database Connection: {connectionString.Split("Password=")[0]}Password=***");
 
 // Add gRPC services
 builder.Services.AddGrpc();

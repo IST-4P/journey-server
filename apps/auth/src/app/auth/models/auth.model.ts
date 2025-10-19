@@ -107,3 +107,25 @@ export type LogoutRequestType = RefreshTokenRequestType;
 export type ForgotPasswordRequestType = z.infer<
   typeof ForgotPasswordRequestSchema
 >;
+
+// Validate Token
+export const ValidateTokenRequestSchema = z.object({
+  accessToken: z.string(),
+});
+
+export const ValidateTokenResponseSchema = z.object({
+  isValid: z.boolean(),
+  userId: z.string().optional(),
+  role: z.string().optional(),
+  uuid: z.string().optional(),
+  iat: z.number().optional(),
+  exp: z.number().optional(),
+  error: z.string().optional(),
+});
+
+export type ValidateTokenRequestType = z.infer<
+  typeof ValidateTokenRequestSchema
+>;
+export type ValidateTokenResponseType = z.infer<
+  typeof ValidateTokenResponseSchema
+>;

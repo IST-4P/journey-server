@@ -99,4 +99,24 @@ namespace Blog.Models
         public bool HasPreviousPage => Page > 1;
     }
 
+    public class BlogListResponse
+    {
+        public List<BlogDto> Blogs { get; set; } = new();
+        public int Page { get; set; }
+        public int Limit { get; set; }
+        public int TotalItems { get; set; }
+        public int TotalPages { get; set; }
+    }
+
+    public class ApiResponse
+    {
+        public string Message { get; set; } = string.Empty;
+    }
+
+    public class ApiErrorResponse
+    {
+        public string Message { get; set; } = string.Empty;
+        public int StatusCode { get; set; }
+    }
+
 }

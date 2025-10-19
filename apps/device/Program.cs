@@ -1,20 +1,16 @@
-using Blog.Data;
-using Blog.Repository;
+using device.Data;
+using device.Repository;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi.Models;
-using System.Text.Encodings.Web;
-using System.Text.Json;
+using device.Service;
+using device.Interface;
+using DotNetEnv;
 
-
-// Load .env file if exists
-DotNetEnv.Env.Load();
+Env.Load();
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Đọc connection string từ appsettings.json
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
-
-// Thay thế các biến môi trường trong connection string
 connectionString = connectionString
     .Replace("${DB_HOST}", Environment.GetEnvironmentVariable("DB_HOST") ?? "localhost")
     .Replace("${DB_PORT}", Environment.GetEnvironmentVariable("DB_PORT") ?? "5432")
@@ -25,25 +21,22 @@ Console.WriteLine($"Connect: {connectionString}");
 builder.Services.AddControllers()
     .AddJsonOptions(options =>
     {
-        // Cấu hình JSON serializer để xử lý ký tự Unicode và HTML
-        options.JsonSerializerOptions.Encoder = System.Text.Encodings.Web.JavaScriptEncoder.UnsafeRelaxedJsonEscaping;
         options.JsonSerializerOptions.PropertyNamingPolicy = System.Text.Json.JsonNamingPolicy.CamelCase;
     });
+
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(c =>
 {
-    c.SwaggerDoc("v1", new OpenApiInfo { Title = "Blog API", Version = "v1" });
+    c.SwaggerDoc("v1", new OpenApiInfo { Title = "Device API", Version = "v1" });
 });
 
-builder.Services.AddDbContext<BlogDbContext>(options =>
+builder.Services.AddDbContext<DeviceDbContext>(options =>
     options.UseNpgsql(connectionString));
 
 builder.Services.AddAutoMapper(typeof(Program));
-builder.Services.AddScoped<IBlogRepository, BlogRepository>();
+builder.Services.AddScoped<IDeviceRepository, DeviceRepository>();
+builder.Services.AddScoped<IDeviceService, DeviceService>();
 
-// Thêm Authentication và Authorization
-builder.Services.AddAuthentication();
-builder.Services.AddAuthorization();
 
 var app = builder.Build();
 
@@ -54,10 +47,5 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
-
-
-app.UseAuthentication();
-app.UseAuthorization();
-
 app.MapControllers();
 app.Run();

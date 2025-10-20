@@ -6,6 +6,7 @@ import {
   DeleteVehicleRequestType,
   GetManyVehiclesRequestType,
   GetManyVehiclesResponseType,
+  GetVehicleRequestType,
   GetVehicleResponseType,
   UpdateVehicleRequestType,
 } from './vehicle.model';
@@ -20,6 +21,11 @@ export class VehicleGrpcController {
     data: GetManyVehiclesRequestType
   ): Promise<GetManyVehiclesResponseType> {
     return this.featureService.getManyVehicles(data);
+  }
+
+  @GrpcMethod('VehicleService', 'GetVehicle')
+  getVehicle(data: GetVehicleRequestType): Promise<GetVehicleResponseType> {
+    return this.featureService.getVehicleById(data);
   }
 
   @GrpcMethod('VehicleService', 'CreateVehicle')

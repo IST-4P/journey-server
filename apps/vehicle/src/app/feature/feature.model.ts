@@ -6,13 +6,14 @@ export const FeatureSchema = z.object({
   name: z.string(),
   description: z.string(),
   icon: z.string(),
-  createdAt: z.date(),
-  updatedAt: z.date(),
+  createdAt: z.coerce.date(),
+  updatedAt: z.coerce.date(),
 });
 
 export const GetFeatureRequestSchema = FeatureSchema.pick({
   id: true,
-});
+  name: true,
+}).partial();
 
 export const GetFeatureResponseSchema = FeatureSchema;
 

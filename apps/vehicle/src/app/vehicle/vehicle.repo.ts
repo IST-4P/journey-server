@@ -13,9 +13,33 @@ export class VehicleRepository {
   constructor(private readonly prisma: PrismaService) {}
 
   getVehicle(data: GetVehicleRequestType) {
-    return this.prisma.vehicle.findMany({
-      where: { id: data.id },
-    });
+    return this.prisma.vehicle
+      .findUnique({
+        where: { id: data.id },
+        include: {
+          vehicleFeatures: {
+            select: {
+              feature: {
+                select: {
+                  name: true,
+                  icon: true,
+                  description: true,
+                },
+              },
+            },
+          },
+        },
+      })
+      .then((vehicle) => {
+        if (!vehicle) return null;
+
+        return {
+          ...vehicle,
+          averageRating: vehicle.averageRating?.toNumber() ?? 0,
+          latitude: vehicle.latitude.toNumber(),
+          longitude: vehicle.longitude.toNumber(),
+        };
+      });
   }
 
   async getManyVehicles({ page, limit, ...where }: GetManyVehiclesRequestType) {
@@ -44,10 +68,33 @@ export class VehicleRepository {
     };
   }
 
-  async createVehicle(data: CreateVehicleRequestType) {
+  async createVehicle({ featureIds, ...data }: CreateVehicleRequestType) {
     const vehicle = await this.prisma.vehicle.create({
-      data,
+      data: {
+        ...data,
+        vehicleFeatures: featureIds
+          ? {
+              create: featureIds.map((featureId) => ({
+                featureId,
+              })),
+            }
+          : undefined,
+      },
+      include: {
+        vehicleFeatures: {
+          select: {
+            feature: {
+              select: {
+                name: true,
+                icon: true,
+                description: true,
+              },
+            },
+          },
+        },
+      },
     });
+
     return {
       ...vehicle,
       averageRating: vehicle.averageRating?.toNumber() ?? 0,
@@ -56,11 +103,35 @@ export class VehicleRepository {
     };
   }
 
-  async updateVehicle({ id, ...data }: UpdateVehicleRequestType) {
+  async updateVehicle({ id, featureIds, ...data }: UpdateVehicleRequestType) {
     const vehicle = await this.prisma.vehicle.update({
       where: { id },
-      data,
+      data: {
+        ...data,
+        ...(featureIds !== undefined && {
+          vehicleFeatures: {
+            deleteMany: {},
+            create: featureIds.map((featureId) => ({
+              featureId,
+            })),
+          },
+        }),
+      },
+      include: {
+        vehicleFeatures: {
+          select: {
+            feature: {
+              select: {
+                name: true,
+                icon: true,
+                description: true,
+              },
+            },
+          },
+        },
+      },
     });
+
     return {
       ...vehicle,
       averageRating: vehicle.averageRating?.toNumber() ?? 0,

@@ -1,0 +1,202 @@
+syntax = "proto3";
+
+package vehicle;
+
+service VehicleService {
+  rpc GetFeature(GetFeatureRequest) returns (GetFeatureResponse);
+  rpc GetAllFeatures(GetAllFeaturesRequest) returns (GetAllFeaturesResponse);
+  rpc CreateFeature(CreateFeatureRequest) returns (GetFeatureResponse);
+  rpc UpdateFeature(UpdateFeatureRequest) returns (GetFeatureResponse);
+  rpc DeleteFeature(GetFeatureRequest) returns (MessageResponse);
+
+  rpc GetVehicle(GetVehicleRequest) returns (GetVehicleResponse);
+  rpc GetManyVehicles(GetManyVehiclesRequest) returns (GetManyVehiclesResponse);
+  rpc CreateVehicle(CreateVehicleRequest) returns (GetVehicleResponse);
+  rpc UpdateVehicle(UpdateVehicleRequest) returns (GetVehicleResponse);
+  rpc DeleteVehicle(GetVehicleRequest) returns (MessageResponse);
+}
+
+// GetFeature
+message GetFeatureRequest {
+  optional string id = 1;
+  optional string name = 2;
+}
+
+message GetFeatureResponse {
+  string id = 1;
+  string name = 2;
+  string description = 3;
+  string icon = 4;
+  string createdAt = 5;
+  string updatedAt = 6;
+}
+
+// GetAllFeatures
+message GetAllFeaturesRequest {}
+
+message GetAllFeaturesResponse {
+  repeated GetFeatureResponse features = 1;
+}
+
+// CreateFeatures
+message CreateFeatureRequest {
+  string name = 1;
+  string description = 2;
+  string icon = 3;
+}
+
+// UpdateFeatures
+message UpdateFeatureRequest {
+  optional string name = 1;
+  optional string description = 2;
+  optional string icon = 3;
+  string id = 4;
+}
+
+// GetVehicle
+message GetVehicleRequest {
+  optional string id = 1;
+  optional string licensePlate = 2;
+}
+
+message VehicleFeature {
+  GetFeatureResponse feature = 1;
+}
+
+message GetVehicleResponse {
+  string id = 1;
+  string type = 2;
+  string name = 3;
+  string brand = 4;
+  string model = 5;
+  string licensePlate = 6;
+
+  int32 seats = 7;
+  string fuelType = 8;
+  string transmission = 9;
+
+  int32 pricePerHour = 10;
+  int32 pricePerDay = 11;
+
+  string location = 12;
+  string city = 13;
+  string ward = 14;
+  double latitude = 15;
+  double longitude = 16;
+
+  string description = 17;
+  repeated string terms = 18;
+
+  string status = 19;
+
+  int32 totalTrips = 20;
+  double averageRating = 21;
+  repeated string totalReviewIds = 22;
+
+  repeated string images = 23;
+
+  repeated VehicleFeature vehicleFeatures = 24;
+
+  string createdAt = 25;
+  string updatedAt = 26;
+}
+
+// GetManyVehicles
+message GetManyVehiclesRequest {
+  optional string id = 1;
+  optional string type = 2;
+  optional string name = 3;
+  optional string brand = 4;
+  optional string model = 5;
+  optional string licensePlate = 6;
+
+  optional int32 seats = 7;
+  optional string fuelType = 8;
+  optional string transmission = 9;
+
+  optional string city = 10;
+  optional string ward = 11;
+
+  optional string status = 12;
+
+  optional double averageRating = 13;
+
+  int32 page = 14;
+  int32 limit = 15;
+}
+
+message GetManyVehiclesResponse {
+  repeated GetVehicleResponse vehicles = 1;
+  int32 page = 2;
+  int32 limit = 3;
+  int32 totalItems = 4;
+  int32 totalPages = 5;
+}
+
+// CreateVehicle
+message CreateVehicleRequest {
+  string type = 1;
+  string name = 2;
+  string brand = 3;
+  string model = 4;
+  string licensePlate = 5;
+
+  int32 seats = 6;
+  string fuelType = 7;
+  string transmission = 8;
+
+  int32 pricePerHour = 9;
+  int32 pricePerDay = 10;
+
+  string location = 11;
+  string city = 12;
+  string ward = 13;
+  double latitude = 14;
+  double longitude = 15;
+
+  string description = 16;
+  repeated string terms = 17;
+
+  string status = 18;
+
+  repeated string images = 19;
+
+  repeated VehicleFeature vehicleFeatures = 20;
+}
+
+// UpdateVehicle
+message UpdateVehicleRequest {
+  optional string type = 1;
+  optional string name = 2;
+  optional string brand = 3;
+  optional string model = 4;
+  optional string licensePlate = 5;
+
+  optional int32 seats = 6;
+  optional string fuelType = 7;
+  optional string transmission = 8;
+
+  optional int32 pricePerHour = 9;
+  optional int32 pricePerDay = 10;
+
+  optional string location = 11;
+  optional string city = 12;
+  optional string ward = 13;
+  optional double latitude = 14;
+  optional double longitude = 15;
+
+  optional string description = 16;
+  repeated string terms = 17;
+
+  optional string status = 18;
+
+  repeated string images = 19;
+
+  repeated VehicleFeature vehicleFeatures = 20;
+
+  string id = 21;
+}
+
+message MessageResponse {
+  string message = 1;
+}

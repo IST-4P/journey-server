@@ -6,6 +6,7 @@ import {
   VehicleType,
 } from '@prisma-clients/vehicle';
 import { z } from 'zod';
+import { FeatureSchema } from '../feature/feature.model';
 
 // ==================== BASE ENUM ======================
 
@@ -41,6 +42,15 @@ export const VehicleSchema = z.object({
   totalReviewIds: z.array(z.string().uuid()),
 
   images: z.array(z.string().url()),
+  vehicleFeatures: z.array(
+    z.object({
+      feature: FeatureSchema.pick({
+        name: true,
+        icon: true,
+        description: true,
+      }),
+    })
+  ),
 
   createdAt: z.coerce.date(),
   updatedAt: z.coerce.date(),
@@ -64,6 +74,7 @@ export const GetManyVehiclesRequestSchema = VehicleSchema.pick({
   fuelType: true,
   transmission: true,
   city: true,
+  ward: true,
   status: true,
   averageRating: true,
 })
@@ -71,7 +82,7 @@ export const GetManyVehiclesRequestSchema = VehicleSchema.pick({
   .extend(PaginationQuerySchema.shape);
 
 export const GetManyVehiclesResponseSchema = z.object({
-  vehicles: z.array(VehicleSchema),
+  vehicles: z.array(VehicleSchema.omit({ vehicleFeatures: true })),
   page: z.number().int(),
   limit: z.number().int(),
   totalItems: z.number().int(),
@@ -81,10 +92,13 @@ export const GetManyVehiclesResponseSchema = z.object({
 export const CreateVehicleRequestSchema = VehicleSchema.omit({
   id: true,
   totalTrips: true,
-  totalReviewIds: true,
   averageRating: true,
+  totalReviewIds: true,
   createdAt: true,
   updatedAt: true,
+  vehicleFeatures: true,
+}).extend({
+  featureIds: z.array(z.string().uuid()),
 });
 
 export const UpdateVehicleRequestSchema =

@@ -52,8 +52,8 @@ model Vehicle {
     transmission TransmissionType
 
     // Giá thuê
-    pricePerHour Decimal @map("price_per_hour") @db.Decimal(10, 2)
-    pricePerDay  Decimal @map("price_per_day") @db.Decimal(10, 2)
+    pricePerHour Int @map("price_per_hour")
+    pricePerDay  Int @map("price_per_day")
 
     // Vị trí
     location  String // Địa chỉ text (VD: "123 Nguyễn Văn A, Quận 1, TP.HCM")
@@ -95,10 +95,10 @@ model Vehicle {
 }
 
 model VehicleFeature {
-    id          String  @id @default(uuid())
-    name        String  @unique // Tên feature (VD: "Bluetooth", "Camera lùi")
-    description String? @db.Text // Mô tả chi tiết về feature (optional)
-    icon        String? // Icon URL hoặc icon name (optional)
+    id          String @id @default(uuid())
+    name        String @unique // Tên feature (VD: "Bluetooth", "Camera lùi")
+    description String // Mô tả chi tiết về feature (optional)
+    icon        String // Icon URL hoặc icon name (optional)
 
     // Timestamps
     createdAt DateTime @default(now()) @map("created_at")

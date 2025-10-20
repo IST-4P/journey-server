@@ -7,10 +7,24 @@ pulsar:
   initialize: true
   zookeeper:
     replicaCount: 1
+    resources:
+      requests:
+        cpu: 50m
+        memory: 128Mi
+      limits:
+        cpu: 200m
+        memory: 256Mi
     podMonitor:
       enabled: false
   broker:
     replicaCount: 1
+    resources:
+      requests:
+        cpu: 100m
+        memory: 256Mi
+      limits:
+        cpu: 500m
+        memory: 512Mi
     configData:
       allowAutoTopicCreation: 'true'
       allowAutoTopicCreationType: 'partitioned'
@@ -19,13 +33,34 @@ pulsar:
       enabled: false
   bookkeeper:
     replicaCount: 1
+    resources:
+      requests:
+        cpu: 100m
+        memory: 256Mi
+      limits:
+        cpu: 500m
+        memory: 512Mi
     podMonitor:
       enabled: false
   autorecovery:
+    resources:
+      requests:
+        cpu: 50m
+        memory: 128Mi
+      limits:
+        cpu: 200m
+        memory: 256Mi
     podMonitor:
       enabled: false
   proxy:
     replicaCount: 1
+    resources:
+      requests:
+        cpu: 50m
+        memory: 128Mi
+      limits:
+        cpu: 200m
+        memory: 256Mi
     podMonitor:
       enabled: false
   kube-prometheus-stack:

@@ -17,7 +17,7 @@ namespace device.Service
     }
     public async Task<AdminDeviceDto> CreateDeviceAsync(AdminDeviceCreateDto device)
     {
-      var entity = mapper.Map<Device>(device);
+      var entity = mapper.Map<device.Model.Entities.Device>(device);
       entity.Id = Guid.NewGuid();
       var created = await repository.CreateDeviceAsync(entity);
       return mapper.Map<AdminDeviceDto>(created);
@@ -50,7 +50,7 @@ namespace device.Service
 
     public async Task<AdminDeviceDto?> UpdateDeviceAsync(Guid id, AdminDeviceUpdateDto dto)
     {
-      var updated = await repository.UpdateDeviceAsync(id, mapper.Map<Device>(dto));
+      var updated = await repository.UpdateDeviceAsync(id, mapper.Map<device.Model.Entities.Device>(dto));
       return updated is null ? null : mapper.Map<AdminDeviceDto>(updated);
     }
 

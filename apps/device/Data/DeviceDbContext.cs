@@ -1,6 +1,5 @@
 using Microsoft.EntityFrameworkCore;
 using DotNetEnv;
-using device.Model.Entities;
 
 namespace device.Data
 {
@@ -13,7 +12,7 @@ namespace device.Data
         {
         }
 
-        public DbSet<Device> Devices { get; set; }
+        public DbSet<device.Model.Entities.Device> Devices { get; set; }
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
@@ -38,7 +37,7 @@ namespace device.Data
         {
             base.OnModelCreating(modelBuilder);
 
-            modelBuilder.Entity<Device>(entity =>
+            modelBuilder.Entity<device.Model.Entities.Device>(entity =>
             {
                 entity.HasKey(e => e.Id);
                 entity.Property(e => e.Id).ValueGeneratedOnAdd();

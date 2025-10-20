@@ -4,18 +4,25 @@ using device.Model.Entities;
 
 namespace device.Mapping
 {
-    public class AutoMappingProfile : Profile
+    public class AutoMapping : Profile
     {
-        public AutoMappingProfile()
+        public AutoMapping()
         {
             // Admin mappings
-            CreateMap<Device, AdminDeviceDto>()
+            CreateMap<device.Model.Entities.Device, AdminDeviceDto>()
                 .ForMember(dest => dest.CategoryName, opt => opt.MapFrom(src => src.Category != null ? src.Category.Name : null));
-            CreateMap<AdminDeviceCreateDto, Device>();
-            CreateMap<AdminDeviceUpdateDto, Device>();
+            CreateMap<AdminDeviceCreateDto, device.Model.Entities.Device>()
+                .ForMember(dest => dest.Id, opt => opt.Ignore())
+                .ForMember(dest => dest.CreateAt, opt => opt.Ignore())
+                .ForMember(dest => dest.UpdateAt, opt => opt.Ignore());
+            CreateMap<AdminDeviceUpdateDto, device.Model.Entities.Device>()
+                .ForMember(dest => dest.Id, opt => opt.Ignore())
+                .ForMember(dest => dest.CreateAt, opt => opt.Ignore())
+                .ForMember(dest => dest.UpdateAt, opt => opt.Ignore())
+                .ForAllMembers(opts => opts.Condition((src, dest, srcMember) => srcMember != null));
 
             // User mappings
-            CreateMap<Device, UserDeviceDto>()
+            CreateMap<device.Model.Entities.Device, UserDeviceDto>()
                 .ForMember(dest => dest.CategoryName, opt => opt.MapFrom(src => src.Category != null ? src.Category.Name : null))
                 .ForMember(dest => dest.Combos, opt => opt.MapFrom(src =>
                     src.ComboDevices != null

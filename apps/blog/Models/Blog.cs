@@ -15,6 +15,9 @@ namespace Blog.Models
         [Required(ErrorMessage = "Title is required")]
         [StringLength(500, ErrorMessage = "Title cannot exceed 500 characters")]
         public required string Title { get; set; }
+        [Required(ErrorMessage = "Type is required")]
+        [StringLength(1000, ErrorMessage = "Type cannot exceed 1000 characters")]
+        public required string Type { get; set; }
 
         [Required(ErrorMessage = "Content is required")]
         [HtmlContent(ErrorMessage = "Content must be valid HTML")]
@@ -36,6 +39,7 @@ namespace Blog.Models
         public Guid Id { set; get; }
         public required string Title { get; set; }
         public required string Content { get; set; }
+        public required string Type { get; set; }
         public required string Region { get; set; }
         public required string Thumbnail { get; set; }
     }
@@ -54,11 +58,15 @@ namespace Blog.Models
         [StringLength(100, ErrorMessage = "Region cannot exceed 100 characters")]
         public required string Region { get; set; }
 
+        [Required(ErrorMessage = "Type is required")]
+        [StringLength(1000, ErrorMessage = "Type cannot exceed 1000 characters")]
+        public required string Type { get; set; }
+
         [Url(ErrorMessage = "Thumbnail must be a valid URL")]
         public required string Thumbnail { get; set; }
     }
 
-    public class UpdateBlogRequetsDto
+    public class UpdateBlogRequestDto
     {
         [Required(ErrorMessage = "Title is required")]
         [StringLength(500, ErrorMessage = "Title cannot exceed 500 characters")]

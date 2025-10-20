@@ -121,6 +121,7 @@ namespace Blog.Services
                 var blog = new Models.Blog
                 {
                     Title = request.Title,
+                    Type = request.Type,
                     Content = request.Content,
                     Region = request.Region,
                     Thumbnail = request.Thumbnail

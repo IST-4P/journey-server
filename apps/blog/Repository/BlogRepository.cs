@@ -3,18 +3,7 @@ using Blog.Data;
 using AutoMapper;
 using Microsoft.EntityFrameworkCore;
 
-namespace Blog.Mapping
-{
-    public class AutoMapping : Profile
-    {
-        public AutoMapping()
-        {
-            CreateMap<Blog.Models.Blog, BlogDto>().ReverseMap();
-            CreateMap<AddBlogRequestDto, Blog.Models.Blog>().ReverseMap();
-            CreateMap<UpdateBlogRequetsDto, Blog.Models.Blog>().ReverseMap();
-        }
-    }
-}
+
 
 namespace Blog.Repository
 {
@@ -128,6 +117,7 @@ namespace Blog.Repository
             }
 
             existingBlog.Title = blog.Title;
+            existingBlog.Type = blog.Type;
             existingBlog.Content = blog.Content;
             existingBlog.Region = blog.Region;
             existingBlog.Thumbnail = blog.Thumbnail;

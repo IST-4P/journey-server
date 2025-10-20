@@ -1,5 +1,5 @@
 import { NotificationProto } from '@hacmieu-journey/grpc';
-import { PulsarClient } from '@hacmieu-journey/pulsar';
+import { NatsClient } from '@hacmieu-journey/nats';
 import { Inject, Injectable, Logger, OnModuleInit } from '@nestjs/common';
 import { ClientGrpc } from '@nestjs/microservices';
 import { lastValueFrom } from 'rxjs';
@@ -12,7 +12,7 @@ export class NotificationService implements OnModuleInit {
   constructor(
     @Inject(NotificationProto.NOTIFICATION_PACKAGE_NAME)
     private client: ClientGrpc,
-    private readonly pulsarClient: PulsarClient
+    private readonly natsClient: NatsClient
   ) {}
 
   onModuleInit() {
@@ -42,10 +42,6 @@ export class NotificationService implements OnModuleInit {
     );
 
     try {
-      const producer = await this.pulsarClient.createProducer(
-        'persistent://journey/notifications/notification-created'
-      );
-
       const notificationData = {
         id: notification.id,
         userId: notification.userId,
@@ -60,20 +56,15 @@ export class NotificationService implements OnModuleInit {
       //   )}`
       // );
 
-      await producer.send({
-        data: Buffer.from(JSON.stringify(notificationData)),
-        properties: {
-          eventType: 'notification.created',
-          version: '1.0',
-          source: 'admin-service',
-        },
-        eventTimestamp: Date.now(),
-      });
-    } catch (pulsarError) {
+      await this.natsClient.publish(
+        'journey.notifications.notification-created',
+        notificationData
+      );
+    } catch (natsError) {
       // Log error but don't fail registration
       this.logger.error(
-        `❌ Failed to publish user-registered event:`,
-        pulsarError
+        `❌ Failed to publish notification.created event:`,
+        natsError
       );
     }
 

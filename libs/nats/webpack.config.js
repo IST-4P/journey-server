@@ -4,6 +4,6 @@ const commonConfig = require('../../webpack.lib.config');
 
 module.exports = merge(commonConfig, {
   output: {
-    path: join(__dirname, '../../dist/libs/pulsar'),
+    path: join(__dirname, '../../dist/libs/nats'),
   },
 });

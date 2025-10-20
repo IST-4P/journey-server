@@ -5,7 +5,7 @@ metadata:
   labels:
     app: journey
 data:
-  PULSAR_SERVICE_URL: {{ .Values.config.pulsarUrl | quote }}
+  NATS_URL: {{ .Values.config.natsUrl | quote }}
   AUTH_GRPC_SERVICE_URL: {{ .Values.config.authUrl | quote }}
   USER_GRPC_SERVICE_URL: {{ .Values.config.userUrl | quote }}
   NOTIFICATION_GRPC_SERVICE_URL: {{ .Values.config.notificationUrl | quote }}

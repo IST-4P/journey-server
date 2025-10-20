@@ -1,9 +1,9 @@
+import { NatsClient } from '@hacmieu-journey/nats';
 import { AccessTokenPayloadCreate } from '@hacmieu-journey/nestjs';
 import {
   isNotFoundPrismaError,
   isUniqueConstraintPrismaError,
 } from '@hacmieu-journey/prisma';
-import { PulsarClient } from '@hacmieu-journey/pulsar';
 import { HttpException, Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { randomInt } from 'crypto';
@@ -46,7 +46,7 @@ export class AuthService {
     private readonly emailService: EmailService,
     private readonly hashingService: HashingService,
     private readonly tokenService: TokenService,
-    private readonly pulsarClient: PulsarClient
+    private readonly natsClient: NatsClient
   ) {}
 
   generateOTP = () => {
@@ -151,11 +151,11 @@ export class AuthService {
 
   async register(body: RegisterRequestType) {
     try {
-      await this.validateVerificationCode({
-        email: body.email,
-        type: TypeOfVerificationCode.REGISTER,
-        code: body.code,
-      });
+      // await this.validateVerificationCode({
+      //   email: body.email,
+      //   type: TypeOfVerificationCode.REGISTER,
+      //   code: body.code,
+      // });
 
       const hashedPassword = await this.hashingService.hash(body.password);
 
@@ -167,20 +167,16 @@ export class AuthService {
           password: hashedPassword,
           role: 'USER',
         }),
-        this.authRepository.deleteVerificationCode({
-          email_type: {
-            email: body.email,
-            type: TypeOfVerificationCode.REGISTER,
-          },
-        }),
+        // this.authRepository.deleteVerificationCode({
+        //   email_type: {
+        //     email: body.email,
+        //     type: TypeOfVerificationCode.REGISTER,
+        //   },
+        // }),
       ]);
 
-      // Tạo profile trong User Service qua Pulsar
+      // Tạo profile trong User Service qua NATS
       try {
-        const producer = await this.pulsarClient.createProducer(
-          'persistent://journey/events/user-registered'
-        );
-
         const eventData = {
           userId: user.id,
           email: user.email,
@@ -190,24 +186,19 @@ export class AuthService {
           createdAt: user.createdAt.toISOString(),
         };
 
-        await producer.send({
-          data: Buffer.from(JSON.stringify(eventData)),
-          properties: {
-            eventType: 'user.registered',
-            version: '1.0',
-            source: 'auth-service',
-          },
-          eventTimestamp: Date.now(),
-        });
+        await this.natsClient.publish(
+          'journey.events.user-registered',
+          eventData
+        );
 
         // this.logger.log(
         //   `✅ Published user-registered event for user: ${user.id}`
         // );
-      } catch (pulsarError) {
+      } catch (natsError) {
         // Log error but don't fail registration
         this.logger.error(
           `❌ Failed to publish user-registered event:`,
-          pulsarError
+          natsError
         );
       }
 

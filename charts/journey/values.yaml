@@ -5,8 +5,11 @@ pulsar:
   namespace: pulsar
   namespaceCreate: true
   initialize: true
+  
+  # Zookeeper - chỉ 1 instance
   zookeeper:
     replicaCount: 1
+    replicas: 1  # Thêm dòng này
     resources:
       requests:
         cpu: 50m
@@ -16,8 +19,11 @@ pulsar:
         memory: 256Mi
     podMonitor:
       enabled: false
+  
+  # Broker - chỉ 1 instance  
   broker:
     replicaCount: 1
+    replicas: 1  # Thêm dòng này
     resources:
       requests:
         cpu: 100m
@@ -31,8 +37,11 @@ pulsar:
       defaultNumPartitions: '3'
     podMonitor:
       enabled: false
+  
+  # Bookkeeper - chỉ 1 instance
   bookkeeper:
     replicaCount: 1
+    replicas: 1  # Thêm dòng này
     resources:
       requests:
         cpu: 100m
@@ -42,6 +51,7 @@ pulsar:
         memory: 512Mi
     podMonitor:
       enabled: false
+  
   autorecovery:
     resources:
       requests:
@@ -52,8 +62,11 @@ pulsar:
         memory: 256Mi
     podMonitor:
       enabled: false
+  
+  # Proxy - chỉ 1 instance
   proxy:
     replicaCount: 1
+    replicas: 1  # Thêm dòng này
     resources:
       requests:
         cpu: 50m
@@ -63,6 +76,8 @@ pulsar:
         memory: 256Mi
     podMonitor:
       enabled: false
+  
+  # Disable tất cả monitoring
   kube-prometheus-stack:
     enabled: false
     prometheusOperator:
@@ -73,6 +88,10 @@ pulsar:
       enabled: false
     prometheus:
       enabled: false
+  
+  # QUAN TRỌNG: Disable victoria-metrics
+  victoria-metrics-k8s-stack:
+    enabled: false
 
 api:
   enabled: true

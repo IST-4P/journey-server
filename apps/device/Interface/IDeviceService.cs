@@ -11,7 +11,7 @@ namespace device.Interface
 {
     public interface IDeviceService
     {
-        // Admin
+        // Admin 
         Task<PagedResult<AdminDeviceDto>> GetDevicesAsync(DeviceQuery query);
         Task<AdminDeviceDto?> GetDeviceByIdAsync(Guid id);
         Task<AdminDeviceDto> CreateDeviceAsync(AdminDeviceCreateDto device);

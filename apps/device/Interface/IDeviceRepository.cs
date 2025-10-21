@@ -13,7 +13,7 @@ namespace device.Interface
         Task<PagedResult<DeviceEntity>> GetDevicesAsync(DeviceQuery query);
         Task<DeviceEntity?> GetDeviceByIdAsync(Guid id);
         Task<DeviceEntity> CreateDeviceAsync(DeviceEntity device);
-        Task<DeviceEntity?> UpdateDeviceAsync(Guid id, DeviceEntity device);
+        Task<DeviceEntity?> UpdateDeviceAsync(Guid id, DeviceEntity device); 
         Task<bool> DeleteDeviceAsync(Guid id);
 
         // User queries

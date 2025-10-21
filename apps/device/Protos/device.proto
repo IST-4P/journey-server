@@ -3,12 +3,20 @@ syntax = "proto3";
 package device;
 
 service DeviceService {
+  // Device operations
   rpc GetDevice(GetDeviceRequest) returns (GetDeviceResponse);
   rpc GetManyDevices(GetManyDevicesRequest) returns (GetManyDevicesResponse); // User
   rpc GetManyDevicesAdmin(GetManyDevicesRequest) returns (GetManyDevicesAdminResponse); // Admin
   rpc CreateDevice(CreateDeviceRequest) returns (GetDeviceResponse);
   rpc UpdateDevice(UpdateDeviceRequest) returns (GetDeviceResponse);
   rpc DeleteDevice(DeleteDeviceRequest) returns (DeleteDeviceResponse);
+  
+  // Combo operations (Admin)
+  rpc GetCombo(GetComboRequest) returns (GetComboResponse);
+  rpc GetManyCombos(GetManyCombosRequest) returns (GetManyCombosResponse);
+  rpc CreateCombo(CreateComboRequest) returns (GetComboResponse);
+  rpc UpdateCombo(UpdateComboRequest) returns (GetComboResponse);
+  rpc DeleteCombo(DeleteComboRequest) returns (DeleteComboResponse);
 }
 
 // GetDevice
@@ -84,7 +92,7 @@ message GetManyDevicesAdminResponse {
 }
 
 // CreateDevice
-message CreateDeviceRequest {
+message CreateDeviceRequest { 
   string name = 1;
   double price = 2;
   string description = 3;
@@ -114,5 +122,91 @@ message DeleteDeviceRequest {
 }
 
 message DeleteDeviceResponse {
+  string message = 1;
+}
+
+// ============================================
+// COMBO MESSAGES
+// ============================================
+
+// GetCombo
+message GetComboRequest {
+  string comboId = 1;
+}
+
+message ComboDeviceItem {
+  string deviceId = 1;
+  string deviceName = 2;
+  double devicePrice = 3;
+  int32 quantity = 4;
+}
+
+message GetComboResponse {
+  string id = 1;
+  string name = 2;
+  double price = 3;
+  string description = 4;
+  repeated string images = 5;
+  repeated ComboDeviceItem devices = 6;
+  string createdAt = 7;
+  string updatedAt = 8;
+}
+
+// GetManyCombos
+message GetManyCombosRequest {
+  int32 page = 1;
+  int32 limit = 2;
+  string search = 3;
+}
+
+message GetManyCombos {
+  string id = 1;
+  string name = 2;
+  double price = 3;
+  string description = 4;
+  repeated string images = 5;
+  int32 deviceCount = 6;
+  string createdAt = 7;
+  string updatedAt = 8;
+}
+
+message GetManyCombosResponse {
+  repeated GetManyCombos combos = 1;
+  int32 page = 2;
+  int32 limit = 3;
+  int32 totalItems = 4;
+  int32 totalPages = 5;
+}
+
+// CreateCombo
+message ComboDeviceInput {
+  string deviceId = 1;
+  int32 quantity = 2;
+}
+
+message CreateComboRequest {
+  string name = 1;
+  double price = 2;
+  string description = 3;
+  repeated string images = 4;
+  repeated ComboDeviceInput deviceItems = 5;
+}
+
+// UpdateCombo
+message UpdateComboRequest {
+  string comboId = 1;
+  string name = 2;
+  double price = 3;
+  string description = 4;
+  repeated string images = 5;
+  repeated ComboDeviceInput deviceItems = 6;
+}
+
+// DeleteCombo
+message DeleteComboRequest {
+  string comboId = 1;
+}
+
+message DeleteComboResponse {
   string message = 1;
 }

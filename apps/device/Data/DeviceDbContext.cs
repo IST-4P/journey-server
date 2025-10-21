@@ -13,12 +13,15 @@ namespace device.Data
         }
 
         public DbSet<device.Model.Entities.Device> Devices { get; set; }
+        public DbSet<device.Model.Entities.Category> Categories { get; set; }
+        public DbSet<device.Model.Entities.Combo> Combos { get; set; }
+        public DbSet<device.Model.Entities.ComboDevice> ComboDevices { get; set; }
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
             if (!optionsBuilder.IsConfigured)
             {
-                Env.Load(); 
+                Env.Load();
 
                 var host = Environment.GetEnvironmentVariable("DB_HOST") ?? "localhost";
                 var port = Environment.GetEnvironmentVariable("DB_PORT") ?? "5432";

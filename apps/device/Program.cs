@@ -25,7 +25,7 @@ builder.Services.AddAutoMapper(typeof(Program));
 builder.Services.AddDbContext<DeviceDbContext>(options => options.UseNpgsql(connectionString));
 
 builder.Services.AddScoped<IDeviceRepository, DeviceRepository>();
-builder.Services.AddScoped<IDeviceService, DeviceService>();
+builder.Services.AddScoped<IComboRepository, ComboRepository>();
 
 var app = builder.Build();
 

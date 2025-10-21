@@ -14,6 +14,7 @@ COPY libs/grpc ./libs/grpc
 COPY libs/nestjs ./libs/nestjs
 COPY libs/nats ./libs/nats
 COPY libs/websocket ./libs/websocket
+COPY libs/domain ./libs/domain
 
 RUN npm install
 

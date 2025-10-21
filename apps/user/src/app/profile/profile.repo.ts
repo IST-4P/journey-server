@@ -1,7 +1,7 @@
+import { GetAllProfilesRequest } from '@domain/user';
 import { Injectable } from '@nestjs/common';
 import { Prisma } from '@prisma-clients/user';
 import { PrismaService } from '../prisma/prisma.service';
-import { GetAllProfilesRequestType } from './profile.model';
 
 @Injectable()
 export class ProfileRepository {
@@ -18,7 +18,7 @@ export class ProfileRepository {
     });
   }
 
-  async findAllProfiles(query: GetAllProfilesRequestType) {
+  async findAllProfiles(query: GetAllProfilesRequest) {
     const skip = (query.page - 1) * query.limit;
     const take = query.limit;
     let where: Prisma.ProfileWhereInput = {};

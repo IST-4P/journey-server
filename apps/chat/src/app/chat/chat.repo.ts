@@ -1,6 +1,6 @@
+import { CreateChatRequest, GetChatsRequest } from '@domain/chat';
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
-import { CreateChatRequestType, GetChatsRequestType } from './chat.model';
 
 @Injectable()
 export class ChatRepository {
@@ -51,7 +51,7 @@ export class ChatRepository {
   //   return conversations;
   // }
 
-  getChats(data: GetChatsRequestType) {
+  getChats(data: GetChatsRequest) {
     const skip = (data.page - 1) * data.limit;
     const take = data.limit;
     return this.prismaService.chat.findMany({
@@ -77,7 +77,7 @@ export class ChatRepository {
     });
   }
 
-  createChat(data: CreateChatRequestType) {
+  createChat(data: CreateChatRequest) {
     return this.prismaService.chat.create({
       data: {
         content: data.content,

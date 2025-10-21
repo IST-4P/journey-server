@@ -33,10 +33,10 @@ message GetProfileResponse {
   string fullName = 3;
   string phone = 4;
   string role = 5;
-  optional string gender = 6;
-  optional string avatarUrl = 7;
+  string gender = 6;
+  string avatarUrl = 7;
   optional string facebookUrl = 8;
-  optional string bio = 9;
+  string bio = 9;
   optional string birthDate = 10;
   int32 creditScore = 11;
   string createdAt = 12;

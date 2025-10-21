@@ -1,15 +1,15 @@
-import { MessageResponseType } from '@hacmieu-journey/nestjs';
+import {
+  CreateVehicleRequest,
+  DeleteVehicleRequest,
+  GetManyVehiclesRequest,
+  GetManyVehiclesResponse,
+  GetVehicleRequest,
+  GetVehicleResponse,
+  UpdateVehicleRequest,
+} from '@domain/vehicle';
+import { MessageResponse } from '@hacmieu-journey/nestjs';
 import { Controller } from '@nestjs/common';
 import { GrpcMethod } from '@nestjs/microservices';
-import {
-  CreateVehicleRequestType,
-  DeleteVehicleRequestType,
-  GetManyVehiclesRequestType,
-  GetManyVehiclesResponseType,
-  GetVehicleRequestType,
-  GetVehicleResponseType,
-  UpdateVehicleRequestType,
-} from './vehicle.model';
 import { VehicleService } from './vehicle.service';
 
 @Controller()
@@ -18,32 +18,28 @@ export class VehicleGrpcController {
 
   @GrpcMethod('VehicleService', 'GetManyVehicles')
   getManyVehicles(
-    data: GetManyVehiclesRequestType
-  ): Promise<GetManyVehiclesResponseType> {
+    data: GetManyVehiclesRequest
+  ): Promise<GetManyVehiclesResponse> {
     return this.featureService.getManyVehicles(data);
   }
 
   @GrpcMethod('VehicleService', 'GetVehicle')
-  getVehicle(data: GetVehicleRequestType): Promise<GetVehicleResponseType> {
+  getVehicle(data: GetVehicleRequest): Promise<GetVehicleResponse> {
     return this.featureService.getVehicleById(data);
   }
 
   @GrpcMethod('VehicleService', 'CreateVehicle')
-  createVehicle(
-    data: CreateVehicleRequestType
-  ): Promise<GetVehicleResponseType> {
+  createVehicle(data: CreateVehicleRequest): Promise<GetVehicleResponse> {
     return this.featureService.createVehicle(data);
   }
 
   @GrpcMethod('VehicleService', 'UpdateVehicle')
-  updateVehicle(
-    data: UpdateVehicleRequestType
-  ): Promise<GetVehicleResponseType> {
+  updateVehicle(data: UpdateVehicleRequest): Promise<GetVehicleResponse> {
     return this.featureService.updateVehicle(data);
   }
 
   @GrpcMethod('VehicleService', 'DeleteVehicle')
-  deleteVehicle(data: DeleteVehicleRequestType): Promise<MessageResponseType> {
+  deleteVehicle(data: DeleteVehicleRequest): Promise<MessageResponse> {
     return this.featureService.deleteVehicle(data);
   }
 }

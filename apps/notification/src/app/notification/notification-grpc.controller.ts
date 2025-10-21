@@ -1,15 +1,15 @@
-import { MessageResponseType } from '@hacmieu-journey/nestjs';
+import {
+  CreateNotificationRequest,
+  DeleteNotificationRequest,
+  GetManyNotificationsRequest,
+  GetManyNotificationsResponse,
+  GetNotificationRequest,
+  GetNotificationResponse,
+  MarkAsReadRequest,
+} from '@domain/notification';
+import { MessageResponse } from '@hacmieu-journey/nestjs';
 import { Controller } from '@nestjs/common';
 import { GrpcMethod } from '@nestjs/microservices';
-import {
-  CreateNotificationRequestType,
-  DeleteNotificationRequestType,
-  GetManyNotificationsRequestType,
-  GetManyNotificationsResponseType,
-  GetNotificationRequestType,
-  GetNotificationResponseType,
-  MarkAsReadRequestType,
-} from './notification.model';
 import { NotificationService } from './notification.service';
 
 @Controller()
@@ -18,36 +18,34 @@ export class NotificationGrpcController {
 
   @GrpcMethod('NotificationService', 'GetManyNotifications')
   getManyNotifications(
-    data: GetManyNotificationsRequestType
-  ): Promise<GetManyNotificationsResponseType> {
+    data: GetManyNotificationsRequest
+  ): Promise<GetManyNotificationsResponse> {
     return this.notificationService.getManyNotifications(data);
   }
 
   @GrpcMethod('NotificationService', 'GetNotification')
   getNotification(
-    data: GetNotificationRequestType
-  ): Promise<GetNotificationResponseType> {
+    data: GetNotificationRequest
+  ): Promise<GetNotificationResponse> {
     return this.notificationService.getNotification(data);
   }
 
   @GrpcMethod('NotificationService', 'CreateNotification')
   createNotification(
-    data: CreateNotificationRequestType
-  ): Promise<GetNotificationResponseType> {
+    data: CreateNotificationRequest
+  ): Promise<GetNotificationResponse> {
     return this.notificationService.createNotification(data);
   }
 
   @GrpcMethod('NotificationService', 'MarkAsReadNotifications')
-  markAsReadNotifications(
-    data: MarkAsReadRequestType
-  ): Promise<MessageResponseType> {
+  markAsReadNotifications(data: MarkAsReadRequest): Promise<MessageResponse> {
     return this.notificationService.markAsReadNotifications(data);
   }
 
   @GrpcMethod('NotificationService', 'DeleteNotification')
   deleteNotification(
-    data: DeleteNotificationRequestType
-  ): Promise<MessageResponseType> {
+    data: DeleteNotificationRequest
+  ): Promise<MessageResponse> {
     return this.notificationService.deleteNotification(data);
   }
 }

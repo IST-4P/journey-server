@@ -1,13 +1,12 @@
+import {
+  CreateNotificationRequest,
+  DeleteNotificationRequest,
+  GetManyNotificationsRequest,
+  GetNotificationRequest,
+  MarkAsReadRequest,
+} from '@domain/notification';
 import { Injectable, Logger } from '@nestjs/common';
 import { NotificationNotFoundException } from './notification.error';
-import {
-  CreateNotificationRequestType,
-  DeleteNotificationRequestType,
-  GetManyNotificationsRequestType,
-  GetNotificationRequestType,
-  MarkAsReadRequestType,
-  NotificationEnumType,
-} from './notification.model';
 import { NotificationRepository } from './notification.repo';
 
 interface UserRegisteredEvent {
@@ -31,7 +30,7 @@ export class NotificationService {
         userId: event.userId,
         title: 'Welcome to HacMieu Journey!',
         content: `Welcome to HacMieu Journey, ${event.name}!`,
-        type: 'WELCOME' as NotificationEnumType,
+        type: 'WELCOME' as const,
       };
 
       return this.notificationRepo.createNotification(data);
@@ -44,7 +43,7 @@ export class NotificationService {
     }
   }
 
-  async getManyNotifications(data: GetManyNotificationsRequestType) {
+  async getManyNotifications(data: GetManyNotificationsRequest) {
     const notifications = await this.notificationRepo.getManyNotifications(
       data
     );
@@ -54,7 +53,7 @@ export class NotificationService {
     return { notifications };
   }
 
-  async getNotification(data: GetNotificationRequestType) {
+  async getNotification(data: GetNotificationRequest) {
     const notification = await this.notificationRepo.getNotificationById(data);
     if (!notification) {
       throw NotificationNotFoundException;
@@ -62,18 +61,18 @@ export class NotificationService {
     return notification;
   }
 
-  createNotification(data: CreateNotificationRequestType) {
+  createNotification(data: CreateNotificationRequest) {
     return this.notificationRepo.createNotification(data);
   }
 
-  async markAsReadNotifications(data: MarkAsReadRequestType) {
+  async markAsReadNotifications(data: MarkAsReadRequest) {
     await this.notificationRepo.makeAsRead(data);
     return {
       message: 'Message.MarkAsReadSuccessfully',
     };
   }
 
-  async deleteNotification(data: DeleteNotificationRequestType) {
+  async deleteNotification(data: DeleteNotificationRequest) {
     const result = await this.notificationRepo.getNotificationById(data);
     if (!result) {
       throw NotificationNotFoundException;

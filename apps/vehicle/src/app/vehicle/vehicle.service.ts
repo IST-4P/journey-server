@@ -1,12 +1,12 @@
+import {
+  CreateVehicleRequest,
+  DeleteVehicleRequest,
+  GetManyVehiclesRequest,
+  GetVehicleRequest,
+  UpdateVehicleRequest,
+} from '@domain/vehicle';
 import { Injectable } from '@nestjs/common';
 import { VehicleNotFoundException } from './vehicle.error';
-import {
-  CreateVehicleRequestType,
-  DeleteVehicleRequestType,
-  GetManyVehiclesRequestType,
-  GetVehicleRequestType,
-  UpdateVehicleRequestType,
-} from './vehicle.model';
 import { VehicleRepository } from './vehicle.repo';
 
 @Injectable()
@@ -15,11 +15,11 @@ export class VehicleService {
 
   constructor(private readonly vehicleRepo: VehicleRepository) {}
 
-  getManyVehicles(data: GetManyVehiclesRequestType) {
+  getManyVehicles(data: GetManyVehiclesRequest) {
     return this.vehicleRepo.getManyVehicles(data);
   }
 
-  async getVehicleById(data: GetVehicleRequestType) {
+  async getVehicleById(data: GetVehicleRequest) {
     const vehicle = await this.vehicleRepo.getVehicle(data);
     if (!vehicle) {
       throw VehicleNotFoundException;
@@ -27,7 +27,7 @@ export class VehicleService {
     return vehicle;
   }
 
-  async createVehicle(data: CreateVehicleRequestType) {
+  async createVehicle(data: CreateVehicleRequest) {
     const vehicle = await this.vehicleRepo.getVehicle({
       licensePlate: data.licensePlate,
     });
@@ -37,7 +37,7 @@ export class VehicleService {
     return this.vehicleRepo.createVehicle(data);
   }
 
-  async updateVehicle(data: UpdateVehicleRequestType) {
+  async updateVehicle(data: UpdateVehicleRequest) {
     const result = await this.vehicleRepo.getVehicle({
       licensePlate: data.licensePlate,
     });
@@ -47,7 +47,7 @@ export class VehicleService {
     return this.vehicleRepo.updateVehicle(data);
   }
 
-  async deleteVehicle(data: DeleteVehicleRequestType) {
+  async deleteVehicle(data: DeleteVehicleRequest) {
     const result = await this.vehicleRepo.getVehicle(data);
     if (!result) {
       throw VehicleNotFoundException;

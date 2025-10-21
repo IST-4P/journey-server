@@ -1,4 +1,4 @@
-import { PaginationQuerySchema } from '@hacmieu-journey/nestjs';
+import { PaginationQuerySchema } from '@domain/shared';
 import { createZodDto } from 'nestjs-zod';
 import { z } from 'zod';
 

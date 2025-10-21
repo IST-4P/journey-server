@@ -1,11 +1,11 @@
+import {
+  CreateFeatureRequest,
+  DeleteFeatureRequest,
+  GetFeatureRequest,
+  UpdateFeatureRequest,
+} from '@domain/vehicle';
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
-import {
-  CreateFeatureRequestType,
-  DeleteFeatureRequestType,
-  GetFeatureRequestType,
-  UpdateFeatureRequestType,
-} from './feature.model';
 
 @Injectable()
 export class FeatureRepository {
@@ -15,26 +15,26 @@ export class FeatureRepository {
     return this.prisma.vehicleFeature.findMany();
   }
 
-  getFeatureById(data: GetFeatureRequestType) {
+  getFeatureById(data: GetFeatureRequest) {
     return this.prisma.vehicleFeature.findUnique({
       where: { id: data.id },
     });
   }
 
-  createFeature(data: CreateFeatureRequestType) {
+  createFeature(data: CreateFeatureRequest) {
     return this.prisma.vehicleFeature.create({
       data,
     });
   }
 
-  updateFeature({ id, ...data }: UpdateFeatureRequestType) {
+  updateFeature({ id, ...data }: UpdateFeatureRequest) {
     return this.prisma.vehicleFeature.update({
       where: { id },
       data,
     });
   }
 
-  deleteFeature(data: DeleteFeatureRequestType) {
+  deleteFeature(data: DeleteFeatureRequest) {
     return this.prisma.vehicleFeature.delete({
       where: { id: data.id },
     });

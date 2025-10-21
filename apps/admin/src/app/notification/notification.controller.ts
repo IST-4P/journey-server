@@ -1,10 +1,10 @@
-import { Body, Controller, Delete, Get, Post, Query } from '@nestjs/common';
 import {
   CreateNotificationRequestDTO,
-  DeleteNotificationQueryDTO,
-  GetManyNotificationsQueryDTO,
-  GetNotificationQueryDTO,
-} from './notification.dto';
+  DeleteNotificationRequestDTO,
+  GetManyNotificationsRequestDTO,
+  GetNotificationRequestDTO,
+} from '@domain/notification';
+import { Body, Controller, Delete, Get, Post, Query } from '@nestjs/common';
 import { NotificationService } from './notification.service';
 
 @Controller('notification')
@@ -14,12 +14,12 @@ export class NotificationController {
   constructor(private readonly notificationService: NotificationService) {}
 
   @Get('detail')
-  getNotification(@Query() query: GetNotificationQueryDTO) {
+  getNotification(@Query() query: GetNotificationRequestDTO) {
     return this.notificationService.getNotification(query);
   }
 
   @Get('list')
-  getManyNotifications(@Query() query: GetManyNotificationsQueryDTO) {
+  getManyNotifications(@Query() query: GetManyNotificationsRequestDTO) {
     return this.notificationService.getManyNotifications(query);
   }
 
@@ -29,7 +29,7 @@ export class NotificationController {
   }
 
   @Delete(':id')
-  deleteNotification(@Query() query: DeleteNotificationQueryDTO) {
+  deleteNotification(@Query() query: DeleteNotificationRequestDTO) {
     return this.notificationService.deleteNotification(query);
   }
 }

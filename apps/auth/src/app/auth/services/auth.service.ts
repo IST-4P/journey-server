@@ -1,3 +1,13 @@
+import {
+  ForgotPasswordRequest,
+  LoginRequest,
+  LogoutRequest,
+  RefreshTokenRequest,
+  RegisterRequest,
+  SendOTPRequest,
+  VerificationCodeType,
+  VerificationCodeValues,
+} from '@domain/auth';
 import { NatsClient } from '@hacmieu-journey/nats';
 import { AccessTokenPayloadCreate } from '@hacmieu-journey/nestjs';
 import {
@@ -18,17 +28,7 @@ import {
   OTPExpiredException,
   RefreshTokenAlreadyUsedException,
   UnauthorizedAccessException,
-} from '../models/auth.error';
-import {
-  ForgotPasswordRequestType,
-  LoginRequestType,
-  LogoutRequestType,
-  RefreshTokenRequestType,
-  RegisterRequestType,
-  SendOTPRequestType,
-  TypeOfVerificationCode,
-  TypeOfVerificationCodeType,
-} from '../models/auth.model';
+} from '../auth.error';
 import { AuthRepository } from '../repositories/auth.repo';
 import { UserRepository } from '../repositories/user.repo';
 import { EmailService } from './email.service';
@@ -84,7 +84,7 @@ export class AuthService {
     code,
   }: {
     email: string;
-    type: TypeOfVerificationCodeType;
+    type: VerificationCodeType;
     code: string;
   }) {
     const verificationCode =
@@ -108,17 +108,17 @@ export class AuthService {
     }
   }
 
-  async sendOtp(body: SendOTPRequestType) {
+  async sendOtp(body: SendOTPRequest) {
     // Kiểm tra email có tồn tại hay chưa
     const user = await this.userRepository.findUnique({
       email: body.email,
     });
 
-    if (body.type === TypeOfVerificationCode.REGISTER && user) {
+    if (body.type === VerificationCodeValues.REGISTER && user) {
       throw EmailAlreadyExistsException;
     }
 
-    if (body.type === TypeOfVerificationCode.FORGOT_PASSWORD && !user) {
+    if (body.type === VerificationCodeValues.FORGOT_PASSWORD && !user) {
       throw EmailNotFoundException;
     }
 
@@ -149,13 +149,13 @@ export class AuthService {
     };
   }
 
-  async register(body: RegisterRequestType) {
+  async register(body: RegisterRequest) {
     try {
-      // await this.validateVerificationCode({
-      //   email: body.email,
-      //   type: TypeOfVerificationCode.REGISTER,
-      //   code: body.code,
-      // });
+      await this.validateVerificationCode({
+        email: body.email,
+        type: VerificationCodeValues.REGISTER,
+        code: body.code,
+      });
 
       const hashedPassword = await this.hashingService.hash(body.password);
 
@@ -167,12 +167,12 @@ export class AuthService {
           password: hashedPassword,
           role: 'USER',
         }),
-        // this.authRepository.deleteVerificationCode({
-        //   email_type: {
-        //     email: body.email,
-        //     type: TypeOfVerificationCode.REGISTER,
-        //   },
-        // }),
+        this.authRepository.deleteVerificationCode({
+          email_type: {
+            email: body.email,
+            type: VerificationCodeValues.REGISTER,
+          },
+        }),
       ]);
 
       // Tạo profile trong User Service qua NATS
@@ -213,7 +213,7 @@ export class AuthService {
     }
   }
 
-  async login(body: LoginRequestType) {
+  async login(body: LoginRequest) {
     // Kiểm tra user có tồn tại không
     const user = await this.userRepository.findUnique({
       email: body.email,
@@ -240,7 +240,7 @@ export class AuthService {
     return tokens;
   }
 
-  async refreshToken({ refreshToken }: RefreshTokenRequestType) {
+  async refreshToken({ refreshToken }: RefreshTokenRequest) {
     try {
       // Kiểm tra token có hợp lê không
       const { userId } = await this.tokenService.verifyRefreshToken(
@@ -281,7 +281,7 @@ export class AuthService {
     }
   }
 
-  async logout({ refreshToken }: LogoutRequestType) {
+  async logout({ refreshToken }: LogoutRequest) {
     try {
       // Kiểm tra token có hợp lệ không
       await this.tokenService.verifyRefreshToken(refreshToken);
@@ -299,7 +299,7 @@ export class AuthService {
     }
   }
 
-  async forgotPassword(body: ForgotPasswordRequestType) {
+  async forgotPassword(body: ForgotPasswordRequest) {
     const { email, code, newPassword } = body;
 
     // Kiểm tra email có tồn tại không
@@ -313,7 +313,7 @@ export class AuthService {
     // Kiểm tra OTP có hợp lệ không
     await this.validateVerificationCode({
       email,
-      type: TypeOfVerificationCode.FORGOT_PASSWORD,
+      type: VerificationCodeValues.FORGOT_PASSWORD,
       code,
     });
 
@@ -324,7 +324,7 @@ export class AuthService {
       this.authRepository.deleteVerificationCode({
         email_type: {
           email,
-          type: TypeOfVerificationCode.FORGOT_PASSWORD,
+          type: VerificationCodeValues.FORGOT_PASSWORD,
         },
       }),
     ]);

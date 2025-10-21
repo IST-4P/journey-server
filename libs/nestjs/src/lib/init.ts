@@ -1,8 +1,8 @@
 import { INestApplication, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import cookieParser from 'cookie-parser';
+import { ResponseInterceptor } from './interceptors/response.interceptor';
 import { CustomZodValidationPipe } from './pipe/custom-zod-validation.pipe';
-import { ResponseInterceptor } from './responses/response.interceptor';
 
 export async function init(app: INestApplication) {
   const globalPrefix = 'api';

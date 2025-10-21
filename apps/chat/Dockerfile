@@ -14,6 +14,8 @@ COPY libs/nats ./libs/nats
 COPY libs/prisma ./libs/prisma
 COPY libs/nestjs ./libs/nestjs
 COPY libs/grpc ./libs/grpc
+COPY libs/domain/chat ./libs/domain/chat
+COPY libs/domain/shared ./libs/domain/shared
 
 RUN npm install
 

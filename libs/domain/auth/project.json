@@ -1,0 +1,7 @@
+{
+  "name": "domain-auth",
+  "$schema": "../../../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "libs/domain/auth/src",
+  "projectType": "library",
+  "tags": ["type:domain", "scope:auth"]
+}

@@ -1,18 +1,18 @@
+import {
+  CreateVehicleRequest,
+  DeleteVehicleRequest,
+  GetManyVehiclesRequest,
+  GetVehicleRequest,
+  UpdateVehicleRequest,
+} from '@domain/vehicle';
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
-import {
-  CreateVehicleRequestType,
-  DeleteVehicleRequestType,
-  GetManyVehiclesRequestType,
-  GetVehicleRequestType,
-  UpdateVehicleRequestType,
-} from './vehicle.model';
 
 @Injectable()
 export class VehicleRepository {
   constructor(private readonly prisma: PrismaService) {}
 
-  getVehicle(data: GetVehicleRequestType) {
+  getVehicle(data: GetVehicleRequest) {
     return this.prisma.vehicle
       .findUnique({
         where: { id: data.id },
@@ -42,7 +42,7 @@ export class VehicleRepository {
       });
   }
 
-  async getManyVehicles({ page, limit, ...where }: GetManyVehiclesRequestType) {
+  async getManyVehicles({ page, limit, ...where }: GetManyVehiclesRequest) {
     const skip = (page - 1) * limit;
     const take = limit;
     const [totalItems, vehicles] = await Promise.all([
@@ -68,7 +68,7 @@ export class VehicleRepository {
     };
   }
 
-  async createVehicle({ featureIds, ...data }: CreateVehicleRequestType) {
+  async createVehicle({ featureIds, ...data }: CreateVehicleRequest) {
     const vehicle = await this.prisma.vehicle.create({
       data: {
         ...data,
@@ -103,7 +103,7 @@ export class VehicleRepository {
     };
   }
 
-  async updateVehicle({ id, featureIds, ...data }: UpdateVehicleRequestType) {
+  async updateVehicle({ id, featureIds, ...data }: UpdateVehicleRequest) {
     const vehicle = await this.prisma.vehicle.update({
       where: { id },
       data: {
@@ -140,7 +140,7 @@ export class VehicleRepository {
     };
   }
 
-  deleteVehicle(data: DeleteVehicleRequestType) {
+  deleteVehicle(data: DeleteVehicleRequest) {
     return this.prisma.vehicle.delete({
       where: { id: data.id },
     });

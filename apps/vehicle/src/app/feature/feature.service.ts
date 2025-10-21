@@ -1,12 +1,11 @@
+import {
+  CreateFeatureRequest,
+  DeleteFeatureRequest,
+  UpdateFeatureRequest,
+} from '@domain/vehicle';
 import { Injectable } from '@nestjs/common';
 import { FeatureNotFoundException } from './feature.error';
-import {
-  CreateFeatureRequestType,
-  DeleteFeatureRequestType,
-  UpdateFeatureRequestType,
-} from './feature.model';
 import { FeatureRepository } from './feature.repo';
-
 @Injectable()
 export class FeatureService {
   // private readonly logger = new Logger(FeatureService.name);
@@ -21,11 +20,11 @@ export class FeatureService {
     return { features };
   }
 
-  createFeature(data: CreateFeatureRequestType) {
+  createFeature(data: CreateFeatureRequest) {
     return this.featureRepo.createFeature(data);
   }
 
-  async updateFeature(data: UpdateFeatureRequestType) {
+  async updateFeature(data: UpdateFeatureRequest) {
     const result = await this.featureRepo.getFeatureById(data);
     if (!result) {
       throw FeatureNotFoundException;
@@ -33,7 +32,7 @@ export class FeatureService {
     return this.featureRepo.updateFeature(data);
   }
 
-  async deleteFeature(data: DeleteFeatureRequestType) {
+  async deleteFeature(data: DeleteFeatureRequest) {
     const result = await this.featureRepo.getFeatureById(data);
     if (!result) {
       throw FeatureNotFoundException;

@@ -28,7 +28,12 @@ builder.Services.AddScoped<IDeviceRepository, DeviceRepository>();
 builder.Services.AddScoped<IComboRepository, ComboRepository>();
 
 var app = builder.Build();
+// Configure gRPC endpoint
+var grpcUrl = Environment.GetEnvironmentVariable("BLOG_GRPC_SERVICE_URL") ?? "0.0.0.0:5006";
+Console.WriteLine($"Blog gRPC Service listening on: {grpcUrl}");
 
+// Map gRPC service
 app.MapGrpcService<DeviceGrpcService>();
+
 app.MapGet("/", () => "Device gRPC Service running...");
 app.Run();

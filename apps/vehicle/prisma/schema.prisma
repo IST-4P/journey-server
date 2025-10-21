@@ -38,12 +38,13 @@ enum FuelType {
 
 // ==================== MAIN MODELS ====================
 
+// Vehicle model (refactored)
 model Vehicle {
     id           String      @id @default(uuid())
     type         VehicleType
     name         String // Tên xe (VD: "Toyota Vios 2023")
-    brand        String // Hãng xe (VD: "Toyota")
-    model        String // Model (VD: "Vios")
+    brandId      String      @map("brand_id")
+    modelId      String      @map("model_id")
     licensePlate String      @unique @map("license_plate") // Biển số xe
 
     // Thông số kỹ thuật
@@ -79,19 +80,51 @@ model Vehicle {
     updatedAt DateTime @updatedAt @map("updated_at")
 
     // Relations
+    brand           VehicleBrand          @relation(fields: [brandId], references: [id], onDelete: Restrict)
+    model           VehicleModel          @relation(fields: [modelId], references: [id], onDelete: Restrict)
     images          String[] // Array of image URLs
     vehicleFeatures VehicleOnFeature[]
     availability    VehicleAvailability[]
 
     @@index([type])
     @@index([status])
-    @@index([brand])
+    @@index([brandId])
+    @@index([modelId])
     @@index([city, ward])
     @@index([pricePerDay])
     @@index([latitude, longitude])
     @@index([averageRating])
     @@index([createdAt])
     @@map("vehicles")
+}
+
+model VehicleBrand {
+    id        String   @id @default(uuid())
+    name      String   @unique // VD: "Toyota", "Honda", "Mercedes"
+    createdAt DateTime @default(now()) @map("created_at")
+    updatedAt DateTime @updatedAt @map("updated_at")
+
+    // Relations
+    models   VehicleModel[]
+    vehicles Vehicle[]
+
+    @@map("brands")
+}
+
+model VehicleModel {
+    id        String   @id @default(uuid())
+    name      String // VD: "Vios", "City", "C-Class"
+    brandId   String   @map("brand_id")
+    createdAt DateTime @default(now()) @map("created_at")
+    updatedAt DateTime @updatedAt @map("updated_at")
+
+    // Relations
+    brand    VehicleBrand @relation(fields: [brandId], references: [id], onDelete: Cascade)
+    vehicles Vehicle[]
+
+    @@unique([brandId, name]) // Mỗi brand chỉ có 1 model name duy nhất
+    @@index([brandId])
+    @@map("vehicle_models")
 }
 
 model VehicleFeature {

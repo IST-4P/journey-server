@@ -25,7 +25,7 @@ export class CreateFeatureRequestDTO extends createZodDto(
 ) {}
 
 export class UpdateFeatureRequestDTO extends createZodDto(
-  UpdateFeatureRequestSchema
+  UpdateFeatureRequestSchema.omit({ id: true })
 ) {}
 
 export class DeleteFeatureRequestDTO extends createZodDto(

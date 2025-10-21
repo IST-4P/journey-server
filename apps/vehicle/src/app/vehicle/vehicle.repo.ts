@@ -12,7 +12,7 @@ import { PrismaService } from '../prisma/prisma.service';
 export class VehicleRepository {
   constructor(private readonly prisma: PrismaService) {}
 
-  getVehicle(data: GetVehicleRequest) {
+  async getVehicle(data: GetVehicleRequest) {
     return this.prisma.vehicle
       .findUnique({
         where: { id: data.id },

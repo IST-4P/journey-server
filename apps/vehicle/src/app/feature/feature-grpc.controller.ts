@@ -3,6 +3,7 @@ import {
   CreateFeatureRequest,
   DeleteFeatureRequest,
   GetAllFeaturesResponse,
+  GetFeatureRequest,
   GetFeatureResponse,
   UpdateFeatureRequest,
 } from '@domain/vehicle';
@@ -17,6 +18,11 @@ export class FeatureGrpcController {
   @GrpcMethod('VehicleService', 'GetAllFeatures')
   getAllFeatures(): Promise<GetAllFeaturesResponse> {
     return this.featureService.getAllFeatures();
+  }
+
+  @GrpcMethod('VehicleService', 'GetFeature')
+  getFeature(data: GetFeatureRequest): Promise<GetFeatureResponse> {
+    return this.featureService.getFeature(data);
   }
 
   @GrpcMethod('VehicleService', 'CreateFeature')

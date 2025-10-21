@@ -6,7 +6,10 @@ import {
   UpdateVehicleRequest,
 } from '@domain/vehicle';
 import { Injectable } from '@nestjs/common';
-import { VehicleNotFoundException } from './vehicle.error';
+import {
+  VehicleAlreadyExistsException,
+  VehicleNotFoundException,
+} from './vehicle.error';
 import { VehicleRepository } from './vehicle.repo';
 
 @Injectable()
@@ -32,7 +35,7 @@ export class VehicleService {
       licensePlate: data.licensePlate,
     });
     if (vehicle) {
-      throw new Error('Vehicle already exists');
+      throw VehicleAlreadyExistsException;
     }
     return this.vehicleRepo.createVehicle(data);
   }

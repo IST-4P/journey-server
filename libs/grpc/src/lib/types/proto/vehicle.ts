@@ -10,7 +10,10 @@ import { Observable } from "rxjs";
 
 export const protobufPackage = "vehicle";
 
-/** GetFeature */
+/**
+ * ======================================================== Feature
+ * GetFeature
+ */
 export interface GetFeatureRequest {
   id?: string | undefined;
   name?: string | undefined;
@@ -48,7 +51,77 @@ export interface UpdateFeatureRequest {
   id: string;
 }
 
-/** GetVehicle */
+/**
+ * ======================================================== Brand
+ * GetAllBrands
+ */
+export interface GetAllBrandsRequest {
+}
+
+export interface GetBrandResponse {
+  id: string;
+  name: string;
+}
+
+export interface GetAllBrandsResponse {
+  brands: GetBrandResponse[];
+}
+
+/** CreateBrand */
+export interface CreateBrandRequest {
+  name: string;
+}
+
+/** UpdateBrand */
+export interface UpdateBrandRequest {
+  id: string;
+  name: string;
+}
+
+/** DeleteBrand */
+export interface DeleteBrandRequest {
+  id?: string | undefined;
+  name?: string | undefined;
+}
+
+/** GetAllModels */
+export interface GetAllModelsRequest {
+  brandId?: string | undefined;
+}
+
+export interface GetModelResponse {
+  id: string;
+  name: string;
+  brandId: string;
+}
+
+export interface GetAllModelsResponse {
+  models: GetModelResponse[];
+}
+
+/** CreateModel */
+export interface CreateModelRequest {
+  name: string;
+  brandId: string;
+}
+
+/** UpdateModel */
+export interface UpdateModelRequest {
+  id: string;
+  name?: string | undefined;
+  brandId?: string | undefined;
+}
+
+/** DeleteModel */
+export interface DeleteModelRequest {
+  id?: string | undefined;
+  name?: string | undefined;
+}
+
+/**
+ * ======================================================== Vehicle
+ * GetVehicle
+ */
 export interface GetVehicleRequest {
   id?: string | undefined;
   licensePlate?: string | undefined;
@@ -62,8 +135,8 @@ export interface GetVehicleResponse {
   id: string;
   type: string;
   name: string;
-  brand: string;
-  model: string;
+  brandId: string;
+  modelId: string;
   licensePlate: string;
   seats: number;
   fuelType: string;
@@ -92,8 +165,8 @@ export interface GetManyVehiclesRequest {
   id?: string | undefined;
   type?: string | undefined;
   name?: string | undefined;
-  brand?: string | undefined;
-  model?: string | undefined;
+  brandId?: string | undefined;
+  modelId?: string | undefined;
   licensePlate?: string | undefined;
   seats?: number | undefined;
   fuelType?: string | undefined;
@@ -118,8 +191,8 @@ export interface GetManyVehiclesResponse {
 export interface CreateVehicleRequest {
   type: string;
   name: string;
-  brand: string;
-  model: string;
+  brandId: string;
+  modelId: string;
   licensePlate: string;
   seats: number;
   fuelType: string;
@@ -135,15 +208,15 @@ export interface CreateVehicleRequest {
   terms: string[];
   status: string;
   images: string[];
-  vehicleFeatures: VehicleFeature[];
+  featureIds: string[];
 }
 
 /** UpdateVehicle */
 export interface UpdateVehicleRequest {
   type?: string | undefined;
   name?: string | undefined;
-  brand?: string | undefined;
-  model?: string | undefined;
+  brandId?: string | undefined;
+  modelId?: string | undefined;
   licensePlate?: string | undefined;
   seats?: number | undefined;
   fuelType?: string | undefined;
@@ -159,7 +232,7 @@ export interface UpdateVehicleRequest {
   terms: string[];
   status?: string | undefined;
   images: string[];
-  vehicleFeatures: VehicleFeature[];
+  featureIds: string[];
   id: string;
 }
 
@@ -179,6 +252,22 @@ export interface VehicleServiceClient {
   updateFeature(request: UpdateFeatureRequest): Observable<GetFeatureResponse>;
 
   deleteFeature(request: GetFeatureRequest): Observable<MessageResponse>;
+
+  getAllBrands(request: GetAllBrandsRequest): Observable<GetAllBrandsResponse>;
+
+  createBrand(request: CreateBrandRequest): Observable<GetBrandResponse>;
+
+  updateBrand(request: UpdateBrandRequest): Observable<GetBrandResponse>;
+
+  deleteBrand(request: DeleteBrandRequest): Observable<MessageResponse>;
+
+  getAllModels(request: GetAllModelsRequest): Observable<GetAllModelsResponse>;
+
+  createModel(request: CreateModelRequest): Observable<GetModelResponse>;
+
+  updateModel(request: UpdateModelRequest): Observable<GetModelResponse>;
+
+  deleteModel(request: DeleteModelRequest): Observable<MessageResponse>;
 
   getVehicle(request: GetVehicleRequest): Observable<GetVehicleResponse>;
 
@@ -210,6 +299,26 @@ export interface VehicleServiceController {
 
   deleteFeature(request: GetFeatureRequest): Promise<MessageResponse> | Observable<MessageResponse> | MessageResponse;
 
+  getAllBrands(
+    request: GetAllBrandsRequest,
+  ): Promise<GetAllBrandsResponse> | Observable<GetAllBrandsResponse> | GetAllBrandsResponse;
+
+  createBrand(request: CreateBrandRequest): Promise<GetBrandResponse> | Observable<GetBrandResponse> | GetBrandResponse;
+
+  updateBrand(request: UpdateBrandRequest): Promise<GetBrandResponse> | Observable<GetBrandResponse> | GetBrandResponse;
+
+  deleteBrand(request: DeleteBrandRequest): Promise<MessageResponse> | Observable<MessageResponse> | MessageResponse;
+
+  getAllModels(
+    request: GetAllModelsRequest,
+  ): Promise<GetAllModelsResponse> | Observable<GetAllModelsResponse> | GetAllModelsResponse;
+
+  createModel(request: CreateModelRequest): Promise<GetModelResponse> | Observable<GetModelResponse> | GetModelResponse;
+
+  updateModel(request: UpdateModelRequest): Promise<GetModelResponse> | Observable<GetModelResponse> | GetModelResponse;
+
+  deleteModel(request: DeleteModelRequest): Promise<MessageResponse> | Observable<MessageResponse> | MessageResponse;
+
   getVehicle(
     request: GetVehicleRequest,
   ): Promise<GetVehicleResponse> | Observable<GetVehicleResponse> | GetVehicleResponse;
@@ -237,6 +346,14 @@ export function VehicleServiceControllerMethods() {
       "createFeature",
       "updateFeature",
       "deleteFeature",
+      "getAllBrands",
+      "createBrand",
+      "updateBrand",
+      "deleteBrand",
+      "getAllModels",
+      "createModel",
+      "updateModel",
+      "deleteModel",
       "getVehicle",
       "getManyVehicles",
       "createVehicle",

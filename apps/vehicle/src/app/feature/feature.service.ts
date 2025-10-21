@@ -1,10 +1,14 @@
 import {
   CreateFeatureRequest,
   DeleteFeatureRequest,
+  GetFeatureRequest,
   UpdateFeatureRequest,
 } from '@domain/vehicle';
 import { Injectable } from '@nestjs/common';
-import { FeatureNotFoundException } from './feature.error';
+import {
+  FeatureAlreadyExistsException,
+  FeatureNotFoundException,
+} from './feature.error';
 import { FeatureRepository } from './feature.repo';
 @Injectable()
 export class FeatureService {
@@ -20,7 +24,19 @@ export class FeatureService {
     return { features };
   }
 
-  createFeature(data: CreateFeatureRequest) {
+  async getFeature(data: GetFeatureRequest) {
+    const feature = await this.featureRepo.getFeatureById(data);
+    if (!feature) {
+      throw FeatureNotFoundException;
+    }
+    return feature;
+  }
+
+  async createFeature(data: CreateFeatureRequest) {
+    const feature = await this.featureRepo.getFeatureById({ name: data.name });
+    if (feature) {
+      throw FeatureAlreadyExistsException;
+    }
     return this.featureRepo.createFeature(data);
   }
 

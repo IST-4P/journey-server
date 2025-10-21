@@ -9,13 +9,23 @@ service VehicleService {
   rpc UpdateFeature(UpdateFeatureRequest) returns (GetFeatureResponse);
   rpc DeleteFeature(GetFeatureRequest) returns (MessageResponse);
 
+  rpc GetAllBrands(GetAllBrandsRequest) returns (GetAllBrandsResponse);
+  rpc CreateBrand(CreateBrandRequest) returns (GetBrandResponse);
+  rpc UpdateBrand(UpdateBrandRequest) returns (GetBrandResponse);
+  rpc DeleteBrand(DeleteBrandRequest) returns (MessageResponse);
+
+  rpc GetAllModels(GetAllModelsRequest) returns (GetAllModelsResponse);
+  rpc CreateModel(CreateModelRequest) returns (GetModelResponse);
+  rpc UpdateModel(UpdateModelRequest) returns (GetModelResponse);
+  rpc DeleteModel(DeleteModelRequest) returns (MessageResponse);
+
   rpc GetVehicle(GetVehicleRequest) returns (GetVehicleResponse);
   rpc GetManyVehicles(GetManyVehiclesRequest) returns (GetManyVehiclesResponse);
   rpc CreateVehicle(CreateVehicleRequest) returns (GetVehicleResponse);
   rpc UpdateVehicle(UpdateVehicleRequest) returns (GetVehicleResponse);
   rpc DeleteVehicle(GetVehicleRequest) returns (MessageResponse);
 }
-
+// ======================================================== Feature
 // GetFeature
 message GetFeatureRequest {
   optional string id = 1;
@@ -53,6 +63,73 @@ message UpdateFeatureRequest {
   string id = 4;
 }
 
+// ======================================================== Brand
+// GetAllBrands
+message GetAllBrandsRequest {}
+
+message GetBrandResponse {
+  string id = 1;
+  string name = 2;
+}
+
+message GetAllBrandsResponse {
+  repeated GetBrandResponse brands  = 1;
+}
+
+// CreateBrand
+message CreateBrandRequest {
+  string name = 1;
+}
+
+// UpdateBrand
+message UpdateBrandRequest {
+  string id = 1;
+  string name = 2;
+}
+
+// DeleteBrand
+message DeleteBrandRequest {
+  optional string id = 1;
+  optional string name = 2;
+}
+
+// ======================================================== Model
+
+// GetAllModels
+message GetAllModelsRequest {
+  optional string brandId = 1;
+}
+
+message GetModelResponse {
+  string id = 1;
+  string name = 2;
+  string brandId = 3;
+}
+
+message GetAllModelsResponse {
+  repeated GetModelResponse models  = 1;
+}
+
+// CreateModel
+message CreateModelRequest {
+  string name = 1;
+  string brandId = 2;
+}
+
+// UpdateModel
+message UpdateModelRequest {
+  string id = 1;
+  optional string name = 2;
+  optional string brandId = 3;
+}
+
+// DeleteModel
+message DeleteModelRequest {
+  optional string id = 1;
+  optional string name = 2;
+}
+
+// ======================================================== Vehicle
 // GetVehicle
 message GetVehicleRequest {
   optional string id = 1;
@@ -67,8 +144,8 @@ message GetVehicleResponse {
   string id = 1;
   string type = 2;
   string name = 3;
-  string brand = 4;
-  string model = 5;
+  string brandId = 4;
+  string modelId = 5;
   string licensePlate = 6;
 
   int32 seats = 7;
@@ -106,8 +183,8 @@ message GetManyVehiclesRequest {
   optional string id = 1;
   optional string type = 2;
   optional string name = 3;
-  optional string brand = 4;
-  optional string model = 5;
+  optional string brandId = 4;
+  optional string modelId = 5;
   optional string licensePlate = 6;
 
   optional int32 seats = 7;
@@ -137,8 +214,8 @@ message GetManyVehiclesResponse {
 message CreateVehicleRequest {
   string type = 1;
   string name = 2;
-  string brand = 3;
-  string model = 4;
+  string brandId = 3;
+  string modelId = 4;
   string licensePlate = 5;
 
   int32 seats = 6;
@@ -161,15 +238,15 @@ message CreateVehicleRequest {
 
   repeated string images = 19;
 
-  repeated VehicleFeature vehicleFeatures = 20;
+  repeated string featureIds = 20;
 }
 
 // UpdateVehicle
 message UpdateVehicleRequest {
   optional string type = 1;
   optional string name = 2;
-  optional string brand = 3;
-  optional string model = 4;
+  optional string brandId = 3;
+  optional string modelId = 4;
   optional string licensePlate = 5;
 
   optional int32 seats = 6;
@@ -192,7 +269,7 @@ message UpdateVehicleRequest {
 
   repeated string images = 19;
 
-  repeated VehicleFeature vehicleFeatures = 20;
+  repeated string featureIds = 20;
 
   string id = 21;
 }

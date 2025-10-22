@@ -1,8 +1,8 @@
 export * from './lib/init';
 
 // Models
-export * from './lib/responses/pagination.model';
-export * from './lib/responses/response.model';
+export * from '../../domain/shared/src/lib/models/message.model';
+export * from '../../domain/shared/src/lib/models/pagination.model';
 
 // Auth Module & Guards
 export * from './lib/guards/access-token.guard';
@@ -31,4 +31,4 @@ export * from './lib/filters/http-exception.filter';
 export * from './lib/pipe/custom-zod-validation.pipe';
 
 // Response Interceptor
-export * from './lib/responses/response.interceptor';
+export * from './lib/interceptors/response.interceptor';

@@ -1,5 +1,5 @@
 import { NotificationProto } from '@hacmieu-journey/grpc';
-import { PulsarModule } from '@hacmieu-journey/pulsar';
+import { NatsModule } from '@hacmieu-journey/nats';
 import { Module } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { ClientsModule, Transport } from '@nestjs/microservices';
@@ -9,7 +9,7 @@ import { NotificationService } from './notification.service';
 
 @Module({
   imports: [
-    PulsarModule,
+    NatsModule,
     ClientsModule.registerAsync([
       {
         name: NotificationProto.NOTIFICATION_PACKAGE_NAME,

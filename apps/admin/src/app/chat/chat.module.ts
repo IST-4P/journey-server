@@ -1,5 +1,5 @@
 import { ChatProto } from '@hacmieu-journey/grpc';
-import { PulsarModule } from '@hacmieu-journey/pulsar';
+import { NatsModule } from '@hacmieu-journey/nats';
 import { Module } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { ClientsModule, Transport } from '@nestjs/microservices';
@@ -9,7 +9,7 @@ import { ChatService } from './chat.service';
 
 @Module({
   imports: [
-    PulsarModule,
+    NatsModule,
     ClientsModule.registerAsync([
       {
         name: ChatProto.CHAT_PACKAGE_NAME,

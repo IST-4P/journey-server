@@ -1,20 +1,20 @@
+import {
+  CreateDriverLicenseRequest,
+  GetDriverLicenseRequest,
+  UpdateDriverLicenseRequest,
+} from '@domain/user';
 import { Injectable } from '@nestjs/common';
 import {
   DriverLicenseAlreadyExistsException,
   DriverLicenseNotFoundException,
 } from './driver-license.error';
-import {
-  CreateDriverLicenseRequestType,
-  GetDriverLicenseRequestType,
-  UpdateDriverLicenseRequestType,
-} from './driver-license.model';
 import { DriverLicenseRepository } from './driver-license.repo';
 
 @Injectable()
 export class DriverLicenseService {
   constructor(private readonly driverLicenseRepo: DriverLicenseRepository) {}
 
-  async getDriverLicense(data: GetDriverLicenseRequestType) {
+  async getDriverLicense(data: GetDriverLicenseRequest) {
     const result = await this.driverLicenseRepo.findDriverLicenseByUserId(
       data.userId
     );
@@ -24,7 +24,7 @@ export class DriverLicenseService {
     return result;
   }
 
-  async createDriverLicense(data: CreateDriverLicenseRequestType) {
+  async createDriverLicense(data: CreateDriverLicenseRequest) {
     const result = await this.driverLicenseRepo.findDriverLicenseByUserId(
       data.userId
     );
@@ -34,10 +34,7 @@ export class DriverLicenseService {
     return this.driverLicenseRepo.createDriverLicense(data);
   }
 
-  async updateDriverLicense({
-    userId,
-    ...data
-  }: UpdateDriverLicenseRequestType) {
+  async updateDriverLicense({ userId, ...data }: UpdateDriverLicenseRequest) {
     const result = await this.driverLicenseRepo.findDriverLicenseByUserId(
       userId
     );

@@ -1,14 +1,14 @@
-import { MessageResponseType } from '@hacmieu-journey/nestjs';
+import { MessageResponse } from '@domain/shared';
+import {
+  CreateAddressRequest,
+  DeleteAddressRequest,
+  GetAddressRequest,
+  GetAddressResponseDTO,
+  GetManyAddressRequest,
+  UpdateAddressRequest,
+} from '@domain/user';
 import { Controller } from '@nestjs/common';
 import { GrpcMethod } from '@nestjs/microservices';
-import {
-  CreateAddressRequestType,
-  DeleteAddressRequestType,
-  GetAddressRequestType,
-  GetAddressResponseType,
-  GetManyAddressRequestType,
-  UpdateAddressRequestType,
-} from './address.model';
 import { AddressService } from './address.service';
 
 @Controller()
@@ -17,32 +17,35 @@ export class AddressGrpcController {
 
   @GrpcMethod('UserService', 'GetManyAddress')
   getManyAddress(
-    data: GetManyAddressRequestType
-  ): Promise<{ addresses: GetAddressResponseType[] }> {
+    data: GetManyAddressRequest
+  ): Promise<{ addresses: GetAddressResponseDTO[] }> {
     return this.addressService.getManyAddressByUserId(data);
   }
 
   @GrpcMethod('UserService', 'GetAddress')
-  getAddress(data: GetAddressRequestType): Promise<GetAddressResponseType> {
+  getAddress(data: GetAddressRequest): Promise<GetAddressResponseDTO> {
     return this.addressService.getAddressById(data);
   }
 
   @GrpcMethod('UserService', 'CreateAddress')
-  createAddress(
-    data: CreateAddressRequestType
-  ): Promise<GetAddressResponseType> {
-    return this.addressService.createAddress(data);
+  async createAddress(
+    data: CreateAddressRequest
+  ): Promise<GetAddressResponseDTO> {
+    const result = await this.addressService.createAddress(data);
+    return {
+      ...result,
+      latitude: result.latitude ?? undefined,
+      longitude: result.longitude ?? undefined,
+    };
   }
 
   @GrpcMethod('UserService', 'UpdateAddress')
-  updateAddress(
-    data: UpdateAddressRequestType
-  ): Promise<GetAddressResponseType> {
+  updateAddress(data: UpdateAddressRequest): Promise<GetAddressResponseDTO> {
     return this.addressService.updateAddress(data);
   }
 
   @GrpcMethod('UserService', 'DeleteAddress')
-  deleteAddress(data: DeleteAddressRequestType): Promise<MessageResponseType> {
+  deleteAddress(data: DeleteAddressRequest): Promise<MessageResponse> {
     return this.addressService.deleteAddress(data);
   }
 }

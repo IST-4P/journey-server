@@ -1,13 +1,13 @@
+import {
+  CreateBankAccountRequest,
+  GetBankAccountRequest,
+  UpdateBankAccountRequest,
+} from '@domain/user';
 import { Injectable } from '@nestjs/common';
 import {
   BankAccountAlreadyExistsException,
   BankAccountNotFoundException,
 } from './bank-account.error';
-import {
-  CreateBankAccountRequestType,
-  GetBankAccountRequestType,
-  UpdateBankAccountRequestType,
-} from './bank-account.model';
 import { BankAccountRepository } from './bank-account.repo';
 
 @Injectable()
@@ -16,7 +16,7 @@ export class BankAccountService {
 
   constructor(private readonly bankAccountRepo: BankAccountRepository) {}
 
-  async getBankAccount(data: GetBankAccountRequestType) {
+  async getBankAccount(data: GetBankAccountRequest) {
     const result = await this.bankAccountRepo.findBankAccountByUserId(
       data.userId
     );
@@ -27,7 +27,7 @@ export class BankAccountService {
     return result;
   }
 
-  async createBankAccount(data: CreateBankAccountRequestType) {
+  async createBankAccount(data: CreateBankAccountRequest) {
     const result = await this.bankAccountRepo.findBankAccountByUserId(
       data.userId
     );
@@ -37,7 +37,7 @@ export class BankAccountService {
     return this.bankAccountRepo.createBankAccount(data);
   }
 
-  async updateBankAccount({ userId, ...data }: UpdateBankAccountRequestType) {
+  async updateBankAccount({ userId, ...data }: UpdateBankAccountRequest) {
     const result = await this.bankAccountRepo.findBankAccountByUserId(userId);
     if (!result) {
       throw BankAccountNotFoundException;

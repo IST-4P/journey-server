@@ -1,3 +1,4 @@
+import { CreateChatRequestDTO } from '@domain/chat';
 import { ChatProto } from '@hacmieu-journey/grpc';
 import { generateRoomUserId } from '@hacmieu-journey/websocket';
 import {
@@ -9,7 +10,6 @@ import {
   WebSocketServer,
 } from '@nestjs/websockets';
 import { Server, Socket } from 'socket.io';
-import { CreateChatRequestDTO } from './chat.dto';
 import { ChatService } from './chat.service';
 
 export interface ChatType {

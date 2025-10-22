@@ -10,10 +10,12 @@ COPY tsconfig.*.json ./
 COPY webpack.*.config.js ./
 
 COPY apps/vehicle ./apps/vehicle
-COPY libs/pulsar ./libs/pulsar
+COPY libs/nats ./libs/nats
 COPY libs/prisma ./libs/prisma
 COPY libs/nestjs ./libs/nestjs
 COPY libs/grpc ./libs/grpc
+COPY libs/domain/vehicle ./libs/domain/vehicle
+COPY libs/domain/shared ./libs/domain/shared
 
 RUN npm install
 

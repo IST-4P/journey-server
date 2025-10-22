@@ -1,6 +1,6 @@
+import { GetChatsRequestDTO } from '@domain/chat';
 import { ActiveUser } from '@hacmieu-journey/nestjs';
 import { Controller, Get, Query } from '@nestjs/common';
-import { GetChatsRequestDTO } from './chat.dto';
 import { ChatService } from './chat.service';
 
 @Controller('chat')

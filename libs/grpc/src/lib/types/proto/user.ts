@@ -21,10 +21,10 @@ export interface GetProfileResponse {
   fullName: string;
   phone: string;
   role: string;
-  gender?: string | undefined;
-  avatarUrl?: string | undefined;
+  gender: string;
+  avatarUrl: string;
   facebookUrl?: string | undefined;
-  bio?: string | undefined;
+  bio: string;
   birthDate?: string | undefined;
   creditScore: number;
   createdAt: string;

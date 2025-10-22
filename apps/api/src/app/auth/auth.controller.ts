@@ -1,4 +1,10 @@
 import {
+  ForgotPasswordRequestDTO,
+  LoginRequestDTO,
+  RegisterRequestDTO,
+  SendOTPRequestDTO,
+} from '@domain/auth';
+import {
   AccessTokenPayload,
   ActiveUser,
   Auth,
@@ -17,12 +23,6 @@ import {
 } from '@nestjs/common';
 import { parse } from 'cookie';
 import { CookieOptions, Request, Response } from 'express';
-import {
-  ForgotPasswordRequestDTO,
-  LoginRequestDTO,
-  RegisterRequestDTO,
-  SendOTPRequestDTO,
-} from './auth.dto';
 import { AuthService } from './auth.service';
 
 const cookieOptions: CookieOptions = {

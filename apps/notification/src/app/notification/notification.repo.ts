@@ -1,16 +1,16 @@
+import {
+  GetManyNotificationsRequest,
+  MarkAsReadRequest,
+} from '@domain/notification';
 import { Injectable } from '@nestjs/common';
 import { Prisma } from '@prisma-clients/notification';
 import { PrismaService } from '../prisma/prisma.service';
-import {
-  GetManyNotificationsRequestType,
-  MarkAsReadRequestType,
-} from './notification.model';
 
 @Injectable()
 export class NotificationRepository {
   constructor(private readonly prisma: PrismaService) {}
 
-  getManyNotifications(data: GetManyNotificationsRequestType) {
+  getManyNotifications(data: GetManyNotificationsRequest) {
     const skip = (data.page - 1) * data.limit;
     const take = data.limit;
 
@@ -35,7 +35,7 @@ export class NotificationRepository {
     });
   }
 
-  makeAsRead(data: MarkAsReadRequestType) {
+  makeAsRead(data: MarkAsReadRequest) {
     return this.prisma.notification.updateMany({
       where: {
         userId: data.userId,

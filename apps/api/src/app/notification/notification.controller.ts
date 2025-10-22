@@ -1,3 +1,7 @@
+import {
+  GetManyNotificationsRequestDTO,
+  MarkAsReadRequestDTO,
+} from '@domain/notification';
 import { ActiveUser } from '@hacmieu-journey/nestjs';
 import {
   Body,
@@ -8,10 +12,6 @@ import {
   Put,
   Query,
 } from '@nestjs/common';
-import {
-  GetManyNotificationsQueryDTO,
-  MarkAsReadRequestDTO,
-} from './notification.dto';
 import { NotificationService } from './notification.service';
 
 @Controller('notification')
@@ -23,11 +23,11 @@ export class NotificationController {
   @Get('list')
   getManyNotifications(
     @ActiveUser('userId') userId: string,
-    @Query() query: GetManyNotificationsQueryDTO
+    @Query() query: GetManyNotificationsRequestDTO
   ) {
     return this.notificationService.getManyNotifications({
-      userId,
       ...query,
+      userId,
     });
   }
 
@@ -48,8 +48,8 @@ export class NotificationController {
     @Body() body: MarkAsReadRequestDTO
   ) {
     return this.notificationService.markAllAsRead({
-      userId,
       ...body,
+      userId,
     });
   }
 

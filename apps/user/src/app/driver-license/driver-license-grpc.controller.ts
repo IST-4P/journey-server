@@ -1,11 +1,11 @@
+import {
+  CreateDriverLicenseRequest,
+  GetDriverLicenseRequest,
+  GetDriverLicenseResponse,
+  UpdateDriverLicenseRequest,
+} from '@domain/user';
 import { Controller } from '@nestjs/common';
 import { GrpcMethod } from '@nestjs/microservices';
-import {
-  CreateDriverLicenseRequestType,
-  GetDriverLicenseRequestType,
-  GetDriverLicenseResponseType,
-  UpdateDriverLicenseRequestType,
-} from './driver-license.model';
 import { DriverLicenseService } from './driver-license.service';
 
 @Controller()
@@ -14,22 +14,22 @@ export class DriverLicenseGrpcController {
 
   @GrpcMethod('UserService', 'GetDriverLicense')
   getDriverLicense(
-    data: GetDriverLicenseRequestType
-  ): Promise<GetDriverLicenseResponseType> {
+    data: GetDriverLicenseRequest
+  ): Promise<GetDriverLicenseResponse> {
     return this.driverLicenseService.getDriverLicense(data);
   }
 
   @GrpcMethod('UserService', 'CreateDriverLicense')
   createDriverLicense(
-    data: CreateDriverLicenseRequestType
-  ): Promise<GetDriverLicenseResponseType> {
+    data: CreateDriverLicenseRequest
+  ): Promise<GetDriverLicenseResponse> {
     return this.driverLicenseService.createDriverLicense(data);
   }
 
   @GrpcMethod('UserService', 'UpdateDriverLicense')
   updateDriverLicense(
-    data: UpdateDriverLicenseRequestType
-  ): Promise<GetDriverLicenseResponseType> {
+    data: UpdateDriverLicenseRequest
+  ): Promise<GetDriverLicenseResponse> {
     return this.driverLicenseService.updateDriverLicense(data);
   }
 }

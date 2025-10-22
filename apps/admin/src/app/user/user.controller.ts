@@ -1,4 +1,16 @@
 import {
+  CreateAddressRequestDTO,
+  CreateBankAccountRequestDTO,
+  CreateDriverLicenseRequestDTO,
+  DeleteAddressRequestDTO,
+  GetAddressRequestDTO,
+  GetAllProfilesRequestDTO,
+  UpdateAddressRequestDTO,
+  UpdateBankAccountRequestDTO,
+  UpdateDriverLicenseRequestDTO,
+  UpdateProfileRequestDTO,
+} from '@domain/user';
+import {
   Body,
   Controller,
   Delete,
@@ -8,19 +20,6 @@ import {
   Put,
   Query,
 } from '@nestjs/common';
-import {
-  CreateAddressRequestDTO,
-  CreateBankAccountRequestDTO,
-  CreateDriverLicenseRequestDTO,
-  DeleteAddressQueryDTO,
-  FindAllProfilesQueryDTO,
-  GetAddressQueryDTO,
-  UpdateAddressQueryDTO,
-  UpdateAddressRequestDTO,
-  UpdateBankAccountRequestDTO,
-  UpdateDriverLicenseRequestDTO,
-  UpdateProfileRequestDTO,
-} from './user.dto';
 import { UserService } from './user.service';
 
 @Controller('user')
@@ -30,7 +29,7 @@ export class UserController {
   constructor(private readonly userService: UserService) {}
 
   @Get('profiles')
-  findAllProfiles(@Query() query: FindAllProfilesQueryDTO) {
+  findAllProfiles(@Query() query: GetAllProfilesRequestDTO) {
     return this.userService.findAllProfiles(query);
   }
 
@@ -45,8 +44,8 @@ export class UserController {
     @Body() body: UpdateProfileRequestDTO
   ) {
     return this.userService.updateProfile({
-      userId,
       ...body,
+      userId,
     });
   }
 
@@ -61,8 +60,8 @@ export class UserController {
     @Body() body: CreateDriverLicenseRequestDTO
   ) {
     return this.userService.createDriverLicense({
-      userId,
       ...body,
+      userId,
     });
   }
 
@@ -71,7 +70,10 @@ export class UserController {
     @Param('userId') userId: string,
     @Body() body: UpdateDriverLicenseRequestDTO
   ) {
-    return this.userService.updateDriverLicense({ userId, ...body });
+    return this.userService.updateDriverLicense({
+      ...body,
+      userId,
+    });
   }
 
   @Get('bank-account/:userId')
@@ -85,8 +87,8 @@ export class UserController {
     @Body() body: CreateBankAccountRequestDTO
   ) {
     return this.userService.createBankAccount({
-      userId,
       ...body,
+      userId,
     });
   }
 
@@ -96,13 +98,13 @@ export class UserController {
     @Body() body: UpdateBankAccountRequestDTO
   ) {
     return this.userService.updateBankAccount({
-      userId,
       ...body,
+      userId,
     });
   }
 
   @Get('address')
-  getAddress(@Query() query: GetAddressQueryDTO) {
+  getAddress(@Query() query: GetAddressRequestDTO) {
     if (query.id) {
       return this.userService.getAddress({
         id: query.id,
@@ -117,29 +119,16 @@ export class UserController {
     @Param('userId') userId: string,
     @Body() body: CreateAddressRequestDTO
   ) {
-    return this.userService.createAddress({
-      userId,
-      ...body,
-    });
+    return this.userService.createAddress(body);
   }
 
   @Put('address')
-  updateAddress(
-    @Body() body: UpdateAddressRequestDTO,
-    @Query() query: UpdateAddressQueryDTO
-  ) {
-    return this.userService.updateAddress({
-      id: query.id,
-      userId: query.userId,
-      ...body,
-    });
+  updateAddress(@Body() body: UpdateAddressRequestDTO) {
+    return this.userService.updateAddress(body);
   }
 
   @Delete('address')
-  deleteAddress(@Query() query: DeleteAddressQueryDTO) {
-    return this.userService.deleteAddress({
-      id: query.id,
-      userId: query.userId,
-    });
+  deleteAddress(@Query() query: DeleteAddressRequestDTO) {
+    return this.userService.deleteAddress(query);
   }
 }

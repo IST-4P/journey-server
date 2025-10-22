@@ -3,8 +3,8 @@
   "version": "0.0.0",
   "license": "MIT",
   "scripts": {
-    "dev": "nx run-many -t serve -p api admin auth user notification chat blog",
-    "build": "nx run-many -t build -p api admin auth user notification chat blog"
+    "dev": "nx run-many -t serve -p api admin auth user notification chat vehicle blog",
+    "build": "nx run-many -t build -p api admin auth user notification chat vehicle blog"
   },
   "private": true,
   "dependencies": {
@@ -27,10 +27,10 @@
     "cookie-parser": "^1.4.7",
     "date-fns": "^4.1.0",
     "ms": "^2.1.3",
+    "nats": "^2.29.3",
     "nestjs-zod": "4.3.1",
     "passport": "^0.7.0",
     "passport-jwt": "^4.0.1",
-    "pulsar-client": "^1.14.0",
     "redis": "^5.8.3",
     "reflect-metadata": "^0.1.13",
     "resend": "^6.1.2",

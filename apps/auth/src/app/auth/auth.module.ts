@@ -1,4 +1,4 @@
-import { PulsarModule } from '@hacmieu-journey/pulsar';
+import { NatsModule } from '@hacmieu-journey/nats';
 import { Module } from '@nestjs/common';
 import { JwtModule } from '@nestjs/jwt';
 import { AuthGrpcController } from './auth-grpc.controller';
@@ -10,7 +10,7 @@ import { HashingService } from './services/hashing.service';
 import { TokenService } from './services/token.service';
 
 @Module({
-  imports: [JwtModule, PulsarModule],
+  imports: [JwtModule, NatsModule],
   controllers: [AuthGrpcController],
   providers: [
     AuthService,

@@ -4,6 +4,7 @@ import { BlogModule } from './blog/blog.module';
 import { ChatModule } from './chat/chat.module';
 import { NotificationModule } from './notification/notification.module';
 import { UserModule } from './user/user.module';
+import { VehicleModule } from './vehicle/vehicle.module';
 
 @Module({
   imports: [
@@ -12,6 +13,7 @@ import { UserModule } from './user/user.module';
     NotificationModule,
     ChatModule,
     BlogModule,
+    VehicleModule,
   ],
   controllers: [],
   providers: [],

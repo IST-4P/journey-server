@@ -268,7 +268,7 @@ namespace device.Service
                 if (!result)
                     throw new RpcException(new Status(StatusCode.NotFound, "Device not found"));
 
-                return new DeleteDeviceResponse { Message = "Device deleted successfully" };
+                return new DeleteDeviceResponse { Message = "DeletedDeviceSuccessul" };
             }
             catch (Exception ex)
             {
@@ -505,7 +505,7 @@ namespace device.Service
                 if (!result)
                     throw new RpcException(new Status(StatusCode.NotFound, "Combo not found"));
 
-                return new DeleteComboResponse { Message = "Combo deleted successfully" };
+                return new DeleteComboResponse { Message = "ComboDeletedSuccessfully" };
             }
             catch (RpcException) { throw; }
             catch (Exception ex)

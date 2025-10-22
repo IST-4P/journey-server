@@ -1,24 +1,11 @@
 services:
-  pulsar:
-    image: apachepulsar/pulsar
-    container_name: pulsar
+  nats:
+    image: nats:latest
+    container_name: nats
     ports:
-      - "6650:6650"
-      - "8080:8080"
-    environment:
-      - PULSAR_MEM=-Xms512m -Xmx512m -XX:MaxDirectMemorySize=1g
-    command: >
-      sh -c "
-      bin/apply-config-from-env.py conf/standalone.conf &&
-      echo 'allowAutoTopicCreation=true' >> conf/standalone.conf &&
-      echo 'allowAutoTopicCreationType=partitioned' >> conf/standalone.conf &&
-      echo 'defaultNumPartitions=3' >> conf/standalone.conf &&
-      bin/pulsar standalone &
-      PULSAR_PID=$$! &&
-      sleep 15 &&
-      bin/pulsar-admin tenants create journey --allowed-clusters standalone || true &&
-      bin/pulsar-admin namespaces create journey/events || true &&
-      bin/pulsar-admin namespaces create journey/notifications || true &&
-      bin/pulsar-admin namespaces create journey/chats || true &&
-      wait $$PULSAR_PID
-      "
+      - "4222:4222"
+      - "8222:8222"
+    command:
+      - "-js"
+      - "-m"
+      - "8222"

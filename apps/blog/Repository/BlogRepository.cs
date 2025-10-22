@@ -2,6 +2,7 @@ using Blog.Models;
 using Blog.Data;
 using AutoMapper;
 using Microsoft.EntityFrameworkCore;
+using Blog.DTOs;
 
 
 
@@ -9,11 +10,11 @@ namespace Blog.Repository
 {
     public interface IBlogRepository
     {
-        Task<List<Blog.Models.Blog>> GetBlogsAsync();
-        Task<PagedResult<Blog.Models.Blog>> GetBlogsWithFilterAsync(BlogFilterDto filter);
-        Task<Blog.Models.Blog?> GetBlogByIdAsync(Guid id);
-        Task<Blog.Models.Blog> AddBlogAsync(Blog.Models.Blog blog);
-        Task<Blog.Models.Blog?> UpdateBlogAsync(Guid id, Blog.Models.Blog blog);
+        Task<List<BlogSummaryAdminDto>> GetBlogsAsync();
+        Task<PagedResult<BlogDetailDto>> GetBlogsWithFilterAsync(BlogFilterDto filter);
+        Task<BlogDetailDto?> GetBlogByIdAsync(Guid id);
+        Task<Blog.Models.Blog> AddBlogAsync(AddBlogRequestDto blog);
+        Task<Blog.Models.Blog?> UpdateBlogAsync(Guid id, UpdateBlogRequestDto blog);
         Task<bool> DeleteBlogAsync(Guid id);
     }
 
@@ -26,14 +27,23 @@ namespace Blog.Repository
             _context = context;
         }
 
-        public async Task<List<Blog.Models.Blog>> GetBlogsAsync()
+        public async Task<List<BlogSummaryAdminDto>> GetBlogsAsync()
         {
             return await _context.Blogs
-                .OrderByDescending(b => b.CreateAt)
+                .Select(b => new BlogSummaryAdminDto
+                {
+                    Id = b.Id,
+                    Title = b.Title,
+                    Type = b.Type,
+                    Region = b.Region,
+                    CreatedAt = b.CreateAt,
+                    UpdatedAt = b.UpdateAt
+                })
+                .OrderByDescending(b => b.CreatedAt)
                 .ToListAsync();
         }
 
-        public async Task<PagedResult<Blog.Models.Blog>> GetBlogsWithFilterAsync(BlogFilterDto filter)
+        public async Task<PagedResult<BlogDetailDto>> GetBlogsWithFilterAsync(BlogFilterDto filter)
         {
             var query = _context.Blogs.AsQueryable();
 
@@ -63,6 +73,10 @@ namespace Blog.Repository
             // Apply sorting
             query = filter.SortBy?.ToLower() switch
             {
+
+                "type" => filter.SortDirection?.ToLower() == "asc"
+                    ? query.OrderBy(b => b.Type)
+                    : query.OrderByDescending(b => b.Type),
                 "title" => filter.SortDirection?.ToLower() == "asc"
                     ? query.OrderBy(b => b.Title)
                     : query.OrderByDescending(b => b.Title),
@@ -81,9 +95,20 @@ namespace Blog.Repository
             var items = await query
                 .Skip((filter.Page - 1) * filter.PageSize)
                 .Take(filter.PageSize)
+                .Select(b => new BlogDetailDto
+                {
+                    Id = b.Id,
+                    Title = b.Title,
+                    Type = b.Type,
+                    Content = b.Content,
+                    Region = b.Region,
+                    Thumbnail = b.Thumbnail,
+                    CreatedAt = b.CreateAt,
+                    UpdatedAt = b.UpdateAt
+                })
                 .ToListAsync();
 
-            return new PagedResult<Blog.Models.Blog>
+            return new PagedResult<BlogDetailDto>
             {
                 Items = items,
                 TotalCount = totalCount,
@@ -92,23 +117,42 @@ namespace Blog.Repository
             };
         }
 
-        public async Task<Blog.Models.Blog?> GetBlogByIdAsync(Guid id)
+        public async Task<BlogDetailDto?> GetBlogByIdAsync(Guid id)
         {
-            return await _context.Blogs.FirstOrDefaultAsync(x => x.Id == id);
+            return await _context.Blogs
+                .Where(x => x.Id == id)
+                .Select(b => new BlogDetailDto
+                {
+                    Id = b.Id,
+                    Title = b.Title,
+                    Type = b.Type,
+                    Content = b.Content,
+                    Region = b.Region,
+                    Thumbnail = b.Thumbnail,
+                    CreatedAt = b.CreateAt,
+                    UpdatedAt = b.UpdateAt
+                })
+                .FirstOrDefaultAsync();
         }
 
-        public async Task<Blog.Models.Blog> AddBlogAsync(Blog.Models.Blog blog)
+        public async Task<Blog.Models.Blog> AddBlogAsync(AddBlogRequestDto blog)
         {
-            blog.Id = Guid.NewGuid();
-            blog.CreateAt = DateTime.UtcNow;
-            blog.UpdateAt = DateTime.UtcNow;
+            var newBlog = new Blog.Models.Blog
+            {
+                Id = Guid.NewGuid(),
+                Title = blog.Title,
+                Type = blog.Type,
+                Content = blog.Content,
+                Region = blog.Region,
+                Thumbnail = blog.Thumbnail
+            };
 
-            await _context.Blogs.AddAsync(blog);
+            await _context.Blogs.AddAsync(newBlog);
             await _context.SaveChangesAsync();
-            return blog;
+            return newBlog;
         }
 
-        public async Task<Blog.Models.Blog?> UpdateBlogAsync(Guid id, Blog.Models.Blog blog)
+        public async Task<Blog.Models.Blog?> UpdateBlogAsync(Guid id, UpdateBlogRequestDto blog)
         {
             var existingBlog = await _context.Blogs.FirstOrDefaultAsync(x => x.Id == id);
             if (existingBlog == null)
@@ -116,11 +160,11 @@ namespace Blog.Repository
                 return null;
             }
 
-            existingBlog.Title = blog.Title;
-            existingBlog.Type = blog.Type;
-            existingBlog.Content = blog.Content;
-            existingBlog.Region = blog.Region;
-            existingBlog.Thumbnail = blog.Thumbnail;
+            existingBlog.Title = blog.Title ?? existingBlog.Title;
+            existingBlog.Type = blog.Type ?? existingBlog.Type;
+            existingBlog.Content = blog.Content ?? existingBlog.Content;
+            existingBlog.Region = blog.Region ?? existingBlog.Region;
+            existingBlog.Thumbnail = blog.Thumbnail ?? existingBlog.Thumbnail;
             existingBlog.UpdateAt = DateTime.UtcNow;
 
             await _context.SaveChangesAsync();

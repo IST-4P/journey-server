@@ -47,10 +47,12 @@ message UserRental {
   string id = 1;
   string targetId = 2;
   bool isCombo = 3;
-  string status = 4;
-  string startDate = 5;
-  string endDate = 6;
-  string createdAt = 7;
+  string targetName = 4;
+  double targetPrice = 5;
+  string status = 6;
+  string startDate = 7;
+  string endDate = 8;
+  string createdAt = 9;
 }
 
 message GetMyRentalsResponse {
@@ -77,12 +79,16 @@ message GetAllRentalsRequest {
 message AdminRental {
   string id = 1;
   string userId = 2;
-  string targetId = 3;
-  bool isCombo = 4;
-  string status = 5;
-  string startDate = 6;
-  string endDate = 7;
-  string createdAt = 8;
+  string userName = 3;
+  string userEmail = 4;
+  string targetId = 5;
+  bool isCombo = 6;
+  string targetName = 7;
+  double targetPrice = 8;
+  string status = 9;
+  string startDate = 10;
+  string endDate = 11;
+  string createdAt = 12;
 }
 
 message GetAllRentalsAdminResponse {

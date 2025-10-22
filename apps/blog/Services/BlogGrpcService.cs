@@ -10,10 +10,7 @@ namespace Blog.Services
         private readonly IMapper _mapper;
         private readonly ILogger<BlogGrpcService> _logger;
 
-        public BlogGrpcService(
-            IBlogRepository blogRepository, 
-            IMapper mapper,
-            ILogger<BlogGrpcService> logger)
+        public BlogGrpcService(IBlogRepository blogRepository, IMapper mapper, ILogger<BlogGrpcService> logger)
         {
             _blogRepository = blogRepository;
             _mapper = mapper;
@@ -21,7 +18,7 @@ namespace Blog.Services
         }
 
         public override async Task<GetBlogResponse> GetBlog(
-            GetBlogRequest request, 
+            GetBlogRequest request,
             ServerCallContext context)
         {
             try
@@ -44,11 +41,11 @@ namespace Blog.Services
                     Id = blog.Id.ToString(),
                     Title = blog.Title,
                     Content = blog.Content,
-                    Type = blog.Region, // Mapping Region to Type based on proto
+                    Type = blog.Type,
                     Region = blog.Region,
                     Thumbnail = blog.Thumbnail,
-                    CreatedAt = blog.CreateAt.ToString("O"),
-                    UpdatedAt = blog.UpdateAt.ToString("O")
+                    CreatedAt = blog.CreatedAt.ToString("O"),
+                    UpdatedAt = blog.UpdatedAt.ToString("O")
                 };
             }
             catch (RpcException)
@@ -63,15 +60,15 @@ namespace Blog.Services
         }
 
         public override async Task<GetManyBlogsResponse> GetManyBlogs(
-            GetManyBlogsRequest request, 
+            GetManyBlogsRequest request,
             ServerCallContext context)
         {
             try
             {
-                _logger.LogInformation("GetManyBlogs called with page: {Page}, limit: {Limit}", 
+                _logger.LogInformation("GetManyBlogs called with page: {Page}, limit: {Limit}",
                     request.Page, request.Limit);
 
-                var filter = new Models.BlogFilterDto
+                var filter = new DTOs.BlogFilterDto
                 {
                     Page = request.Page > 0 ? request.Page : 1,
                     PageSize = request.Limit > 0 ? request.Limit : 10
@@ -96,8 +93,8 @@ namespace Blog.Services
                         Type = blog.Region,
                         Region = blog.Region,
                         Thumbnail = blog.Thumbnail,
-                        CreatedAt = blog.CreateAt.ToString("O"),
-                        UpdatedAt = blog.UpdateAt.ToString("O")
+                        CreatedAt = blog.CreatedAt.ToString("O"),
+                        UpdatedAt = blog.UpdatedAt.ToString("O")
                     });
                 }
 
@@ -111,14 +108,14 @@ namespace Blog.Services
         }
 
         public override async Task<GetBlogResponse> CreateBlog(
-            CreateBlogRequest request, 
+            CreateBlogRequest request,
             ServerCallContext context)
         {
             try
             {
                 _logger.LogInformation("CreateBlog called with title: {Title}", request.Title);
 
-                var blog = new Models.Blog
+                var addDto = new DTOs.AddBlogRequestDto
                 {
                     Title = request.Title,
                     Type = request.Type,
@@ -127,7 +124,7 @@ namespace Blog.Services
                     Thumbnail = request.Thumbnail
                 };
 
-                var createdBlog = await _blogRepository.AddBlogAsync(blog);
+                var createdBlog = await _blogRepository.AddBlogAsync(addDto);
 
                 return new GetBlogResponse
                 {
@@ -149,7 +146,7 @@ namespace Blog.Services
         }
 
         public override async Task<GetBlogResponse> UpdateBlog(
-            UpdateBlogRequest request, 
+            UpdateBlogRequest request,
             ServerCallContext context)
         {
             try
@@ -167,20 +164,16 @@ namespace Blog.Services
                     throw new RpcException(new Status(StatusCode.NotFound, "Error.BlogNotFound"));
                 }
 
-                // Update only provided fields
-                if (!string.IsNullOrEmpty(request.Title))
-                    existingBlog.Title = request.Title;
-                
-                if (!string.IsNullOrEmpty(request.Content))
-                    existingBlog.Content = request.Content;
-                
-                if (!string.IsNullOrEmpty(request.Region))
-                    existingBlog.Region = request.Region;
-                
-                if (!string.IsNullOrEmpty(request.Thumbnail))
-                    existingBlog.Thumbnail = request.Thumbnail;
+                var updateDto = new DTOs.UpdateBlogRequestDto
+                {
+                    Title = string.IsNullOrEmpty(request.Title) ? null : request.Title,
+                    Content = string.IsNullOrEmpty(request.Content) ? null : request.Content,
+                    Type = string.IsNullOrEmpty(request.Type) ? null : request.Type,
+                    Region = string.IsNullOrEmpty(request.Region) ? null : request.Region,
+                    Thumbnail = string.IsNullOrEmpty(request.Thumbnail) ? null : request.Thumbnail
+                };
 
-                var updatedBlog = await _blogRepository.UpdateBlogAsync(blogId, existingBlog);
+                var updatedBlog = await _blogRepository.UpdateBlogAsync(blogId, updateDto);
 
                 if (updatedBlog == null)
                 {
@@ -211,7 +204,7 @@ namespace Blog.Services
         }
 
         public override async Task<DeleteBlogResponse> DeleteBlog(
-            DeleteBlogRequest request, 
+            DeleteBlogRequest request,
             ServerCallContext context)
         {
             try
@@ -231,7 +224,7 @@ namespace Blog.Services
 
                 return new DeleteBlogResponse
                 {
-                    Message = "Blog deleted successfully"
+                    Message = "BlogDeletedSuccessfully"
                 };
             }
             catch (RpcException)

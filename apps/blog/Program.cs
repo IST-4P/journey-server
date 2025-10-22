@@ -7,6 +7,13 @@ using Microsoft.EntityFrameworkCore;
 DotNetEnv.Env.Load();
 
 var builder = WebApplication.CreateBuilder(args);
+builder.WebHost.ConfigureKestrel(options =>
+{
+    options.ListenAnyIP(5005, listenOptions =>
+    {
+        listenOptions.Protocols = Microsoft.AspNetCore.Server.Kestrel.Core.HttpProtocols.Http2;
+    });
+});
 
 // Get connection string - prefer environment variable (for Kubernetes), fallback to appsettings.json with env substitution
 var connectionString = Environment.GetEnvironmentVariable("ConnectionStrings__DefaultConnection");

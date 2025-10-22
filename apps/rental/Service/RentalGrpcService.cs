@@ -12,12 +12,21 @@ namespace rental.Service
         private readonly RentalRepository _repository;
         private readonly IMapper _mapper;
         private readonly ILogger<RentalGrpcService> _logger;
+        private readonly User.UserService.UserServiceClient _userClient;
+        private readonly Device.DeviceService.DeviceServiceClient _deviceClient;
 
-        public RentalGrpcService(RentalRepository repository, IMapper mapper, ILogger<RentalGrpcService> logger)
+        public RentalGrpcService(
+            RentalRepository repository,
+            IMapper mapper,
+            ILogger<RentalGrpcService> logger,
+            User.UserService.UserServiceClient userClient,
+            Device.DeviceService.DeviceServiceClient deviceClient)
         {
             _repository = repository;
             _mapper = mapper;
             _logger = logger;
+            _userClient = userClient;
+            _deviceClient = deviceClient;
         }
 
         // User: Create rental
@@ -90,7 +99,8 @@ namespace rental.Service
 
                 foreach (var rental in pagedResult.Items)
                 {
-                    response.Rentals.Add(MapToUserRental(rental));
+                    var userRental = await MapToUserRental(rental);
+                    response.Rentals.Add(userRental);
                 }
 
                 return response;
@@ -167,7 +177,8 @@ namespace rental.Service
 
                 foreach (var rental in pagedResult.Items)
                 {
-                    response.Rentals.Add(MapToAdminRental(rental));
+                    var adminRental = await MapToAdminRental(rental);
+                    response.Rentals.Add(adminRental);
                 }
 
                 return response;
@@ -237,7 +248,7 @@ namespace rental.Service
 
                 return new DeleteRentalResponse
                 {
-                    Message = "Rental deleted successfully"
+                    Message = "RentalDedletedSuccessfully"
                 };
             }
             catch (RpcException)
@@ -252,13 +263,44 @@ namespace rental.Service
         }
 
         // Helper methods
-        private UserRental MapToUserRental(RentalEntity rental)
+        private async Task<UserRental> MapToUserRental(RentalEntity rental)
         {
+            var targetName = "Unknown";
+            var targetPrice = 0.0;
+
+            try
+            {
+                if (rental.IsCombo)
+                {
+                    var comboResponse = await _deviceClient.GetComboAsync(new Device.GetComboRequest
+                    {
+                        ComboId = rental.TargetId.ToString()
+                    });
+                    targetName = comboResponse.Name;
+                    targetPrice = comboResponse.Price;
+                }
+                else
+                {
+                    var deviceResponse = await _deviceClient.GetDeviceAsync(new Device.GetDeviceRequest
+                    {
+                        DeviceId = rental.TargetId.ToString()
+                    });
+                    targetName = deviceResponse.Name;
+                    targetPrice = deviceResponse.Price;
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogWarning(ex, "Failed to fetch target info for rental {RentalId}", rental.Id);
+            }
+
             return new UserRental
             {
                 Id = rental.Id.ToString(),
                 TargetId = rental.TargetId.ToString(),
                 IsCombo = rental.IsCombo,
+                TargetName = targetName,
+                TargetPrice = targetPrice,
                 Status = rental.Status,
                 StartDate = rental.StartDate.ToString("O"),
                 EndDate = rental.EndDate.ToString("O"),
@@ -266,14 +308,65 @@ namespace rental.Service
             };
         }
 
-        private AdminRental MapToAdminRental(RentalEntity rental)
+        private async Task<AdminRental> MapToAdminRental(RentalEntity rental)
         {
+            var userName = "Unknown";
+            var userEmail = "";
+            var targetName = "Unknown";
+            var targetPrice = 0.0;
+
+            try
+            {
+                // Fetch user info
+                var userResponse = await _userClient.GetProfileAsync(new User.GetProfileRequest
+                {
+                    UserId = rental.UserId.ToString()
+                });
+                userName = userResponse.FullName;
+                userEmail = userResponse.Email;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogWarning(ex, "Failed to fetch user info for rental {RentalId}", rental.Id);
+            }
+
+            try
+            {
+                // Fetch device or combo info
+                if (rental.IsCombo)
+                {
+                    var comboResponse = await _deviceClient.GetComboAsync(new Device.GetComboRequest
+                    {
+                        ComboId = rental.TargetId.ToString()
+                    });
+                    targetName = comboResponse.Name;
+                    targetPrice = comboResponse.Price;
+                }
+                else
+                {
+                    var deviceResponse = await _deviceClient.GetDeviceAsync(new Device.GetDeviceRequest
+                    {
+                        DeviceId = rental.TargetId.ToString()
+                    });
+                    targetName = deviceResponse.Name;
+                    targetPrice = deviceResponse.Price;
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogWarning(ex, "Failed to fetch target info for rental {RentalId}", rental.Id);
+            }
+
             return new AdminRental
             {
                 Id = rental.Id.ToString(),
                 UserId = rental.UserId.ToString(),
+                UserName = userName,
+                UserEmail = userEmail,
                 TargetId = rental.TargetId.ToString(),
                 IsCombo = rental.IsCombo,
+                TargetName = targetName,
+                TargetPrice = targetPrice,
                 Status = rental.Status,
                 StartDate = rental.StartDate.ToString("O"),
                 EndDate = rental.EndDate.ToString("O"),

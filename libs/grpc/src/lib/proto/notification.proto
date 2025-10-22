@@ -1,0 +1,66 @@
+syntax = "proto3";
+
+package notification;
+
+service NotificationService {
+  rpc GetNotification(GetNotificationRequest) returns (GetNotificationResponse);
+  rpc GetManyNotifications(GetManyNotificationsRequest) returns (GetManyNotificationsResponse);
+  rpc CreateNotification(CreateNotificationRequest) returns (GetNotificationResponse);
+  rpc MarkAsReadNotifications(MarkAsReadRequest) returns (MessageResponse);
+  rpc DeleteNotification(DeleteNotificationRequest) returns (MessageResponse);
+}
+
+// GetNotification
+message GetNotificationRequest {
+  string id = 1;
+  string userId = 2;
+}
+
+message GetNotificationResponse {
+  string id = 1;
+  string userId = 2;
+  string type = 3;
+  string title = 4;
+  string content = 5;
+  bool read = 6;
+  optional string bookingId = 7;
+  optional string vehicleId = 8;
+  optional string paymentId = 9;
+  string createdAt = 10;
+  string updatedAt = 11;
+}
+
+// GetManyNotifications
+message GetManyNotificationsRequest {
+  string userId = 1;
+  int32 page = 2;
+  int32 limit = 3;
+}
+
+message GetManyNotificationsResponse {
+  repeated GetNotificationResponse notifications = 1;
+}
+
+// CreateNotification
+message CreateNotificationRequest {
+  string userId = 1;
+  string type = 2;
+  string title = 3;
+  string content = 4;
+}
+
+// MarkAsReadNotifications
+message MarkAsReadRequest {
+  string userId = 1;
+  repeated string notificationIds = 2;
+}
+
+message MessageResponse {
+  string message = 1;
+}
+
+// DeleteNotification
+message DeleteNotificationRequest {
+  string id = 1;
+  string userId = 2;
+}

@@ -447,7 +447,7 @@ notifications {
 ```protobuf
 service NotificationService {
   rpc SendNotification(NotificationRequest) returns (StatusResponse);
-  rpc GetNotifications(UserIdRequest) returns (NotificationListResponse);
+  rpc GetManyNotifications(UserIdRequest) returns (NotificationListResponse);
   rpc MarkAsRead(NotificationIdRequest) returns (StatusResponse);
   rpc SendEmail(EmailRequest) returns (StatusResponse);
 }

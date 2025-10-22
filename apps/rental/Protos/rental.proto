@@ -1,0 +1,117 @@
+syntax = "proto3";
+
+package rental;
+
+service RentalService {
+  // User operations
+  rpc CreateRental(CreateRentalRequest) returns (RentalResponse);
+  rpc GetMyRentals(GetMyRentalsRequest) returns (GetMyRentalsResponse);
+  rpc GetRentalById(GetRentalByIdRequest) returns (RentalResponse);
+  
+  // Admin operations
+  rpc GetAllRentals(GetAllRentalsRequest) returns (GetAllRentalsAdminResponse);
+  rpc UpdateRental(UpdateRentalRequest) returns (RentalResponse);
+  rpc DeleteRental(DeleteRentalRequest) returns (DeleteRentalResponse);
+}
+
+// Common response
+message RentalResponse {
+  string id = 1;
+  string userId = 2;
+  string targetId = 3;
+  bool isCombo = 4;
+  string status = 5;
+  string startDate = 6;
+  string endDate = 7;
+  string createdAt = 8;
+}
+
+// User: Create Rental
+message CreateRentalRequest {
+  string userId = 1;
+  string targetId = 2;
+  bool isCombo = 3;
+  string startDate = 4;
+  string endDate = 5;
+}
+
+// User: Get My Rentals
+message GetMyRentalsRequest {
+  string userId = 1;
+  int32 page = 2;
+  int32 limit = 3;
+  string status = 4;
+}
+
+message UserRental {
+  string id = 1;
+  string targetId = 2;
+  bool isCombo = 3;
+  string targetName = 4;
+  double targetPrice = 5;
+  string status = 6;
+  string startDate = 7;
+  string endDate = 8;
+  string createdAt = 9;
+}
+
+message GetMyRentalsResponse {
+  repeated UserRental rentals = 1;
+  int32 page = 2;
+  int32 limit = 3;
+  int32 totalItems = 4;
+  int32 totalPages = 5;
+}
+
+// User/Admin: Get Rental By Id
+message GetRentalByIdRequest {
+  string rentalId = 1;
+}
+
+// Admin: Get All Rentals
+message GetAllRentalsRequest {
+  int32 page = 1;
+  int32 limit = 2;
+  string status = 3;
+  string userId = 4;
+}
+
+message AdminRental {
+  string id = 1;
+  string userId = 2;
+  string userName = 3;
+  string userEmail = 4;
+  string targetId = 5;
+  bool isCombo = 6;
+  string targetName = 7;
+  double targetPrice = 8;
+  string status = 9;
+  string startDate = 10;
+  string endDate = 11;
+  string createdAt = 12;
+}
+
+message GetAllRentalsAdminResponse {
+  repeated AdminRental rentals = 1;
+  int32 page = 2;
+  int32 limit = 3;
+  int32 totalItems = 4;
+  int32 totalPages = 5;
+}
+
+// Admin: Update Rental
+message UpdateRentalRequest {
+  string rentalId = 1;
+  string status = 2;
+  string startDate = 3;
+  string endDate = 4;
+}
+
+// Admin: Delete Rental
+message DeleteRentalRequest {
+  string rentalId = 1;
+}
+
+message DeleteRentalResponse {
+  string message = 1;
+}

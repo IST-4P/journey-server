@@ -1,0 +1,17 @@
+{{- if .Values.notification.enabled }}
+apiVersion: v1
+kind: Service
+metadata:
+  name: notification
+  labels:
+    app: notification
+spec:
+  type: ClusterIP
+  selector:
+    app: notification
+  ports:
+    - protocol: TCP
+      port: {{ .Values.notification.port.grpc }}
+      targetPort: {{ .Values.notification.port.grpc }}
+      name: grpc
+{{- end }}

@@ -1,0 +1,118 @@
+global:
+  imagePullPolicy: Always
+
+nats:
+  enabled: true
+  nats:
+    jetstream:
+      enabled: false
+    limits:
+      maxConnections: 100
+      maxSubscriptions: 100
+  config:
+    cluster:
+      enabled: false
+  container:
+    resources:
+      requests:
+        cpu: 50m
+        memory: 128Mi
+      limits:
+        cpu: 200m
+        memory: 256Mi
+
+api:
+  enabled: true
+  replicas: 1
+  image: 'caophi562005/journey-api:latest'
+  port:
+    http: 3000
+
+admin:
+  enabled: true
+  replicas: 1
+  image: 'caophi562005/journey-admin:latest'
+  port:
+    http: 3100
+
+auth:
+  enabled: true
+  replicas: 1
+  image: 'caophi562005/journey-auth:latest'
+  port:
+    grpc: 5000
+
+user:
+  enabled: true
+  replicas: 1
+  image: 'caophi562005/journey-user:latest'
+  port:
+    grpc: 5001
+    http: 3001
+
+notification:
+  enabled: true
+  replicas: 1
+  image: 'caophi562005/journey-notification:latest'
+  port:
+    grpc: 5002
+    http: 3002
+
+chat:
+  enabled: true
+  replicas: 1
+  image: 'caophi562005/journey-chat:latest'
+  port:
+    grpc: 5003
+    http: 3003
+
+vehicle:
+  enabled: true
+  replicas: 1
+  image: 'caophi562005/journey-vehicle:latest'
+  port:
+    grpc: 5004
+    http: 3004
+
+blog:
+  enabled: true
+  replicas: 1
+  image: 'caophi562005/journey-blog:latest'
+  port:
+    grpc: 5005
+    http: 3005
+
+# Configuration (non-sensitive)
+config:
+  natsUrl: ''
+  authUrl: ''
+  userUrl: ''
+  notificationUrl: ''
+  chatUrl: ''
+  vehicleUrl: ''
+  blogUrl: ''
+  accessTokenExpiresIn: '1h'
+  refreshTokenExpiresIn: '7d'
+  otpExpires: '5m'
+
+# Secrets (sensitive - DO NOT COMMIT REAL VALUES)
+secrets:
+  authDatabaseUrl: ''
+  userDatabaseUrl: ''
+  notificationDatabaseUrl: ''
+  chatDatabaseUrl: ''
+  vehicleDatabaseUrl: ''
+  accessTokenSecret: ''
+  blogDatabaseUrl: ''
+  refreshTokenSecret: ''
+  resendApiKey: ''
+  redisUrl: ''
+
+# Ingress configuration
+ingress:
+  enabled: true
+  api:
+    host: 'journey-api.hacmieu.xyz'
+  admin:
+    host: 'journey-admin.hacmieu.xyz'
+  email: 'caophi565caophi@gmail.com'

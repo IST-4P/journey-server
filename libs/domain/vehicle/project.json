@@ -1,0 +1,7 @@
+{
+  "name": "domain-vehicle",
+  "$schema": "../../../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "libs/domain/vehicle/src",
+  "projectType": "library",
+  "tags": ["type:domain", "scope:vehicle"]
+}

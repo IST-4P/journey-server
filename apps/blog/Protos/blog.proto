@@ -1,0 +1,79 @@
+syntax = "proto3";
+
+package blog;
+
+service BlogService {
+  rpc GetBlog(GetBlogRequest) returns (GetBlogResponse);
+  rpc GetManyBlogs(GetManyBlogsRequest) returns (GetManyBlogsResponse);
+  rpc CreateBlog(CreateBlogRequest) returns (GetBlogResponse);
+  rpc UpdateBlog(UpdateBlogRequest) returns (GetBlogResponse);
+  rpc DeleteBlog(DeleteBlogRequest) returns (DeleteBlogResponse);
+}
+
+// GetBlog
+message GetBlogRequest {
+  string blogId = 1;
+}
+
+message GetBlogResponse {
+  string id = 1;
+  string title = 2;
+  string content = 3;
+  string type = 4;
+  string region = 5;
+  string thumbnail = 6;
+  string createdAt = 7;
+  string updatedAt = 8;
+}
+
+// GetManyBlogs
+message GetManyBlogsRequest {
+  int32 page = 1;
+  int32 limit = 2;
+}
+
+message GetManyBlogs {
+  string id = 1;
+  string title = 2;
+  string type = 3;
+  string region = 4;
+  string thumbnail = 5;
+  string createdAt = 6;
+  string updatedAt = 7;
+}
+
+message GetManyBlogsResponse {
+  repeated GetManyBlogs blogs = 1;
+  int32 page = 2;
+  int32 limit = 3;
+  int32 totalItems = 4;
+  int32 totalPages = 5;
+}
+
+// CreateBlog
+message CreateBlogRequest {
+  string title = 1;
+  string content = 2;
+  string type = 3;
+  string region = 4;
+  string thumbnail = 5;
+}
+
+// UpdateBlog
+message UpdateBlogRequest {
+  string blogId = 1;
+  optional string title = 2;
+  optional string content = 3;
+  optional string type = 4;
+  optional string region = 5;
+  optional string thumbnail = 6;
+}
+
+// DeleteBlog
+message DeleteBlogRequest {
+  string blogId = 1;
+}
+
+message DeleteBlogResponse {
+  string message = 1;
+}

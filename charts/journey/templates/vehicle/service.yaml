@@ -1,0 +1,17 @@
+{{- if .Values.vehicle.enabled }}
+apiVersion: v1
+kind: Service
+metadata:
+  name: vehicle
+  labels:
+    app: vehicle
+spec:
+  type: ClusterIP
+  selector:
+    app: vehicle
+  ports:
+    - protocol: TCP
+      port: {{ .Values.vehicle.port.grpc }}
+      targetPort: {{ .Values.vehicle.port.grpc }}
+      name: grpc
+{{- end }}

@@ -2,6 +2,7 @@
   "compileOnSave": false,
   "compilerOptions": {
     "rootDir": ".",
+    "strict": true,
     "sourceMap": true,
     "declaration": false,
     "moduleResolution": "node",
@@ -13,11 +14,20 @@
     "lib": ["es2020", "dom"],
     "skipLibCheck": true,
     "skipDefaultLibCheck": true,
+    "esModuleInterop": true,
     "baseUrl": ".",
     "paths": {
+      "@hacmieu-journey/grpc": ["libs/grpc/src/index.ts"],
+      "@hacmieu-journey/nats": ["libs/nats/src/index.ts"],
       "@hacmieu-journey/nestjs": ["libs/nestjs/src/index.ts"],
-      "@hacmieu-journey/pulsar": ["libs/pulsar/src/index.ts"],
-      "@hacmieu-journey/websocket": ["libs/websocket/src/index.ts"]
+      "@hacmieu-journey/prisma": ["libs/prisma/src/index.ts"],
+      "@hacmieu-journey/websocket": ["libs/websocket/src/index.ts"],
+      "@domain/shared": ["libs/domain/shared/src/index.ts"],
+      "@domain/user": ["libs/domain/user/src/index.ts"],
+      "@domain/vehicle": ["libs/domain/vehicle/src/index.ts"],
+      "@domain/auth": ["libs/domain/auth/src/index.ts"],
+      "@domain/chat": ["libs/domain/chat/src/index.ts"],
+      "@domain/notification": ["libs/domain/notification/src/index.ts"]
     }
   },
   "exclude": ["node_modules", "tmp"]

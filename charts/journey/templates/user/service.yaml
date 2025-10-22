@@ -1,0 +1,17 @@
+{{- if .Values.user.enabled }}
+apiVersion: v1
+kind: Service
+metadata:
+  name: user
+  labels:
+    app: user
+spec:
+  type: ClusterIP
+  selector:
+    app: user
+  ports:
+    - protocol: TCP
+      port: {{ .Values.user.port.grpc }}
+      targetPort: {{ .Values.user.port.grpc }}
+      name: grpc
+{{- end }}

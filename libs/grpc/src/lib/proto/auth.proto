@@ -1,0 +1,94 @@
+syntax = "proto3";
+
+package auth;
+
+service AuthService {
+  rpc Register(RegisterRequest) returns (RegisterResponse);
+  rpc Login(LoginRequest) returns (LoginResponse);
+  rpc RefreshToken(RefreshTokenRequest) returns (RefreshTokenResponse);
+  rpc Logout(LogoutRequest) returns (LogoutResponse);
+  rpc SendOtp(SendOTPRequest) returns (SendOTPResponse);
+  rpc ForgotPassword(ForgotPasswordRequest) returns (ForgotPasswordResponse);
+  rpc ValidateToken(ValidateTokenRequest) returns (ValidateTokenResponse);
+}
+
+// Register
+message RegisterRequest {
+  string email = 1;
+  string name = 2;
+  string phone = 3;
+  string password = 4;
+  string confirmPassword = 5;
+  string code = 6;
+}
+
+message RegisterResponse {
+  string message = 1;
+}
+
+// Login
+message LoginRequest {
+  string email = 1;
+  string password = 2;
+}
+
+message LoginResponse {
+  string accessToken = 1;
+  string refreshToken = 2;
+}
+
+// Refresh Token
+message RefreshTokenRequest {
+  string refreshToken = 1;
+}
+
+message RefreshTokenResponse {
+  string accessToken = 1;
+  string refreshToken = 2;
+}
+
+// Logout
+message LogoutRequest {
+  string refreshToken = 1;
+}
+
+message LogoutResponse {
+  string message = 1;
+}
+
+// Send OTP
+message SendOTPRequest {
+  string email = 1;
+  string type = 2;
+}
+
+message SendOTPResponse {
+  string message = 1;
+}
+
+// Forgot Password
+message ForgotPasswordRequest {
+  string email = 1;
+  string code = 2;
+  string newPassword = 3;
+  string confirmNewPassword = 4;
+}
+
+message ForgotPasswordResponse {
+  string message = 1;
+}
+
+// Validate Token
+message ValidateTokenRequest {
+  string accessToken = 1;
+}
+
+message ValidateTokenResponse {
+  bool isValid = 1;
+  string userId = 2;
+  string role = 3;
+  string uuid = 4;
+  int64 iat = 5;
+  int64 exp = 6;
+  string error = 7;
+}

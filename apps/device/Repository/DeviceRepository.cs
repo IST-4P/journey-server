@@ -3,6 +3,7 @@ using device.Interface;
 using device.Model.Entities;
 using device.Model.Dto;
 using Microsoft.EntityFrameworkCore;
+using DeviceEntity = device.Model.Entities.Device;
 
 namespace device.Repository
 {
@@ -14,7 +15,7 @@ namespace device.Repository
             _dbContext = dbContext;
         }
 
-        private static IQueryable<Device> ApplyFilter(IQueryable<Device> queryable, DeviceQuery query)
+        private static IQueryable<DeviceEntity> ApplyFilter(IQueryable<DeviceEntity> queryable, DeviceQuery query)
         {
             if (!string.IsNullOrWhiteSpace(query.Search))
             {
@@ -42,7 +43,7 @@ namespace device.Repository
             return queryable;
         }
 
-        private static IQueryable<Device> ApplySort(IQueryable<Device> queryable, DeviceQuery query)
+        private static IQueryable<DeviceEntity> ApplySort(IQueryable<DeviceEntity> queryable, DeviceQuery query)
         {
             var sortBy = (query.SortBy ?? "createAt").ToLower();
             var desc = string.Equals(query.SortDir, "desc", StringComparison.OrdinalIgnoreCase);
@@ -55,12 +56,12 @@ namespace device.Repository
             };
         }
 
-        private static PagedResult<Device> ToPaged<T>(IQueryable<Device> source, DeviceQuery query, long totalCount)
+        private static PagedResult<DeviceEntity> ToPaged<T>(IQueryable<DeviceEntity> source, DeviceQuery query, long totalCount)
         {
             var page = query.Page <= 0 ? 1 : query.Page;
             var pageSize = query.PageSize <= 0 ? 10 : query.PageSize;
             var totalPages = (int)Math.Ceiling(totalCount / (double)pageSize);
-            return new PagedResult<Device>
+            return new PagedResult<DeviceEntity>
             {
                 Page = page,
                 PageSize = pageSize,
@@ -70,16 +71,16 @@ namespace device.Repository
             };
         }
 
-        public async Task<PagedResult<Device>> GetDevicesAsync(DeviceQuery query)
+        public async Task<PagedResult<DeviceEntity>> GetDevicesAsync(DeviceQuery query)
         {
-            var q = _dbContext.Devices.Include(x => x.Category).AsQueryable();
+            var q = _dbContext.Set<DeviceEntity>().Include(x => x.Category).AsQueryable();
             q = ApplyFilter(q, query);
             var total = await q.LongCountAsync();
             q = ApplySort(q, query);
             var page = query.Page <= 0 ? 1 : query.Page;
             var pageSize = query.PageSize <= 0 ? 10 : query.PageSize;
             var items = await q.Skip((page - 1) * pageSize).Take(pageSize).ToListAsync();
-            return new PagedResult<Device>
+            return new PagedResult<DeviceEntity>
             {
                 Page = page,
                 PageSize = pageSize,
@@ -89,25 +90,25 @@ namespace device.Repository
             };
         }
 
-        public async Task<Device?> GetDeviceByIdAsync(Guid id)
+        public async Task<DeviceEntity?> GetDeviceByIdAsync(Guid id)
         {
-            return await _dbContext.Devices
+            return await _dbContext.Set<DeviceEntity>()
                 .Include(x => x.Category)
                 .Include(x => x.ComboDevices!)
                     .ThenInclude(cd => cd.Combo)
                 .FirstOrDefaultAsync(x => x.Id == id);
         }
 
-        public async Task<Device> CreateDeviceAsync(Device device)
+        public async Task<DeviceEntity> CreateDeviceAsync(DeviceEntity device)
         {
-            await _dbContext.Devices.AddAsync(device);
+            await _dbContext.Set<DeviceEntity>().AddAsync(device);
             await _dbContext.SaveChangesAsync();
             return device;
         }
 
-        public async Task<Device?> UpdateDeviceAsync(Guid id, Device device)
+        public async Task<DeviceEntity?> UpdateDeviceAsync(Guid id, DeviceEntity device)
         {
-            var existing = await _dbContext.Devices.FirstOrDefaultAsync(x => x.Id == id);
+            var existing = await _dbContext.Set<DeviceEntity>().FirstOrDefaultAsync(x => x.Id == id);
             if (existing == null) return null;
 
             existing.Name = device.Name ?? existing.Name;
@@ -127,17 +128,17 @@ namespace device.Repository
 
         public async Task<bool> DeleteDeviceAsync(Guid id)
         {
-            var existing = await _dbContext.Devices.FirstOrDefaultAsync(x => x.Id == id);
+            var existing = await _dbContext.Set<DeviceEntity>().FirstOrDefaultAsync(x => x.Id == id);
             if (existing == null) return false;
 
-            _dbContext.Devices.Remove(existing);
+            _dbContext.Set<DeviceEntity>().Remove(existing);
             await _dbContext.SaveChangesAsync();
             return true;
         }
 
-        public async Task<PagedResult<Device>> GetAvailableDevicesAsync(DeviceQuery query)
+        public async Task<PagedResult<DeviceEntity>> GetAvailableDevicesAsync(DeviceQuery query)
         {
-            var q = _dbContext.Devices
+            var q = _dbContext.Set<DeviceEntity>()
                 .Include(x => x.Category)
                 .Include(x => x.ComboDevices!).ThenInclude(cd => cd.Combo)
                 .Where(d => d.Status == "Available")
@@ -150,7 +151,7 @@ namespace device.Repository
             var pageSize = query.PageSize <= 0 ? 10 : query.PageSize;
             var items = await q.Skip((page - 1) * pageSize).Take(pageSize).ToListAsync();
 
-            return new PagedResult<Device>
+            return new PagedResult<DeviceEntity>
             {
                 Page = page,
                 PageSize = pageSize,

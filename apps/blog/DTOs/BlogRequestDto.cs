@@ -22,7 +22,7 @@ namespace Blog.DTOs
         [StringLength(100, ErrorMessage = "Region cannot exceed 100 characters")]
         public required string Region { get; set; }
 
-        [Url(ErrorMessage = "Thumbnail must be a valid URL")]
+        [FileExtensions(Extensions = "jpg,jpeg,png", ErrorMessage = "Thumbnail must be a valid image file (jpg, jpeg, png)")]
         public required string Thumbnail { get; set; }
     }
 
@@ -40,12 +40,14 @@ namespace Blog.DTOs
         [StringLength(100, ErrorMessage = "Region cannot exceed 100 characters")]
         public string? Region { get; set; }
 
-        [Url(ErrorMessage = "Thumbnail must be a valid URL")]
+        [FileExtensions(Extensions = "jpg,jpeg,png", ErrorMessage = "Thumbnail must be a valid image file (jpg, jpeg, png)")]
         public string? Thumbnail { get; set; }
     }
 
     public class BlogFilterDto
     {
+        public string? Type { get; set; }
+        public string? Title { get; set; }
         public string? Region { get; set; }
         public string? SearchTerm { get; set; }
         public DateTime? FromDate { get; set; }

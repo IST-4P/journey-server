@@ -1,4 +1,11 @@
 import {
+  CreateBlogRequestDTO,
+  DeleteBlogRequestDTO,
+  GetBlogRequestDTO,
+  GetManyBlogsRequestDTO,
+  UpdateBlogRequestDTO,
+} from '@domain/blog';
+import {
   Body,
   Controller,
   Delete,
@@ -8,13 +15,6 @@ import {
   Put,
   Query,
 } from '@nestjs/common';
-import {
-  CreateBlogRequestDTO,
-  DeleteBlogRequestDTO,
-  GetBlogRequestDTO,
-  GetManyBlogsRequestDTO,
-  UpdateBlogRequestDTO,
-} from './blog.dto';
 import { BlogService } from './blog.service';
 
 @Controller('blog')
@@ -43,7 +43,7 @@ export class BlogController {
     @Param('blogId') blogId: string,
     @Body() body: UpdateBlogRequestDTO
   ) {
-    return this.blogService.updateBlog({ ...body, blogId });
+    return this.blogService.updateBlog({ ...body, id: blogId });
   }
 
   @Delete(':blogId')

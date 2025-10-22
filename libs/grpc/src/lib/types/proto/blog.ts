@@ -12,7 +12,7 @@ export const protobufPackage = "blog";
 
 /** GetBlog */
 export interface GetBlogRequest {
-  blogId: string;
+  id: string;
 }
 
 export interface GetBlogResponse {
@@ -28,6 +28,9 @@ export interface GetBlogResponse {
 
 /** GetManyBlogs */
 export interface GetManyBlogsRequest {
+  title?: string | undefined;
+  type?: string | undefined;
+  region?: string | undefined;
   page: number;
   limit: number;
 }
@@ -61,7 +64,7 @@ export interface CreateBlogRequest {
 
 /** UpdateBlog */
 export interface UpdateBlogRequest {
-  blogId: string;
+  id: string;
   title?: string | undefined;
   content?: string | undefined;
   type?: string | undefined;
@@ -71,7 +74,7 @@ export interface UpdateBlogRequest {
 
 /** DeleteBlog */
 export interface DeleteBlogRequest {
-  blogId: string;
+  id: string;
 }
 
 export interface DeleteBlogResponse {

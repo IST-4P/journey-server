@@ -27,7 +27,8 @@
       "@domain/vehicle": ["libs/domain/vehicle/src/index.ts"],
       "@domain/auth": ["libs/domain/auth/src/index.ts"],
       "@domain/chat": ["libs/domain/chat/src/index.ts"],
-      "@domain/notification": ["libs/domain/notification/src/index.ts"]
+      "@domain/notification": ["libs/domain/notification/src/index.ts"],
+      "@domain/blog": ["libs/domain/blog/src/index.ts"]
     }
   },
   "exclude": ["node_modules", "tmp"]

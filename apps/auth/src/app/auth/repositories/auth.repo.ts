@@ -1,5 +1,5 @@
+import { RefreshToken, VerificationCode } from '@domain/auth';
 import { Injectable } from '@nestjs/common';
-import { RefreshTokenType, VerificationCodeType } from '../models/auth.model';
 
 import { Prisma } from '@prisma-clients/auth';
 import { PrismaService } from '../../prisma/prisma.service';
@@ -10,7 +10,7 @@ export class AuthRepository {
 
   findUniqueVerificationCode(
     uniqueValue: Prisma.VerificationCodeWhereUniqueInput
-  ): Promise<VerificationCodeType | null> {
+  ): Promise<VerificationCode | null> {
     return this.prismaService.verificationCode.findUniqueOrThrow({
       where: uniqueValue,
     });
@@ -18,7 +18,7 @@ export class AuthRepository {
 
   deleteVerificationCode(
     body: Prisma.VerificationCodeWhereUniqueInput
-  ): Promise<VerificationCodeType> {
+  ): Promise<VerificationCode> {
     return this.prismaService.verificationCode.delete({
       where: body,
     });
@@ -26,7 +26,7 @@ export class AuthRepository {
 
   createVerificationCode(
     body: Prisma.VerificationCodeCreateInput
-  ): Promise<VerificationCodeType> {
+  ): Promise<VerificationCode> {
     return this.prismaService.verificationCode.upsert({
       where: {
         email_type: {
@@ -44,7 +44,7 @@ export class AuthRepository {
 
   createRefreshToken(
     data: Prisma.RefreshTokenUncheckedCreateInput
-  ): Promise<RefreshTokenType> {
+  ): Promise<RefreshToken> {
     return this.prismaService.refreshToken.create({
       data,
     });
@@ -52,7 +52,7 @@ export class AuthRepository {
 
   deleteRefreshToken(
     where: Prisma.RefreshTokenWhereUniqueInput
-  ): Promise<RefreshTokenType> {
+  ): Promise<RefreshToken> {
     return this.prismaService.refreshToken.delete({
       where,
     });
@@ -60,7 +60,7 @@ export class AuthRepository {
 
   findUniqueRefreshToken(
     token: Prisma.RefreshTokenWhereUniqueInput
-  ): Promise<RefreshTokenType | null> {
+  ): Promise<RefreshToken | null> {
     return this.prismaService.refreshToken.findUniqueOrThrow({
       where: token,
     });

@@ -1,4 +1,4 @@
-import { PulsarClient, PulsarConsumer } from '@hacmieu-journey/pulsar';
+import { NatsClient, NatsConsumer } from '@hacmieu-journey/nats';
 import { Injectable } from '@nestjs/common';
 import { ChatGateway } from './chat.gateway';
 
@@ -10,16 +10,12 @@ export interface DataEvent {
 }
 
 @Injectable()
-export class ChatConsumer extends PulsarConsumer<DataEvent> {
+export class ChatConsumer extends NatsConsumer<DataEvent> {
   constructor(
-    pulsarClient: PulsarClient,
+    natsClient: NatsClient,
     private readonly chatGateway: ChatGateway
   ) {
-    super(
-      pulsarClient,
-      'persistent://journey/chats/chat-created', // Topic
-      'chat-service' // Service name
-    );
+    super(natsClient, 'journey.chats.chat-created');
   }
 
   protected async onMessage(event: DataEvent): Promise<void> {

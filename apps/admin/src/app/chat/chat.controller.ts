@@ -1,5 +1,5 @@
+import { CreateChatRequestDTO, GetChatsRequestDTO } from '@domain/chat';
 import { Body, Controller, Get, Post, Query } from '@nestjs/common';
-import { CreateChatRequestDTO, GetChatsQueryDTO } from './chat.dto';
 import { ChatService } from './chat.service';
 
 @Controller('chat')
@@ -9,7 +9,7 @@ export class ChatController {
   constructor(private readonly chatService: ChatService) {}
 
   @Get()
-  getManyChats(@Query() query: GetChatsQueryDTO) {
+  getManyChats(@Query() query: GetChatsRequestDTO) {
     return this.chatService.getChats(query);
   }
 

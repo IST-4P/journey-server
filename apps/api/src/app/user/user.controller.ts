@@ -1,5 +1,3 @@
-import { ActiveUser } from '@hacmieu-journey/nestjs';
-import { Body, Controller, Get, Param, Post, Put } from '@nestjs/common';
 import {
   CreateAddressRequestDTO,
   CreateBankAccountRequestDTO,
@@ -8,7 +6,9 @@ import {
   UpdateBankAccountRequestDTO,
   UpdateDriverLicenseRequestDTO,
   UpdateProfileRequestDTO,
-} from './user.dto';
+} from '@domain/user';
+import { ActiveUser } from '@hacmieu-journey/nestjs';
+import { Body, Controller, Get, Param, Post, Put } from '@nestjs/common';
 import { UserService } from './user.service';
 
 @Controller('user')
@@ -28,8 +28,8 @@ export class UserController {
     @Body() body: UpdateProfileRequestDTO
   ) {
     return this.userService.updateProfile({
-      userId,
       ...body,
+      userId,
     });
   }
 
@@ -44,8 +44,8 @@ export class UserController {
     @Body() body: CreateDriverLicenseRequestDTO
   ) {
     return this.userService.createDriverLicense({
-      userId,
       ...body,
+      userId,
     });
   }
 
@@ -54,7 +54,10 @@ export class UserController {
     @ActiveUser('userId') userId: string,
     @Body() body: UpdateDriverLicenseRequestDTO
   ) {
-    return this.userService.updateDriverLicense({ userId, ...body });
+    return this.userService.updateDriverLicense({
+      ...body,
+      userId,
+    });
   }
 
   @Get('bank-account')
@@ -68,8 +71,8 @@ export class UserController {
     @Body() body: CreateBankAccountRequestDTO
   ) {
     return this.userService.createBankAccount({
-      userId,
       ...body,
+      userId,
     });
   }
 
@@ -79,8 +82,8 @@ export class UserController {
     @Body() body: UpdateBankAccountRequestDTO
   ) {
     return this.userService.updateBankAccount({
-      userId,
       ...body,
+      userId,
     });
   }
 
@@ -100,8 +103,8 @@ export class UserController {
     @Body() body: CreateAddressRequestDTO
   ) {
     return this.userService.createAddress({
-      userId,
       ...body,
+      userId,
     });
   }
 
@@ -112,9 +115,9 @@ export class UserController {
     @Param('id') id: string
   ) {
     return this.userService.updateAddress({
+      ...body,
       id,
       userId,
-      ...body,
     });
   }
 }

@@ -1,0 +1,40 @@
+{{- if .Values.vehicle.enabled }}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: vehicle
+  labels:
+    app: vehicle
+spec:
+  replicas: {{ .Values.vehicle.replicas }}
+  selector:
+    matchLabels:
+      app: vehicle
+  template:
+    metadata:
+      labels:
+        app: vehicle
+    spec:
+      containers:
+        - name: vehicle
+          image: {{ .Values.vehicle.image }}
+          imagePullPolicy: {{ .Values.global.imagePullPolicy }}
+          ports:
+            - containerPort: {{ .Values.vehicle.port.grpc }}
+            - containerPort: {{ .Values.vehicle.port.http }}
+          env:
+            - name: DATABASE_URL
+              valueFrom:
+                secretKeyRef:
+                  name: journey-secrets
+                  key: VEHICLE_DATABASE_URL
+            - name: PORT
+              value: {{ .Values.vehicle.port.http | quote }}
+            - name: VEHICLE_GRPC_SERVICE_URL
+              value: "0.0.0.0:{{ .Values.vehicle.port.grpc }}"
+          envFrom:
+            - configMapRef:
+                name: journey-config
+            - secretRef:
+                name: journey-secrets
+{{- end }}

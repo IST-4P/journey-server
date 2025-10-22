@@ -1,11 +1,11 @@
+import {
+  GetAllProfilesRequest,
+  GetProfileRequest,
+  Role,
+  UpdateProfileRequest,
+} from '@domain/user';
 import { Injectable, Logger } from '@nestjs/common';
 import { ProfileNotFoundException } from './profile.error';
-import {
-  GetAllProfilesRequestType,
-  GetProfileRequestType,
-  RoleEnumType,
-  UpdateProfileRequestType,
-} from './profile.model';
 import { ProfileRepository } from './profile.repo';
 
 interface UserRegisteredEvent {
@@ -40,7 +40,7 @@ export class ProfileService {
         email: event.email,
         fullName: event.name,
         phone: event.phone,
-        role: event.role as RoleEnumType,
+        role: event.role as Role,
       });
 
       // this.logger.log(`✅ Created profile for user: ${event.userId}`);
@@ -54,7 +54,7 @@ export class ProfileService {
     }
   }
 
-  async getProfile(data: GetProfileRequestType) {
+  async getProfile(data: GetProfileRequest) {
     const result = await this.profileRepo.findProfileById(data.userId);
 
     if (!result) {
@@ -63,11 +63,11 @@ export class ProfileService {
     return result;
   }
 
-  async findAllProfiles(query: GetAllProfilesRequestType) {
+  async findAllProfiles(query: GetAllProfilesRequest) {
     return this.profileRepo.findAllProfiles(query);
   }
 
-  async updateProfile({ userId, ...data }: UpdateProfileRequestType) {
+  async updateProfile({ userId, ...data }: UpdateProfileRequest) {
     const result = await this.getProfile({ userId });
     if (!result) {
       throw ProfileNotFoundException;

@@ -15,12 +15,12 @@ model Profile {
     fullName    String    @map("full_name")
     phone       String    @unique
     role        Role
-    avatarUrl   String?   @map("avatar_url")
+    avatarUrl   String    @default("https://cdn-icons-png.freepik.com/512/3607/3607444.png") @map("avatar_url")
     facebookUrl String?   @map("facebook_url")
     creditScore Int       @default(100) @map("credit_score")
-    bio         String?
+    bio         String    @default("Xin chào")
     birthDate   DateTime? @map("birth_date")
-    gender      Gender?
+    gender      Gender    @default(OTHER)
     createdAt   DateTime  @default(now()) @map("created_at")
     updatedAt   DateTime  @updatedAt @map("updated_at")
 

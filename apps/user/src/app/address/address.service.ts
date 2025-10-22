@@ -1,19 +1,19 @@
+import {
+  CreateAddressRequest,
+  DeleteAddressRequest,
+  GetAddressRequest,
+  GetManyAddressRequest,
+  UpdateAddressRequest,
+} from '@domain/user';
 import { Injectable } from '@nestjs/common';
 import { AddressNotFoundException } from './address.error';
-import {
-  CreateAddressRequestType,
-  DeleteAddressRequestType,
-  GetAddressRequestType,
-  GetManyAddressRequestType,
-  UpdateAddressRequestType,
-} from './address.model';
 import { AddressRepository } from './address.repo';
 
 @Injectable()
 export class AddressService {
   constructor(private readonly addressRepo: AddressRepository) {}
 
-  async getManyAddressByUserId(data: GetManyAddressRequestType) {
+  async getManyAddressByUserId(data: GetManyAddressRequest) {
     const result = await this.addressRepo.findManyAddressByUserId(data.userId);
     if (result.length === 0) {
       throw AddressNotFoundException;
@@ -21,7 +21,7 @@ export class AddressService {
     return { addresses: result };
   }
 
-  async getAddressById(data: GetAddressRequestType) {
+  async getAddressById(data: GetAddressRequest) {
     const result = await this.addressRepo.findAddressById(data);
     if (!result) {
       throw AddressNotFoundException;
@@ -29,11 +29,11 @@ export class AddressService {
     return result;
   }
 
-  async createAddress(data: CreateAddressRequestType) {
+  async createAddress(data: CreateAddressRequest) {
     return this.addressRepo.createAddress(data);
   }
 
-  async updateAddress({ id, userId, ...data }: UpdateAddressRequestType) {
+  async updateAddress({ id, userId, ...data }: UpdateAddressRequest) {
     const result = await this.addressRepo.findAddressById({ id, userId });
     if (!result) {
       throw AddressNotFoundException;
@@ -41,7 +41,7 @@ export class AddressService {
     return this.addressRepo.updateAddress({ id, userId: userId! }, data);
   }
 
-  async deleteAddress(data: DeleteAddressRequestType) {
+  async deleteAddress(data: DeleteAddressRequest) {
     const result = await this.addressRepo.findAddressById(data);
     if (!result) {
       throw AddressNotFoundException;

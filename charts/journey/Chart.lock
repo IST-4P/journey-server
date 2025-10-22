@@ -1,6 +1,6 @@
 dependencies:
-- name: pulsar
-  repository: https://pulsar.apache.org/charts
-  version: 3.7.0
-digest: sha256:c6cfe70aa56bb31976cf80929748b990148ed267ddfc54044652e97208aeebbf
-generated: "2025-10-11T19:48:53.331314+07:00"
+- name: nats
+  repository: https://nats-io.github.io/k8s/helm/charts/
+  version: 1.2.11
+digest: sha256:123f03bf1fd886b7eeda28bd10e92de4f5107738b1fdcfe295f0152d371957d2
+generated: "2025-10-20T21:40:47.2381246+07:00"

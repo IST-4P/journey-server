@@ -1,18 +1,18 @@
-import { MessageResponseType } from '@hacmieu-journey/nestjs';
+import {
+  ForgotPasswordRequest,
+  LoginRequest,
+  LoginResponse,
+  LogoutRequest,
+  RefreshTokenRequest,
+  RefreshTokenResponse,
+  RegisterRequest,
+  SendOTPRequest,
+  ValidateTokenRequest,
+  ValidateTokenResponse,
+} from '@domain/auth';
+import { MessageResponse } from '@hacmieu-journey/nestjs';
 import { Controller } from '@nestjs/common';
 import { GrpcMethod } from '@nestjs/microservices';
-import {
-  ForgotPasswordRequestType,
-  LoginRequestType,
-  LoginResponseType,
-  LogoutRequestType,
-  RefreshTokenRequestType,
-  RefreshTokenResponse,
-  RegisterRequestType,
-  SendOTPRequestType,
-  ValidateTokenRequestType,
-  ValidateTokenResponseType,
-} from './models/auth.model';
 import { AuthService } from './services/auth.service';
 
 @Controller()
@@ -20,7 +20,7 @@ export class AuthGrpcController {
   constructor(private readonly authService: AuthService) {}
 
   @GrpcMethod('AuthService', 'SendOtp')
-  sendOtp(data: SendOTPRequestType): Promise<MessageResponseType> {
+  sendOtp(data: SendOTPRequest): Promise<MessageResponse> {
     return this.authService.sendOtp({
       email: data.email,
       type: data.type as 'REGISTER' | 'FORGOT_PASSWORD',
@@ -28,36 +28,32 @@ export class AuthGrpcController {
   }
 
   @GrpcMethod('AuthService', 'Register')
-  register(data: RegisterRequestType): Promise<MessageResponseType> {
+  register(data: RegisterRequest): Promise<MessageResponse> {
     return this.authService.register(data);
   }
 
   @GrpcMethod('AuthService', 'Login')
-  login(data: LoginRequestType): Promise<LoginResponseType> {
+  login(data: LoginRequest): Promise<LoginResponse> {
     return this.authService.login(data);
   }
 
   @GrpcMethod('AuthService', 'RefreshToken')
-  refreshToken(data: RefreshTokenRequestType): Promise<RefreshTokenResponse> {
+  refreshToken(data: RefreshTokenRequest): Promise<RefreshTokenResponse> {
     return this.authService.refreshToken(data);
   }
 
   @GrpcMethod('AuthService', 'Logout')
-  logout(data: LogoutRequestType): Promise<MessageResponseType> {
+  logout(data: LogoutRequest): Promise<MessageResponse> {
     return this.authService.logout(data);
   }
 
   @GrpcMethod('AuthService', 'ForgotPassword')
-  forgotPassword(
-    data: ForgotPasswordRequestType
-  ): Promise<MessageResponseType> {
+  forgotPassword(data: ForgotPasswordRequest): Promise<MessageResponse> {
     return this.authService.forgotPassword(data);
   }
 
   @GrpcMethod('AuthService', 'ValidateToken')
-  validateToken(
-    data: ValidateTokenRequestType
-  ): Promise<ValidateTokenResponseType> {
+  validateToken(data: ValidateTokenRequest): Promise<ValidateTokenResponse> {
     return this.authService.validateToken(data.accessToken);
   }
 }

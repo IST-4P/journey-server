@@ -1,5 +1,5 @@
 import { ChatProto } from '@hacmieu-journey/grpc';
-import { PulsarClient } from '@hacmieu-journey/pulsar';
+import { NatsClient } from '@hacmieu-journey/nats';
 import { Inject, Injectable, Logger, OnModuleInit } from '@nestjs/common';
 import { ClientGrpc } from '@nestjs/microservices';
 import { lastValueFrom } from 'rxjs';
@@ -12,7 +12,7 @@ export class ChatService implements OnModuleInit {
   constructor(
     @Inject(ChatProto.CHAT_PACKAGE_NAME)
     private client: ClientGrpc,
-    private readonly pulsarClient: PulsarClient
+    private readonly natsClient: NatsClient
   ) {}
 
   onModuleInit() {
@@ -33,10 +33,6 @@ export class ChatService implements OnModuleInit {
     const chat = await lastValueFrom(this.chatService.createChat(data));
 
     try {
-      const producer = await this.pulsarClient.createProducer(
-        'persistent://journey/chats/chat-created'
-      );
-
       const chatData = {
         id: chat.id,
         fromUserId: chat.fromUserId,
@@ -51,21 +47,10 @@ export class ChatService implements OnModuleInit {
       //   )}`
       // );
 
-      await producer.send({
-        data: Buffer.from(JSON.stringify(chatData)),
-        properties: {
-          eventType: 'chat.created',
-          version: '1.0',
-          source: 'admin-service',
-        },
-        eventTimestamp: Date.now(),
-      });
-    } catch (pulsarError) {
+      await this.natsClient.publish('journey.chats.chat-created', chatData);
+    } catch (natsError) {
       // Log error but don't fail registration
-      this.logger.error(
-        `❌ Failed to publish user-registered event:`,
-        pulsarError
-      );
+      this.logger.error(`❌ Failed to publish chat.created event:`, natsError);
     }
     return chat;
   }

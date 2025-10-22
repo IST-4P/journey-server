@@ -1,4 +1,4 @@
-import { PulsarClient, PulsarConsumer } from '@hacmieu-journey/pulsar';
+import { NatsClient, NatsConsumer } from '@hacmieu-journey/nats';
 import { Injectable } from '@nestjs/common';
 import { NotificationGateway } from './notification.gateway';
 
@@ -11,16 +11,12 @@ interface DataEvent {
 }
 
 @Injectable()
-export class NotificationConsumer extends PulsarConsumer<DataEvent> {
+export class NotificationConsumer extends NatsConsumer<DataEvent> {
   constructor(
-    pulsarClient: PulsarClient,
+    natsClient: NatsClient,
     private readonly notificationGateway: NotificationGateway
   ) {
-    super(
-      pulsarClient,
-      'persistent://journey/notifications/notification-created', // Topic
-      'notification-service' // Service name
-    );
+    super(natsClient, 'journey.notifications.notification-created');
   }
 
   protected async onMessage(event: DataEvent): Promise<void> {

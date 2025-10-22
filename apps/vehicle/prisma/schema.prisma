@@ -38,12 +38,13 @@ enum FuelType {
 
 // ==================== MAIN MODELS ====================
 
+// Vehicle model (refactored)
 model Vehicle {
     id           String      @id @default(uuid())
     type         VehicleType
     name         String // Tên xe (VD: "Toyota Vios 2023")
-    brand        String // Hãng xe (VD: "Toyota")
-    model        String // Model (VD: "Vios")
+    brandId      String      @map("brand_id")
+    modelId      String      @map("model_id")
     licensePlate String      @unique @map("license_plate") // Biển số xe
 
     // Thông số kỹ thuật
@@ -52,8 +53,8 @@ model Vehicle {
     transmission TransmissionType
 
     // Giá thuê
-    pricePerHour Decimal @map("price_per_hour") @db.Decimal(10, 2)
-    pricePerDay  Decimal @map("price_per_day") @db.Decimal(10, 2)
+    pricePerHour Int @map("price_per_hour")
+    pricePerDay  Int @map("price_per_day")
 
     // Vị trí
     location  String // Địa chỉ text (VD: "123 Nguyễn Văn A, Quận 1, TP.HCM")
@@ -79,13 +80,16 @@ model Vehicle {
     updatedAt DateTime @updatedAt @map("updated_at")
 
     // Relations
+    brand           VehicleBrand          @relation(fields: [brandId], references: [id], onDelete: Restrict)
+    model           VehicleModel          @relation(fields: [modelId], references: [id], onDelete: Restrict)
     images          String[] // Array of image URLs
     vehicleFeatures VehicleOnFeature[]
     availability    VehicleAvailability[]
 
     @@index([type])
     @@index([status])
-    @@index([brand])
+    @@index([brandId])
+    @@index([modelId])
     @@index([city, ward])
     @@index([pricePerDay])
     @@index([latitude, longitude])
@@ -94,11 +98,40 @@ model Vehicle {
     @@map("vehicles")
 }
 
+model VehicleBrand {
+    id        String   @id @default(uuid())
+    name      String   @unique // VD: "Toyota", "Honda", "Mercedes"
+    createdAt DateTime @default(now()) @map("created_at")
+    updatedAt DateTime @updatedAt @map("updated_at")
+
+    // Relations
+    models   VehicleModel[]
+    vehicles Vehicle[]
+
+    @@map("brands")
+}
+
+model VehicleModel {
+    id        String   @id @default(uuid())
+    name      String // VD: "Vios", "City", "C-Class"
+    brandId   String   @map("brand_id")
+    createdAt DateTime @default(now()) @map("created_at")
+    updatedAt DateTime @updatedAt @map("updated_at")
+
+    // Relations
+    brand    VehicleBrand @relation(fields: [brandId], references: [id], onDelete: Cascade)
+    vehicles Vehicle[]
+
+    @@unique([brandId, name]) // Mỗi brand chỉ có 1 model name duy nhất
+    @@index([brandId])
+    @@map("vehicle_models")
+}
+
 model VehicleFeature {
-    id          String  @id @default(uuid())
-    name        String  @unique // Tên feature (VD: "Bluetooth", "Camera lùi")
-    description String? @db.Text // Mô tả chi tiết về feature (optional)
-    icon        String? // Icon URL hoặc icon name (optional)
+    id          String @id @default(uuid())
+    name        String @unique // Tên feature (VD: "Bluetooth", "Camera lùi")
+    description String // Mô tả chi tiết về feature (optional)
+    icon        String // Icon URL hoặc icon name (optional)
 
     // Timestamps
     createdAt DateTime @default(now()) @map("created_at")

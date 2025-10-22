@@ -1,43 +1,25 @@
 global:
   imagePullPolicy: Always
 
-pulsar:
-  namespace: pulsar
-  namespaceCreate: true
-  initialize: true
-  zookeeper:
-    replicaCount: 1
-    podMonitor:
+nats:
+  enabled: true
+  nats:
+    jetstream:
       enabled: false
-  broker:
-    replicaCount: 1
-    configData:
-      allowAutoTopicCreation: 'true'
-      allowAutoTopicCreationType: 'partitioned'
-      defaultNumPartitions: '3'
-    podMonitor:
+    limits:
+      maxConnections: 100
+      maxSubscriptions: 100
+  config:
+    cluster:
       enabled: false
-  bookkeeper:
-    replicaCount: 1
-    podMonitor:
-      enabled: false
-  autorecovery:
-    podMonitor:
-      enabled: false
-  proxy:
-    replicaCount: 1
-    podMonitor:
-      enabled: false
-  kube-prometheus-stack:
-    enabled: false
-    prometheusOperator:
-      enabled: false
-    grafana:
-      enabled: false
-    alertmanager:
-      enabled: false
-    prometheus:
-      enabled: false
+  container:
+    resources:
+      requests:
+        cpu: 50m
+        memory: 128Mi
+      limits:
+        cpu: 200m
+        memory: 256Mi
 
 api:
   enabled: true
@@ -84,6 +66,14 @@ chat:
     grpc: 5003
     http: 3003
 
+vehicle:
+  enabled: true
+  replicas: 1
+  image: 'caophi562005/journey-vehicle:latest'
+  port:
+    grpc: 5004
+    http: 3004
+
 blog:
   enabled: true
   replicas: 1
@@ -94,11 +84,12 @@ blog:
 
 # Configuration (non-sensitive)
 config:
-  pulsarUrl: ''
+  natsUrl: ''
   authUrl: ''
   userUrl: ''
   notificationUrl: ''
   chatUrl: ''
+  vehicleUrl: ''
   blogUrl: ''
   accessTokenExpiresIn: '1h'
   refreshTokenExpiresIn: '7d'
@@ -110,6 +101,7 @@ secrets:
   userDatabaseUrl: ''
   notificationDatabaseUrl: ''
   chatDatabaseUrl: ''
+  vehicleDatabaseUrl: ''
   accessTokenSecret: ''
   blogDatabaseUrl: ''
   refreshTokenSecret: ''

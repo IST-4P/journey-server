@@ -23,14 +23,14 @@ namespace Blog.Services
         {
             try
             {
-                _logger.LogInformation("GetBlog called with blogId: {BlogId}", request.BlogId);
+                _logger.LogInformation("GetBlog called with Id: {Id}", request.Id);
 
-                if (!Guid.TryParse(request.BlogId, out var blogId))
+                if (!Guid.TryParse(request.Id, out var Id))
                 {
-                    throw new RpcException(new Status(StatusCode.InvalidArgument, "Error.InvalidBlogId"));
+                    throw new RpcException(new Status(StatusCode.InvalidArgument, "Error.InvalidId"));
                 }
 
-                var blog = await _blogRepository.GetBlogByIdAsync(blogId);
+                var blog = await _blogRepository.GetBlogByIdAsync(Id);
                 if (blog == null)
                 {
                     throw new RpcException(new Status(StatusCode.NotFound, "Error.BlogNotFound"));
@@ -54,7 +54,7 @@ namespace Blog.Services
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error getting blog: {BlogId}", request.BlogId);
+                _logger.LogError(ex, "Error getting blog: {Id}", request.Id);
                 throw new RpcException(new Status(StatusCode.Internal, $"Internal error: {ex.Message}"));
             }
         }
@@ -151,14 +151,14 @@ namespace Blog.Services
         {
             try
             {
-                _logger.LogInformation("UpdateBlog called with blogId: {BlogId}", request.BlogId);
+                _logger.LogInformation("UpdateBlog called with Id: {Id}", request.Id);
 
-                if (!Guid.TryParse(request.BlogId, out var blogId))
+                if (!Guid.TryParse(request.Id, out var Id))
                 {
-                    throw new RpcException(new Status(StatusCode.InvalidArgument, "Error.InvalidBlogId"));
+                    throw new RpcException(new Status(StatusCode.InvalidArgument, "Error.InvalidId"));
                 }
 
-                var existingBlog = await _blogRepository.GetBlogByIdAsync(blogId);
+                var existingBlog = await _blogRepository.GetBlogByIdAsync(Id);
                 if (existingBlog == null)
                 {
                     throw new RpcException(new Status(StatusCode.NotFound, "Error.BlogNotFound"));
@@ -173,7 +173,7 @@ namespace Blog.Services
                     Thumbnail = string.IsNullOrEmpty(request.Thumbnail) ? null : request.Thumbnail
                 };
 
-                var updatedBlog = await _blogRepository.UpdateBlogAsync(blogId, updateDto);
+                var updatedBlog = await _blogRepository.UpdateBlogAsync(Id, updateDto);
 
                 if (updatedBlog == null)
                 {
@@ -198,7 +198,7 @@ namespace Blog.Services
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error updating blog: {BlogId}", request.BlogId);
+                _logger.LogError(ex, "Error updating blog: {Id}", request.Id);
                 throw new RpcException(new Status(StatusCode.Internal, $"Internal error: {ex.Message}"));
             }
         }
@@ -209,14 +209,14 @@ namespace Blog.Services
         {
             try
             {
-                _logger.LogInformation("DeleteBlog called with blogId: {BlogId}", request.BlogId);
+                _logger.LogInformation("DeleteBlog called with Id: {Id}", request.Id);
 
-                if (!Guid.TryParse(request.BlogId, out var blogId))
+                if (!Guid.TryParse(request.Id, out var Id))
                 {
-                    throw new RpcException(new Status(StatusCode.InvalidArgument, "Error.InvalidBlogId"));
+                    throw new RpcException(new Status(StatusCode.InvalidArgument, "Error.InvalidId"));
                 }
 
-                var result = await _blogRepository.DeleteBlogAsync(blogId);
+                var result = await _blogRepository.DeleteBlogAsync(Id);
                 if (!result)
                 {
                     throw new RpcException(new Status(StatusCode.NotFound, "Error.BlogNotFound"));
@@ -233,7 +233,7 @@ namespace Blog.Services
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error deleting blog: {BlogId}", request.BlogId);
+                _logger.LogError(ex, "Error deleting blog: {Id}", request.Id);
                 throw new RpcException(new Status(StatusCode.Internal, $"Internal error: {ex.Message}"));
             }
         }

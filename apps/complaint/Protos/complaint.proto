@@ -1,0 +1,88 @@
+syntax = "proto3";
+
+package complaint;
+
+// Timestamp hỗ trợ thời gian (nếu dùng Google Well-Known Types)
+import "google/protobuf/timestamp.proto";
+
+enum ComplaintStatus {
+  PENDING = 0;
+  PROCESSING = 1;
+  RESOLVED = 2;
+  REJECTED = 3;
+}
+
+// ComplaintDto
+message Complaint {
+  string id = 1;
+  string userId = 2;
+  string deviceId = 3;
+  string comboId = 4;
+  string vehicelId = 5
+  string rentalId = 6;
+  string title = 7;
+  string content = 8;
+  repeated string evidenceImages = 9;
+  ComplaintStatus status = 10;
+  string adminResponse = 11;
+  google.protobuf.Timestamp createdAt = 12;
+  google.protobuf.Timestamp updatedAt = 13;
+}
+
+// -------- Request DTOs --------
+
+message CreateComplaintRequest {
+  string userId = 1;
+  string deviceId = 2;
+  string comboId = 3;
+  string vehicelId = 4
+  string rentalId = 5;
+  string title = 6;
+  string content = 7;
+  repeated string evidenceImages = 8;
+}
+
+message GetComplaintByIdRequest {
+  string id = 1;
+}
+
+message GetManyọkComplaintByUserRequest {
+  string userId = 1;
+}
+
+message UpdateComplaintStatusRequest {
+  string id = 1;
+  ComplaintStatus status = 2;
+  string adminResponse = 3;
+}
+
+// -------- Response DTOs --------
+
+message ComplaintResponse {
+  Complaint complaint = 1;
+}
+
+message ComplaintsResponse {
+  repeated Complaint complaints = 1;
+}
+
+// =========================
+// SERVICE
+// =========================
+
+service ComplaintService {
+  // User gửi khiếu nại
+  rpc CreateComplaint(CreateComplaintRequest) returns (ComplaintResponse);
+
+  // Admin / User lấy 1 khiếu nại
+  rpc GetComplaintById(GetComplaintByIdRequest) returns (ComplaintResponse);
+
+  // User lấy danh sách khiếu nại của mình
+  rpc GetComplaintsByUser(GetComplaintsByUserRequest) returns (ComplaintsResponse);
+
+  // Admin lấy tất cả khiếu nại
+  rpc GetAllComplaints(google.protobuf.Empty) returns (ComplaintsResponse);
+
+  // Admin cập nhật trạng thái khiếu nại
+  rpc UpdateComplaintStatus(UpdateComplaintStatusRequest) returns (ComplaintResponse);
+}

@@ -18,8 +18,12 @@ export class VehicleService {
 
   constructor(private readonly vehicleRepo: VehicleRepository) {}
 
-  getManyVehicles(data: GetManyVehiclesRequest) {
-    return this.vehicleRepo.getManyVehicles(data);
+  async getManyVehicles(data: GetManyVehiclesRequest) {
+    const vehicles = await this.vehicleRepo.getManyVehicles(data);
+    if (vehicles.vehicles.length === 0) {
+      throw VehicleNotFoundException;
+    }
+    return vehicles;
   }
 
   async getVehicleById(data: GetVehicleRequest) {

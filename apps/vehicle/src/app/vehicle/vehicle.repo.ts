@@ -14,8 +14,10 @@ export class VehicleRepository {
 
   async getVehicle(data: GetVehicleRequest) {
     return this.prisma.vehicle
-      .findUnique({
-        where: { id: data.id },
+      .findFirst({
+        where: {
+          OR: [{ id: data.id }, { licensePlate: data.licensePlate }],
+        },
         include: {
           vehicleFeatures: {
             select: {

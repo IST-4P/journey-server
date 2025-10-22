@@ -15,9 +15,11 @@ export class FeatureRepository {
     return this.prisma.vehicleFeature.findMany();
   }
 
-  getFeatureById(data: GetFeatureRequest) {
-    return this.prisma.vehicleFeature.findUnique({
-      where: { id: data.id },
+  getFeature(data: GetFeatureRequest) {
+    return this.prisma.vehicleFeature.findFirst({
+      where: {
+        OR: [{ id: data.id }, { name: data.name }],
+      },
     });
   }
 

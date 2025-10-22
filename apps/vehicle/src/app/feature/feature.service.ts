@@ -25,7 +25,7 @@ export class FeatureService {
   }
 
   async getFeature(data: GetFeatureRequest) {
-    const feature = await this.featureRepo.getFeatureById(data);
+    const feature = await this.featureRepo.getFeature(data);
     if (!feature) {
       throw FeatureNotFoundException;
     }
@@ -33,7 +33,7 @@ export class FeatureService {
   }
 
   async createFeature(data: CreateFeatureRequest) {
-    const feature = await this.featureRepo.getFeatureById({ name: data.name });
+    const feature = await this.featureRepo.getFeature({ name: data.name });
     if (feature) {
       throw FeatureAlreadyExistsException;
     }
@@ -41,7 +41,7 @@ export class FeatureService {
   }
 
   async updateFeature(data: UpdateFeatureRequest) {
-    const result = await this.featureRepo.getFeatureById(data);
+    const result = await this.featureRepo.getFeature(data);
     if (!result) {
       throw FeatureNotFoundException;
     }
@@ -49,7 +49,7 @@ export class FeatureService {
   }
 
   async deleteFeature(data: DeleteFeatureRequest) {
-    const result = await this.featureRepo.getFeatureById(data);
+    const result = await this.featureRepo.getFeature(data);
     if (!result) {
       throw FeatureNotFoundException;
     }

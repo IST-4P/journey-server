@@ -31,7 +31,7 @@ export class CreateVehicleRequestDTO extends createZodDto(
 ) {}
 
 export class UpdateVehicleRequestDTO extends createZodDto(
-  UpdateVehicleRequestSchema.extend({
+  UpdateVehicleRequestSchema.omit({ id: true }).extend({
     terms: z.array(z.string()),
     images: z.array(z.string()),
     featureIds: z.array(z.string().uuid()),

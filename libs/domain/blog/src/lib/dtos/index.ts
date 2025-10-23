@@ -21,7 +21,7 @@ export class CreateBlogRequestDTO extends createZodDto(
   CreateBlogRequestSchema
 ) {}
 export class UpdateBlogRequestDTO extends createZodDto(
-  UpdateBlogResponseSchema
+  UpdateBlogResponseSchema.omit({ id: true })
 ) {}
 export class DeleteBlogRequestDTO extends createZodDto(
   DeleteBlogRequestSchema

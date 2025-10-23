@@ -13,6 +13,7 @@ data:
   VEHICLE_GRPC_SERVICE_URL: {{ .Values.config.vehicleUrl | quote }}
   BLOG_GRPC_SERVICE_URL: {{ .Values.config.blogUrl | quote }}
   BOOKING_GRPC_SERVICE_URL: {{ .Values.config.bookingUrl | quote }}
+  PAYMENT_GRPC_SERVICE_URL: {{ .Values.config.paymentUrl | quote }}
   ACCESS_TOKEN_EXPIRES_IN:
     {{ .Values.config.accessTokenExpiresIn | default "1h" | quote }}
   REFRESH_TOKEN_EXPIRES_IN:

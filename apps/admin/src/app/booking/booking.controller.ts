@@ -34,6 +34,7 @@ export class BookingController {
 
   @Post()
   createBooking(@Body() body: CreateBookingRequestDTO) {
+    console.log('Hi');
     return this.bookingService.createBooking({
       ...body,
       startTime: body.startTime.toISOString(),

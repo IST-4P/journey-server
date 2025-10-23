@@ -57,7 +57,7 @@ export class NotificationService implements OnModuleInit {
       // );
 
       await this.natsClient.publish(
-        'journey.notifications.notification-created',
+        'journey.events.notification-created',
         notificationData
       );
     } catch (natsError) {

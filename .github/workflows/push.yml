@@ -67,7 +67,7 @@ jobs:
         run: |
           echo "=== Cleaning up old Docker images (keeping latest 5 versions) ==="
 
-          SERVICES="api admin auth notification user chat vehicle blog booking"
+          SERVICES="api admin auth notification user chat vehicle blog booking payment"
           KEEP_COUNT=5
 
           for SERVICE in $SERVICES; do
@@ -174,6 +174,9 @@ jobs:
           - name: booking
             dockerfile: apps/booking/Dockerfile
             type: nodejs
+          - name: payment
+            dockerfile: apps/payment/Dockerfile
+            type: nodejs
 
     steps:
       - uses: actions/checkout@v4
@@ -271,6 +274,9 @@ jobs:
           booking:
             enabled: true
             image: ${{ secrets.DOCKERHUB_USERNAME }}/journey-booking:${{ steps.tag.outputs.TAG }}
+          payment:
+            enabled: true
+            image: ${{ secrets.DOCKERHUB_USERNAME }}/journey-payment:${{ steps.tag.outputs.TAG }}
           EOF
 
       - name: List and cleanup all pending Helm operations
@@ -361,5 +367,6 @@ jobs:
           kubectl rollout status deployment/vehicle -n journey --timeout=3m
           kubectl rollout status deployment/blog -n journey --timeout=3m
           kubectl rollout status deployment/booking -n journey --timeout=3m
+          kubectl rollout status deployment/payment -n journey --timeout=3m
 
           echo "✅ All deployments verified successfully!"

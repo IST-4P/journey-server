@@ -1,0 +1,17 @@
+{{- if .Values.payment.enabled }}
+apiVersion: v1
+kind: Service
+metadata:
+  name: payment
+  labels:
+    app: payment
+spec:
+  type: ClusterIP
+  selector:
+    app: payment
+  ports:
+    - protocol: TCP
+      port: {{ .Values.payment.port.grpc }}
+      targetPort: {{ .Values.payment.port.grpc }}
+      name: grpc
+{{- end }}

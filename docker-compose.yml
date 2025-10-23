@@ -5,7 +5,13 @@ services:
     ports:
       - "4222:4222"
       - "8222:8222"
+    volumes:
+      - nats-data:/data # Mount volume
     command:
-      - "-js"
-      - "-m"
+      - "-js" # Enable JetStream
+      - "-sd" # Store directory
+      - "/data" # Path lưu data
+      - "-m" # Monitoring
       - "8222"
+volumes:
+  nats-data:

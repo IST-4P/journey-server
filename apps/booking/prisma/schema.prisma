@@ -59,7 +59,7 @@ model Booking {
     // Thời gian thuê
     startTime DateTime @map("start_time")
     endTime   DateTime @map("end_time")
-    duration  Int // Số giờ hoặc ngày thuê (tính tự động)
+    duration  Float // Số giờ hoặc ngày thuê (tính tự động)
 
     // Địa chỉ lấy xe (tại vị trí xe)
     pickupAddress String  @map("pickup_address") // Địa chỉ lấy xe

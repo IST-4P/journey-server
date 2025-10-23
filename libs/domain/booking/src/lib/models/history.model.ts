@@ -1,12 +1,15 @@
+import { PaginationQuerySchema } from '@domain/shared';
 import { z } from 'zod';
 import { HistoryValidatorSchema } from '../validators';
 
 export const GetManyHistoriesRequestSchema = HistoryValidatorSchema.pick({
   action: true,
-}).partial();
+})
+  .partial()
+  .extend(PaginationQuerySchema.shape);
 
 export const GetManyHistoriesResponseSchema = z.object({
-  histories: z.array(HistoryValidatorSchema),
+  histories: z.array(HistoryValidatorSchema.omit({ notes: true })),
   page: z.number().int(),
   limit: z.number().int(),
   totalItems: z.number().int(),

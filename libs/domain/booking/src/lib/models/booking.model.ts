@@ -1,3 +1,4 @@
+import { PaginationQuerySchema } from '@domain/shared';
 import z from 'zod';
 import { BookingValidatorSchema } from '../validators';
 
@@ -11,7 +12,9 @@ export const GetManyBookingsRequestSchema = BookingValidatorSchema.pick({
   userId: true,
   vehicleId: true,
   status: true,
-}).partial();
+})
+  .partial()
+  .extend(PaginationQuerySchema.shape);
 
 export const GetManyBookingsResponseSchema = z.object({
   bookings: z.array(BookingValidatorSchema),
@@ -36,7 +39,6 @@ export const CreateBookingRequestSchema = BookingValidatorSchema.pick({
   vat: true,
   discount: true,
   deposit: true,
-  refundAmount: true,
 
   notes: true,
 });

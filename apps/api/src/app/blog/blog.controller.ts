@@ -1,5 +1,5 @@
+import { GetBlogRequestDTO, GetManyBlogsRequestDTO } from '@domain/blog';
 import { Controller, Get, Param, Query } from '@nestjs/common';
-import { GetBlogRequestDTO, GetManyBlogsRequestDTO } from './blog.dto';
 import { BlogService } from './blog.service';
 
 @Controller('blog')
@@ -13,7 +13,7 @@ export class BlogController {
     return this.blogService.getManyBlogs(query);
   }
 
-  @Get(':blogId')
+  @Get(':id')
   getBlog(@Param() query: GetBlogRequestDTO) {
     return this.blogService.getBlog(query);
   }

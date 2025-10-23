@@ -24,5 +24,5 @@ export class CreateExtensionRequestDTO extends createZodDto(
   CreateExtensionRequestSchema
 ) {}
 export class UpdateStatusExtensionRequestDTO extends createZodDto(
-  UpdateStatusExtensionRequestSchema
+  UpdateStatusExtensionRequestSchema.omit({ id: true })
 ) {}

@@ -25,7 +25,7 @@ export class CreateBookingRequestDTO extends createZodDto(
   CreateBookingRequestSchema
 ) {}
 export class CancelBookingRequestDTO extends createZodDto(
-  CancelBookingRequestSchema
+  CancelBookingRequestSchema.omit({ id: true })
 ) {}
 export class CancelBookingResponseDTO extends createZodDto(
   CancelBookingResponseSchema

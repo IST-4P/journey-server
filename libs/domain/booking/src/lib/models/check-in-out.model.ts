@@ -1,10 +1,13 @@
+import { PaginationQuerySchema } from '@domain/shared';
 import z from 'zod';
 import { CheckInOutValidatorSchema } from '../validators';
 
 export const GetManyCheckInOutsRequestSchema = CheckInOutValidatorSchema.pick({
   bookingId: true,
   type: true,
-}).partial();
+})
+  .partial()
+  .extend(PaginationQuerySchema.shape);
 
 export const GetManyCheckInOutsResponseSchema = z.object({
   checkInOuts: z.array(CheckInOutValidatorSchema),

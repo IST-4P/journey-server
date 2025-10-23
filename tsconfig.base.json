@@ -24,6 +24,7 @@
       "@domain/shared": ["libs/domain/shared/src/index.ts"],
       "@domain/user": ["libs/domain/user/src/index.ts"],
       "@domain/vehicle": ["libs/domain/vehicle/src/index.ts"],
+      "@domain/booking": ["libs/domain/booking/src/index.ts"],
       "@hacmieu-journey/grpc": ["libs/grpc/src/index.ts"],
       "@hacmieu-journey/nats": ["libs/nats/src/index.ts"],
       "@hacmieu-journey/nestjs": ["libs/nestjs/src/index.ts"],

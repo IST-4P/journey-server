@@ -1,9 +1,12 @@
+import { PaginationQuerySchema } from '@domain/shared';
 import { z } from 'zod';
 import { ExtensionValidatorSchema } from '../validators';
 
 export const GetManyExtensionsRequestSchema = ExtensionValidatorSchema.pick({
   status: true,
-}).partial();
+})
+  .partial()
+  .extend(PaginationQuerySchema.shape);
 
 export const GetManyExtensionsResponseSchema = z.object({
   extensions: z.array(ExtensionValidatorSchema),

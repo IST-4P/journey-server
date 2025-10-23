@@ -82,6 +82,14 @@ blog:
     grpc: 5005
     http: 3005
 
+booking:
+  enabled: true
+  replicas: 1
+  image: 'caophi562005/journey-booking:latest'
+  port:
+    grpc: 5008
+    http: 3008
+
 # Configuration (non-sensitive)
 config:
   natsUrl: ''
@@ -91,6 +99,7 @@ config:
   chatUrl: ''
   vehicleUrl: ''
   blogUrl: ''
+  bookingUrl: ''
   accessTokenExpiresIn: '1h'
   refreshTokenExpiresIn: '7d'
   otpExpires: '5m'
@@ -104,6 +113,7 @@ secrets:
   vehicleDatabaseUrl: ''
   accessTokenSecret: ''
   blogDatabaseUrl: ''
+  bookingDatabaseUrl: ''
   refreshTokenSecret: ''
   resendApiKey: ''
   redisUrl: ''

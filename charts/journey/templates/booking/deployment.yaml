@@ -1,0 +1,40 @@
+{{- if .Values.booking.enabled }}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: booking
+  labels:
+    app: booking
+spec:
+  replicas: {{ .Values.booking.replicas }}
+  selector:
+    matchLabels:
+      app: booking
+  template:
+    metadata:
+      labels:
+        app: booking
+    spec:
+      containers:
+        - name: booking
+          image: {{ .Values.booking.image }}
+          imagePullPolicy: {{ .Values.global.imagePullPolicy }}
+          ports:
+            - containerPort: {{ .Values.booking.port.grpc }}
+            - containerPort: {{ .Values.booking.port.http }}
+          env:
+            - name: DATABASE_URL
+              valueFrom:
+                secretKeyRef:
+                  name: journey-secrets
+                  key: BOOKING_DATABASE_URL
+            - name: PORT
+              value: {{ .Values.booking.port.http | quote }}
+            - name: BOOKING_GRPC_SERVICE_URL
+              value: "0.0.0.0:{{ .Values.booking.port.grpc }}"
+          envFrom:
+            - configMapRef:
+                name: journey-config
+            - secretRef:
+                name: journey-secrets
+{{- end }}

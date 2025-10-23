@@ -1,0 +1,17 @@
+{{- if .Values.booking.enabled }}
+apiVersion: v1
+kind: Service
+metadata:
+  name: booking
+  labels:
+    app: booking
+spec:
+  type: ClusterIP
+  selector:
+    app: booking
+  ports:
+    - protocol: TCP
+      port: {{ .Values.booking.port.grpc }}
+      targetPort: {{ .Values.booking.port.grpc }}
+      name: grpc
+{{- end }}

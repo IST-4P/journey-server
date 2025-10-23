@@ -1,0 +1,175 @@
+generator client {
+    provider      = "prisma-client-js"
+    output        = "../../../node_modules/@prisma-clients/booking"
+    binaryTargets = ["native", "debian-openssl-1.1.x"]
+}
+
+datasource db {
+    provider = "postgresql"
+    url      = env("DATABASE_URL")
+}
+
+// ==================== ENUMS ====================
+
+enum BookingStatus {
+    PENDING // Chờ thanh toán
+    CONFIRMED // Đã thanh toán, chờ nhận xe
+    ONGOING // Đang thuê (đã check-in)
+    COMPLETED // Hoàn thành (đã check-out)
+    CANCELLED // Đã hủy
+    EXPIRED // Hết hạn (quá thời gian không thanh toán)
+}
+
+enum CheckType {
+    CHECK_IN
+    CHECK_OUT
+}
+
+enum PaymentStatus {
+    PENDING // Chờ thanh toán
+    PAID // Đã thanh toán
+    PARTIALLY_PAID // Thanh toán một phần
+    REFUNDED // Đã hoàn tiền
+    FAILED // Thanh toán thất bại
+}
+
+enum HistoryAction {
+    CREATED
+    PAID
+    CONFIRMED
+    CHECKED_IN
+    CHECKED_OUT
+    CANCELLED
+}
+
+enum ExtensionStatus {
+    PENDING
+    APPROVED
+    REJECTED
+}
+
+// ==================== MAIN MODELS ====================
+
+model Booking {
+    id        String        @id @default(uuid())
+    userId    String        @map("user_id") // Reference to User Service
+    vehicleId String        @map("vehicle_id") // Reference to Vehicle Service
+    status    BookingStatus @default(PENDING)
+
+    // Thời gian thuê
+    startTime DateTime @map("start_time")
+    endTime   DateTime @map("end_time")
+    duration  Float // Số giờ hoặc ngày thuê (tính tự động)
+
+    // Địa chỉ lấy xe (tại vị trí xe)
+    pickupAddress String  @map("pickup_address") // Địa chỉ lấy xe
+    pickupLat     Decimal @map("pickup_lat") @db.Decimal(10, 8)
+    pickupLng     Decimal @map("pickup_lng") @db.Decimal(11, 8)
+
+    // Chi phí
+    rentalFee     Int @map("rental_fee") // Phí thuê xe
+    insuranceFee  Int @map("insurance_fee") // Phí bảo hiểm
+    vat           Int @map("vat") // VAT (10%)
+    discount      Int @default(0) @map("discount") // Giảm giá (từ promo code)
+    deposit       Int @map("deposit") // Tiền cọc (thường 500k)
+    totalAmount   Int @map("total_amount") // Tổng tiền = rental + insurance + vat - discount + deposit
+    refundAmount  Int @default(0) @map("refund_amount") // Số tiền hoàn cọc
+    penaltyAmount Int @default(0) @map("penalty_amount") // Phí phạt (nếu có)
+
+    // Payment tracking
+    paymentStatus PaymentStatus @default(PENDING) @map("payment_status")
+    paymentId     String?       @map("payment_id") // Reference to Payment Service
+    paidAt        DateTime?     @map("paid_at")
+
+    // Ghi chú
+    notes          String? @db.Text // Ghi chú của người thuê
+    cancelReason   String? @map("cancel_reason") // Lý do hủy
+    adminNotes     String? @map("admin_notes") @db.Text // Ghi chú của admin
+    damageReported Boolean @default(false) @map("damage_reported") // Có báo cáo hư hỏng không
+
+    // Timestamps
+    createdAt   DateTime  @default(now()) @map("created_at")
+    updatedAt   DateTime  @updatedAt @map("updated_at")
+    cancelledAt DateTime? @map("cancelled_at")
+    expiredAt   DateTime? @map("expired_at")
+
+    // Relations
+    history  BookingHistory[]
+    checkIns CheckInOut[]
+
+    @@index([userId])
+    @@index([vehicleId])
+    @@index([status])
+    @@index([startTime, endTime])
+    @@index([paymentStatus])
+    @@index([createdAt])
+    @@map("bookings")
+}
+
+// Lịch sử thay đổi trạng thái booking
+model BookingHistory {
+    id        String        @id @default(uuid())
+    bookingId String        @map("booking_id")
+    action    HistoryAction
+    notes     String?       @db.Text
+    createdAt DateTime      @default(now()) @map("created_at")
+
+    booking Booking @relation(fields: [bookingId], references: [id], onDelete: Cascade)
+
+    @@index([bookingId])
+    @@index([createdAt])
+    @@map("booking_history")
+}
+
+// Check-in và Check-out
+model CheckInOut {
+    id        String    @id @default(uuid())
+    bookingId String    @map("booking_id")
+    type      CheckType
+    // Thông tin vị trí
+    latitude  Decimal   @db.Decimal(10, 8)
+    longitude Decimal   @db.Decimal(11, 8)
+    address   String?
+
+    // Hình ảnh
+    images String[] // Array of image URLs (5-6 ảnh)
+
+    // Thông tin xe
+    mileage      Int // Số km hiện tại
+    fuelLevel    Int // Mức xăng (%) 0-100
+    damageNotes  String?  @map("damage_notes") @db.Text // Ghi chú về hư hỏng
+    damageImages String[] @default([]) @map("damage_images") // Ảnh hư hỏng (nếu có)
+
+    // Thông tin xác nhận
+    verified   Boolean   @default(false) // Đã xác nhận bởi admin chưa
+    verifiedAt DateTime? @map("verified_at")
+
+    createdAt DateTime @default(now()) @map("created_at")
+    updatedAt DateTime @updatedAt @map("updated_at")
+
+    booking Booking @relation(fields: [bookingId], references: [id], onDelete: Cascade)
+
+    @@index([bookingId])
+    @@index([type])
+    @@index([createdAt])
+    @@map("check_in_out")
+}
+
+// Extension requests (Yêu cầu gia hạn)
+model BookingExtension {
+    id               String          @id @default(uuid())
+    bookingId        String          @map("booking_id")
+    requestedBy      String          @map("requested_by") // User ID
+    originalEndTime  DateTime        @map("original_end_time")
+    newEndTime       DateTime        @map("new_end_time")
+    additionalHours  Int             @map("additional_hours")
+    additionalAmount Int             @map("additional_amount") // Số tiền phải trả thêm
+    status           ExtensionStatus @default(PENDING)
+    rejectionReason  String?         @map("rejection_reason")
+    notes            String?         @db.Text
+    createdAt        DateTime        @default(now()) @map("created_at")
+
+    @@index([bookingId])
+    @@index([status])
+    @@map("booking_extensions")
+}

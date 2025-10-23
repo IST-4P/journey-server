@@ -14,6 +14,10 @@
         {
             "name": "rental",
             "path": "apps/rental"
+        },
+        {
+            "name": "complaint",
+            "path": "apps/complaint"
         }
     ],
     "settings": {}

@@ -1,0 +1,26 @@
+syntax = "proto3";
+
+package payment;
+
+service PaymentService {
+  rpc Receiver(WebhookPaymentRequest) returns (WebhookPaymentResponse);
+}
+
+message WebhookPaymentRequest {
+  int32 id = 1;
+  string gateway = 2;
+  string transactionDate = 3;
+  optional string accountNumber = 4;
+  optional string code = 5;
+  optional string content = 6;
+  string transferType = 7;
+  double transferAmount = 8;
+  double accumulated = 9;
+  optional string subAccount = 10;
+  optional string referenceCode = 11;
+  string description = 12;
+}
+
+message WebhookPaymentResponse {
+  string message = 1;
+}

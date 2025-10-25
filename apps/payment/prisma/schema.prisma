@@ -33,7 +33,7 @@ model Payment {
 }
 
 model PaymentTransaction {
-    id                 String   @id @default(uuid())
+    id                 Int      @id @default(autoincrement())
     gateway            String   @db.VarChar(100)
     transactionDate    DateTime @default(now())
     accountNumber      String?  @db.VarChar(100)

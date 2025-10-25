@@ -1,4 +1,5 @@
 import { createZodDto } from 'nestjs-zod';
+import z from 'zod';
 import {
   CreatePaymentRequest,
   GetManyPaymentsRequest,
@@ -10,7 +11,13 @@ import {
 } from '../models';
 
 export class WebhookPaymentRequestDTO extends createZodDto(
-  WebhookPaymentRequest
+  WebhookPaymentRequest.extend({
+    accountNumber: z.string().optional(),
+    code: z.string().optional(),
+    content: z.string().optional(),
+    subAccount: z.string().optional(),
+    referenceCode: z.string().optional(),
+  })
 ) {}
 export class GetManyPaymentsRequestDTO extends createZodDto(
   GetManyPaymentsRequest

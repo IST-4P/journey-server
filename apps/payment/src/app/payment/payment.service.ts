@@ -3,6 +3,7 @@ import {
   GetManyPaymentsRequest,
   GetPaymentRequest,
   UpdateStatusPaymentRequest,
+  WebhookPaymentRequest,
 } from '@domain/payment';
 import { Injectable } from '@nestjs/common';
 import { PaymentNotFoundException } from './payment.error';
@@ -38,5 +39,10 @@ export class PaymentService {
       throw PaymentNotFoundException;
     }
     return this.paymentRepository.updatePaymentStatus(data);
+  }
+
+  async receiver(data: WebhookPaymentRequest) {
+    const result = await this.paymentRepository.receiver(data);
+    console.log(JSON.stringify(result));
   }
 }

@@ -5,6 +5,7 @@ import { AuthModule } from './auth/auth.module';
 import { BlogModule } from './blog/blog.module';
 import { ChatModule } from './chat/chat.module';
 import { NotificationModule } from './notification/notification.module';
+import { PaymentModule } from './payment/payment.module';
 import { UserModule } from './user/user.module';
 
 @Module({
@@ -16,6 +17,7 @@ import { UserModule } from './user/user.module';
     NotificationModule,
     ChatModule,
     BlogModule,
+    PaymentModule,
   ],
   providers: [],
 })

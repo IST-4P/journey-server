@@ -10,3 +10,13 @@ export const PaymentAlreadyExistsException = new RpcException({
   code: status.ALREADY_EXISTS,
   message: 'Error.PaymentAlreadyExists',
 });
+
+export const PaymentTransactionExistsException = new RpcException({
+  code: status.ALREADY_EXISTS,
+  message: 'Error.PaymentTransactionExists',
+});
+
+export const AmountPriceMismatchException = new RpcException({
+  code: status.FAILED_PRECONDITION,
+  message: 'Error.AmountPriceMismatch',
+});

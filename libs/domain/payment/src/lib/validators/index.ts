@@ -3,6 +3,8 @@ import { PaymentStatusEnum, PaymentTypeEnum } from '../enums';
 
 export const PaymentValidator = z.object({
   id: z.string().uuid(),
+  sequenceNumber: z.number().int(),
+  paymentCode: z.string().max(30),
   userId: z.string().uuid(),
   type: PaymentTypeEnum,
   bookingId: z.string().uuid().nullable(),

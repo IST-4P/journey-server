@@ -21,15 +21,23 @@ enum PaymentType {
 }
 
 model Payment {
-    id        String        @id @default(uuid())
-    userId    String
-    type      PaymentType
-    bookingId String?
-    rentalId  String?
-    amount    Int
-    status    PaymentStatus @default(PENDING)
-    createdAt DateTime      @default(now())
-    updatedAt DateTime      @updatedAt
+    id             String        @id @default(uuid())
+    sequenceNumber Int           @unique @default(autoincrement())
+    paymentCode    String?       @unique @db.VarChar(18)
+    userId         String
+    type           PaymentType
+    bookingId      String?
+    rentalId       String?
+    amount         Int
+    status         PaymentStatus @default(PENDING)
+    createdAt      DateTime      @default(now())
+    updatedAt      DateTime      @updatedAt
+
+    @@index([paymentCode])
+    @@index([userId])
+    @@index([bookingId])
+    @@index([rentalId])
+    @@index([status])
 }
 
 model PaymentTransaction {

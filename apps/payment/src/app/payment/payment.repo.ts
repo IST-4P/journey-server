@@ -18,6 +18,18 @@ import {
 export class PaymentRepository {
   constructor(private readonly prismaService: PrismaService) {}
 
+  generatePaymentCode(sequenceNumber: number, type: string): string {
+    const date = new Date();
+    const year = date.getFullYear().toString().slice(-2);
+    const month = (date.getMonth() + 1).toString().padStart(2, '0');
+    const day = date.getDate().toString().padStart(2, '0');
+    const prefix = type.slice(0, 2).toUpperCase();
+
+    return `${prefix}${year}${month}${day}${sequenceNumber
+      .toString()
+      .padStart(10, '0')}`;
+  }
+
   async getManyPayments(data: GetManyPaymentsRequest) {
     const skip = (data.page - 1) * data.limit;
     const take = data.limit;
@@ -49,8 +61,23 @@ export class PaymentRepository {
   }
 
   async createPayment(data: CreatePaymentRequest) {
-    return this.prismaService.payment.create({
-      data,
+    return await this.prismaService.$transaction(async (tx) => {
+      // Tạo payment với sequenceNumber tự động tăng
+      const payment = await tx.payment.create({
+        data,
+      });
+
+      // Generate payment code
+      const paymentCode = this.generatePaymentCode(
+        payment.sequenceNumber,
+        payment.type
+      );
+
+      // Update payment code
+      await tx.payment.update({
+        where: { id: payment.id },
+        data: { paymentCode },
+      });
     });
   }
 
@@ -108,13 +135,13 @@ export class PaymentRepository {
       });
 
       // Kiểm tra nội dung chuyển tiền và tổng số tiền có khớp không
-      const paymentId = data.code
+      const paymentCode = data.code
         ? String(data.code.split('VE')[1])
         : String(data.content?.split('VE')[1]);
 
       const payment = await tx.payment.findUnique({
         where: {
-          id: paymentId,
+          paymentCode,
         },
       });
 
@@ -130,7 +157,7 @@ export class PaymentRepository {
       await Promise.all([
         tx.payment.update({
           where: {
-            id: paymentId,
+            paymentCode,
           },
           data: {
             status: 'PAID',
@@ -138,7 +165,7 @@ export class PaymentRepository {
         }),
       ]);
       return {
-        paymentId,
+        paymentCode,
         userId,
       };
     });

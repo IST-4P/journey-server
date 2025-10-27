@@ -5,6 +5,7 @@ import {
   GetBookingRequest,
   GetManyBookingsRequest,
   HistoryActionValues,
+  PaymentStatusValues,
   UpdateStatusBookingRequest,
 } from '@domain/booking';
 import { NatsClient } from '@hacmieu-journey/nats';
@@ -23,7 +24,8 @@ export class BookingRepository {
     if (endTime <= startTime) {
       throw new Error('End time must be after start time');
     }
-
+    endTime = new Date(endTime);
+    startTime = new Date(startTime);
     const diffMs = endTime.getTime() - startTime.getTime();
     const diffHours = diffMs / (1000 * 60 * 60);
 
@@ -173,7 +175,10 @@ export class BookingRepository {
 
       const updateStatusBooking$ = tx.booking.update({
         where: { id: data.id },
-        data: { status: BookingStatusValues.PAID },
+        data: {
+          status: BookingStatusValues.PAID,
+          paymentStatus: PaymentStatusValues.PAID,
+        },
       });
 
       const createBookingHistory$ = tx.bookingHistory.create({

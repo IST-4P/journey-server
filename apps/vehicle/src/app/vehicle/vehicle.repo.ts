@@ -150,6 +150,7 @@ export class VehicleRepository {
   }
 
   async updateStatus(data: { id: string; status: VehicleStatus }) {
+    console.log(JSON.stringify(data));
     await this.prisma.vehicle.update({
       where: {
         id: data.id,

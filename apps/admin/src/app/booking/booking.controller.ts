@@ -1,6 +1,6 @@
 import {
   CancelBookingRequestDTO,
-  CreateBookingRequestDTO,
+  CreateBookingAdminRequestDTO,
   CreateCheckInOutRequestDTO,
   CreateExtensionRequestDTO,
   CreateHistoryRequestDTO,
@@ -33,8 +33,7 @@ export class BookingController {
   }
 
   @Post()
-  createBooking(@Body() body: CreateBookingRequestDTO) {
-    console.log('Hi');
+  createBooking(@Body() body: CreateBookingAdminRequestDTO) {
     return this.bookingService.createBooking({
       ...body,
       startTime: body.startTime.toISOString(),

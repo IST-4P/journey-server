@@ -1,24 +1,31 @@
-using ComplaintService.Data;
-using ComplaintService.Repository;
-using ComplaintService.Services;
 using Microsoft.EntityFrameworkCore;
+using review.Data;
+using review.Interface;
+using review.Repository;
+using review.Services;
+using DotNetEnv;
 using System.Text.RegularExpressions;
 
 // Load environment variables
-DotNetEnv.Env.Load();
+Env.Load();
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Configure Kestrel for gRPC
 builder.WebHost.ConfigureKestrel(options =>
 {
-    options.ListenAnyIP(5009, listenOptions =>
+    options.ListenAnyIP(5010, listenOptions =>
     {
         listenOptions.Protocols = Microsoft.AspNetCore.Server.Kestrel.Core.HttpProtocols.Http2;
     });
 });
 
-// Build database connection string by expanding placeholders from environment variables
+// Add services to the container
+builder.Services.AddGrpc();
+
+// Add AutoMapper
+builder.Services.AddAutoMapper(typeof(Program));
+
+// Add DbContext
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection") ?? string.Empty;
 connectionString = connectionString
     .Replace("${DB_HOST}", Environment.GetEnvironmentVariable("DB_HOST") ?? "localhost")
@@ -31,24 +38,29 @@ connectionString = connectionString
 var maskedConnectionString = Regex.Replace(connectionString, "(?i)(Password|Pwd)=[^;]*", "$1=****");
 Console.WriteLine($"[ComplaintService] DB: {maskedConnectionString}");
 
-// Add services to the container
-builder.Services.AddGrpc();
-builder.Services.AddAutoMapper(typeof(Program).Assembly);
 
-// Register DbContext
-builder.Services.AddDbContext<ComplaintDbContext>(options =>
+builder.Services.AddDbContext<ReviewDbContext>(options =>
     options.UseNpgsql(connectionString));
 
-// Register repositories
-builder.Services.AddScoped<IComplaintRepository, ComplaintRepository>();
+builder.Services.AddScoped<IReviewRepository, ReviewRepository>();
+
+builder.Services.AddScoped<IReviewService, ReviewService>();
+
+var deviceServiceUrl = Environment.GetEnvironmentVariable("DEVICE_GRPC_URL") ?? "http://localhost:5006";
+
+builder.Services.AddGrpcClient<Device.DeviceService.DeviceServiceClient>(options =>
+{
+    options.Address = new Uri(deviceServiceUrl);
+});
+
+
+builder.Logging.ClearProviders();
+builder.Logging.AddConsole();
 
 var app = builder.Build();
 
-// Configure the HTTP request pipeline
-var grpcUrl = Environment.GetEnvironmentVariable("COMPLAINT_GRPC_SERVICE_URL") ?? "0.0.0.0:5009";
-Console.WriteLine($"Complaint gRPC Service listening on: {grpcUrl}");
-
-app.MapGrpcService<ComplaintGrpcService>();
-app.MapGet("/", () => "Complaint gRPC Service running...");
+var grpcUrl = Environment.GetEnvironmentVariable("REVIEW_GRPC_SERVICE_URL") ?? "0.0.0.0:5010";
+app.MapGrpcService<ReviewGrpcService>();
+app.MapGet("/", () => "Review gRPC Service running...");
 
 app.Run();

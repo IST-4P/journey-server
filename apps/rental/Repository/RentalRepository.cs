@@ -3,6 +3,7 @@ using rental.Model.Entities;
 using rental.Model.Dto;
 using Microsoft.EntityFrameworkCore;
 using RentalEntity = rental.Model.Entities.Rental;
+using RentalExtensionEntity = rental.Model.Entities.RentalExtension;
 
 namespace rental.Repository
 {
@@ -23,6 +24,23 @@ namespace rental.Repository
             return rental;
         }
 
+        // User: Create rental extention
+        public async Task<RentalExtensionEntity> CreateExtensionAsync(RentalExtensionEntity extension)
+        {
+            _context.Set<RentalExtensionEntity>().Add(extension);
+            await _context.SaveChangesAsync();
+            return extension;
+        }
+
+        public async Task<List<RentalExtensionEntity>> GetExtensionsByRentalIdAsync(Guid rentalId)
+        {
+            return await _context.Set<RentalExtensionEntity>()
+                .Where(e => e.RentalId == rentalId)
+                .OrderByDescending(e => e.CreatedAt)
+                .ToListAsync();
+        }
+
+
         // User: Get own rentals
         public async Task<PagedResult<RentalEntity>> GetUserRentalsAsync(Guid userId, RentalQueryDto query)
         {
@@ -32,7 +50,10 @@ namespace rental.Repository
 
             if (!string.IsNullOrEmpty(query.Status))
             {
-                q = q.Where(r => r.Status == query.Status);
+                if (Enum.TryParse<RentalStatus>(query.Status, true, out var status))
+                {
+                    q = q.Where(r => r.Status == status);
+                }
             }
 
             if (query.FromDate.HasValue)
@@ -89,7 +110,10 @@ namespace rental.Repository
 
             if (!string.IsNullOrEmpty(query.Status))
             {
-                q = q.Where(r => r.Status == query.Status);
+                if (Enum.TryParse<RentalStatus>(query.Status, true, out var status))
+                {
+                    q = q.Where(r => r.Status == status);
+                }
             }
 
             if (query.FromDate.HasValue)
@@ -135,10 +159,10 @@ namespace rental.Repository
             if (rental == null) return null;
 
             if (!string.IsNullOrEmpty(updateDto.Status))
-                rental.Status = updateDto.Status;
+                if (Enum.TryParse<RentalStatus>(updateDto.Status, true, out var status))
 
-            if (updateDto.StartDate.HasValue)
-                rental.StartDate = updateDto.StartDate.Value;
+                    if (updateDto.StartDate.HasValue)
+                        rental.StartDate = updateDto.StartDate.Value;
 
             if (updateDto.EndDate.HasValue)
                 rental.EndDate = updateDto.EndDate.Value;

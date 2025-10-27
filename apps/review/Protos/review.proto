@@ -1,0 +1,220 @@
+syntax = "proto3";
+
+option csharp_namespace = "Review";
+
+package review;
+
+service ReviewService {
+  // User operations
+  rpc CreateReview (CreateReviewRequest) returns (ReviewResponse);
+  rpc UpdateReview (UpdateReviewRequest) returns (ReviewResponse);
+  rpc DeleteReview (DeleteReviewRequest) returns (DeleteReviewResponse);
+  rpc GetMyReviews (GetMyReviewsRequest) returns (GetMyReviewsResponse);
+  rpc GetReviewById (GetReviewByIdRequest) returns (ReviewResponse);
+  
+  // Public operations
+  rpc GetReviewsByVehicle (GetReviewsByVehicleRequest) returns (GetReviewsResponse);
+  rpc GetReviewsByDevice (GetReviewsByDeviceRequest) returns (GetReviewsResponse);
+  rpc GetReviewsByCombo (GetReviewsByComboRequest) returns (GetReviewsResponse);
+  
+  // Admin operations
+  rpc GetAllReviews (GetAllReviewsRequest) returns (GetReviewsResponse);
+  rpc AdminDeleteReview (AdminDeleteReviewRequest) returns (DeleteReviewResponse);
+}
+
+enum ReviewType {
+  DEVICE = 0;
+  VEHICLE = 1;
+  COMBO = 2;
+}
+
+enum SortField {
+  CREATED_AT = 0;
+  UPDATED_AT = 1;
+  RATING = 2;
+  TITLE = 3;
+}
+
+enum SortOrder {
+  ASCENDING = 0;
+  DESCENDING = 1;
+}
+
+// Review entity 
+message Review { 
+  string id = 1;
+  string vehicle_id = 2;
+  string device_id = 3;
+  string combo_id = 4;
+  string user_id = 5;
+
+  int32 rating = 6;
+  string title = 7;
+  ReviewType type = 8;
+  string content = 9;
+  repeated string images = 10;
+
+  string created_at = 11;
+  string updated_at = 12;
+
+  int32 update_count = 13;
+}
+
+// Review summary (no content/images)
+message ReviewSummary { 
+  string id = 1;
+  string vehicle_id = 2;
+  string device_id = 3;
+  string combo_id = 4;
+  string user_id = 5;
+
+  int32 rating = 6;
+  string title = 7;
+  ReviewType type = 8;
+
+  string created_at = 9;
+  string updated_at = 10;
+
+  int32 update_count = 11;
+}
+
+// Request messages
+message CreateReviewRequest {
+  string user_id = 1; 
+  string vehicle_id = 2;
+  string device_id = 3;
+  string combo_id = 4;
+
+  int32 rating = 5;
+  string title = 6;
+  ReviewType type = 7;
+  string content = 8;
+  repeated string images = 9;
+}
+
+message UpdateReviewRequest {
+  string review_id = 1;
+  string user_id = 2;
+  
+  int32 rating = 3;
+  string title = 4;
+  string content = 5;
+  repeated string images = 6;
+}
+
+message DeleteReviewRequest {
+  string review_id = 1;
+  string user_id = 2;
+}
+
+message GetReviewByIdRequest {
+  string review_id = 1;
+}
+
+message GetMyReviewsRequest {
+  string user_id = 1;
+  int32 page = 2;
+  int32 limit = 3;
+  
+  // Query options
+  string search_text = 4;
+  int32 min_rating = 5;
+  int32 max_rating = 6;
+  string start_date = 7;  // ISO 8601 format
+  string end_date = 8;    // ISO 8601 format
+  SortField sort_by = 9;
+  SortOrder sort_order = 10;
+}
+
+message GetReviewsByVehicleRequest {
+  string vehicle_id = 1;
+  int32 page = 2;
+  int32 limit = 3;
+  
+  // Query options
+  string search_text = 4;
+  int32 min_rating = 5;
+  int32 max_rating = 6;
+  string start_date = 7;
+  string end_date = 8;
+  SortField sort_by = 9;
+  SortOrder sort_order = 10;
+}
+
+message GetReviewsByDeviceRequest {
+  string device_id = 1;
+  int32 page = 2;
+  int32 limit = 3;
+  
+  // Query options
+  string search_text = 4;
+  int32 min_rating = 5;
+  int32 max_rating = 6;
+  string start_date = 7;
+  string end_date = 8;
+  SortField sort_by = 9;
+  SortOrder sort_order = 10;
+}
+
+message GetReviewsByComboRequest {
+  string combo_id = 1;
+  int32 page = 2;
+  int32 limit = 3;
+  
+  // Query options
+  string search_text = 4;
+  int32 min_rating = 5;
+  int32 max_rating = 6;
+  string start_date = 7;
+  string end_date = 8;
+  SortField sort_by = 9;
+  SortOrder sort_order = 10;
+}
+
+message GetAllReviewsRequest {
+  string admin_id = 1;
+  int32 page = 2;
+  int32 limit = 3;
+  ReviewType type = 4;
+  
+  // Query options
+  string search_text = 5;
+  int32 min_rating = 6;
+  int32 max_rating = 7;
+  string start_date = 8;
+  string end_date = 9;
+  SortField sort_by = 10;
+  SortOrder sort_order = 11;
+}
+
+message AdminDeleteReviewRequest {
+  string review_id = 1;
+  string admin_id = 2;
+}
+
+// Response messages
+message ReviewResponse {
+  Review review = 1;
+  string message = 2;
+}
+
+message GetReviewsResponse {
+  repeated Review reviews = 1;
+  int32 page = 2;
+  int32 limit = 3;
+  int32 total_items = 4;
+  int32 total_pages = 5;
+}
+
+message GetMyReviewsResponse {
+  repeated Review reviews = 1;
+  int32 page = 2;
+  int32 limit = 3;
+  int32 total_items = 4;
+  int32 total_pages = 5;
+}
+
+message DeleteReviewResponse {
+  bool success = 1;
+  string message = 2;
+}

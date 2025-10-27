@@ -1,35 +1,8 @@
-using System;
-using System.ComponentModel.DataAnnotations;
-using rental.Model.Entities;
-
-namespace rental.Model.Dto
+namespace review.Model
 {
-    // Request DTOs for User (Create)
-    public class CreateRentalRequestDto
-    {
-        [Required]
-        public Guid UserId { get; set; }
 
-        [Required]
-        public List<RentalItemData> Items { get; set; } = new();
 
-        [Required]
-        public DateTime StartDate { get; set; }
-
-        [Required]
-        public DateTime EndDate { get; set; }
-    }
-
-    // Request DTO for Admin (Update)
-    public class UpdateRentalRequestDto
-    {
-        public string? Status { get; set; } // Pending, Approved, Rejected, Completed, Cancelled
-        public DateTime? StartDate { get; set; }
-        public DateTime? EndDate { get; set; }
-    }
-
-    // Filter/Query DTO
-    public class RentalQueryDto
+    public class ReviewQuery
     {
         public Guid? UserId { get; set; }
         public string? Status { get; set; }

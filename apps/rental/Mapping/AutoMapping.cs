@@ -21,8 +21,14 @@ namespace rental.Mapping
             CreateMap<UpdateRentalRequestDto, RentalEntity>()
                 .ForMember(dest => dest.Id, opt => opt.Ignore())
                 .ForMember(dest => dest.UserId, opt => opt.Ignore())
-                .ForMember(dest => dest.TargetId, opt => opt.Ignore())
-                .ForMember(dest => dest.IsCombo, opt => opt.Ignore())
+                .ForMember(dest => dest.Items, opt => opt.Ignore())
+                .ForMember(dest => dest.TotalQuantity, opt => opt.Ignore())
+                .ForMember(dest => dest.RentalFee, opt => opt.Ignore())
+                .ForMember(dest => dest.Deposit, opt => opt.Ignore())
+                .ForMember(dest => dest.DiscountPercent, opt => opt.Ignore())
+                .ForMember(dest => dest.MaxDiscount, opt => opt.Ignore())
+                .ForMember(dest => dest.VAT, opt => opt.Ignore())
+                .ForMember(dest => dest.TotalPrice, opt => opt.Ignore())
                 .ForMember(dest => dest.CreatedAt, opt => opt.Ignore())
                 .ForAllMembers(opts => opts.Condition((src, dest, srcMember) => srcMember != null));
         }

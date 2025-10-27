@@ -1,6 +1,36 @@
 syntax = "proto3";
 
+// Import using virtual roots provided via AdditionalImportDirs in csproj
+import "user.proto";
+import "device.proto";
+
 package rental;
+
+// Single rental item (device or combo with quantity)
+message RentalItem {
+  string targetId = 1;
+  bool isCombo = 2;
+  int32 quantity = 3;
+}
+
+// Full target details (device or combo) based on IsCombo
+message RentalTargetDetail {
+  oneof detail {
+    device.GetDeviceResponse device = 1;
+    device.GetComboResponse combo = 2;
+  }
+}
+
+// Rental item with details for response
+message RentalItemDetail {
+  string targetId = 1;
+  bool isCombo = 2;
+  int32 quantity = 3;
+  string name = 4;
+  double unitPrice = 5;
+  double subtotal = 6;
+  RentalTargetDetail detail = 7;
+}
 
 service RentalService {
   // User operations
@@ -12,27 +42,39 @@ service RentalService {
   rpc GetAllRentals(GetAllRentalsRequest) returns (GetAllRentalsAdminResponse);
   rpc UpdateRental(UpdateRentalRequest) returns (RentalResponse);
   rpc DeleteRental(DeleteRentalRequest) returns (DeleteRentalResponse);
+
+  // Extensions: Rental time extension
+  rpc CreateRentalExtension(CreateRentalExtensionRequest) returns (RentalResponse);
+  rpc GetRentalExtensions(GetRentalExtensionsRequest) returns (GetRentalExtensionsResponse);
 }
 
 // Common response
 message RentalResponse {
   string id = 1;
   string userId = 2;
-  string targetId = 3;
-  bool isCombo = 4;
-  string status = 5;
-  string startDate = 6;
-  string endDate = 7;
-  string createdAt = 8;
+  repeated RentalItemDetail items = 3;
+  string status = 4;
+  double rentalFee = 5;
+  double deposit = 6;
+  double maxDiscount = 7; // Max discount amount in VND that can be deducted
+  double totalPrice = 8; 
+  int32 totalQuantity = 9; 
+  double VAT = 10; // VAT percentage (e.g., 10 for 10%)
+  string startDate = 11;
+  string endDate = 12;
+  string createdAt = 13;
+  optional string actualEndDate = 14;
+  double discountPercent = 15; // Discount percentage applied
 }
 
 // User: Create Rental
 message CreateRentalRequest {
   string userId = 1;
-  string targetId = 2;
-  bool isCombo = 3;
-  string startDate = 4;
-  string endDate = 5;
+  RentalItem item = 2; // Only ONE item (device or combo) with quantity
+  string startDate = 3;
+  string endDate = 4;
+  double discountPercent = 5; // Discount percentage (e.g., 10 for 10%)
+  double maxDiscount = 6; // Maximum discount amount in VND
 }
 
 // User: Get My Rentals
@@ -45,14 +87,14 @@ message GetMyRentalsRequest {
 
 message UserRental {
   string id = 1;
-  string targetId = 2;
-  bool isCombo = 3;
-  string targetName = 4;
-  double targetPrice = 5;
-  string status = 6;
-  string startDate = 7;
-  string endDate = 8;
-  string createdAt = 9;
+  repeated RentalItemDetail items = 2;
+  double totalPrice = 3;
+  double maxDiscount = 4; 
+  string status = 5;
+  string startDate = 6;
+  string endDate = 7;
+  string createdAt = 8;
+  double discountPercent = 9; 
 }
 
 message GetMyRentalsResponse {
@@ -74,21 +116,24 @@ message GetAllRentalsRequest {
   int32 limit = 2;
   string status = 3;
   string userId = 4;
+  // Requester must be admin; server will validate role
+  string requesterId = 5;
+  // Filtering by date/price can be added later with proper types
 }
 
 message AdminRental {
   string id = 1;
   string userId = 2;
-  string userName = 3;
-  string userEmail = 4;
-  string targetId = 5;
-  bool isCombo = 6;
-  string targetName = 7;
-  double targetPrice = 8;
-  string status = 9;
-  string startDate = 10;
-  string endDate = 11;
-  string createdAt = 12;
+  string userName = 3; // only username (fullName)
+  string userEmail = 4; // only email
+  repeated RentalItemDetail items = 5;
+  double totalPrice = 6;
+  double maxDiscount = 7; // Max discount amount
+  string status = 8;
+  string startDate = 9;
+  string endDate = 10;
+  string createdAt = 11;
+  double discountPercent = 12; // Discount percentage applied
 }
 
 message GetAllRentalsAdminResponse {
@@ -97,6 +142,38 @@ message GetAllRentalsAdminResponse {
   int32 limit = 3;
   int32 totalItems = 4;
   int32 totalPages = 5;
+}
+
+// =============================
+// Rental Extension messages
+// =============================
+
+message RentalExtensionMessage {
+  string id = 1;
+  string rentalId = 2;
+  string newEndDate = 3; // ISO string
+  double additionalFee = 4;
+  double additionalHours = 5;
+  string requestedBy = 6; // userId
+  string createdAt = 7;
+  string notes = 8;
+}
+
+message CreateRentalExtensionRequest {
+  string rentalId = 1;
+  string requestedBy = 2;
+  string newEndDate = 3;
+  double additionalFee = 4;
+  double additionalHours = 5;
+  string notes = 6;
+}
+
+message GetRentalExtensionsRequest {
+  string rentalId = 1;
+}
+
+message GetRentalExtensionsResponse {
+  repeated RentalExtensionMessage extensions = 1;
 }
 
 // Admin: Update Rental

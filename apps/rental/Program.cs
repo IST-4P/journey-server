@@ -9,6 +9,14 @@ var builder = WebApplication.CreateBuilder(args);
 
 // Load environment variables
 DotNetEnv.Env.Load();
+builder.WebHost.ConfigureKestrel(options =>
+{
+    options.ListenAnyIP(5007, listenOptions =>
+    {
+        listenOptions.Protocols = Microsoft.AspNetCore.Server.Kestrel.Core.HttpProtocols.Http2;
+    });
+});
+
 
 builder.Services.AddGrpc();
 builder.Services.AddAutoMapper(typeof(Program));

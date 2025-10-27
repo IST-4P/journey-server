@@ -36,13 +36,13 @@ export class BookingController {
   @Post()
   createBooking(
     @Body() body: CreateBookingRequestDTO,
-    @ActiveUser('userId') userId: string
+    @ActiveUser('userId') id: string
   ) {
+    body.userId = id;
     return this.bookingService.createBooking({
       ...body,
       startTime: body.startTime.toISOString(),
       endTime: body.endTime.toISOString(),
-      userId,
     });
   }
 

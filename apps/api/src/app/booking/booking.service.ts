@@ -47,8 +47,11 @@ export class BookingService implements OnModuleInit {
     const vehicle = await lastValueFrom(
       this.vehicleService.getVehicle({ id: data.vehicleId })
     );
-    if (vehicle.status !== 'AVAILABLE') {
-      throw new Error('Vehicle is not available for booking');
+    if (!vehicle) {
+      throw new Error('Vehicle not found');
+    }
+    if (vehicle.status !== 'ACTIVE') {
+      throw new Error('Vehicle is not ACTIVE for booking');
     }
     return lastValueFrom(this.bookingService.createBooking(data));
   }

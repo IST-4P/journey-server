@@ -4,6 +4,7 @@ import {
   GetManyVehiclesRequest,
   GetVehicleRequest,
   UpdateVehicleRequest,
+  VehicleStatus,
 } from '@domain/vehicle';
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
@@ -145,6 +146,17 @@ export class VehicleRepository {
   deleteVehicle(data: DeleteVehicleRequest) {
     return this.prisma.vehicle.delete({
       where: { id: data.id },
+    });
+  }
+
+  async updateStatus(data: { id: string; status: VehicleStatus }) {
+    await this.prisma.vehicle.update({
+      where: {
+        id: data.id,
+      },
+      data: {
+        status: data.status,
+      },
     });
   }
 }

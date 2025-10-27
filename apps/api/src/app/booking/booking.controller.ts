@@ -3,7 +3,6 @@ import {
   CreateBookingRequestDTO,
   CreateCheckInOutRequestDTO,
   CreateExtensionRequestDTO,
-  CreateHistoryRequestDTO,
   GetBookingRequestDTO,
   GetCheckInOutRequestDTO,
   GetExtensionRequestDTO,
@@ -12,9 +11,8 @@ import {
   GetManyCheckInOutsRequestDTO,
   GetManyExtensionsRequestDTO,
   GetManyHistoriesRequestDTO,
-  UpdateStatusExtensionRequestDTO,
-  VerifyCheckInOutRequestDTO,
 } from '@domain/booking';
+import { ActiveUser } from '@hacmieu-journey/nestjs';
 import { Body, Controller, Get, Param, Post, Put, Query } from '@nestjs/common';
 import { BookingService } from './booking.service';
 
@@ -23,8 +21,11 @@ export class BookingController {
   constructor(private readonly bookingService: BookingService) {}
 
   @Get()
-  getManyBookings(@Query() query: GetManyBookingsRequestDTO) {
-    return this.bookingService.getManyBookings(query);
+  getManyBookings(
+    @Query() query: GetManyBookingsRequestDTO,
+    @ActiveUser('userId') userId: string
+  ) {
+    return this.bookingService.getManyBookings({ ...query, userId });
   }
 
   @Get(':id')
@@ -33,13 +34,15 @@ export class BookingController {
   }
 
   @Post()
-  createBooking(@Body() body: CreateBookingRequestDTO) {
-    console.log('Hi');
+  createBooking(
+    @Body() body: CreateBookingRequestDTO,
+    @ActiveUser('userId') userId: string
+  ) {
     return this.bookingService.createBooking({
       ...body,
       startTime: body.startTime.toISOString(),
       endTime: body.endTime.toISOString(),
-      notes: body.notes || undefined,
+      userId,
     });
   }
 
@@ -70,22 +73,14 @@ export class CheckInOutController {
   }
 
   @Post()
-  createCheckInOut(@Body() body: CreateCheckInOutRequestDTO) {
-    return this.bookingService.createCheckInOut({
+  checkIn(
+    @Body() body: CreateCheckInOutRequestDTO,
+    @ActiveUser('userId') userId: string
+  ) {
+    return this.bookingService.checkIn({
       ...body,
       checkDate: body.checkDate.toISOString(),
-    });
-  }
-
-  @Put('verify/:id')
-  verifyCheckInOut(
-    @Body() body: Omit<VerifyCheckInOutRequestDTO, 'id'>,
-    @Param('id') id: string
-  ) {
-    return this.bookingService.verifyCheckInOut({
-      id,
-      verified: body.verified,
-      verifiedAt: body.verifiedAt?.toISOString() || '',
+      userId,
     });
   }
 }
@@ -113,18 +108,6 @@ export class ExtensionController {
       notes: body.notes || undefined,
     });
   }
-
-  @Put('status/:id')
-  updateStatusExtension(
-    @Body() body: UpdateStatusExtensionRequestDTO,
-    @Param('id') id: string
-  ) {
-    return this.bookingService.updateStatusExtension({
-      id,
-      status: body.status,
-      rejectionReason: body.rejectionReason || undefined,
-    });
-  }
 }
 
 @Controller('history')
@@ -139,13 +122,5 @@ export class HistoryController {
   @Get(':id')
   getHistory(@Param() params: GetHistoryRequestDTO) {
     return this.bookingService.getHistory(params);
-  }
-
-  @Post()
-  createHistory(@Body() body: CreateHistoryRequestDTO) {
-    return this.bookingService.createHistory({
-      ...body,
-      notes: body.notes || undefined,
-    });
   }
 }

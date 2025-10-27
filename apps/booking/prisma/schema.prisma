@@ -13,7 +13,7 @@ datasource db {
 
 enum BookingStatus {
     PENDING // Chờ thanh toán
-    CONFIRMED // Đã thanh toán, chờ nhận xe
+    PAID // Đã thanh toán, chờ nhận xe
     ONGOING // Đang thuê (đã check-in)
     COMPLETED // Hoàn thành (đã check-out)
     CANCELLED // Đã hủy
@@ -36,7 +36,6 @@ enum PaymentStatus {
 enum HistoryAction {
     CREATED
     PAID
-    CONFIRMED
     CHECKED_IN
     CHECKED_OUT
     CANCELLED
@@ -124,6 +123,7 @@ model BookingHistory {
 // Check-in và Check-out
 model CheckInOut {
     id        String    @id @default(uuid())
+    userId    String    @map("user_id") // User ID của người thực hiện check-in/out
     bookingId String    @map("booking_id")
     type      CheckType
     // Thông tin vị trí

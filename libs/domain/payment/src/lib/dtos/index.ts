@@ -15,7 +15,10 @@ export class WebhookPaymentRequestDTO extends createZodDto(
     accountNumber: z.string().optional(),
     code: z.string().optional(),
     content: z.string().optional(),
-    subAccount: z.string().optional(),
+    subAccount: z
+      .string()
+      .nullish()
+      .transform((val) => val ?? undefined),
     referenceCode: z.string().optional(),
   })
 ) {}

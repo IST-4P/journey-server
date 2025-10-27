@@ -1,36 +1,58 @@
 import { z } from 'zod';
 
-/**
- * Vehicle Type Enum
- */
-export const VehicleTypeEnum = z.enum(['CAR', 'MOTORCYCLE']);
-export type VehicleType = z.infer<typeof VehicleTypeEnum>;
+export const VehicleTypeValues = {
+  CAR: 'CAR',
+  MOTORCYCLE: 'MOTORCYCLE',
+} as const;
 
-/**
- * Fuel Type Enum
- */
+export const VehicleTypeEnum = z.enum([
+  VehicleTypeValues.CAR,
+  VehicleTypeValues.MOTORCYCLE,
+]);
+
+export const FuelTypeValues = {
+  GASOLINE: 'GASOLINE',
+  DIESEL: 'DIESEL',
+  ELECTRIC: 'ELECTRIC',
+  HYBRID: 'HYBRID',
+  UNLEADED_GASOLINE: 'UNLEADED_GASOLINE',
+} as const;
+
 export const FuelTypeEnum = z.enum([
-  'GASOLINE',
-  'DIESEL',
-  'ELECTRIC',
-  'HYBRID',
+  FuelTypeValues.GASOLINE,
+  FuelTypeValues.DIESEL,
+  FuelTypeValues.ELECTRIC,
+  FuelTypeValues.HYBRID,
+  FuelTypeValues.UNLEADED_GASOLINE,
 ]);
-export type FuelType = z.infer<typeof FuelTypeEnum>;
 
-/**
- * Transmission Type Enum
- */
-export const TransmissionTypeEnum = z.enum(['MANUAL', 'AUTOMATIC']);
-export type TransmissionType = z.infer<typeof TransmissionTypeEnum>;
+export const TransmissionTypeValues = {
+  MANUAL: 'MANUAL',
+  AUTOMATIC: 'AUTOMATIC',
+} as const;
 
-/**
- * Vehicle Status Enum
- */
+export const TransmissionTypeEnum = z.enum([
+  TransmissionTypeValues.MANUAL,
+  TransmissionTypeValues.AUTOMATIC,
+]);
+
+export const VehicleStatusValues = {
+  ACTIVE: 'ACTIVE',
+  INACTIVE: 'INACTIVE',
+  MAINTENANCE: 'MAINTENANCE',
+  RESERVED: 'RESERVED',
+  RENTED: 'RENTED',
+} as const;
+
 export const VehicleStatusEnum = z.enum([
-  'ACTIVE',
-  'INACTIVE',
-  'MAINTENANCE',
-  'RESERVED',
-  'RENTED',
+  VehicleStatusValues.ACTIVE,
+  VehicleStatusValues.INACTIVE,
+  VehicleStatusValues.MAINTENANCE,
+  VehicleStatusValues.RESERVED,
+  VehicleStatusValues.RENTED,
 ]);
+
+export type VehicleType = z.infer<typeof VehicleTypeEnum>;
+export type FuelType = z.infer<typeof FuelTypeEnum>;
+export type TransmissionType = z.infer<typeof TransmissionTypeEnum>;
 export type VehicleStatus = z.infer<typeof VehicleStatusEnum>;

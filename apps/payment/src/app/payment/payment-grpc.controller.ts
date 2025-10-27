@@ -1,4 +1,5 @@
 import { WebhookPaymentRequest } from '@domain/payment';
+import { MessageResponse } from '@hacmieu-journey/nestjs';
 import { Controller } from '@nestjs/common';
 import { GrpcMethod } from '@nestjs/microservices';
 import { PaymentService } from './payment.service';
@@ -8,7 +9,7 @@ export class PaymentGrpcController {
   constructor(private readonly paymentService: PaymentService) {}
 
   @GrpcMethod('PaymentService', 'Receiver')
-  receiver(data: WebhookPaymentRequest): Promise<void> {
+  receiver(data: WebhookPaymentRequest): Promise<MessageResponse> {
     return this.paymentService.receiver(data);
   }
 }

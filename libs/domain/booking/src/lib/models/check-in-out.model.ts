@@ -4,6 +4,7 @@ import { CheckInOutValidatorSchema } from '../validators';
 
 export const GetManyCheckInOutsRequestSchema = CheckInOutValidatorSchema.pick({
   bookingId: true,
+  userId: true,
   type: true,
 })
   .partial()
@@ -25,6 +26,7 @@ export const GetCheckInOutResponseSchema = CheckInOutValidatorSchema;
 
 export const CreateCheckInOutRequestSchema = CheckInOutValidatorSchema.pick({
   bookingId: true,
+  userId: true,
   type: true,
   latitude: true,
   longitude: true,
@@ -34,6 +36,8 @@ export const CreateCheckInOutRequestSchema = CheckInOutValidatorSchema.pick({
   fuelLevel: true,
   damageNotes: true,
   damageImages: true,
+}).extend({
+  checkDate: z.coerce.date(),
 });
 
 export const VerifyCheckInOutRequestSchema = CheckInOutValidatorSchema.pick({

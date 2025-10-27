@@ -34,10 +34,6 @@ export class PaymentConsumer
   }
 
   protected async onMessage(event: BookingCreatedEvent): Promise<void> {
-    // this.logger.log(
-    //   `Processing booking created event: ${JSON.stringify(event)}`
-    // );
-
     await this.paymentService.createPayment({
       id: event.id,
       userId: event.userId,

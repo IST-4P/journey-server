@@ -5,6 +5,7 @@ import {
   UpdateStatusPaymentRequest,
   WebhookPaymentRequest,
 } from '@domain/payment';
+import { NatsClient } from '@hacmieu-journey/nats';
 import { Injectable } from '@nestjs/common';
 import { parse } from 'date-fns';
 import { PrismaService } from '../prisma/prisma.service';
@@ -16,7 +17,10 @@ import {
 
 @Injectable()
 export class PaymentRepository {
-  constructor(private readonly prismaService: PrismaService) {}
+  constructor(
+    private readonly prismaService: PrismaService,
+    private readonly natsClient: NatsClient
+  ) {}
 
   generatePaymentCode(sequenceNumber: number, type: string): string {
     const date = new Date();
@@ -135,24 +139,24 @@ export class PaymentRepository {
       });
 
       // Kiểm tra nội dung chuyển tiền và tổng số tiền có khớp không
-      const paymentCode = data.code
-        ? String(data.code.split('VE')[1])
-        : String(data.content?.split('VE')[1]);
-
+      const paymentCode = data.code ? String(data.code) : String(data.content);
       const payment = await tx.payment.findUnique({
         where: {
           paymentCode,
         },
       });
-
       if (!payment) {
         throw PaymentNotFoundException;
       }
-      const { amount, userId } = payment;
-
+      const { amount, bookingId, rentalId } = payment;
       if (amount !== data.transferAmount) {
         throw AmountPriceMismatchException;
       }
+
+      const eventData = {
+        id: bookingId || rentalId,
+        status: 'PAID',
+      };
 
       await Promise.all([
         tx.payment.update({
@@ -163,11 +167,10 @@ export class PaymentRepository {
             status: 'PAID',
           },
         }),
+        bookingId
+          ? this.natsClient.publish('journey.events.booking-paid', eventData)
+          : this.natsClient.publish('journey.events.rental-paid', eventData),
       ]);
-      return {
-        paymentCode,
-        userId,
-      };
     });
 
     return result;

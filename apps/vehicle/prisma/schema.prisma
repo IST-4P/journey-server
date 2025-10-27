@@ -31,6 +31,7 @@ enum TransmissionType {
 
 enum FuelType {
     GASOLINE // Xăng
+    UNLEADED_GASOLINE // Xăng không chì
     DIESEL // Dầu diesel
     ELECTRIC // Điện
     HYBRID // Hybrid

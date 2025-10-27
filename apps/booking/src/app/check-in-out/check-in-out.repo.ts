@@ -1,15 +1,22 @@
 import {
+  BookingStatusValues,
   CreateCheckInOutRequest,
   GetCheckInOutRequest,
   GetManyCheckInOutsRequest,
+  HistoryActionValues,
   VerifyCheckInOutRequest,
 } from '@domain/booking';
+import { NatsClient } from '@hacmieu-journey/nats';
 import { Injectable } from '@nestjs/common';
+import { BookingNotFoundException } from '../booking/booking.error';
 import { PrismaService } from '../prisma/prisma.service';
 
 @Injectable()
 export class CheckInOutRepository {
-  constructor(private readonly prismaService: PrismaService) {}
+  constructor(
+    private readonly prismaService: PrismaService,
+    private readonly natsClient: NatsClient
+  ) {}
 
   async getManyCheckInOuts(data: GetManyCheckInOutsRequest) {
     const skip = (data.page - 1) * data.limit;
@@ -59,18 +66,59 @@ export class CheckInOutRepository {
       });
   }
 
-  async createCheckInOut(data: CreateCheckInOutRequest) {
-    return this.prismaService.checkInOut
-      .create({
-        data,
-      })
-      .then((checkInOut) => {
-        return {
-          ...checkInOut,
-          latitude: checkInOut.latitude.toNumber(),
-          longitude: checkInOut.longitude.toNumber(),
-        };
+  async checkIn(data: CreateCheckInOutRequest) {
+    return this.prismaService.$transaction(async (tx) => {
+      const booking = await tx.booking.findUnique({
+        where: {
+          id: data.bookingId,
+        },
       });
+
+      if (!booking) {
+        throw BookingNotFoundException;
+      }
+
+      if (data.checkDate < booking.startTime) {
+        throw new Error('Error.CheckInWrongTime');
+      }
+
+      const createCheckIn$ = tx.checkInOut.create({
+        data,
+      });
+
+      const updateStatusBooking$ = tx.booking.update({
+        where: { id: data.bookingId },
+        data: { status: BookingStatusValues.ONGOING },
+      });
+
+      const createBookingHistory$ = tx.bookingHistory.create({
+        data: {
+          bookingId: data.bookingId,
+          action: HistoryActionValues.CHECKED_IN,
+          notes: 'Booking checked in successfully',
+        },
+      });
+
+      const updateStatusVehicle$ = this.natsClient.publish(
+        'journey.events.vehicle-rented',
+        {
+          id: booking.vehicleId,
+        }
+      );
+
+      const [checkIn] = await Promise.all([
+        createCheckIn$,
+        updateStatusBooking$,
+        createBookingHistory$,
+        updateStatusVehicle$,
+      ]);
+
+      return {
+        ...checkIn,
+        latitude: checkIn.latitude.toNumber(),
+        longitude: checkIn.longitude.toNumber(),
+      };
+    });
   }
 
   async verifyCheckInOut(data: VerifyCheckInOutRequest) {

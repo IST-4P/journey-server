@@ -1,4 +1,5 @@
 import { createZodDto } from 'nestjs-zod';
+import z from 'zod';
 import {
   CancelBookingRequestSchema,
   CancelBookingResponseSchema,
@@ -22,7 +23,9 @@ export class GetManyBookingsResponseDTO extends createZodDto(
   GetManyBookingsResponseSchema
 ) {}
 export class CreateBookingRequestDTO extends createZodDto(
-  CreateBookingRequestSchema
+  CreateBookingRequestSchema.extend({
+    notes: z.string().optional(),
+  })
 ) {}
 export class CancelBookingRequestDTO extends createZodDto(
   CancelBookingRequestSchema.omit({ id: true })

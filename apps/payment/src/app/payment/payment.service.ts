@@ -42,7 +42,9 @@ export class PaymentService {
   }
 
   async receiver(data: WebhookPaymentRequest) {
-    const result = await this.paymentRepository.receiver(data);
-    console.log(JSON.stringify(result));
+    await this.paymentRepository.receiver(data);
+    return {
+      message: 'Message.ReceivedSuccessfully',
+    };
   }
 }

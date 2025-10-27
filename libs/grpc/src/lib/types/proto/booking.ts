@@ -96,6 +96,7 @@ export interface CancelBookingRequest {
  */
 export interface GetManyCheckInOutsRequest {
   bookingId?: string | undefined;
+  userId?: string | undefined;
   type?: string | undefined;
   page?: number | undefined;
   limit?: number | undefined;
@@ -117,6 +118,7 @@ export interface GetCheckInOutRequest {
 export interface GetCheckInOutResponse {
   id: string;
   bookingId: string;
+  userId: string;
   type: string;
   latitude: number;
   longitude: number;
@@ -135,6 +137,7 @@ export interface GetCheckInOutResponse {
 /** CreateCheckInOut */
 export interface CreateCheckInOutRequest {
   bookingId: string;
+  userId: string;
   type: string;
   latitude: number;
   longitude: number;
@@ -144,6 +147,7 @@ export interface CreateCheckInOutRequest {
   fuelLevel: number;
   damageNotes?: string | undefined;
   damageImages: string[];
+  checkDate: string;
 }
 
 /** VerifyCheckInOut */
@@ -261,7 +265,7 @@ export interface BookingServiceClient {
 
   getCheckInOut(request: GetCheckInOutRequest): Observable<GetCheckInOutResponse>;
 
-  createCheckInOut(request: CreateCheckInOutRequest): Observable<GetCheckInOutResponse>;
+  checkIn(request: CreateCheckInOutRequest): Observable<GetCheckInOutResponse>;
 
   verifyCheckInOut(request: VerifyCheckInOutRequest): Observable<GetCheckInOutResponse>;
 
@@ -305,7 +309,7 @@ export interface BookingServiceController {
     request: GetCheckInOutRequest,
   ): Promise<GetCheckInOutResponse> | Observable<GetCheckInOutResponse> | GetCheckInOutResponse;
 
-  createCheckInOut(
+  checkIn(
     request: CreateCheckInOutRequest,
   ): Promise<GetCheckInOutResponse> | Observable<GetCheckInOutResponse> | GetCheckInOutResponse;
 
@@ -351,7 +355,7 @@ export function BookingServiceControllerMethods() {
       "cancelBooking",
       "getManyCheckInOuts",
       "getCheckInOut",
-      "createCheckInOut",
+      "checkIn",
       "verifyCheckInOut",
       "getManyExtensions",
       "getExtension",

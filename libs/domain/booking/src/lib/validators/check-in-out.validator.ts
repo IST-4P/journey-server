@@ -4,6 +4,7 @@ import { CheckTypeEnum } from '../enums';
 export const CheckInOutValidatorSchema = z.object({
   id: z.string().uuid(),
   bookingId: z.string().uuid(),
+  userId: z.string().uuid(),
   type: CheckTypeEnum,
 
   latitude: z.number(),

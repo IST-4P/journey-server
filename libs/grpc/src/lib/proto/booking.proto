@@ -10,7 +10,7 @@ service BookingService {
 
   rpc GetManyCheckInOuts(GetManyCheckInOutsRequest) returns (GetManyCheckInOutsResponse);
   rpc GetCheckInOut(GetCheckInOutRequest) returns (GetCheckInOutResponse);
-  rpc CreateCheckInOut(CreateCheckInOutRequest) returns (GetCheckInOutResponse);
+  rpc CheckIn(CreateCheckInOutRequest) returns (GetCheckInOutResponse);
   rpc VerifyCheckInOut(VerifyCheckInOutRequest) returns (GetCheckInOutResponse);
 
   rpc GetManyExtensions(GetManyExtensionsRequest) returns (GetManyExtensionsResponse);
@@ -114,9 +114,10 @@ message CancelBookingRequest {
 // GetManyCheckInOuts
 message GetManyCheckInOutsRequest {
   optional string bookingId = 1;
-  optional string type = 2;
-  optional int32 page = 3;
-  optional int32 limit = 4;
+  optional string userId = 2;
+  optional string type = 3;
+  optional int32 page = 4;
+  optional int32 limit = 5;
 }
 
 message GetManyCheckInOutsResponse {
@@ -135,38 +136,41 @@ message GetCheckInOutRequest {
 message GetCheckInOutResponse {
   string id = 1;
   string bookingId = 2;
-  string type = 3;
+  string userId = 3;
+  string type = 4;
 
-  double latitude = 4;
-  double longitude = 5;
-  optional string address = 6;
+  double latitude = 5;
+  double longitude = 6;
+  optional string address = 7;
 
-  repeated string images = 7;
+  repeated string images = 8;
 
-  int32 mileage = 8;
-  int32 fuelLevel = 9;
-  optional string damageNotes = 10;
-  repeated string damageImages = 11;
+  int32 mileage = 9;
+  int32 fuelLevel = 10;
+  optional string damageNotes = 11;
+  repeated string damageImages = 12;
 
-  bool verified = 12;
-  optional string verifiedAt = 13;
+  bool verified = 13;
+  optional string verifiedAt = 14;
 
-  string createdAt = 14;
-  string updatedAt = 15;
+  string createdAt = 15;
+  string updatedAt = 16;
 }
 
 // CreateCheckInOut
 message CreateCheckInOutRequest {
   string bookingId = 1;
-  string type = 2;
-  double latitude = 3;
-  double longitude = 4;
-  optional string address = 5;
-  repeated string images = 6;
-  int32 mileage = 7;
-  int32 fuelLevel = 8;
-  optional string damageNotes = 9;
-  repeated string damageImages = 10;
+  string userId = 2;
+  string type = 3;
+  double latitude = 4;
+  double longitude = 5;
+  optional string address = 6;
+  repeated string images = 7;
+  int32 mileage = 8;
+  int32 fuelLevel = 9;
+  optional string damageNotes = 10;
+  repeated string damageImages = 11;
+  string checkDate = 12;
 }
 
 // VerifyCheckInOut

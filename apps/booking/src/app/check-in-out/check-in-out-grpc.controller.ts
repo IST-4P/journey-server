@@ -26,11 +26,11 @@ export class CheckInOutGrpcController {
     return this.checkInOutService.getCheckInOut(data);
   }
 
-  @GrpcMethod('BookingService', 'CreateCheckInOut')
+  @GrpcMethod('BookingService', 'CheckIn')
   createCheckInOut(
     data: CreateCheckInOutRequest
   ): Promise<GetCheckInOutResponse> {
-    return this.checkInOutService.createCheckInOut(data);
+    return this.checkInOutService.checkIn(data);
   }
 
   @GrpcMethod('BookingService', 'VerifyCheckInOut')

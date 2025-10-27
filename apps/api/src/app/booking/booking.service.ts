@@ -1,5 +1,4 @@
-import { BookingProto } from '@hacmieu-journey/grpc';
-import { NatsClient } from '@hacmieu-journey/nats';
+import { BookingProto, VehicleProto } from '@hacmieu-journey/grpc';
 import { Inject, Injectable, Logger, OnModuleInit } from '@nestjs/common';
 import { ClientGrpc } from '@nestjs/microservices';
 import { lastValueFrom } from 'rxjs';
@@ -8,17 +7,23 @@ import { lastValueFrom } from 'rxjs';
 export class BookingService implements OnModuleInit {
   private readonly logger = new Logger(BookingService.name);
   private bookingService!: BookingProto.BookingServiceClient;
+  private vehicleService!: VehicleProto.VehicleServiceClient;
 
   constructor(
     @Inject(BookingProto.BOOKING_PACKAGE_NAME)
-    private client: ClientGrpc,
-    private readonly natsClient: NatsClient
+    private bookingClient: ClientGrpc,
+    @Inject(VehicleProto.VEHICLE_PACKAGE_NAME)
+    private vehicleClient: ClientGrpc
   ) {}
 
   onModuleInit() {
     this.bookingService =
-      this.client.getService<BookingProto.BookingServiceClient>(
+      this.bookingClient.getService<BookingProto.BookingServiceClient>(
         BookingProto.BOOKING_SERVICE_NAME
+      );
+    this.vehicleService =
+      this.vehicleClient.getService<VehicleProto.VehicleServiceClient>(
+        VehicleProto.VEHICLE_SERVICE_NAME
       );
   }
 
@@ -36,9 +41,15 @@ export class BookingService implements OnModuleInit {
     return lastValueFrom(this.bookingService.getBooking(data));
   }
 
-  createBooking(
+  async createBooking(
     data: BookingProto.CreateBookingRequest
   ): Promise<BookingProto.GetBookingResponse> {
+    const vehicle = await lastValueFrom(
+      this.vehicleService.getVehicle({ id: data.vehicleId })
+    );
+    if (vehicle.status !== 'AVAILABLE') {
+      throw new Error('Vehicle is not available for booking');
+    }
     return lastValueFrom(this.bookingService.createBooking(data));
   }
 
@@ -62,16 +73,10 @@ export class BookingService implements OnModuleInit {
     return lastValueFrom(this.bookingService.getCheckInOut(data));
   }
 
-  createCheckInOut(
+  checkIn(
     data: BookingProto.CreateCheckInOutRequest
   ): Promise<BookingProto.GetCheckInOutResponse> {
     return lastValueFrom(this.bookingService.checkIn(data));
-  }
-
-  verifyCheckInOut(
-    data: BookingProto.VerifyCheckInOutRequest
-  ): Promise<BookingProto.GetCheckInOutResponse> {
-    return lastValueFrom(this.bookingService.verifyCheckInOut(data));
   }
 
   //================= Extensions =================//
@@ -94,12 +99,6 @@ export class BookingService implements OnModuleInit {
     return lastValueFrom(this.bookingService.createExtension(data));
   }
 
-  updateStatusExtension(
-    data: BookingProto.UpdateStatusExtensionRequest
-  ): Promise<BookingProto.GetExtensionResponse> {
-    return lastValueFrom(this.bookingService.updateStatusExtension(data));
-  }
-
   //================= Histories =================//
 
   getManyHistories(
@@ -112,11 +111,5 @@ export class BookingService implements OnModuleInit {
     data: BookingProto.GetHistoryRequest
   ): Promise<BookingProto.GetHistoryResponse> {
     return lastValueFrom(this.bookingService.getHistory(data));
-  }
-
-  createHistory(
-    data: BookingProto.CreateHistoryRequest
-  ): Promise<BookingProto.GetHistoryResponse> {
-    return lastValueFrom(this.bookingService.createHistory(data));
   }
 }

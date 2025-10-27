@@ -30,8 +30,8 @@ export class CheckInOutService {
     return checkInOut;
   }
 
-  createCheckInOut(data: CreateCheckInOutRequest) {
-    return this.checkInOutRepository.createCheckInOut(data);
+  async checkIn(data: CreateCheckInOutRequest) {
+    return this.checkInOutRepository.checkIn(data);
   }
 
   verifyCheckInOut(data: VerifyCheckInOutRequest) {

@@ -6,7 +6,9 @@ export const GetManyBlogsRequestSchema = BlogValidatorSchema.pick({
   title: true,
   type: true,
   region: true,
-}).extend(PaginationQuerySchema.shape);
+})
+  .partial()
+  .extend(PaginationQuerySchema.shape);
 
 export const GetManyBlogsResponseSchema = z.object({
   blogs: z.array(BlogValidatorSchema.omit({ content: true })),

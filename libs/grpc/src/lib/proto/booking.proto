@@ -1,0 +1,270 @@
+syntax = "proto3";
+
+package booking;
+
+service BookingService {
+  rpc GetManyBookings(GetManyBookingsRequest) returns (GetManyBookingsResponse);
+  rpc GetBooking(GetBookingRequest) returns (GetBookingResponse);
+  rpc CreateBooking(CreateBookingRequest) returns (GetBookingResponse);
+  rpc CancelBooking(CancelBookingRequest) returns (GetBookingResponse);
+
+  rpc GetManyCheckInOuts(GetManyCheckInOutsRequest) returns (GetManyCheckInOutsResponse);
+  rpc GetCheckInOut(GetCheckInOutRequest) returns (GetCheckInOutResponse);
+  rpc CheckIn(CreateCheckInOutRequest) returns (GetCheckInOutResponse);
+  rpc VerifyCheckInOut(VerifyCheckInOutRequest) returns (GetCheckInOutResponse);
+
+  rpc GetManyExtensions(GetManyExtensionsRequest) returns (GetManyExtensionsResponse);
+  rpc GetExtension(GetExtensionRequest) returns (GetExtensionResponse);
+  rpc CreateExtension(CreateExtensionRequest) returns (GetExtensionResponse);
+  rpc UpdateStatusExtension(UpdateStatusExtensionRequest) returns (GetExtensionResponse);
+
+  rpc GetManyHistories(GetManyHistoriesRequest) returns (GetManyHistoriesResponse);
+  rpc GetHistory(GetHistoryRequest) returns (GetHistoryResponse);
+  rpc CreateHistory(CreateHistoryRequest) returns (GetHistoryResponse);
+}
+
+// ======================================================== Booking
+// GetBooking
+message GetBookingRequest {
+  optional string id = 1;
+}
+
+message GetBookingResponse {
+  string id = 1;
+  string userId = 2;
+  string vehicleId = 3;
+  string status = 4;
+
+  string startTime = 5;
+  string endTime = 6;
+  int32 duration = 7;
+
+  string pickupAddress = 8;
+  double pickupLat = 9;
+  double pickupLng = 10;
+
+  int32 rentalFee = 11;
+  int32 insuranceFee = 12;
+  int32 vat = 13;
+  int32 discount = 14;
+  int32 deposit = 15;
+  int32 totalAmount = 16;
+  int32 refundAmount = 17;
+  int32 penaltyAmount = 18;
+
+  string paymentStatus = 19;
+  optional string paymentId = 20;
+  optional string paidAt = 21;
+
+  optional string notes = 22;
+  optional string cancelReason = 23;
+  optional string adminNotes = 24;
+  bool damageReported = 25;
+
+  string createdAt = 26;
+  string updatedAt = 27;
+  optional string cancelledAt = 28;
+  optional string expiredAt = 29;
+}
+
+// GetManyBookings
+message GetManyBookingsRequest {
+  optional string userId = 1;
+  optional string vehicleId = 2;
+  optional string status = 3;
+  optional int32 page = 4;
+  optional int32 limit = 5;
+}
+
+message GetManyBookingsResponse {
+  repeated GetBookingResponse bookings = 1;
+  int32 page = 2;
+  int32 limit = 3;
+  int32 totalItems = 4;
+  int32 totalPages = 5;
+}
+
+// CreateBooking
+message CreateBookingRequest {
+  string userId = 1;
+  string vehicleId = 2;
+  string startTime = 3;
+  string endTime = 4;
+
+  string pickupAddress = 5;
+  double pickupLat = 6;
+  double pickupLng = 7;
+
+  int32 rentalFee = 8;
+  int32 insuranceFee = 9;
+  int32 vat = 10;
+  int32 discount = 11;
+  int32 deposit = 12;
+
+  optional string notes = 13;
+}
+
+// CancelBooking
+message CancelBookingRequest {
+  string id = 1;
+  string cancelReason = 2;
+}
+
+// ======================================================== CheckInOut
+// GetManyCheckInOuts
+message GetManyCheckInOutsRequest {
+  optional string bookingId = 1;
+  optional string userId = 2;
+  optional string type = 3;
+  optional int32 page = 4;
+  optional int32 limit = 5;
+}
+
+message GetManyCheckInOutsResponse {
+  repeated GetCheckInOutResponse checkInOuts = 1;
+  int32 page = 2;
+  int32 limit = 3;
+  int32 totalItems = 4;
+  int32 totalPages = 5;
+}
+
+// GetCheckInOut
+message GetCheckInOutRequest {
+  string id = 1;
+}
+
+message GetCheckInOutResponse {
+  string id = 1;
+  string bookingId = 2;
+  string userId = 3;
+  string type = 4;
+
+  double latitude = 5;
+  double longitude = 6;
+  optional string address = 7;
+
+  repeated string images = 8;
+
+  int32 mileage = 9;
+  int32 fuelLevel = 10;
+  optional string damageNotes = 11;
+  repeated string damageImages = 12;
+
+  bool verified = 13;
+  optional string verifiedAt = 14;
+
+  string createdAt = 15;
+  string updatedAt = 16;
+}
+
+// CreateCheckInOut
+message CreateCheckInOutRequest {
+  string bookingId = 1;
+  string userId = 2;
+  string type = 3;
+  double latitude = 4;
+  double longitude = 5;
+  optional string address = 6;
+  repeated string images = 7;
+  int32 mileage = 8;
+  int32 fuelLevel = 9;
+  optional string damageNotes = 10;
+  repeated string damageImages = 11;
+  string checkDate = 12;
+}
+
+// VerifyCheckInOut
+message VerifyCheckInOutRequest {
+  string id = 1;
+  bool verified = 2;
+  string verifiedAt = 3;
+}
+
+// ======================================================== Extension
+// GetManyExtensions
+message GetManyExtensionsRequest {
+  optional string status = 1;
+  optional int32 page = 2;
+  optional int32 limit = 3;
+}
+
+message GetManyExtensionsResponse {
+  repeated GetExtensionResponse extensions = 1;
+  int32 page = 2;
+  int32 limit = 3;
+  int32 totalItems = 4;
+  int32 totalPages = 5;
+}
+
+// GetExtension
+message GetExtensionRequest {
+  string id = 1;
+}
+
+message GetExtensionResponse {
+  string id = 1;
+  string bookingId = 2;
+  string requestedBy = 3;
+  string originalEndTime = 4;
+  string newEndTime = 5;
+  int32 additionalHours = 6;
+  int32 additionalAmount = 7;
+  string status = 8;
+  optional string rejectionReason = 9;
+  optional string notes = 10;
+  string createdAt = 11;
+}
+
+// CreateExtension
+message CreateExtensionRequest {
+  string bookingId = 1;
+  string requestedBy = 2;
+  string originalEndTime = 3;
+  string newEndTime = 4;
+  int32 additionalHours = 5;
+  int32 additionalAmount = 6;
+  optional string notes = 7;
+}
+
+// UpdateStatusExtension
+message UpdateStatusExtensionRequest {
+  string id = 1;
+  string status = 2;
+  optional string rejectionReason = 3;
+}
+
+// ======================================================== History
+// GetManyHistories
+message GetManyHistoriesRequest {
+  optional string action = 1;
+  optional int32 page = 2;
+  optional int32 limit = 3;
+}
+
+message GetManyHistoriesResponse {
+  repeated GetHistoryResponse histories = 1;
+  int32 page = 2;
+  int32 limit = 3;
+  int32 totalItems = 4;
+  int32 totalPages = 5;
+}
+
+// GetHistory
+message GetHistoryRequest {
+  string id = 1;
+}
+
+message GetHistoryResponse {
+  string id = 1;
+  string bookingId = 2;
+  string action = 3;
+  optional string notes = 4;
+  string createdAt = 5;
+}
+
+// CreateHistory
+message CreateHistoryRequest {
+  string bookingId = 1;
+  string action = 2;
+  optional string notes = 3;
+}

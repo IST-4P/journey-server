@@ -17,18 +17,20 @@
     "esModuleInterop": true,
     "baseUrl": ".",
     "paths": {
+      "@domain/auth": ["libs/domain/auth/src/index.ts"],
+      "@domain/blog": ["libs/domain/blog/src/index.ts"],
+      "@domain/booking": ["libs/domain/booking/src/index.ts"],
+      "@domain/chat": ["libs/domain/chat/src/index.ts"],
+      "@domain/notification": ["libs/domain/notification/src/index.ts"],
+      "@domain/shared": ["libs/domain/shared/src/index.ts"],
+      "@domain/user": ["libs/domain/user/src/index.ts"],
+      "@domain/vehicle": ["libs/domain/vehicle/src/index.ts"],
+      "@domain/payment": ["libs/domain/payment/src/index.ts"],
       "@hacmieu-journey/grpc": ["libs/grpc/src/index.ts"],
       "@hacmieu-journey/nats": ["libs/nats/src/index.ts"],
       "@hacmieu-journey/nestjs": ["libs/nestjs/src/index.ts"],
       "@hacmieu-journey/prisma": ["libs/prisma/src/index.ts"],
-      "@hacmieu-journey/websocket": ["libs/websocket/src/index.ts"],
-      "@domain/shared": ["libs/domain/shared/src/index.ts"],
-      "@domain/user": ["libs/domain/user/src/index.ts"],
-      "@domain/vehicle": ["libs/domain/vehicle/src/index.ts"],
-      "@domain/auth": ["libs/domain/auth/src/index.ts"],
-      "@domain/chat": ["libs/domain/chat/src/index.ts"],
-      "@domain/notification": ["libs/domain/notification/src/index.ts"],
-      "@domain/blog": ["libs/domain/blog/src/index.ts"]
+      "@hacmieu-journey/websocket": ["libs/websocket/src/index.ts"]
     }
   },
   "exclude": ["node_modules", "tmp"]

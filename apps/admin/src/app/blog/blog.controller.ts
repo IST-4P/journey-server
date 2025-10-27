@@ -28,7 +28,7 @@ export class BlogController {
     return this.blogService.getManyBlogs(query);
   }
 
-  @Get(':blogId')
+  @Get(':id')
   getBlog(@Param() query: GetBlogRequestDTO) {
     return this.blogService.getBlog(query);
   }
@@ -38,15 +38,12 @@ export class BlogController {
     return this.blogService.createBlog(body);
   }
 
-  @Put(':blogId')
-  updateBlog(
-    @Param('blogId') blogId: string,
-    @Body() body: UpdateBlogRequestDTO
-  ) {
-    return this.blogService.updateBlog({ ...body, id: blogId });
+  @Put(':id')
+  updateBlog(@Param('id') id: string, @Body() body: UpdateBlogRequestDTO) {
+    return this.blogService.updateBlog({ ...body, id });
   }
 
-  @Delete(':blogId')
+  @Delete(':id')
   deleteBlog(@Param() params: DeleteBlogRequestDTO) {
     return this.blogService.deleteBlog(params);
   }

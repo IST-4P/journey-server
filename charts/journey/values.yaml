@@ -2,24 +2,26 @@ global:
   imagePullPolicy: Always
 
 nats:
-  enabled: true
-  nats:
-    jetstream:
-      enabled: false
-    limits:
-      maxConnections: 100
-      maxSubscriptions: 100
   config:
     cluster:
       enabled: false
+    jetstream:
+      enabled: true
+      fileStorage:
+        enabled: true
+        dir: /data
+        pvc:
+          enabled: true
+          size: 10Gi
+          storageClassName: do-block-storage-retain
   container:
     resources:
       requests:
-        cpu: 50m
-        memory: 128Mi
-      limits:
-        cpu: 200m
+        cpu: 100m
         memory: 256Mi
+      limits:
+        cpu: 500m
+        memory: 512Mi
 
 api:
   enabled: true
@@ -82,6 +84,22 @@ blog:
     grpc: 5005
     http: 3005
 
+booking:
+  enabled: true
+  replicas: 1
+  image: 'caophi562005/journey-booking:latest'
+  port:
+    grpc: 5008
+    http: 3008
+
+payment:
+  enabled: true
+  replicas: 1
+  image: 'caophi562005/journey-payment:latest'
+  port:
+    grpc: 5009
+    http: 3009
+
 # Configuration (non-sensitive)
 config:
   natsUrl: ''
@@ -91,6 +109,8 @@ config:
   chatUrl: ''
   vehicleUrl: ''
   blogUrl: ''
+  bookingUrl: ''
+  paymentUrl: ''
   accessTokenExpiresIn: '1h'
   refreshTokenExpiresIn: '7d'
   otpExpires: '5m'
@@ -104,8 +124,11 @@ secrets:
   vehicleDatabaseUrl: ''
   accessTokenSecret: ''
   blogDatabaseUrl: ''
+  bookingDatabaseUrl: ''
+  paymentDatabaseUrl: ''
   refreshTokenSecret: ''
   resendApiKey: ''
+  paymentApiKey: ''
   redisUrl: ''
 
 # Ingress configuration

@@ -1,0 +1,58 @@
+generator client {
+    provider      = "prisma-client-js"
+    output        = "../../../node_modules/@prisma-clients/payment"
+    binaryTargets = ["native", "debian-openssl-1.1.x"]
+}
+
+datasource db {
+    provider = "postgresql"
+    url      = env("DATABASE_URL")
+}
+
+enum PaymentStatus {
+    PENDING
+    PAID
+    FAILED
+}
+
+enum PaymentType {
+    DEVICE
+    VEHICLE
+}
+
+model Payment {
+    id             String        @id @default(uuid())
+    sequenceNumber Int           @unique @default(autoincrement())
+    paymentCode    String?       @unique @db.VarChar(18)
+    userId         String
+    type           PaymentType
+    bookingId      String?
+    rentalId       String?
+    amount         Int
+    status         PaymentStatus @default(PENDING)
+    createdAt      DateTime      @default(now())
+    updatedAt      DateTime      @updatedAt
+
+    @@index([paymentCode])
+    @@index([userId])
+    @@index([bookingId])
+    @@index([rentalId])
+    @@index([status])
+}
+
+model PaymentTransaction {
+    id                 Int      @id @default(autoincrement())
+    gateway            String   @db.VarChar(100)
+    transactionDate    DateTime @default(now())
+    accountNumber      String?  @db.VarChar(100)
+    subAccount         String?  @db.VarChar(250)
+    amountIn           Int      @default(0)
+    amountOut          Int      @default(0)
+    accumulated        Int      @default(0)
+    code               String?  @db.VarChar(250)
+    transactionContent String?  @db.Text
+    referenceNumber    String?  @db.VarChar(255)
+    body               String?  @db.Text
+
+    createdAt DateTime @default(now())
+}

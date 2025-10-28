@@ -19,4 +19,5 @@ data:
   REFRESH_TOKEN_EXPIRES_IN:
     {{ .Values.config.refreshTokenExpiresIn | default "7d" | quote }}
   OTP_EXPIRES: {{ .Values.config.otpExpires | default "5m" | quote }}
+  BOOKING_COLLATERAL: {{ .Values.config.bookingCollateral | default "10000" | quote }}
 

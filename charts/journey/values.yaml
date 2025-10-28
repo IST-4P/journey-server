@@ -114,6 +114,7 @@ config:
   accessTokenExpiresIn: '1h'
   refreshTokenExpiresIn: '7d'
   otpExpires: '5m'
+  bookingCollateral: '10000'
 
 # Secrets (sensitive - DO NOT COMMIT REAL VALUES)
 secrets:

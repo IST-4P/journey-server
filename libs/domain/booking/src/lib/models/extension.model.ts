@@ -38,6 +38,13 @@ export const UpdateExtensionRequestSchema = ExtensionValidatorSchema.pick({
   notes: true,
 });
 
+export const UpdateStatusExtensionRequestSchema = ExtensionValidatorSchema.pick(
+  {
+    id: true,
+    rejectionReason: true,
+  }
+);
+
 export type GetManyExtensionsRequest = z.infer<
   typeof GetManyExtensionsRequestSchema
 >;
@@ -51,4 +58,7 @@ export type CreateExtensionRequest = z.infer<
 >;
 export type UpdateExtensionRequest = z.infer<
   typeof UpdateExtensionRequestSchema
+>;
+export type UpdateStatusExtensionRequest = z.infer<
+  typeof UpdateStatusExtensionRequestSchema
 >;

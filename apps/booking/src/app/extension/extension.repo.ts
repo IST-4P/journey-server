@@ -103,6 +103,11 @@ export class ExtensionRepository {
         data: { status: ExtensionStatusEnumValues.APPROVED },
       });
 
+      const updateBooking$ = tx.booking.update({
+        where: { id: extension.bookingId },
+        data: { endTime: extension.newEndTime },
+      });
+
       const createBookingHistory$ = tx.bookingHistory.create({
         data: {
           bookingId: extension.bookingId,
@@ -124,6 +129,7 @@ export class ExtensionRepository {
 
       const [updatedExtension] = await Promise.all([
         updateExtension$,
+        updateBooking$,
         createBookingHistory$,
         createPayment$,
       ]);

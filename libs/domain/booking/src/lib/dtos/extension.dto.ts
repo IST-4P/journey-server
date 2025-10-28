@@ -1,4 +1,5 @@
 import { createZodDto } from 'nestjs-zod';
+import z from 'zod';
 import {
   CreateExtensionRequestSchema,
   GetExtensionRequestSchema,
@@ -6,6 +7,7 @@ import {
   GetManyExtensionsRequestSchema,
   GetManyExtensionsResponseSchema,
   UpdateExtensionRequestSchema,
+  UpdateStatusExtensionRequestSchema,
 } from '../models';
 
 export class GetManyExtensionsRequestDTO extends createZodDto(
@@ -23,6 +25,13 @@ export class GetExtensionResponseDTO extends createZodDto(
 export class CreateExtensionRequestDTO extends createZodDto(
   CreateExtensionRequestSchema
 ) {}
+export class UpdateStatusExtensionRequestDTO extends createZodDto(
+  UpdateStatusExtensionRequestSchema.extend({
+    rejectionReason: z.string().optional(),
+  })
+) {}
 export class UpdateExtensionRequestDTO extends createZodDto(
-  UpdateExtensionRequestSchema
+  UpdateExtensionRequestSchema.extend({
+    notes: z.string().optional(),
+  })
 ) {}

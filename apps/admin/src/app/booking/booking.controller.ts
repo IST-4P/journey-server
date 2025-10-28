@@ -9,6 +9,7 @@ import {
   GetManyHistoriesRequestDTO,
   UpdateCheckOutRequestDTO,
   UpdateExtensionRequestDTO,
+  UpdateStatusExtensionRequestDTO,
   VerifyCheckInOutRequestDTO,
 } from '@domain/booking';
 import { Body, Controller, Get, Param, Put, Query } from '@nestjs/common';
@@ -77,13 +78,25 @@ export class ExtensionController {
   }
 
   @Put('approve/:id')
-  approveExtension(@Param() params: UpdateExtensionRequestDTO) {
+  approveExtension(@Param() params: UpdateStatusExtensionRequestDTO) {
     return this.bookingService.approveExtension(params);
   }
 
   @Put('reject/:id')
-  rejectExtension(@Param() params: UpdateExtensionRequestDTO) {
+  rejectExtension(@Param() params: UpdateStatusExtensionRequestDTO) {
     return this.bookingService.rejectExtension(params);
+  }
+
+  @Put(':id')
+  updateExtension(
+    @Body() body: Omit<UpdateExtensionRequestDTO, 'id'>,
+    @Param('id') id: string
+  ) {
+    return this.bookingService.updateExtension({
+      ...body,
+      newEndTime: body.newEndTime.toISOString(),
+      id,
+    });
   }
 }
 

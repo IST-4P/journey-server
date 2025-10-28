@@ -75,6 +75,12 @@ export class BookingService implements OnModuleInit {
     return lastValueFrom(this.bookingService.getExtension(data));
   }
 
+  updateExtension(
+    data: BookingProto.UpdateExtensionRequest
+  ): Promise<BookingProto.GetExtensionResponse> {
+    return lastValueFrom(this.bookingService.updateExtension(data));
+  }
+
   approveExtension(
     data: BookingProto.UpdateStatusExtensionRequest
   ): Promise<BookingProto.GetExtensionResponse> {

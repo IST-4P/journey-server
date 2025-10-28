@@ -22,7 +22,11 @@
   <PackageReference Include="NATS.Client.JetStream" Version="2.4.0" />
   </ItemGroup>
 
-  <ItemGroup>
-    <Protobuf Include="Protos\device.proto" GrpcServices="Server" />
-  </ItemGroup>
+<ItemGroup>
+  <Protobuf Include="..\..\libs\grpc\src\lib\proto\device.proto"
+            GrpcServices="Server"
+            ProtoRoot="..\..\libs\grpc\src\lib\proto" />
+
+</ItemGroup>
+
 </Project>

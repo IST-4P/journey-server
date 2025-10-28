@@ -5,11 +5,9 @@ namespace review.Model.Dto
     /// </summary>
     public class CreateReviewDto
     {
-        public Guid BookingId { get; set; }
+        public Guid? BookingId { get; set; }
         public Guid UserId { get; set; }
-        public Guid? VehicleId { get; set; }
-        public Guid? DeviceId { get; set; }
-        public Guid? ComboId { get; set; }
+        public Guid? RentalId { get; set; }
         public int Rating { get; set; }
         public string Title { get; set; } = string.Empty;
         public ReviewType Type { get; set; }
@@ -36,10 +34,10 @@ namespace review.Model.Dto
     public class ReviewDto
     {
         public Guid Id { get; set; }
-        public Guid BookingId { get; set; }
+        public Guid? BookingId { get; set; }
         public Guid? VehicleId { get; set; }
         public Guid? DeviceId { get; set; }
-        public Guid? ComboId { get; set; }
+        public Guid? RentalId { get; set; }
         public Guid UserId { get; set; }
         public int Rating { get; set; }
         public string Title { get; set; } = string.Empty;
@@ -57,10 +55,11 @@ namespace review.Model.Dto
     public class ReviewSummaryDto
     {
         public Guid Id { get; set; }
-        public Guid BookingId { get; set; }
+        public Guid? BookingId { get; set; }
+
         public Guid? VehicleId { get; set; }
         public Guid? DeviceId { get; set; }
-        public Guid? ComboId { get; set; }
+        public Guid? RentalId { get; set; }
         public Guid UserId { get; set; }
         public int Rating { get; set; }
         public string Title { get; set; } = string.Empty;

@@ -6,12 +6,28 @@
     <ImplicitUsings>enable</ImplicitUsings>
   </PropertyGroup>
 
-  <ItemGroup>
-    <Protobuf Include="Protos\review.proto" GrpcServices="Server" />
-  </ItemGroup>
+<ItemGroup>
+  <Protobuf Include="..\..\libs\grpc\src\lib\proto\review.proto"
+            GrpcServices="Server"
+            ProtoRoot="..\..\libs\grpc\src\lib\proto" />
+  <!-- External protos for gRPC clients -->
+  <Protobuf Include="..\..\libs\grpc\src\lib\proto\rental.proto"
+            GrpcServices="Client"
+            ProtoRoot="..\..\libs\grpc\src\lib\proto" />
+  <Protobuf Include="..\..\libs\grpc\src\lib\proto\device.proto"
+            GrpcServices="Client"
+            ProtoRoot="..\..\libs\grpc\src\lib\proto" />
+  <Protobuf Include="..\..\libs\grpc\src\lib\proto\user.proto"
+            GrpcServices="Client"
+            ProtoRoot="..\..\libs\grpc\src\lib\proto" />
+</ItemGroup>
+
 
   <ItemGroup>
     <PackageReference Include="Grpc.AspNetCore" Version="2.64.0" />
+    <PackageReference Include="Grpc.Net.ClientFactory" Version="2.64.0" />
+    <PackageReference Include="Grpc.Tools" Version="2.70.0" PrivateAssets="All" />
+    <PackageReference Include="Google.Protobuf" Version="3.29.1" />
     <PackageReference Include="AutoMapper" Version="13.0.1" />
     <PackageReference Include="Microsoft.EntityFrameworkCore" Version="9.0.0" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="9.0.0">

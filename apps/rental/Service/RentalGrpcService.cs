@@ -243,8 +243,8 @@ namespace rental.Service
                     throw new RpcException(new Status(StatusCode.NotFound, "Rental not found"));
                 }
 
-                // Deserialize items and build details
-                var items = JsonSerializer.Deserialize<List<RentalItemData>>(rental.Items) ?? new List<RentalItemData>();
+                // Deserialize items and build details (defensive for null/empty/invalid JSON)
+                var items = DeserializeItemsSafe(rental.Items);
                 var itemDetails = await BuildItemDetails(items);
 
                 var response = new RentalResponse
@@ -471,7 +471,8 @@ namespace rental.Service
                     throw new RpcException(new Status(StatusCode.NotFound, "Rental not found"));
                 }
 
-            var items = JsonSerializer.Deserialize<List<RentalItemData>>(updated.Items) ?? new List<RentalItemData>();
+            // Defensive JSON parsing for rental items
+            var items = DeserializeItemsSafe(updated.Items);
             var itemDetails = await BuildItemDetails(items);
 
             var response = new RentalResponse
@@ -542,7 +543,8 @@ namespace rental.Service
 // Helper methods
 private async Task<UserRental> MapToUserRental(RentalEntity rental)
 {
-    var items = JsonSerializer.Deserialize<List<RentalItemData>>(rental.Items) ?? new List<RentalItemData>();
+    // Defensive JSON parsing for rental items
+    var items = DeserializeItemsSafe(rental.Items);
     var itemDetails = await BuildItemDetails(items);
 
     var response = new UserRental
@@ -585,7 +587,8 @@ private async Task<AdminRental> MapToAdminRental(RentalEntity rental)
         _logger.LogWarning(ex, "Failed to fetch user info for rental {RentalId}", rental.Id);
     }
 
-    var items = JsonSerializer.Deserialize<List<RentalItemData>>(rental.Items) ?? new List<RentalItemData>();
+    // Defensive JSON parsing for rental items
+    var items = DeserializeItemsSafe(rental.Items);
     var itemDetails = await BuildItemDetails(items);
 
     var response = new AdminRental
@@ -673,6 +676,26 @@ private async Task<List<RentalItemDetail>> BuildItemDetails(List<RentalItemData>
     }
 
     return details;
+}
+
+// Safely deserialize rental items JSON to a strongly-typed list.
+// Returns an empty list when the JSON is null/empty/whitespace or invalid.
+private List<RentalItemData> DeserializeItemsSafe(string? json)
+{
+    if (string.IsNullOrWhiteSpace(json))
+    {
+        return new List<RentalItemData>();
+    }
+    try
+    {
+        var result = JsonSerializer.Deserialize<List<RentalItemData>>(json);
+        return result ?? new List<RentalItemData>();
+    }
+    catch (JsonException ex)
+    {
+        _logger.LogWarning(ex, "Failed to deserialize rental items JSON. Returning empty list.");
+        return new List<RentalItemData>();
+    }
 }
     }
 }

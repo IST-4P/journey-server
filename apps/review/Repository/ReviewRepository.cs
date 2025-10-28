@@ -142,14 +142,22 @@ namespace review.Repository
                 .AnyAsync(r => r.Id == reviewId && r.UserId == userId);
         }
 
-        public async Task<bool> HasBookingBeenReviewedAsync(Guid bookingId)
+        public async Task<bool> HasBookingBeenReviewedAsync(Guid? bookingId)
         {
             return await _context.Reviews.AnyAsync(r => r.BookingId == bookingId);
+        }
+        public async Task<bool> HasRentalBeenReviewedAsync(Guid? rentalId)
+        {
+            return await _context.Reviews.AnyAsync(r => r.RentalId == rentalId );
         }
 
         public async Task<ReviewModel?> GetReviewByBookingIdAsync(Guid bookingId)
         {
             return await _context.Reviews.FirstOrDefaultAsync(r => r.BookingId == bookingId);
+        }
+        public async Task<ReviewModel?> GetReviewByRentalIdAsync(Guid rentalId)
+        {
+            return await _context.Reviews.FirstOrDefaultAsync(r => r.RentalId == rentalId);
         }
 
         private IQueryable<ReviewModel> ApplyFiltersAndSorting(IQueryable<ReviewModel> query, ReviewQueryDto dto)

@@ -3,6 +3,8 @@ namespace review.Nats.Events
     public class ReviewCreatedEvent
     {
         public string ReviewId { get; set; } = string.Empty;
+        public string? BookingId { get; set; }
+        public string? RentalId { get; set; }
         public string? VehicleId { get; set; }
         public string? DeviceId { get; set; }
         public string? ComboId { get; set; }

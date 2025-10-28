@@ -4,9 +4,11 @@ using review.Interface;
 using review.Repository;
 using review.Services;
 using review.Nats;
+using Rental;
 using DotNetEnv;
 using System.Text.RegularExpressions;
 using NATS.Client.Core;
+using Npgsql;
 
 // Load environment variables
 Env.Load();
@@ -40,6 +42,13 @@ builder.Services.AddSingleton(sp =>
 builder.Services.AddSingleton<NatsPublisher>();
 builder.Services.AddSingleton<NatsStreamSetup>();
 
+// gRPC clients
+var rentalServiceUrl = Environment.GetEnvironmentVariable("RENTAL_GRPC_URL") ?? "http://localhost:5007";
+builder.Services.AddGrpcClient<Rental.RentalService.RentalServiceClient>(o =>
+{
+    o.Address = new Uri(rentalServiceUrl);
+});
+
 // Add DbContext
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection") ?? string.Empty;
 connectionString = connectionString
@@ -55,7 +64,14 @@ Console.WriteLine($"[ReviewService] DB: {maskedConnectionString}");
 
 
 builder.Services.AddDbContext<ReviewDbContext>(options =>
-    options.UseNpgsql(connectionString));
+{
+    var dataSourceBuilder = new NpgsqlDataSourceBuilder(connectionString);
+    dataSourceBuilder.EnableDynamicJson(); 
+    var dataSource = dataSourceBuilder.Build();
+
+    options.UseNpgsql(dataSource);
+});
+
 
 builder.Services.AddScoped<IReviewRepository, ReviewRepository>();
 
@@ -81,5 +97,7 @@ catch (Exception ex)
 var grpcUrl = Environment.GetEnvironmentVariable("REVIEW_GRPC_SERVICE_URL") ?? "0.0.0.0:5010";
 app.MapGrpcService<ReviewGrpcService>();
 app.MapGet("/", () => "Review gRPC Service running...");
+
+
 
 app.Run();

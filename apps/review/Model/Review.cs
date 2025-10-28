@@ -7,13 +7,13 @@ namespace review.Model
         [Key]
         public Guid Id { get; set; }
 
-        [Required]
-        public Guid BookingId { get; set; }
-
+        public Guid? BookingId { get; set; }
+        public Guid? RentalId { get; set; }
         public Guid? VehicleId { get; set; }
         public Guid? DeviceId { get; set; }
         public Guid? ComboId { get; set; }
 
+        
         [Required]
         public Guid UserId { get; set; }
 

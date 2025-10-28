@@ -1,6 +1,10 @@
 syntax = "proto3";
 
-option csharp_namespace = "Review";
+import "user.proto";
+import "device.proto";
+import "rental.proto";
+import "booking.proto";
+import "vehicle.proto";
 
 package review;
 
@@ -59,6 +63,7 @@ message Review {
   string updated_at = 13;
 
   int32 update_count = 14;
+  string rental_id = 15;
 }
 
 // Review summary (no content/images)
@@ -78,21 +83,19 @@ message ReviewSummary {
   string updated_at = 11;
 
   int32 update_count = 12;
+  string rental_id = 13;
 }
 
 // Request messages
 message CreateReviewRequest {
-  string booking_id = 1;
+  optional string booking_id = 1;
   string user_id = 2; 
-  string vehicle_id = 3;
-  string device_id = 4;
-  string combo_id = 5;
-
-  int32 rating = 6;
-  string title = 7;
-  ReviewType type = 8;
-  string content = 9;
-  repeated string images = 10;
+  optional string rental_id = 3;
+  int32 rating = 4;
+  string title = 5;
+  ReviewType type = 6;
+  string content = 7;
+  repeated string images = 8;
 }
 
 message UpdateReviewRequest {

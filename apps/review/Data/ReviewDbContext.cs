@@ -50,11 +50,16 @@ namespace review.Data
                 entity.Property(e => e.UpdateCount)
                     .HasDefaultValue(0);
 
+                // BookingId and RentalId are nullable - at least one must be provided
                 entity.Property(e => e.BookingId)
-                    .IsRequired();
+                    .IsRequired(false);
+
+                entity.Property(e => e.RentalId)
+                    .IsRequired(false);
 
                 // Indexes for performance
-                entity.HasIndex(e => e.BookingId).IsUnique(); // Mỗi booking chỉ có 1 review
+                entity.HasIndex(e => e.BookingId).IsUnique().HasFilter("\"BookingId\" IS NOT NULL"); // Mỗi booking chỉ có 1 review
+                entity.HasIndex(e => e.RentalId).IsUnique().HasFilter("\"RentalId\" IS NOT NULL"); // Mỗi rental chỉ có 1 review
                 entity.HasIndex(e => e.UserId);
                 entity.HasIndex(e => e.VehicleId);
                 entity.HasIndex(e => e.DeviceId);

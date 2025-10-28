@@ -23,19 +23,19 @@
   </ItemGroup>
 
 <ItemGroup>
-  <!-- Proto chính của Rental -->
-  <Protobuf Include="Protos\rental.proto"
+  <Protobuf Include="..\..\libs\grpc\src\lib\proto\rental.proto"
             GrpcServices="Server"
-            AdditionalImportDirs="..\device\Protos;..\..\libs\grpc\src\lib\proto"
-            ProtoRoot="Protos" />
-
-  <!-- Các proto bên ngoài -->
-  <Protobuf Include="..\device\Protos\device.proto"
-            GrpcServices="Client" />
+            ProtoRoot="..\..\libs\grpc\src\lib\proto" />
+  <!-- External protos for gRPC clients -->
+  <Protobuf Include="..\..\libs\grpc\src\lib\proto\device.proto"
+            GrpcServices="Client"
+            ProtoRoot="..\..\libs\grpc\src\lib\proto" />
   <Protobuf Include="..\..\libs\grpc\src\lib\proto\user.proto"
-            GrpcServices="Client" />
+            GrpcServices="Client"
+            ProtoRoot="..\..\libs\grpc\src\lib\proto" />
 </ItemGroup>
 
+  
 
 
 </Project>

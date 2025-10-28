@@ -27,11 +27,9 @@ namespace review.Services
             {
                 var dto = new CreateReviewDto
                 {
-                    BookingId = Guid.Parse(request.BookingId),
+                    BookingId = Guid.TryParse(request.BookingId, out var bookingId) ? bookingId : (Guid?)null,
                     UserId = Guid.Parse(request.UserId),
-                    VehicleId = string.IsNullOrEmpty(request.VehicleId) ? null : Guid.Parse(request.VehicleId),
-                    DeviceId = string.IsNullOrEmpty(request.DeviceId) ? null : Guid.Parse(request.DeviceId),
-                    ComboId = string.IsNullOrEmpty(request.ComboId) ? null : Guid.Parse(request.ComboId),
+                    RentalId = Guid.TryParse(request.RentalId, out var rentalId) ? rentalId : (Guid?)null,
                     Rating = request.Rating,
                     Title = request.Title,
                     Type = MapProtoTypeToReviewType(request.Type),

@@ -1,6 +1,5 @@
 syntax = "proto3";
 
-// Import using virtual roots provided via AdditionalImportDirs in csproj
 import "user.proto";
 import "device.proto";
 

@@ -34,6 +34,9 @@ namespace rental.Model.Entities
         // thời gian tạo
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 
+        // Review relationship (optional - not required after rental)
+        public Guid? ReviewId { get; set; }
+
         // relationship
         public Guid? RentalExtensionId { get; set; }
         public RentalExtension? Rentals { get; set; }

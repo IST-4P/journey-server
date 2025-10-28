@@ -13,30 +13,34 @@ namespace review.Services
         private readonly IReviewRepository _repository;
         private readonly ILogger<ReviewService> _logger;
         private readonly NatsPublisher _natsPublisher;
+        private readonly Rental.RentalService.RentalServiceClient _rentalClient;
         private const int MaxUpdateCount = 2;
 
-        public ReviewService(IReviewRepository repository, ILogger<ReviewService> logger, NatsPublisher natsPublisher)
+        public ReviewService(IReviewRepository repository, ILogger<ReviewService> logger, NatsPublisher natsPublisher, Rental.RentalService.RentalServiceClient rentalClient)
         {
             _repository = repository;
             _logger = logger;
             _natsPublisher = natsPublisher;
+            _rentalClient = rentalClient;
         }
 
         public async Task<ReviewModel> CreateReviewAsync(CreateReviewDto dto)
         {
             // Validate that at least one target is specified
-            if (!dto.VehicleId.HasValue && !dto.DeviceId.HasValue && !dto.ComboId.HasValue)
+            if (!dto.BookingId.HasValue && !dto.RentalId.HasValue)
             {
                 throw new RpcException(new Status(StatusCode.InvalidArgument,
-                    "At least one of vehicleId, deviceId, or comboId must be specified"));
+                    "At least one of bookingId or rentalId must be specified"));
             }
 
             // Check if booking has already been reviewed
             var hasBeenReviewed = await _repository.HasBookingBeenReviewedAsync(dto.BookingId);
-            if (hasBeenReviewed)
+            var hasRentalBeenReviewed = await _repository.HasRentalBeenReviewedAsync(dto.RentalId);
+
+            if (hasBeenReviewed || hasRentalBeenReviewed)
             {
                 throw new RpcException(new Status(StatusCode.AlreadyExists,
-                    "This booking has already been reviewed"));
+                    "This booking or rental has already been reviewed"));
             }
 
             // Validate rating
@@ -51,9 +55,7 @@ namespace review.Services
                 Id = Guid.NewGuid(),
                 BookingId = dto.BookingId,
                 UserId = dto.UserId,
-                VehicleId = dto.VehicleId,
-                DeviceId = dto.DeviceId,
-                ComboId = dto.ComboId,
+                RentalId = dto.RentalId,
                 Rating = dto.Rating,
                 Title = dto.Title,
                 Type = dto.Type,
@@ -63,6 +65,40 @@ namespace review.Services
                 UpdatedAt = DateTime.UtcNow,
                 UpdateCount = 0
             };
+
+            // If RentalId provided, fetch and populate target IDs (DeviceId/ComboId)
+            if (dto.RentalId.HasValue)
+            {
+                try
+                {
+                    var rentalResp = await _rentalClient.GetRentalByIdAsync(new Rental.GetRentalByIdRequest
+                    {
+                        RentalId = dto.RentalId.Value.ToString()
+                    });
+
+                    var firstItem = rentalResp.Items.FirstOrDefault();
+                    if (firstItem != null)
+                    {
+                        var targetId = Guid.Parse(firstItem.TargetId);
+                        if (firstItem.IsCombo)
+                        {
+                            review.ComboId = targetId;
+                            review.Type = ReviewType.Combo;
+                        }
+                        else
+                        {
+                            review.DeviceId = targetId;
+                            review.Type = ReviewType.Device;
+                        }
+                    }
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogWarning(ex, "Failed to fetch rental details for RentalId {RentalId}", dto.RentalId);
+                }
+            }
+
+
 
             var createdReview = await _repository.CreateReviewAsync(review);
 
@@ -79,13 +115,16 @@ namespace review.Services
                 var reviewEvent = new ReviewCreatedEvent
                 {
                     ReviewId = review.Id.ToString(),
-                    VehicleId = review.VehicleId?.ToString(),
-                    DeviceId = review.DeviceId?.ToString(),
-                    ComboId = review.ComboId?.ToString(),
+                    BookingId = review.BookingId?.ToString(),
+                    RentalId = review.RentalId?.ToString(),
                     UserId = review.UserId.ToString(),
                     Rating = review.Rating,
                     Type = review.Type.ToString(),
-                    CreatedAt = review.CreatedAt.ToString("o")
+                    CreatedAt = review.CreatedAt.ToString("o"),
+                    // Use target IDs already populated in review entity
+                    DeviceId = review.DeviceId?.ToString(),
+                    ComboId = review.ComboId?.ToString(),
+                    VehicleId = review.VehicleId?.ToString()
                 };
 
                 await _natsPublisher.PublishAsync("review.created", reviewEvent);

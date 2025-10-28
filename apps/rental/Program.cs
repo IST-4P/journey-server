@@ -1,18 +1,41 @@
 using rental.Data;
 using rental.Repository;
 using rental.Service;
+using rental.Nats;
 using Microsoft.EntityFrameworkCore;
 using System.Text.RegularExpressions;
 using Grpc.Net.Client;
+using NATS.Client.Core;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Load environment variables
 DotNetEnv.Env.Load();
+builder.WebHost.ConfigureKestrel(options =>
+{
+    options.ListenAnyIP(5007, listenOptions =>
+    {
+        listenOptions.Protocols = Microsoft.AspNetCore.Server.Kestrel.Core.HttpProtocols.Http2;
+    });
+});
+
 
 builder.Services.AddGrpc();
 builder.Services.AddAutoMapper(typeof(Program));
 builder.Services.AddScoped<RentalRepository>();
+
+// Add NATS
+var natsUrl = Environment.GetEnvironmentVariable("NATS_URL") ?? "nats://localhost:4222";
+Console.WriteLine($"[RentalService] Connecting to NATS at: {natsUrl}");
+
+builder.Services.AddSingleton(sp =>
+{
+    var opts = new NatsOpts { Url = natsUrl };
+    return new NatsConnection(opts);
+});
+
+builder.Services.AddSingleton<NatsPublisher>();
+builder.Services.AddSingleton<NatsStreamSetup>();
 
 // Build database connection string by expanding placeholders from environment variables
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection") ?? string.Empty;
@@ -47,7 +70,17 @@ builder.Services.AddGrpcClient<Device.DeviceService.DeviceServiceClient>(options
 
 var app = builder.Build();
 
-
+// Setup NATS streams
+try
+{
+    var natsSetup = app.Services.GetRequiredService<NatsStreamSetup>();
+    await natsSetup.SetupStreamsAsync();
+    Console.WriteLine("[RentalService] NATS streams setup completed");
+}
+catch (Exception ex)
+{
+    Console.WriteLine($"[RentalService] Failed to setup NATS streams: {ex.Message}");
+}
 
 var grpcUrl = Environment.GetEnvironmentVariable("RENTAL_GRPC_SERVICE_URL") ?? "0.0.0.0:5007";
 Console.WriteLine($"Rental gRPC Service listening on: {grpcUrl}");

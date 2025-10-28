@@ -4,10 +4,6 @@
             "path": "."
         },
         {
-            "name": "Blog",
-            "path": "apps/Blog"
-        },
-        {
             "name": "device",
             "path": "apps/device"
         },
@@ -18,6 +14,10 @@
         {
             "name": "complaint",
             "path": "apps/complaint"
+        },
+        {
+            "name": "review",
+            "path": "apps/review"
         }
     ],
     "settings": {}

@@ -90,7 +90,7 @@ namespace Blog.Services
                     {
                         Id = blog.Id.ToString(),
                         Title = blog.Title,
-                        Type = blog.Region,
+                        Type = blog.Type,
                         Region = blog.Region,
                         Thumbnail = blog.Thumbnail,
                         CreatedAt = blog.CreatedAt.ToString("O"),
@@ -131,7 +131,7 @@ namespace Blog.Services
                     Id = createdBlog.Id.ToString(),
                     Title = createdBlog.Title,
                     Content = createdBlog.Content,
-                    Type = createdBlog. Type,
+                    Type = createdBlog.Type,
                     Region = createdBlog.Region,
                     Thumbnail = createdBlog.Thumbnail,
                     CreatedAt = createdBlog.CreateAt.ToString("O"),

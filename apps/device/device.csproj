@@ -18,9 +18,15 @@
     <PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="9.0.9" PrivateAssets="All" />
   <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="9.0.4" />
   <PackageReference Include="Swashbuckle.AspNetCore" Version="6.5.0" />
+  <PackageReference Include="NATS.Client.Core" Version="2.4.0" />
+  <PackageReference Include="NATS.Client.JetStream" Version="2.4.0" />
   </ItemGroup>
 
-  <ItemGroup>
-    <Protobuf Include="Protos\device.proto" GrpcServices="Server" />
-  </ItemGroup>
+<ItemGroup>
+  <Protobuf Include="..\..\libs\grpc\src\lib\proto\device.proto"
+            GrpcServices="Server"
+            ProtoRoot="..\..\libs\grpc\src\lib\proto" />
+
+</ItemGroup>
+
 </Project>

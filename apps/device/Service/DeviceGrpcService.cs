@@ -3,8 +3,8 @@ using device.Repository;
 using device.Model.Dto;
 using device.Model.Entities;
 using device.Interface;
-using Grpc.Core;
-using Device; // generated from Protos/device.proto
+using Grpc.Core; 
+using Device; 
 using DeviceEntity = device.Model.Entities.Device;
 
 namespace device.Service

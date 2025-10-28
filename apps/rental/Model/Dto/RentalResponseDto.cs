@@ -14,6 +14,7 @@ namespace rental.Model.Dto
         public DateTime StartDate { get; set; }
         public DateTime EndDate { get; set; }
         public DateTime CreatedAt { get; set; }
+        public ReviewSummaryDto? Review { get; set; } // Optional - rental may not have review
     }
 
     // Response for Admin - full info including UserId with enriched data
@@ -31,5 +32,6 @@ namespace rental.Model.Dto
         public DateTime StartDate { get; set; }
         public DateTime EndDate { get; set; }
         public DateTime CreatedAt { get; set; }
+        public ReviewSummaryDto? Review { get; set; } // Optional - rental may not have review
     }
 }

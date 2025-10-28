@@ -160,5 +160,26 @@ namespace device.Repository
                 Items = items
             };
         }
+
+        public async Task<bool> AddReviewIdAsync(Guid deviceId, Guid reviewId)
+        {
+            var device = await _dbContext.Set<DeviceEntity>().FirstOrDefaultAsync(x => x.Id == deviceId);
+            if (device == null) return false;
+
+            if (device.TotalReviewIds == null)
+            {
+                device.TotalReviewIds = new List<string>();
+            }
+
+            var reviewIdString = reviewId.ToString();
+            if (!device.TotalReviewIds.Contains(reviewIdString))
+            {
+                device.TotalReviewIds.Add(reviewIdString);
+                device.UpdateAt = DateTime.UtcNow;
+                await _dbContext.SaveChangesAsync();
+            }
+
+            return true;
+        }
     }
 }

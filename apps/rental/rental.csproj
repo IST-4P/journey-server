@@ -18,11 +18,24 @@
     <PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="9.0.9" PrivateAssets="All" />
   <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="9.0.4" />
   <PackageReference Include="Swashbuckle.AspNetCore" Version="6.5.0" />
+  <PackageReference Include="NATS.Client.Core" Version="2.4.0" />
+  <PackageReference Include="NATS.Client.JetStream" Version="2.4.0" />
   </ItemGroup>
 
-  <ItemGroup>
-    <Protobuf Include="Protos\rental.proto" GrpcServices="Server" />
-    <Protobuf Include="Protos\user.proto" GrpcServices="Client" />
-    <Protobuf Include="Protos\device.proto" GrpcServices="Client" />
-  </ItemGroup>
+<ItemGroup>
+  <Protobuf Include="..\..\libs\grpc\src\lib\proto\rental.proto"
+            GrpcServices="Server"
+            ProtoRoot="..\..\libs\grpc\src\lib\proto" />
+  <!-- External protos for gRPC clients -->
+  <Protobuf Include="..\..\libs\grpc\src\lib\proto\device.proto"
+            GrpcServices="Client"
+            ProtoRoot="..\..\libs\grpc\src\lib\proto" />
+  <Protobuf Include="..\..\libs\grpc\src\lib\proto\user.proto"
+            GrpcServices="Client"
+            ProtoRoot="..\..\libs\grpc\src\lib\proto" />
+</ItemGroup>
+
+  
+
+
 </Project>

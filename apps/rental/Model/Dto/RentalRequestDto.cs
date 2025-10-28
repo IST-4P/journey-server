@@ -1,5 +1,6 @@
 using System;
 using System.ComponentModel.DataAnnotations;
+using rental.Model.Entities;
 
 namespace rental.Model.Dto
 {
@@ -10,9 +11,7 @@ namespace rental.Model.Dto
         public Guid UserId { get; set; }
 
         [Required]
-        public Guid TargetId { get; set; } // DeviceId or ComboId
-
-        public bool IsCombo { get; set; } = false;
+        public List<RentalItemData> Items { get; set; } = new();
 
         [Required]
         public DateTime StartDate { get; set; }

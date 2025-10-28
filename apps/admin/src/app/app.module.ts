@@ -1,3 +1,4 @@
+import { AuthGuardModule } from '@hacmieu-journey/nestjs';
 import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { BlogModule } from './blog/blog.module';
@@ -10,6 +11,7 @@ import { VehicleModule } from './vehicle/vehicle.module';
 @Module({
   imports: [
     ConfigModule.forRoot({ isGlobal: true }),
+    AuthGuardModule,
     UserModule,
     NotificationModule,
     ChatModule,

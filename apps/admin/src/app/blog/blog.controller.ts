@@ -5,6 +5,7 @@ import {
   GetManyBlogsRequestDTO,
   UpdateBlogRequestDTO,
 } from '@domain/blog';
+import { Auth, AuthType } from '@hacmieu-journey/nestjs';
 import {
   Body,
   Controller,
@@ -24,6 +25,7 @@ export class BlogController {
   constructor(private readonly blogService: BlogService) {}
 
   @Get()
+  @Auth([AuthType.Admin])
   getManyBlogs(@Query() query: GetManyBlogsRequestDTO) {
     return this.blogService.getManyBlogs(query);
   }

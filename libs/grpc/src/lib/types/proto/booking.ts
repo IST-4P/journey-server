@@ -29,16 +29,19 @@ export interface GetBookingResponse {
   pickupAddress: string;
   pickupLat: number;
   pickupLng: number;
+  vehicleFeeHour: number;
   rentalFee: number;
   insuranceFee: number;
   vat: number;
   discount: number;
   deposit: number;
+  collateral: number;
   totalAmount: number;
   refundAmount: number;
   penaltyAmount: number;
+  damageAmount: number;
+  overtimeAmount: number;
   paymentStatus: string;
-  paymentId?: string | undefined;
   paidAt?: string | undefined;
   notes?: string | undefined;
   cancelReason?: string | undefined;
@@ -76,6 +79,7 @@ export interface CreateBookingRequest {
   pickupAddress: string;
   pickupLat: number;
   pickupLng: number;
+  vehicleFeeHour: number;
   rentalFee: number;
   insuranceFee: number;
   vat: number;
@@ -88,6 +92,7 @@ export interface CreateBookingRequest {
 export interface CancelBookingRequest {
   id: string;
   cancelReason: string;
+  cancelDate?: string | undefined;
 }
 
 /**
@@ -150,11 +155,21 @@ export interface CreateCheckInOutRequest {
   checkDate: string;
 }
 
+/** UpdateCheckOutRequest */
+export interface UpdateCheckOutRequest {
+  id: string;
+  mileage?: number | undefined;
+  fuelLevel?: number | undefined;
+  damageNotes?: string | undefined;
+  damageImages: string[];
+  penaltyAmount?: number | undefined;
+  damageAmount?: number | undefined;
+  overtimeAmount?: number | undefined;
+}
+
 /** VerifyCheckInOut */
 export interface VerifyCheckInOutRequest {
   id: string;
-  verified: boolean;
-  verifiedAt: string;
 }
 
 /**
@@ -200,16 +215,22 @@ export interface CreateExtensionRequest {
   requestedBy: string;
   originalEndTime: string;
   newEndTime: string;
-  additionalHours: number;
-  additionalAmount: number;
   notes?: string | undefined;
 }
 
 /** UpdateStatusExtension */
 export interface UpdateStatusExtensionRequest {
   id: string;
-  status: string;
   rejectionReason?: string | undefined;
+}
+
+/** UpdateExtension */
+export interface UpdateExtensionRequest {
+  id: string;
+  newEndTime: string;
+  additionalHours: number;
+  additionalAmount: number;
+  notes?: string | undefined;
 }
 
 /**
@@ -267,6 +288,10 @@ export interface BookingServiceClient {
 
   checkIn(request: CreateCheckInOutRequest): Observable<GetCheckInOutResponse>;
 
+  checkOut(request: CreateCheckInOutRequest): Observable<GetCheckInOutResponse>;
+
+  updateCheckOut(request: UpdateCheckOutRequest): Observable<GetCheckInOutResponse>;
+
   verifyCheckInOut(request: VerifyCheckInOutRequest): Observable<GetCheckInOutResponse>;
 
   getManyExtensions(request: GetManyExtensionsRequest): Observable<GetManyExtensionsResponse>;
@@ -275,7 +300,11 @@ export interface BookingServiceClient {
 
   createExtension(request: CreateExtensionRequest): Observable<GetExtensionResponse>;
 
-  updateStatusExtension(request: UpdateStatusExtensionRequest): Observable<GetExtensionResponse>;
+  approveExtension(request: UpdateStatusExtensionRequest): Observable<GetExtensionResponse>;
+
+  rejectExtension(request: UpdateStatusExtensionRequest): Observable<GetExtensionResponse>;
+
+  updateExtension(request: UpdateExtensionRequest): Observable<GetExtensionResponse>;
 
   getManyHistories(request: GetManyHistoriesRequest): Observable<GetManyHistoriesResponse>;
 
@@ -313,6 +342,14 @@ export interface BookingServiceController {
     request: CreateCheckInOutRequest,
   ): Promise<GetCheckInOutResponse> | Observable<GetCheckInOutResponse> | GetCheckInOutResponse;
 
+  checkOut(
+    request: CreateCheckInOutRequest,
+  ): Promise<GetCheckInOutResponse> | Observable<GetCheckInOutResponse> | GetCheckInOutResponse;
+
+  updateCheckOut(
+    request: UpdateCheckOutRequest,
+  ): Promise<GetCheckInOutResponse> | Observable<GetCheckInOutResponse> | GetCheckInOutResponse;
+
   verifyCheckInOut(
     request: VerifyCheckInOutRequest,
   ): Promise<GetCheckInOutResponse> | Observable<GetCheckInOutResponse> | GetCheckInOutResponse;
@@ -329,8 +366,16 @@ export interface BookingServiceController {
     request: CreateExtensionRequest,
   ): Promise<GetExtensionResponse> | Observable<GetExtensionResponse> | GetExtensionResponse;
 
-  updateStatusExtension(
+  approveExtension(
     request: UpdateStatusExtensionRequest,
+  ): Promise<GetExtensionResponse> | Observable<GetExtensionResponse> | GetExtensionResponse;
+
+  rejectExtension(
+    request: UpdateStatusExtensionRequest,
+  ): Promise<GetExtensionResponse> | Observable<GetExtensionResponse> | GetExtensionResponse;
+
+  updateExtension(
+    request: UpdateExtensionRequest,
   ): Promise<GetExtensionResponse> | Observable<GetExtensionResponse> | GetExtensionResponse;
 
   getManyHistories(
@@ -356,11 +401,15 @@ export function BookingServiceControllerMethods() {
       "getManyCheckInOuts",
       "getCheckInOut",
       "checkIn",
+      "checkOut",
+      "updateCheckOut",
       "verifyCheckInOut",
       "getManyExtensions",
       "getExtension",
       "createExtension",
-      "updateStatusExtension",
+      "approveExtension",
+      "rejectExtension",
+      "updateExtension",
       "getManyHistories",
       "getHistory",
       "createHistory",

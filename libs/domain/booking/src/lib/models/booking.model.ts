@@ -34,6 +34,7 @@ export const CreateBookingRequestSchema = BookingValidatorSchema.pick({
   pickupLat: true,
   pickupLng: true,
 
+  vehicleFeeHour: true,
   rentalFee: true,
   insuranceFee: true,
   vat: true,
@@ -46,6 +47,8 @@ export const CreateBookingRequestSchema = BookingValidatorSchema.pick({
 export const CancelBookingRequestSchema = BookingValidatorSchema.pick({
   id: true,
   cancelReason: true,
+}).extend({
+  cancelDate: z.coerce.date(),
 });
 
 export const CancelBookingResponseSchema = GetBookingResponseSchema;

@@ -53,6 +53,7 @@ export class BookingService implements OnModuleInit {
     if (vehicle.status !== 'ACTIVE') {
       throw new Error('Vehicle is not ACTIVE for booking');
     }
+    data.vehicleFeeHour = vehicle.pricePerHour;
     return lastValueFrom(this.bookingService.createBooking(data));
   }
 
@@ -80,6 +81,12 @@ export class BookingService implements OnModuleInit {
     data: BookingProto.CreateCheckInOutRequest
   ): Promise<BookingProto.GetCheckInOutResponse> {
     return lastValueFrom(this.bookingService.checkIn(data));
+  }
+
+  checkOut(
+    data: BookingProto.CreateCheckInOutRequest
+  ): Promise<BookingProto.GetCheckInOutResponse> {
+    return lastValueFrom(this.bookingService.checkOut(data));
   }
 
   //================= Extensions =================//

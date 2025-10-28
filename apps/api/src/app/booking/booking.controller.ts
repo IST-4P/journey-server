@@ -35,7 +35,7 @@ export class BookingController {
 
   @Post()
   createBooking(
-    @Body() body: CreateBookingRequestDTO,
+    @Body() body: Omit<CreateBookingRequestDTO, 'userId'>,
     @ActiveUser('userId') userId: string
   ) {
     return this.bookingService.createBooking({
@@ -58,7 +58,7 @@ export class BookingController {
   }
 }
 
-@Controller('check-in-out')
+@Controller('check')
 export class CheckInOutController {
   constructor(private readonly bookingService: BookingService) {}
 
@@ -72,12 +72,24 @@ export class CheckInOutController {
     return this.bookingService.getCheckInOut(params);
   }
 
-  @Post()
+  @Post('check-in')
   checkIn(
     @Body() body: CreateCheckInOutRequestDTO,
     @ActiveUser('userId') userId: string
   ) {
     return this.bookingService.checkIn({
+      ...body,
+      checkDate: body.checkDate.toISOString(),
+      userId,
+    });
+  }
+
+  @Post('check-out')
+  checkOut(
+    @Body() body: CreateCheckInOutRequestDTO,
+    @ActiveUser('userId') userId: string
+  ) {
+    return this.bookingService.checkOut({
       ...body,
       checkDate: body.checkDate.toISOString(),
       userId,

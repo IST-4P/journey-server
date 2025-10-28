@@ -35,19 +35,6 @@ export class BookingService implements OnModuleInit {
   ): Promise<BookingProto.GetBookingResponse> {
     return lastValueFrom(this.bookingService.getBooking(data));
   }
-
-  createBooking(
-    data: BookingProto.CreateBookingRequest
-  ): Promise<BookingProto.GetBookingResponse> {
-    return lastValueFrom(this.bookingService.createBooking(data));
-  }
-
-  cancelBooking(
-    data: BookingProto.CancelBookingRequest
-  ): Promise<BookingProto.GetBookingResponse> {
-    return lastValueFrom(this.bookingService.cancelBooking(data));
-  }
-
   //================= CheckInOuts =================//
 
   getManyCheckInOuts(
@@ -62,10 +49,10 @@ export class BookingService implements OnModuleInit {
     return lastValueFrom(this.bookingService.getCheckInOut(data));
   }
 
-  createCheckInOut(
-    data: BookingProto.CreateCheckInOutRequest
+  updateCheckOut(
+    data: BookingProto.UpdateCheckOutRequest
   ): Promise<BookingProto.GetCheckInOutResponse> {
-    return lastValueFrom(this.bookingService.checkIn(data));
+    return lastValueFrom(this.bookingService.updateCheckOut(data));
   }
 
   verifyCheckInOut(
@@ -88,16 +75,22 @@ export class BookingService implements OnModuleInit {
     return lastValueFrom(this.bookingService.getExtension(data));
   }
 
-  createExtension(
-    data: BookingProto.CreateExtensionRequest
-  ): Promise<BookingProto.GetExtensionResponse> {
-    return lastValueFrom(this.bookingService.createExtension(data));
-  }
-
-  updateStatusExtension(
+  approveExtension(
     data: BookingProto.UpdateStatusExtensionRequest
   ): Promise<BookingProto.GetExtensionResponse> {
-    return lastValueFrom(this.bookingService.updateStatusExtension(data));
+    return lastValueFrom(this.bookingService.approveExtension(data));
+  }
+
+  rejectExtension(
+    data: BookingProto.UpdateStatusExtensionRequest
+  ): Promise<BookingProto.GetExtensionResponse> {
+    return lastValueFrom(this.bookingService.rejectExtension(data));
+  }
+
+  UpdateExtension(
+    data: BookingProto.UpdateExtensionRequest
+  ): Promise<BookingProto.GetExtensionResponse> {
+    return lastValueFrom(this.bookingService.updateExtension(data));
   }
 
   //================= Histories =================//
@@ -112,11 +105,5 @@ export class BookingService implements OnModuleInit {
     data: BookingProto.GetHistoryRequest
   ): Promise<BookingProto.GetHistoryResponse> {
     return lastValueFrom(this.bookingService.getHistory(data));
-  }
-
-  createHistory(
-    data: BookingProto.CreateHistoryRequest
-  ): Promise<BookingProto.GetHistoryResponse> {
-    return lastValueFrom(this.bookingService.createHistory(data));
   }
 }

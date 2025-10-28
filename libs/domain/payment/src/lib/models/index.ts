@@ -1,6 +1,6 @@
 import { PaginationQuerySchema } from '@domain/shared';
 import { z } from 'zod';
-import { PaymentValidator } from '../validators';
+import { PaymentValidator, RefundValidator } from '../validators';
 
 export const GetManyPaymentsRequest = PaymentValidator.pick({
   userId: true,
@@ -53,6 +53,41 @@ export const UpdateStatusPaymentRequest = PaymentValidator.pick({
   status: true,
 });
 
+export const GetRefundRequest = RefundValidator.pick({
+  id: true,
+});
+
+export const GetRefundResponse = RefundValidator;
+
+export const GetManyRefundsRequest = RefundValidator.pick({
+  status: true,
+})
+  .partial()
+  .extend(PaginationQuerySchema.shape);
+
+export const GetManyRefundsResponse = z.object({
+  refunds: z.array(RefundValidator),
+  page: z.number().int(),
+  limit: z.number().int(),
+  totalItems: z.number().int(),
+  totalPages: z.number().int(),
+});
+
+export const UpdateRefundStatusRequest = RefundValidator.pick({
+  id: true,
+  status: true,
+});
+
+export const CreateRefundRequest = RefundValidator.pick({
+  id: true,
+  userId: true,
+  paymentId: true,
+  bookingId: true,
+  rentalId: true,
+  amount: true,
+  penaltyAmount: true,
+});
+
 export type GetManyPaymentsRequest = z.infer<typeof GetManyPaymentsRequest>;
 export type GetManyPaymentsResponse = z.infer<typeof GetManyPaymentsResponse>;
 export type GetPaymentRequest = z.infer<typeof GetPaymentRequest>;
@@ -62,3 +97,11 @@ export type UpdateStatusPaymentRequest = z.infer<
   typeof UpdateStatusPaymentRequest
 >;
 export type WebhookPaymentRequest = z.infer<typeof WebhookPaymentRequest>;
+export type GetRefundRequest = z.infer<typeof GetRefundRequest>;
+export type GetRefundResponse = z.infer<typeof GetRefundResponse>;
+export type GetManyRefundsRequest = z.infer<typeof GetManyRefundsRequest>;
+export type GetManyRefundsResponse = z.infer<typeof GetManyRefundsResponse>;
+export type UpdateRefundStatusRequest = z.infer<
+  typeof UpdateRefundStatusRequest
+>;
+export type CreateRefundRequest = z.infer<typeof CreateRefundRequest>;

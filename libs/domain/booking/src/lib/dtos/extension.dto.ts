@@ -5,7 +5,7 @@ import {
   GetExtensionResponseSchema,
   GetManyExtensionsRequestSchema,
   GetManyExtensionsResponseSchema,
-  UpdateStatusExtensionRequestSchema,
+  UpdateExtensionRequestSchema,
 } from '../models';
 
 export class GetManyExtensionsRequestDTO extends createZodDto(
@@ -23,6 +23,6 @@ export class GetExtensionResponseDTO extends createZodDto(
 export class CreateExtensionRequestDTO extends createZodDto(
   CreateExtensionRequestSchema
 ) {}
-export class UpdateStatusExtensionRequestDTO extends createZodDto(
-  UpdateStatusExtensionRequestSchema.omit({ id: true })
+export class UpdateExtensionRequestDTO extends createZodDto(
+  UpdateExtensionRequestSchema
 ) {}

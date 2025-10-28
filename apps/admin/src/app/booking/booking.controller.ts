@@ -1,9 +1,4 @@
 import {
-  CancelBookingRequestDTO,
-  CreateBookingAdminRequestDTO,
-  CreateCheckInOutRequestDTO,
-  CreateExtensionRequestDTO,
-  CreateHistoryRequestDTO,
   GetBookingRequestDTO,
   GetCheckInOutRequestDTO,
   GetExtensionRequestDTO,
@@ -12,10 +7,11 @@ import {
   GetManyCheckInOutsRequestDTO,
   GetManyExtensionsRequestDTO,
   GetManyHistoriesRequestDTO,
-  UpdateStatusExtensionRequestDTO,
+  UpdateCheckOutRequestDTO,
+  UpdateExtensionRequestDTO,
   VerifyCheckInOutRequestDTO,
 } from '@domain/booking';
-import { Body, Controller, Get, Param, Post, Put, Query } from '@nestjs/common';
+import { Body, Controller, Get, Param, Put, Query } from '@nestjs/common';
 import { BookingService } from './booking.service';
 
 @Controller('booking')
@@ -31,30 +27,9 @@ export class BookingController {
   getBooking(@Param() params: GetBookingRequestDTO) {
     return this.bookingService.getBooking(params);
   }
-
-  @Post()
-  createBooking(@Body() body: CreateBookingAdminRequestDTO) {
-    return this.bookingService.createBooking({
-      ...body,
-      startTime: body.startTime.toISOString(),
-      endTime: body.endTime.toISOString(),
-      notes: body.notes || undefined,
-    });
-  }
-
-  @Put('cancel/:id')
-  cancelBooking(
-    @Body() body: CancelBookingRequestDTO,
-    @Param('id') id: string
-  ) {
-    return this.bookingService.cancelBooking({
-      id,
-      cancelReason: body.cancelReason || '',
-    });
-  }
 }
 
-@Controller('check-in-out')
+@Controller('check')
 export class CheckInOutController {
   constructor(private readonly bookingService: BookingService) {}
 
@@ -68,23 +43,21 @@ export class CheckInOutController {
     return this.bookingService.getCheckInOut(params);
   }
 
-  @Post()
-  createCheckInOut(@Body() body: CreateCheckInOutRequestDTO) {
-    return this.bookingService.createCheckInOut({
+  @Put('checkout/:id')
+  updateCheckOut(
+    @Body() body: UpdateCheckOutRequestDTO,
+    @Param('id') id: string
+  ) {
+    return this.bookingService.updateCheckOut({
       ...body,
-      checkDate: body.checkDate.toISOString(),
+      id,
     });
   }
 
   @Put('verify/:id')
-  verifyCheckInOut(
-    @Body() body: Omit<VerifyCheckInOutRequestDTO, 'id'>,
-    @Param('id') id: string
-  ) {
+  verifyCheckInOut(@Param() params: VerifyCheckInOutRequestDTO) {
     return this.bookingService.verifyCheckInOut({
-      id,
-      verified: body.verified,
-      verifiedAt: body.verifiedAt?.toISOString() || '',
+      id: params.id,
     });
   }
 }
@@ -103,26 +76,14 @@ export class ExtensionController {
     return this.bookingService.getExtension(params);
   }
 
-  @Post()
-  createExtension(@Body() body: CreateExtensionRequestDTO) {
-    return this.bookingService.createExtension({
-      ...body,
-      originalEndTime: body.originalEndTime.toISOString(),
-      newEndTime: body.newEndTime.toISOString(),
-      notes: body.notes || undefined,
-    });
+  @Put('approve/:id')
+  approveExtension(@Param() params: UpdateExtensionRequestDTO) {
+    return this.bookingService.approveExtension(params);
   }
 
-  @Put('status/:id')
-  updateStatusExtension(
-    @Body() body: UpdateStatusExtensionRequestDTO,
-    @Param('id') id: string
-  ) {
-    return this.bookingService.updateStatusExtension({
-      id,
-      status: body.status,
-      rejectionReason: body.rejectionReason || undefined,
-    });
+  @Put('reject/:id')
+  rejectExtension(@Param() params: UpdateExtensionRequestDTO) {
+    return this.bookingService.rejectExtension(params);
   }
 }
 
@@ -138,13 +99,5 @@ export class HistoryController {
   @Get(':id')
   getHistory(@Param() params: GetHistoryRequestDTO) {
     return this.bookingService.getHistory(params);
-  }
-
-  @Post()
-  createHistory(@Body() body: CreateHistoryRequestDTO) {
-    return this.bookingService.createHistory({
-      ...body,
-      notes: body.notes || undefined,
-    });
   }
 }

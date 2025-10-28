@@ -15,17 +15,21 @@ export const BookingValidatorSchema = z.object({
   pickupLat: z.number(),
   pickupLng: z.number(),
 
+  vehicleFeeHour: z.number().int(),
   rentalFee: z.number().int(),
   insuranceFee: z.number().int(),
   vat: z.number().int(),
   discount: z.number().int(),
   deposit: z.number().int(),
+  collateral: z.number().int(),
   totalAmount: z.number().int(),
   refundAmount: z.number().int(),
+
   penaltyAmount: z.number().int(),
+  damageAmount: z.number().int(),
+  overtimeAmount: z.number().int(),
 
   paymentStatus: PaymentStatusEnum,
-  paymentId: z.string().uuid().nullable(),
   paidAt: z.coerce.date().nullable(),
 
   notes: z.string().nullable(),

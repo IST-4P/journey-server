@@ -2,6 +2,7 @@ import {
   CreateExtensionRequest,
   GetExtensionRequest,
   GetManyExtensionsRequest,
+  UpdateExtensionRequest,
   UpdateStatusExtensionRequest,
 } from '@domain/booking';
 import { Injectable } from '@nestjs/common';
@@ -32,7 +33,15 @@ export class ExtensionService {
     return this.bookingRepository.createExtension(data);
   }
 
-  updateStatusExtension(data: UpdateStatusExtensionRequest) {
-    return this.bookingRepository.updateStatusExtension(data);
+  approveExtension(data: UpdateStatusExtensionRequest) {
+    return this.bookingRepository.approveExtension(data);
+  }
+
+  rejectExtension(data: UpdateStatusExtensionRequest) {
+    return this.bookingRepository.rejectExtension(data);
+  }
+
+  updateExtension(data: UpdateExtensionRequest) {
+    return this.bookingRepository.updateExtension(data);
   }
 }

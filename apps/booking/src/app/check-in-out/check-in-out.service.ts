@@ -2,6 +2,7 @@ import {
   CreateCheckInOutRequest,
   GetCheckInOutRequest,
   GetManyCheckInOutsRequest,
+  UpdateCheckOutRequest,
   VerifyCheckInOutRequest,
 } from '@domain/booking';
 import { Injectable } from '@nestjs/common';
@@ -34,7 +35,19 @@ export class CheckInOutService {
     return this.checkInOutRepository.checkIn(data);
   }
 
-  verifyCheckInOut(data: VerifyCheckInOutRequest) {
+  async checkOut(data: CreateCheckInOutRequest) {
+    return this.checkInOutRepository.checkOut(data);
+  }
+
+  async updateCheckOut(data: UpdateCheckOutRequest) {
+    const checkOut = await this.checkInOutRepository.getCheckInOut(data);
+    if (!checkOut) {
+      throw CheckInOutNotFoundException;
+    }
+    return this.checkInOutRepository.updateCheckOut(data);
+  }
+
+  async verifyCheckInOut(data: VerifyCheckInOutRequest) {
     return this.checkInOutRepository.verifyCheckInOut(data);
   }
 }

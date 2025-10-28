@@ -10,6 +10,7 @@ import {
 } from '@domain/booking';
 import { NatsClient } from '@hacmieu-journey/nats';
 import { Injectable } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
 import { PrismaService } from '../prisma/prisma.service';
 import { BookingNotFoundException } from './booking.error';
 
@@ -17,7 +18,8 @@ import { BookingNotFoundException } from './booking.error';
 export class BookingRepository {
   constructor(
     private readonly prismaService: PrismaService,
-    private readonly natsClient: NatsClient
+    private readonly natsClient: NatsClient,
+    private readonly configService: ConfigService
   ) {}
 
   private calculateDuration(startTime: Date, endTime: Date): number {
@@ -30,6 +32,29 @@ export class BookingRepository {
     const diffHours = diffMs / (1000 * 60 * 60);
 
     return diffHours;
+  }
+
+  private calculateRefundPercentage(cancelDate: Date, startDate: Date): number {
+    // Chuyển đổi sang Date object nếu là string
+    const cancel = new Date(cancelDate);
+    const start = new Date(startDate);
+
+    // Reset time về đầu ngày để so sánh chính xác số ngày
+    cancel.setHours(0, 0, 0, 0);
+    start.setHours(0, 0, 0, 0);
+
+    // Tính số ngày chênh lệch
+    const diffTime = start.getTime() - cancel.getTime();
+    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+
+    // Áp dụng chính sách hoàn tiền
+    if (diffDays > 10) {
+      return 100; // Hoàn 100% nếu hủy trước > 10 ngày
+    } else if (diffDays > 5) {
+      return 30; // Hoàn 30% nếu hủy trước > 5 ngày
+    } else {
+      return 0; // Không hoàn tiền nếu hủy trong vòng 5 ngày
+    }
   }
 
   async getManyBookings(data: GetManyBookingsRequest) {
@@ -88,12 +113,16 @@ export class BookingRepository {
       data.discount +
       data.deposit;
 
+    const collateral =
+      this.configService.get<number>('BOOKING_COLLATERAL') || 0;
+
     return this.prismaService.$transaction(async (tx) => {
       const createBooking = await tx.booking.create({
         data: {
           ...data,
           duration: this.calculateDuration(data.startTime, data.endTime),
           totalAmount,
+          collateral,
         },
       });
 
@@ -106,13 +135,13 @@ export class BookingRepository {
       });
 
       const createPayment$ = this.natsClient.publish(
-        'journey.events.booking-created',
+        'journey.events.payment-created',
         {
           id: createBooking.id,
           userId: createBooking.userId,
           type: 'VEHICLE',
           bookingId: createBooking.id,
-          totalAmount: createBooking.totalAmount,
+          totalAmount: createBooking.collateral,
         }
       );
 
@@ -127,23 +156,76 @@ export class BookingRepository {
   }
 
   async cancelBooking(data: CancelBookingRequest) {
-    return this.prismaService.booking
-      .update({
+    return this.prismaService.$transaction(async (tx) => {
+      const booking = await tx.booking.findUnique({
+        where: {
+          id: data.id,
+        },
+        include: {
+          checkIns: {
+            where: {
+              type: 'CHECK_IN',
+            },
+          },
+        },
+      });
+      if (!booking) {
+        throw BookingNotFoundException;
+      }
+      if (booking.checkIns.length > 0) {
+        throw new Error('Cannot cancel booking with existing check-ins');
+      }
+      const refundPercentage = this.calculateRefundPercentage(
+        data.cancelDate,
+        booking.startTime
+      );
+      const refundAmount = (booking.deposit * refundPercentage) / 100;
+
+      const updateStatusBooking$ = tx.booking.update({
         where: {
           id: data.id,
         },
         data: {
           status: BookingStatusValues.CANCELLED,
           cancelReason: data.cancelReason,
+          refundAmount,
         },
-      })
-      .then((booking) => {
-        return {
-          ...booking,
-          pickupLat: booking.pickupLat.toNumber(),
-          pickupLng: booking.pickupLng.toNumber(),
-        };
       });
+
+      const createBookingHistory$ = tx.bookingHistory.create({
+        data: {
+          bookingId: data.id,
+          action: HistoryActionValues.CANCELLED,
+          notes: `Booking cancelled. Refund percentage: ${refundPercentage}%. Refund amount: ${refundAmount}`,
+        },
+      });
+
+      const createRefund$ = this.natsClient.publish(
+        'journey.events.refund-created',
+        {
+          id: data.id,
+          userId: booking.userId,
+          bookingId: booking.id,
+          penaltyAmount: 0,
+          damageAmount: 0,
+          overtimeAmount: 0,
+          collateral: 0,
+          deposit: refundAmount,
+        }
+      );
+
+      const [cancelBooking] = await Promise.all([
+        updateStatusBooking$,
+        createBookingHistory$,
+        createRefund$,
+      ]);
+
+      return {
+        ...cancelBooking,
+        pickupLat: cancelBooking.pickupLat.toNumber(),
+        pickupLng: cancelBooking.pickupLng.toNumber(),
+      };
+    });
   }
 
   async updateStatusBooking(data: UpdateStatusBookingRequest) {
@@ -161,7 +243,7 @@ export class BookingRepository {
       });
   }
 
-  async bookingPaid(data: { id: string }) {
+  async bookingDepositPaid(data: { id: string }) {
     await this.prismaService.$transaction(async (tx) => {
       const booking = await tx.booking.findUnique({
         where: {
@@ -176,7 +258,7 @@ export class BookingRepository {
       const updateStatusBooking$ = tx.booking.update({
         where: { id: data.id },
         data: {
-          status: BookingStatusValues.PAID,
+          status: BookingStatusValues.DEPOSIT_PAID,
           paymentStatus: PaymentStatusValues.PAID,
         },
       });
@@ -184,8 +266,8 @@ export class BookingRepository {
       const createBookingHistory$ = tx.bookingHistory.create({
         data: {
           bookingId: data.id,
-          action: HistoryActionValues.PAID,
-          notes: 'Booking paid successfully',
+          action: HistoryActionValues.DEPOSIT_PAID,
+          notes: 'Booking deposit paid successfully',
         },
       });
 

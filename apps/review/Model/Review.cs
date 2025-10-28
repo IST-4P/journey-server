@@ -7,6 +7,9 @@ namespace review.Model
         [Key]
         public Guid Id { get; set; }
 
+        [Required]
+        public Guid BookingId { get; set; }
+
         public Guid? VehicleId { get; set; }
         public Guid? DeviceId { get; set; }
         public Guid? ComboId { get; set; }
@@ -29,7 +32,7 @@ namespace review.Model
         [MaxLength(2000)]
         public string Content { get; set; } = string.Empty;
 
-        public List<string> Images { get; set; } = new List<string>();
+        public List<string>? Images { get; set; }
 
         public DateTime CreatedAt { get; set; }
         public DateTime UpdatedAt { get; set; }

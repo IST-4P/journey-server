@@ -27,6 +27,7 @@ namespace review.Services
             {
                 var dto = new CreateReviewDto
                 {
+                    BookingId = Guid.Parse(request.BookingId),
                     UserId = Guid.Parse(request.UserId),
                     VehicleId = string.IsNullOrEmpty(request.VehicleId) ? null : Guid.Parse(request.VehicleId),
                     DeviceId = string.IsNullOrEmpty(request.DeviceId) ? null : Guid.Parse(request.DeviceId),
@@ -35,7 +36,7 @@ namespace review.Services
                     Title = request.Title,
                     Type = MapProtoTypeToReviewType(request.Type),
                     Content = request.Content,
-                    Images = request.Images.ToList()
+                    Images = request.Images.Count > 0 ? request.Images.ToList() : null
                 };
 
                 var review = await _reviewService.CreateReviewAsync(dto);
@@ -69,7 +70,7 @@ namespace review.Services
                     Rating = request.Rating,
                     Title = request.Title,
                     Content = request.Content,
-                    Images = request.Images.ToList()
+                    Images = request.Images.Count > 0 ? request.Images.ToList() : null
                 };
 
                 var review = await _reviewService.UpdateReviewAsync(dto);

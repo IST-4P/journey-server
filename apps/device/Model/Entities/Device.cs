@@ -13,6 +13,7 @@ namespace device.Model.Entities
         public int? Quantity { get; set; }
         public string? Status { get; set; }
         public List<string>? Images { get; set; }
+        public List<string>? TotalReviewIds { get; set; }
 
         public DateTime CreateAt { get; set; } = DateTime.UtcNow;
         public DateTime UpdateAt { get; set; } = DateTime.UtcNow;
@@ -62,12 +63,12 @@ namespace device.Model.Entities
 
         public Guid ComboId { get; set; }
         public Combo? Combo { get; set; }
-        
+
         public int Quantity { get; set; } = 1;
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
     }
-    
-        public class ApiResponse
+
+    public class ApiResponse
     {
         public string Message { get; set; } = string.Empty;
     }

@@ -43,53 +43,56 @@ enum SortOrder {
 // Review entity 
 message Review { 
   string id = 1;
-  string vehicle_id = 2;
-  string device_id = 3;
-  string combo_id = 4;
-  string user_id = 5;
+  string booking_id = 2;
+  string vehicle_id = 3;
+  string device_id = 4;
+  string combo_id = 5;
+  string user_id = 6;
+
+  int32 rating = 7;
+  string title = 8;
+  ReviewType type = 9;
+  string content = 10;
+  repeated string images = 11;
+
+  string created_at = 12;
+  string updated_at = 13;
+
+  int32 update_count = 14;
+}
+
+// Review summary (no content/images)
+message ReviewSummary { 
+  string id = 1;
+  string booking_id = 2;
+  string vehicle_id = 3;
+  string device_id = 4;
+  string combo_id = 5;
+  string user_id = 6;
+
+  int32 rating = 7;
+  string title = 8;
+  ReviewType type = 9;
+
+  string created_at = 10;
+  string updated_at = 11;
+
+  int32 update_count = 12;
+}
+
+// Request messages
+message CreateReviewRequest {
+  string booking_id = 1;
+  string user_id = 2; 
+  string vehicle_id = 3;
+  string device_id = 4;
+  string combo_id = 5;
 
   int32 rating = 6;
   string title = 7;
   ReviewType type = 8;
   string content = 9;
   repeated string images = 10;
-
-  string created_at = 11;
-  string updated_at = 12;
-
-  int32 update_count = 13;
-}
-
-// Review summary (no content/images)
-message ReviewSummary { 
-  string id = 1;
-  string vehicle_id = 2;
-  string device_id = 3;
-  string combo_id = 4;
-  string user_id = 5;
-
-  int32 rating = 6;
-  string title = 7;
-  ReviewType type = 8;
-
-  string created_at = 9;
-  string updated_at = 10;
-
-  int32 update_count = 11;
-}
-
-// Request messages
-message CreateReviewRequest {
-  string user_id = 1; 
-  string vehicle_id = 2;
-  string device_id = 3;
-  string combo_id = 4;
-
-  int32 rating = 5;
-  string title = 6;
-  ReviewType type = 7;
-  string content = 8;
-  repeated string images = 9;
 }
 
 message UpdateReviewRequest {

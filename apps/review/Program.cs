@@ -3,8 +3,10 @@ using review.Data;
 using review.Interface;
 using review.Repository;
 using review.Services;
+using review.Nats;
 using DotNetEnv;
 using System.Text.RegularExpressions;
+using NATS.Client.Core;
 
 // Load environment variables
 Env.Load();
@@ -25,18 +27,31 @@ builder.Services.AddGrpc();
 // Add AutoMapper
 builder.Services.AddAutoMapper(typeof(Program));
 
+// Add NATS
+var natsUrl = Environment.GetEnvironmentVariable("NATS_URL") ?? "nats://localhost:4222";
+Console.WriteLine($"[ReviewService] Connecting to NATS at: {natsUrl}");
+
+builder.Services.AddSingleton(sp =>
+{
+    var opts = new NatsOpts { Url = natsUrl };
+    return new NatsConnection(opts);
+});
+
+builder.Services.AddSingleton<NatsPublisher>();
+builder.Services.AddSingleton<NatsStreamSetup>();
+
 // Add DbContext
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection") ?? string.Empty;
 connectionString = connectionString
     .Replace("${DB_HOST}", Environment.GetEnvironmentVariable("DB_HOST") ?? "localhost")
     .Replace("${DB_PORT}", Environment.GetEnvironmentVariable("DB_PORT") ?? "5432")
-    .Replace("${DB_NAME_COMPLAINT}", Environment.GetEnvironmentVariable("DB_NAME_COMPLAINT") ?? "journey-complaint")
+    .Replace("${DB_NAME_REVIEW}", Environment.GetEnvironmentVariable("DB_NAME_REVIEW") ?? "journey-review")
     .Replace("${DB_USERNAME}", Environment.GetEnvironmentVariable("DB_USERNAME") ?? "postgres")
     .Replace("${DB_PASSWORD}", Environment.GetEnvironmentVariable("DB_PASSWORD") ?? "");
 
 // Log DB connection info without leaking secrets
 var maskedConnectionString = Regex.Replace(connectionString, "(?i)(Password|Pwd)=[^;]*", "$1=****");
-Console.WriteLine($"[ComplaintService] DB: {maskedConnectionString}");
+Console.WriteLine($"[ReviewService] DB: {maskedConnectionString}");
 
 
 builder.Services.AddDbContext<ReviewDbContext>(options =>
@@ -46,18 +61,22 @@ builder.Services.AddScoped<IReviewRepository, ReviewRepository>();
 
 builder.Services.AddScoped<IReviewService, ReviewService>();
 
-var deviceServiceUrl = Environment.GetEnvironmentVariable("DEVICE_GRPC_URL") ?? "http://localhost:5006";
-
-builder.Services.AddGrpcClient<Device.DeviceService.DeviceServiceClient>(options =>
-{
-    options.Address = new Uri(deviceServiceUrl);
-});
-
-
 builder.Logging.ClearProviders();
 builder.Logging.AddConsole();
 
 var app = builder.Build();
+
+// Setup NATS streams
+try
+{
+    var natsSetup = app.Services.GetRequiredService<NatsStreamSetup>();
+    await natsSetup.SetupStreamsAsync();
+    Console.WriteLine("[ReviewService] NATS streams setup completed");
+}
+catch (Exception ex)
+{
+    Console.WriteLine($"[ReviewService] Failed to setup NATS streams: {ex.Message}");
+}
 
 var grpcUrl = Environment.GetEnvironmentVariable("REVIEW_GRPC_SERVICE_URL") ?? "0.0.0.0:5010";
 app.MapGrpcService<ReviewGrpcService>();

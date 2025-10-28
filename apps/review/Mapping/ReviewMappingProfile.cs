@@ -14,6 +14,7 @@ namespace review.Mapping
             // Model to Proto
             CreateMap<ReviewModel, ProtoReview>()
                 .ForMember(dest => dest.Id, opt => opt.MapFrom(src => src.Id.ToString()))
+                .ForMember(dest => dest.BookingId, opt => opt.MapFrom(src => src.BookingId.ToString()))
                 .ForMember(dest => dest.VehicleId, opt => opt.MapFrom(src => src.VehicleId.HasValue ? src.VehicleId.Value.ToString() : string.Empty))
                 .ForMember(dest => dest.DeviceId, opt => opt.MapFrom(src => src.DeviceId.HasValue ? src.DeviceId.Value.ToString() : string.Empty))
                 .ForMember(dest => dest.ComboId, opt => opt.MapFrom(src => src.ComboId.HasValue ? src.ComboId.Value.ToString() : string.Empty))
@@ -40,6 +41,7 @@ namespace review.Mapping
             // Proto to Model (for create/update)
             CreateMap<Review.CreateReviewRequest, ReviewModel>()
                 .ForMember(dest => dest.Id, opt => opt.Ignore())
+                .ForMember(dest => dest.BookingId, opt => opt.MapFrom(src => Guid.Parse(src.BookingId)))
                 .ForMember(dest => dest.UserId, opt => opt.MapFrom(src => Guid.Parse(src.UserId)))
                 .ForMember(dest => dest.VehicleId, opt => opt.MapFrom(src => string.IsNullOrEmpty(src.VehicleId) ? (Guid?)null : Guid.Parse(src.VehicleId)))
                 .ForMember(dest => dest.DeviceId, opt => opt.MapFrom(src => string.IsNullOrEmpty(src.DeviceId) ? (Guid?)null : Guid.Parse(src.DeviceId)))

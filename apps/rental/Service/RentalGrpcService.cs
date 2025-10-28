@@ -243,26 +243,6 @@ namespace rental.Service
                     throw new RpcException(new Status(StatusCode.NotFound, "Rental not found"));
                 }
 
-                // fetch user basic
-                UserBasic? userBasic = null;
-                try
-                {
-                    var userProfile = await _userClient.GetProfileAsync(new User.GetProfileRequest
-                    {
-                        UserId = rental.UserId.ToString()
-                    });
-                    userBasic = new UserBasic
-                    {
-                        Id = userProfile.Id,
-                        Email = userProfile.Email,
-                        Username = userProfile.FullName
-                    };
-                }
-                catch (Exception ex)
-                {
-                    _logger.LogWarning(ex, "Failed to fetch user profile for rental {RentalId}", rental.Id);
-                }
-
                 // Deserialize items and build details
                 var items = JsonSerializer.Deserialize<List<RentalItemData>>(rental.Items) ?? new List<RentalItemData>();
                 var itemDetails = await BuildItemDetails(items);
@@ -407,17 +387,6 @@ namespace rental.Service
                 var items = JsonSerializer.Deserialize<List<RentalItemData>>(rental.Items) ?? new List<RentalItemData>();
                 var itemDetails = await BuildItemDetails(items);
 
-                UserBasic? userBasic = null;
-                try
-                {
-                    var userProfile = await _userClient.GetProfileAsync(new User.GetProfileRequest { UserId = rental.UserId.ToString() });
-                    userBasic = new UserBasic { Id = userProfile.Id, Email = userProfile.Email, Username = userProfile.FullName };
-                }
-                catch (Exception ex)
-                {
-                    _logger.LogWarning(ex, "Failed to fetch user profile for rental {RentalId}", rental.Id);
-                }
-
                 var response = new RentalResponse
                 {
                     Id = rental.Id.ToString(),
@@ -502,54 +471,34 @@ namespace rental.Service
                     throw new RpcException(new Status(StatusCode.NotFound, "Rental not found"));
                 }
 
-                // fetch user basic
-                UserBasic? userBasic = null;
-                try
-                {
-                    var userProfile = await _userClient.GetProfileAsync(new User.GetProfileRequest
-                    {
-                        UserId = updated.UserId.ToString()
-                    });
-                    userBasic = new UserBasic
-                    {
-                        Id = userProfile.Id,
-                        Email = userProfile.Email,
-                        Username = userProfile.FullName
-                    };
-                }
-                catch (Exception ex)
-                {
-                    _logger.LogWarning(ex, "Failed to fetch user profile for rental {RentalId}", updated.Id);
-                }
+            var items = JsonSerializer.Deserialize<List<RentalItemData>>(updated.Items) ?? new List<RentalItemData>();
+            var itemDetails = await BuildItemDetails(items);
 
-                var items = JsonSerializer.Deserialize<List<RentalItemData>>(updated.Items) ?? new List<RentalItemData>();
-                var itemDetails = await BuildItemDetails(items);
+            var response = new RentalResponse
+            {
+                Id = updated.Id.ToString(),
+                UserId = updated.UserId.ToString(),
+                Status = updated.Status.ToString(),
+                RentalFee = updated.RentalFee,
+                Deposit = updated.Deposit ?? 0,
+                MaxDiscount = updated.MaxDiscount,
+                DiscountPercent = updated.DiscountPercent,
+                TotalPrice = updated.TotalPrice,
+                TotalQuantity = updated.TotalQuantity,
+                VAT = updated.VAT,
+                StartDate = updated.StartDate.ToString("O"),
+                EndDate = updated.EndDate.ToString("O"),
+                CreatedAt = updated.CreatedAt.ToString("O"),
+                ActualEndDate = updated.ActualEndDate?.ToString("O") ?? string.Empty,
+            };
 
-                var response = new RentalResponse
-                {
-                    Id = updated.Id.ToString(),
-                    UserId = updated.UserId.ToString(),
-                    Status = updated.Status.ToString(),
-                    RentalFee = updated.RentalFee,
-                    Deposit = updated.Deposit ?? 0,
-                    MaxDiscount = updated.MaxDiscount,
-                    DiscountPercent = updated.DiscountPercent,
-                    TotalPrice = updated.TotalPrice,
-                    TotalQuantity = updated.TotalQuantity,
-                    VAT = updated.VAT,
-                    StartDate = updated.StartDate.ToString("O"),
-                    EndDate = updated.EndDate.ToString("O"),
-                    CreatedAt = updated.CreatedAt.ToString("O"),
-                    ActualEndDate = updated.ActualEndDate?.ToString("O") ?? string.Empty,
-                };
-
-                foreach (var item in itemDetails)
-                {
-                    response.Items.Add(item);
-                }
-
-                return response;
+            foreach (var item in itemDetails)
+            {
+                response.Items.Add(item);
             }
+
+            return response;
+        }
             catch (RpcException)
             {
                 throw;
@@ -563,167 +512,167 @@ namespace rental.Service
 
         // Admin: Delete rental
         public override async Task<DeleteRentalResponse> DeleteRental(DeleteRentalRequest request, ServerCallContext context)
+{
+    try
+    {
+        var rentalId = Guid.Parse(request.RentalId);
+        var deleted = await _repository.DeleteAsync(rentalId);
+
+        if (!deleted)
         {
-            try
-            {
-                var rentalId = Guid.Parse(request.RentalId);
-                var deleted = await _repository.DeleteAsync(rentalId);
-
-                if (!deleted)
-                {
-                    throw new RpcException(new Status(StatusCode.NotFound, "Rental not found"));
-                }
-
-                return new DeleteRentalResponse
-                {
-                    Message = "RentalDeletedSuccessfully"
-                };
-            }
-            catch (RpcException)
-            {
-                throw;
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Error deleting rental");
-                throw new RpcException(new Status(StatusCode.Internal, ex.Message));
-            }
+            throw new RpcException(new Status(StatusCode.NotFound, "Rental not found"));
         }
 
-        // Helper methods
-        private async Task<UserRental> MapToUserRental(RentalEntity rental)
+        return new DeleteRentalResponse
         {
-            var items = JsonSerializer.Deserialize<List<RentalItemData>>(rental.Items) ?? new List<RentalItemData>();
-            var itemDetails = await BuildItemDetails(items);
+            Message = "RentalDeletedSuccessfully"
+        };
+    }
+    catch (RpcException)
+    {
+        throw;
+    }
+    catch (Exception ex)
+    {
+        _logger.LogError(ex, "Error deleting rental");
+        throw new RpcException(new Status(StatusCode.Internal, ex.Message));
+    }
+}
 
-            var response = new UserRental
-            {
-                Id = rental.Id.ToString(),
-                TotalPrice = rental.TotalPrice,
-                MaxDiscount = rental.MaxDiscount,
-                DiscountPercent = rental.DiscountPercent,
-                Status = rental.Status.ToString(),
-                StartDate = rental.StartDate.ToString("O"),
-                EndDate = rental.EndDate.ToString("O"),
-                CreatedAt = rental.CreatedAt.ToString("O")
-            };
+// Helper methods
+private async Task<UserRental> MapToUserRental(RentalEntity rental)
+{
+    var items = JsonSerializer.Deserialize<List<RentalItemData>>(rental.Items) ?? new List<RentalItemData>();
+    var itemDetails = await BuildItemDetails(items);
 
-            foreach (var item in itemDetails)
-            {
-                response.Items.Add(item);
-            }
+    var response = new UserRental
+    {
+        Id = rental.Id.ToString(),
+        TotalPrice = rental.TotalPrice,
+        MaxDiscount = rental.MaxDiscount,
+        DiscountPercent = rental.DiscountPercent,
+        Status = rental.Status.ToString(),
+        StartDate = rental.StartDate.ToString("O"),
+        EndDate = rental.EndDate.ToString("O"),
+        CreatedAt = rental.CreatedAt.ToString("O")
+    };
 
-            return response;
-        }
+    foreach (var item in itemDetails)
+    {
+        response.Items.Add(item);
+    }
 
-        private async Task<AdminRental> MapToAdminRental(RentalEntity rental)
+    return response;
+}
+
+private async Task<AdminRental> MapToAdminRental(RentalEntity rental)
+{
+    var userName = "Unknown";
+    var userEmail = "";
+
+    try
+    {
+        // Fetch user info
+        var userResponse = await _userClient.GetProfileAsync(new User.GetProfileRequest
         {
-            var userName = "Unknown";
-            var userEmail = "";
+            UserId = rental.UserId.ToString()
+        });
+        userName = userResponse.FullName;
+        userEmail = userResponse.Email;
+    }
+    catch (Exception ex)
+    {
+        _logger.LogWarning(ex, "Failed to fetch user info for rental {RentalId}", rental.Id);
+    }
 
-            try
+    var items = JsonSerializer.Deserialize<List<RentalItemData>>(rental.Items) ?? new List<RentalItemData>();
+    var itemDetails = await BuildItemDetails(items);
+
+    var response = new AdminRental
+    {
+        Id = rental.Id.ToString(),
+        UserId = rental.UserId.ToString(),
+        UserName = userName,
+        UserEmail = userEmail,
+        TotalPrice = rental.TotalPrice,
+        MaxDiscount = rental.MaxDiscount,
+        DiscountPercent = rental.DiscountPercent,
+        Status = rental.Status.ToString(),
+        StartDate = rental.StartDate.ToString("O"),
+        EndDate = rental.EndDate.ToString("O"),
+        CreatedAt = rental.CreatedAt.ToString("O")
+    };
+
+    foreach (var item in itemDetails)
+    {
+        response.Items.Add(item);
+    }
+
+    return response;
+}
+
+// Build item details helper
+private async Task<List<RentalItemDetail>> BuildItemDetails(List<RentalItemData> items)
+{
+    var details = new List<RentalItemDetail>();
+
+    foreach (var item in items)
+    {
+        try
+        {
+            string name;
+            double unitPrice;
+            RentalTargetDetail? targetDetail = null;
+
+            if (item.IsCombo)
             {
-                // Fetch user info
-                var userResponse = await _userClient.GetProfileAsync(new User.GetProfileRequest
+                var combo = await _deviceClient.GetComboAsync(new Device.GetComboRequest
                 {
-                    UserId = rental.UserId.ToString()
+                    ComboId = item.TargetId.ToString()
                 });
-                userName = userResponse.FullName;
-                userEmail = userResponse.Email;
+                name = combo.Name;
+                unitPrice = combo.Price;
+                targetDetail = new RentalTargetDetail { Combo = combo };
             }
-            catch (Exception ex)
+            else
             {
-                _logger.LogWarning(ex, "Failed to fetch user info for rental {RentalId}", rental.Id);
-            }
-
-            var items = JsonSerializer.Deserialize<List<RentalItemData>>(rental.Items) ?? new List<RentalItemData>();
-            var itemDetails = await BuildItemDetails(items);
-
-            var response = new AdminRental
-            {
-                Id = rental.Id.ToString(),
-                UserId = rental.UserId.ToString(),
-                UserName = userName,
-                UserEmail = userEmail,
-                TotalPrice = rental.TotalPrice,
-                MaxDiscount = rental.MaxDiscount,
-                DiscountPercent = rental.DiscountPercent,
-                Status = rental.Status.ToString(),
-                StartDate = rental.StartDate.ToString("O"),
-                EndDate = rental.EndDate.ToString("O"),
-                CreatedAt = rental.CreatedAt.ToString("O")
-            };
-
-            foreach (var item in itemDetails)
-            {
-                response.Items.Add(item);
+                var device = await _deviceClient.GetDeviceAsync(new Device.GetDeviceRequest
+                {
+                    DeviceId = item.TargetId.ToString()
+                });
+                name = device.Name;
+                unitPrice = device.Price;
+                targetDetail = new RentalTargetDetail { Device = device };
             }
 
-            return response;
+            details.Add(new RentalItemDetail
+            {
+                TargetId = item.TargetId.ToString(),
+                IsCombo = item.IsCombo,
+                Quantity = item.Quantity,
+                Name = name,
+                UnitPrice = unitPrice,
+                Subtotal = unitPrice * item.Quantity,
+                Detail = targetDetail
+            });
         }
-
-        // Build item details helper
-        private async Task<List<RentalItemDetail>> BuildItemDetails(List<RentalItemData> items)
+        catch (Exception ex)
         {
-            var details = new List<RentalItemDetail>();
-
-            foreach (var item in items)
+            _logger.LogWarning(ex, "Failed to build detail for item {TargetId}", item.TargetId);
+            // Add placeholder detail
+            details.Add(new RentalItemDetail
             {
-                try
-                {
-                    string name;
-                    double unitPrice;
-                    RentalTargetDetail? targetDetail = null;
-
-                    if (item.IsCombo)
-                    {
-                        var combo = await _deviceClient.GetComboAsync(new Device.GetComboRequest
-                        {
-                            ComboId = item.TargetId.ToString()
-                        });
-                        name = combo.Name;
-                        unitPrice = combo.Price;
-                        targetDetail = new RentalTargetDetail { Combo = combo };
-                    }
-                    else
-                    {
-                        var device = await _deviceClient.GetDeviceAsync(new Device.GetDeviceRequest
-                        {
-                            DeviceId = item.TargetId.ToString()
-                        });
-                        name = device.Name;
-                        unitPrice = device.Price;
-                        targetDetail = new RentalTargetDetail { Device = device };
-                    }
-
-                    details.Add(new RentalItemDetail
-                    {
-                        TargetId = item.TargetId.ToString(),
-                        IsCombo = item.IsCombo,
-                        Quantity = item.Quantity,
-                        Name = name,
-                        UnitPrice = unitPrice,
-                        Subtotal = unitPrice * item.Quantity,
-                        Detail = targetDetail
-                    });
-                }
-                catch (Exception ex)
-                {
-                    _logger.LogWarning(ex, "Failed to build detail for item {TargetId}", item.TargetId);
-                    // Add placeholder detail
-                    details.Add(new RentalItemDetail
-                    {
-                        TargetId = item.TargetId.ToString(),
-                        IsCombo = item.IsCombo,
-                        Quantity = item.Quantity,
-                        Name = "Unknown",
-                        UnitPrice = 0,
-                        Subtotal = 0
-                    });
-                }
-            }
-
-            return details;
+                TargetId = item.TargetId.ToString(),
+                IsCombo = item.IsCombo,
+                Quantity = item.Quantity,
+                Name = "Unknown",
+                UnitPrice = 0,
+                Subtotal = 0
+            });
         }
+    }
+
+    return details;
+}
     }
 }

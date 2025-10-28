@@ -5,6 +5,7 @@ namespace review.Model.Dto
     /// </summary>
     public class CreateReviewDto
     {
+        public Guid BookingId { get; set; }
         public Guid UserId { get; set; }
         public Guid? VehicleId { get; set; }
         public Guid? DeviceId { get; set; }
@@ -13,7 +14,7 @@ namespace review.Model.Dto
         public string Title { get; set; } = string.Empty;
         public ReviewType Type { get; set; }
         public string Content { get; set; } = string.Empty;
-        public List<string> Images { get; set; } = new();
+        public List<string>? Images { get; set; }
     }
 
     /// <summary>
@@ -26,7 +27,7 @@ namespace review.Model.Dto
         public int Rating { get; set; }
         public string Title { get; set; } = string.Empty;
         public string Content { get; set; } = string.Empty;
-        public List<string> Images { get; set; } = new();
+        public List<string>? Images { get; set; }
     }
 
     /// <summary>
@@ -35,6 +36,7 @@ namespace review.Model.Dto
     public class ReviewDto
     {
         public Guid Id { get; set; }
+        public Guid BookingId { get; set; }
         public Guid? VehicleId { get; set; }
         public Guid? DeviceId { get; set; }
         public Guid? ComboId { get; set; }
@@ -43,7 +45,7 @@ namespace review.Model.Dto
         public string Title { get; set; } = string.Empty;
         public ReviewType Type { get; set; }
         public string Content { get; set; } = string.Empty;
-        public List<string> Images { get; set; } = new();
+        public List<string>? Images { get; set; }
         public DateTime CreatedAt { get; set; }
         public DateTime UpdatedAt { get; set; }
         public int UpdateCount { get; set; }
@@ -55,6 +57,7 @@ namespace review.Model.Dto
     public class ReviewSummaryDto
     {
         public Guid Id { get; set; }
+        public Guid BookingId { get; set; }
         public Guid? VehicleId { get; set; }
         public Guid? DeviceId { get; set; }
         public Guid? ComboId { get; set; }

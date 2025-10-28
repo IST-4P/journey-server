@@ -27,7 +27,10 @@ namespace review.Interface
         // Check if user owns review
         Task<bool> IsUserReviewOwnerAsync(Guid reviewId, Guid userId);
 
-        // Check if user has already reviewed
-        Task<bool> HasUserReviewedAsync(Guid userId, Guid? vehicleId, Guid? deviceId, Guid? comboId);
+        // Check if booking has already been reviewed
+        Task<bool> HasBookingBeenReviewedAsync(Guid bookingId);
+
+        // Get review by booking ID
+        Task<ReviewModel?> GetReviewByBookingIdAsync(Guid bookingId);
     }
 }

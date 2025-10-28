@@ -142,20 +142,14 @@ namespace review.Repository
                 .AnyAsync(r => r.Id == reviewId && r.UserId == userId);
         }
 
-        public async Task<bool> HasUserReviewedAsync(Guid userId, Guid? vehicleId, Guid? deviceId, Guid? comboId)
+        public async Task<bool> HasBookingBeenReviewedAsync(Guid bookingId)
         {
-            var query = _context.Reviews.Where(r => r.UserId == userId);
+            return await _context.Reviews.AnyAsync(r => r.BookingId == bookingId);
+        }
 
-            if (vehicleId.HasValue)
-                query = query.Where(r => r.VehicleId == vehicleId.Value);
-
-            if (deviceId.HasValue)
-                query = query.Where(r => r.DeviceId == deviceId.Value);
-
-            if (comboId.HasValue)
-                query = query.Where(r => r.ComboId == comboId.Value);
-
-            return await query.AnyAsync();
+        public async Task<ReviewModel?> GetReviewByBookingIdAsync(Guid bookingId)
+        {
+            return await _context.Reviews.FirstOrDefaultAsync(r => r.BookingId == bookingId);
         }
 
         private IQueryable<ReviewModel> ApplyFiltersAndSorting(IQueryable<ReviewModel> query, ReviewQueryDto dto)

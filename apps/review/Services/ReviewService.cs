@@ -1,6 +1,8 @@
 using Grpc.Core;
 using review.Interface;
 using review.Model.Dto;
+using review.Nats;
+using review.Nats.Events;
 using ReviewModel = review.Model.Review;
 using ReviewType = review.Model.ReviewType;
 
@@ -10,12 +12,14 @@ namespace review.Services
     {
         private readonly IReviewRepository _repository;
         private readonly ILogger<ReviewService> _logger;
+        private readonly NatsPublisher _natsPublisher;
         private const int MaxUpdateCount = 2;
 
-        public ReviewService(IReviewRepository repository, ILogger<ReviewService> logger)
+        public ReviewService(IReviewRepository repository, ILogger<ReviewService> logger, NatsPublisher natsPublisher)
         {
             _repository = repository;
             _logger = logger;
+            _natsPublisher = natsPublisher;
         }
 
         public async Task<ReviewModel> CreateReviewAsync(CreateReviewDto dto)
@@ -27,12 +31,12 @@ namespace review.Services
                     "At least one of vehicleId, deviceId, or comboId must be specified"));
             }
 
-            // Check if user has already reviewed this item
-            var hasReviewed = await _repository.HasUserReviewedAsync(dto.UserId, dto.VehicleId, dto.DeviceId, dto.ComboId);
-            if (hasReviewed)
+            // Check if booking has already been reviewed
+            var hasBeenReviewed = await _repository.HasBookingBeenReviewedAsync(dto.BookingId);
+            if (hasBeenReviewed)
             {
                 throw new RpcException(new Status(StatusCode.AlreadyExists,
-                    "You have already reviewed this item"));
+                    "This booking has already been reviewed"));
             }
 
             // Validate rating
@@ -45,6 +49,7 @@ namespace review.Services
             var review = new ReviewModel
             {
                 Id = Guid.NewGuid(),
+                BookingId = dto.BookingId,
                 UserId = dto.UserId,
                 VehicleId = dto.VehicleId,
                 DeviceId = dto.DeviceId,
@@ -53,13 +58,44 @@ namespace review.Services
                 Title = dto.Title,
                 Type = dto.Type,
                 Content = dto.Content,
-                Images = dto.Images ?? new List<string>(),
+                Images = dto.Images,
                 CreatedAt = DateTime.UtcNow,
                 UpdatedAt = DateTime.UtcNow,
                 UpdateCount = 0
             };
 
-            return await _repository.CreateReviewAsync(review);
+            var createdReview = await _repository.CreateReviewAsync(review);
+
+            // Publish event to NATS
+            await PublishReviewCreatedEvent(createdReview);
+
+            return createdReview;
+        }
+
+        private async Task PublishReviewCreatedEvent(ReviewModel review)
+        {
+            try
+            {
+                var reviewEvent = new ReviewCreatedEvent
+                {
+                    ReviewId = review.Id.ToString(),
+                    VehicleId = review.VehicleId?.ToString(),
+                    DeviceId = review.DeviceId?.ToString(),
+                    ComboId = review.ComboId?.ToString(),
+                    UserId = review.UserId.ToString(),
+                    Rating = review.Rating,
+                    Type = review.Type.ToString(),
+                    CreatedAt = review.CreatedAt.ToString("o")
+                };
+
+                await _natsPublisher.PublishAsync("review.created", reviewEvent);
+                _logger.LogInformation($"Published review.created event for review {review.Id}");
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, $"Failed to publish review.created event for review {review.Id}");
+                // Don't throw - the review was created successfully
+            }
         }
 
         public async Task<ReviewModel> UpdateReviewAsync(UpdateReviewDto dto)

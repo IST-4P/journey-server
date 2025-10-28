@@ -50,7 +50,11 @@ namespace review.Data
                 entity.Property(e => e.UpdateCount)
                     .HasDefaultValue(0);
 
+                entity.Property(e => e.BookingId)
+                    .IsRequired();
+
                 // Indexes for performance
+                entity.HasIndex(e => e.BookingId).IsUnique(); // Mỗi booking chỉ có 1 review
                 entity.HasIndex(e => e.UserId);
                 entity.HasIndex(e => e.VehicleId);
                 entity.HasIndex(e => e.DeviceId);

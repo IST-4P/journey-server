@@ -62,8 +62,8 @@ export interface RentalResponse {
 /** User: Create Rental */
 export interface CreateRentalRequest {
   userId: string;
-  /** Only ONE item (device or combo) with quantity */
-  item: RentalItem | undefined;
+  /** Multiple items allowed (devices and/or combos) */
+  items: RentalItem[];
   startDate: string;
   endDate: string;
   /** Discount percentage (e.g., 10 for 10%) */

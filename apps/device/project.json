@@ -1,0 +1,81 @@
+{
+  "name": "device",
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "apps/device",
+  "projectType": "application",
+  "tags": ["type:app", "platform:dotnet"],
+  "targets": {
+    "build": {
+      "executor": "nx:run-commands",
+      "outputs": ["{workspaceRoot}/apps/device/bin/Release"],
+      "options": {
+        "command": "dotnet build device.csproj -c Release",
+        "cwd": "apps/device"
+      },
+      "configurations": {
+        "development": {
+          "command": "dotnet build device.csproj -c Debug"
+        }
+      }
+    },
+    "serve": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "dotnet run --project device.csproj",
+        "cwd": "apps/device"
+      },
+      "configurations": {
+        "development": {
+          "command": "dotnet run --project device.csproj --environment Development"
+        },
+        "production": {
+          "command": "dotnet run --project device.csproj --environment Production"
+        }
+      }
+    },
+    "publish": {
+      "executor": "nx:run-commands",
+      "dependsOn": ["build"],
+      "outputs": ["{workspaceRoot}/apps/device/bin/Release/net8.0/publish"],
+      "options": {
+        "command": "dotnet publish device.csproj -c Release -o bin/Release/net8.0/publish",
+        "cwd": "apps/device"
+      }
+    },
+    "docker-build": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "docker build -t caophi562005/journey-device:latest -f apps/device/Dockerfile .",
+        "cwd": "{workspaceRoot}"
+      }
+    },
+    "docker-push": {
+      "executor": "nx:run-commands",
+      "dependsOn": ["docker-build"],
+      "options": {
+        "command": "docker push caophi562005/journey-device:latest"
+      }
+    },
+    "test": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "dotnet test",
+        "cwd": "apps/device"
+      }
+    },
+    "clean": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "dotnet clean",
+        "cwd": "apps/device"
+      }
+    },
+    "restore": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "dotnet restore",
+        "cwd": "apps/device"
+      }
+    }
+  }
+}

@@ -83,9 +83,9 @@ namespace rental.Model.Entities
     public enum RentalStatus
     {
         PENDING, // Chờ thanh toán deposit
-        PAID, // Đã thanh toán deposit, chờ nhận xe
-        ONGOING, // Đang thuê (đã check-in)
-        COMPLETED, // Hoàn thành (đã check-out, đã hoàn deposit)
+        PAID, // Đã thanh toán deposit, chờ nhận hàng
+        ONGOING, // Đang thuê 
+        COMPLETED, // Hoàn thành (đã trả)
         CANCELLED, // Đã hủy (có thể hoàn deposit)
         EXPIRED // Hết hạn (quá thời gian không thanh toán)
     }

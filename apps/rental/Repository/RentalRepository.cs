@@ -152,6 +152,17 @@ namespace rental.Repository
             };
         }
 
+        // User: Cancel rental
+        public async Task<RentalEntity?> CancelRentalAsync(Guid id)
+        {
+            var rental = await _context.Set<RentalEntity>().FindAsync(id);
+            if (rental == null) return null;
+
+            rental.Status = RentalStatus.CANCELLED;
+            await _context.SaveChangesAsync();
+            return rental;
+        }
+
         // Admin: Update rental
         public async Task<RentalEntity?> UpdateAsync(Guid id, UpdateRentalRequestDto updateDto)
         {

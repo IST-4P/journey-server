@@ -7,6 +7,7 @@ using RentalEntity = rental.Model.Entities.Rental;
 using RentalExtensionEntity = rental.Model.Entities.RentalExtension;
 using rental.Model.Entities;
 using System.Text.Json;
+using rental.Nats;
 
 namespace rental.Service
 {
@@ -18,6 +19,7 @@ namespace rental.Service
         private readonly User.UserService.UserServiceClient _userClient;
         private readonly Device.DeviceService.DeviceServiceClient _deviceClient;
         private readonly Payment.PaymentService.PaymentServiceClient _paymentClient;
+        private readonly NatsPublisher _natsPublisher;
 
         public RentalGrpcService(
             RentalRepository repository,
@@ -25,7 +27,8 @@ namespace rental.Service
             ILogger<RentalGrpcService> logger,
             User.UserService.UserServiceClient userClient,
             Device.DeviceService.DeviceServiceClient deviceClient,
-            Payment.PaymentService.PaymentServiceClient paymentClient)
+            Payment.PaymentService.PaymentServiceClient paymentClient,
+            NatsPublisher natsPublisher)
         {
             _repository = repository;
             _mapper = mapper;
@@ -33,6 +36,7 @@ namespace rental.Service
             _userClient = userClient;
             _deviceClient = deviceClient;
             _paymentClient = paymentClient;
+            _natsPublisher = natsPublisher;
         }
 
         // User: Create rental
@@ -213,6 +217,27 @@ namespace rental.Service
                     _logger.LogWarning(ex, "Payment integration failed for rental {RentalId}. Leaving status as {Status}", created.Id, created.Status);
                 }
 
+                // Publish rental.created event to NATS
+                try
+                {
+                    await _natsPublisher.PublishAsync("rental.created", new
+                    {
+                        rentalId = created.Id,
+                        userId = created.UserId,
+                        items = itemsDataList,
+                        status = created.Status.ToString(),
+                        deposit = created.Deposit,
+                        totalPrice = created.TotalPrice,
+                        startDate = created.StartDate,
+                        endDate = created.EndDate,
+                        createdAt = created.CreatedAt
+                    });
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogWarning(ex, "Failed to publish rental.created event for rental {RentalId}", created.Id);
+                }
+
                 var response = new RentalResponse
                 {
                     Id = created.Id.ToString(),
@@ -238,6 +263,80 @@ namespace rental.Service
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error creating rental");
+                throw new RpcException(new Status(StatusCode.Internal, ex.Message));
+            }
+        }
+
+        //User: Cancel rental
+        public override async Task<CancelRentalResponse> CancelRental(CancelRentalRequest request, ServerCallContext context)
+        {
+            try
+            {
+                var rentalId = Guid.Parse(request.RentalId);
+                var rental = await _repository.GetByIdAsync(rentalId);
+                if (rental is null)
+                {
+                    throw new RpcException(new Status(StatusCode.NotFound, "Rental not found"));
+                }
+
+                if (rental.Status != RentalStatus.PENDING && rental.Status != RentalStatus.PAID)
+                {
+                    throw new RpcException(new Status(StatusCode.FailedPrecondition, "Only PENDING or PAID rentals can be cancelled"));
+                }
+
+                // Calculate refund amount based on cancellation time
+                double refundPercent = RentalCalculationHelper.CalculateRefundPercent(rental.StartDate, DateTime.UtcNow);
+                double refundAmount = RentalCalculationHelper.CalculateRefundAmount(rental.Deposit ?? 0, refundPercent);
+
+                // Deserialize items for event publishing
+                var items = DeserializeItemsSafe(rental.Items);
+
+                // Update rental status to CANCELLED
+                await _repository.UpdateAsync(rental.Id, new UpdateRentalRequestDto { Status = RentalStatus.CANCELLED.ToString() });
+                await RecordStatusChange(rental.Id, rental.Status, RentalStatus.CANCELLED,
+                    $"Rental cancelled by user. Refund: {refundPercent}% = {refundAmount:F2} VND");
+
+                _logger.LogInformation(
+                    "Rental {RentalId} cancelled. Deposit: {Deposit} VND, Refund: {RefundPercent}% = {RefundAmount} VND",
+                    rentalId, rental.Deposit ?? 0, refundPercent, refundAmount);
+
+                // TODO: Integrate with payment service to process refund
+
+                // Publish rental.cancelled event to NATS
+                try
+                {
+                    await _natsPublisher.PublishAsync("rental.cancelled", new
+                    {
+                        rentalId = rental.Id,
+                        userId = rental.UserId,
+                        items = items, // để device service biết cần hoàn lại bao nhiêu
+                        refundAmount = refundAmount,
+                        refundPercent = refundPercent,
+                        cancelledAt = DateTime.UtcNow
+                    });
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogWarning(ex, "Failed to publish rental.cancelled event for rental {RentalId}", rental.Id);
+                }
+
+                var response = new CancelRentalResponse
+                {
+                    Success = true,
+                    Message = $"Rental cancelled successfully. Refund amount: {refundAmount:F2} VND ({refundPercent}% of deposit)",
+                    RefundAmount = refundAmount,
+                    RefundPercent = refundPercent
+                };
+
+                return response;
+            }
+            catch (RpcException)
+            {
+                throw;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error cancelling rental");
                 throw new RpcException(new Status(StatusCode.Internal, ex.Message));
             }
         }
@@ -593,12 +692,48 @@ namespace rental.Service
 
                             // TODO: Integrate with payment service to process refund
                         }
+
+                        // Publish rental.updated event to NATS
+                        try
+                        {
+                            await _natsPublisher.PublishAsync("rental.updated", new
+                            {
+                                rentalId = updated.Id,
+                                userId = updated.UserId,
+                                oldStatus = oldStatus.ToString(),
+                                newStatus = newStatus.ToString(),
+                                updatedAt = DateTime.UtcNow
+                            });
+                        }
+                        catch (Exception ex)
+                        {
+                            _logger.LogWarning(ex, "Failed to publish rental.updated event for rental {RentalId}", rentalId);
+                        }
+
+                        // Publish rental.completed event if status is COMPLETED
+                        if (newStatus == RentalStatus.COMPLETED)
+                        {
+                            try
+                            {
+                                var items = DeserializeItemsSafe(updated.Items);
+                                await _natsPublisher.PublishAsync("rental.completed", new
+                                {
+                                    rentalId = updated.Id,
+                                    userId = updated.UserId,
+                                    items = items,
+                                    completedAt = DateTime.UtcNow
+                                });
+                            }
+                            catch (Exception ex)
+                            {
+                                _logger.LogWarning(ex, "Failed to publish rental.completed event for rental {RentalId}", rentalId);
+                            }
+                        }
                     }
                 }
 
                 // Defensive JSON parsing for rental items
-                var items = DeserializeItemsSafe(updated.Items);
-                var itemDetails = await BuildItemDetails(items);
+                var itemDetails = await BuildItemDetails(DeserializeItemsSafe(updated.Items));
 
                 var response = new RentalResponse
                 {

@@ -24,14 +24,6 @@ namespace rental.Service
             }
             return totalItemValue * (DEPOSIT_PERCENT / 100.0);
         }
-
-        // Legacy method for backward compatibility
-        [Obsolete("Use CalculateDepositForItems instead")]
-        public static double CalculateDeposit(double rentalFee)
-        {
-            return rentalFee * 0.2;
-        }
-
         public static double CalculateTotalPrice(double rentalFee, double discountAmount, double deposit)
         {
             double subtotal = rentalFee - discountAmount + deposit;
@@ -44,17 +36,16 @@ namespace rental.Service
             var daysBefore = (startDate - cancelDate).TotalDays;
 
             if (daysBefore >= 7)
-                return 100; // Full refund if cancelled 7+ days before
+                return 100;
             else if (daysBefore >= 3)
-                return 50;  // 50% refund if cancelled 3-7 days before
+                return 50; 
             else
-                return 0;   // No refund if cancelled less than 3 days before
+                return 0;  
         }
 
         public static double CalculateRefundAmount(double deposit, double refundPercent)
         {
             return deposit * (refundPercent / 100.0);
         }
-
     }
 }

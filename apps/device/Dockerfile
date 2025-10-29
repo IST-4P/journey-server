@@ -4,11 +4,11 @@ WORKDIR /src
 
 # Copy project file và restore dependencies
 COPY apps/device/device.csproj apps/device/
+COPY libs/grpc/ libs/grpc/
 RUN dotnet restore apps/device/device.csproj
 
 # Copy toàn bộ source code
 COPY apps/device/ apps/device/
-COPY libs/grpc/src/lib/proto/device.proto apps/device/Protos/
 
 # Build project
 WORKDIR /src/apps/device
@@ -25,15 +25,15 @@ WORKDIR /app
 COPY --from=build /app/publish .
 
 # Expose gRPC port
-EXPOSE 5005
+EXPOSE 5006
 
 # Set environment variables
-ENV ASPNETCORE_URLS=http://+:5005
+ENV ASPNETCORE_URLS=http://+:5006
 ENV ASPNETCORE_ENVIRONMENT=Production
 
 # Health check
 HEALTHCHECK --interval=30s --timeout=10s --start-period=40s --retries=3 \
-  CMD curl -f http://localhost:5005/health || exit 1
+  CMD curl -f http://localhost:5006/health || exit 1
 
 # Run the application
 ENTRYPOINT ["dotnet", "device.dll"]

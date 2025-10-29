@@ -23,19 +23,10 @@
   </ItemGroup>
 
 <ItemGroup>
-  <Protobuf Include="..\..\libs\grpc\src\lib\proto\rental.proto"
-            GrpcServices="Server"
-            ProtoRoot="..\..\libs\grpc\src\lib\proto" />
-  <!-- External protos for gRPC clients -->
-  <Protobuf Include="..\..\libs\grpc\src\lib\proto\device.proto"
-            GrpcServices="Client"
-            ProtoRoot="..\..\libs\grpc\src\lib\proto" />
-  <Protobuf Include="..\..\libs\grpc\src\lib\proto\user.proto"
-            GrpcServices="Client"
-            ProtoRoot="..\..\libs\grpc\src\lib\proto" />
-  <Protobuf Include="..\..\libs\grpc\src\lib\proto\payment.proto"
-            GrpcServices="Client"
-            ProtoRoot="..\..\libs\grpc\src\lib\proto" />
+  <Protobuf Include="..\..\libs\grpc\src\lib\proto\rental.proto" GrpcServices="Server" />
+  <Protobuf Include="..\..\libs\grpc\src\lib\proto\device.proto" GrpcServices="Client" />
+  <Protobuf Include="..\..\libs\grpc\src\lib\proto\user.proto" GrpcServices="Client" />
+  <Protobuf Include="..\..\libs\grpc\src\lib\proto\payment.proto" GrpcServices="Client" />
 </ItemGroup>
 
   

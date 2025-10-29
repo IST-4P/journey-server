@@ -24,7 +24,7 @@ namespace rental.Nats
                 // Create RENTAL stream
                 var rentalStreamConfig = new StreamConfig(
                     name: "RENTAL",
-                    subjects: new[] { "rental.created", "rental.updated", "rental.completed" }
+                    subjects: new[] { "rental.created", "rental.updated", "rental.completed", "rental.cancelled" }
                 )
                 {
                     Storage = StreamConfigStorage.File,

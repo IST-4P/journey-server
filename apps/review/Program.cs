@@ -4,7 +4,6 @@ using review.Interface;
 using review.Repository;
 using review.Services;
 using review.Nats;
-using Rental;
 using DotNetEnv;
 using System.Text.RegularExpressions;
 using NATS.Client.Core;
@@ -43,10 +42,26 @@ builder.Services.AddSingleton<NatsPublisher>();
 builder.Services.AddSingleton<NatsStreamSetup>();
 
 // gRPC clients
+var deviceServiceUrl = Environment.GetEnvironmentVariable("DEVICE_GRPC_URL") ?? "http://localhost:5006";
+builder.Services.AddGrpcClient<Device.DeviceService.DeviceServiceClient>(o =>
+{
+    o.Address = new Uri(deviceServiceUrl);
+});
 var rentalServiceUrl = Environment.GetEnvironmentVariable("RENTAL_GRPC_URL") ?? "http://localhost:5007";
 builder.Services.AddGrpcClient<Rental.RentalService.RentalServiceClient>(o =>
 {
     o.Address = new Uri(rentalServiceUrl);
+});
+var vehicleServiceUrl = Environment.GetEnvironmentVariable("VEHICLE_GRPC_URL") ?? "http://localhost:5008";
+builder.Services.AddGrpcClient<Vehicle.VehicleService.VehicleServiceClient>(o =>
+{
+    o.Address = new Uri(vehicleServiceUrl);
+});
+
+var bookingServiceUrl = Environment.GetEnvironmentVariable("BOOKING_GRPC_URL") ?? "http://localhost:5009";
+builder.Services.AddGrpcClient<Booking.BookingService.BookingServiceClient>(o =>
+{
+    o.Address = new Uri(bookingServiceUrl);
 });
 
 // Add DbContext
@@ -66,7 +81,7 @@ Console.WriteLine($"[ReviewService] DB: {maskedConnectionString}");
 builder.Services.AddDbContext<ReviewDbContext>(options =>
 {
     var dataSourceBuilder = new NpgsqlDataSourceBuilder(connectionString);
-    dataSourceBuilder.EnableDynamicJson(); 
+    dataSourceBuilder.EnableDynamicJson();
     var dataSource = dataSourceBuilder.Build();
 
     options.UseNpgsql(dataSource);

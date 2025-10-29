@@ -25,6 +25,7 @@ import {
   FailedToSendOTPException,
   InvalidOTPException,
   InvalidPasswordException,
+  OnlyForAdminException,
   OTPExpiredException,
   RefreshTokenAlreadyUsedException,
   UnauthorizedAccessException,
@@ -221,6 +222,37 @@ export class AuthService {
 
     if (!user) {
       throw EmailNotFoundException;
+    }
+
+    const isPasswordMatch = await this.hashingService.compare(
+      body.password,
+      user.password
+    );
+    if (!isPasswordMatch) {
+      throw InvalidPasswordException;
+    }
+
+    // Tạo mới accessToken và refreshToken
+    const tokens = await this.generateTokens({
+      userId: user.id,
+      role: user.role,
+    });
+
+    return tokens;
+  }
+
+  async loginAdmin(body: LoginRequest) {
+    // Kiểm tra user có tồn tại không
+    const user = await this.userRepository.findUnique({
+      email: body.email,
+    });
+
+    if (!user) {
+      throw EmailNotFoundException;
+    }
+
+    if (user.role !== 'ADMIN' && user.role !== 'SUPER_ADMIN') {
+      throw OnlyForAdminException;
     }
 
     const isPasswordMatch = await this.hashingService.compare(

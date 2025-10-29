@@ -40,3 +40,8 @@ export const InvalidPasswordException = new RpcException({
   code: status.INVALID_ARGUMENT,
   message: 'Error.InvalidPassword',
 });
+
+export const OnlyForAdminException = new RpcException({
+  code: status.INVALID_ARGUMENT,
+  message: 'Error.OnlyForAdmin',
+});

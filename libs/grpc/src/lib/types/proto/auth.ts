@@ -98,6 +98,8 @@ export interface AuthServiceClient {
 
   login(request: LoginRequest): Observable<LoginResponse>;
 
+  loginAdmin(request: LoginRequest): Observable<LoginResponse>;
+
   refreshToken(request: RefreshTokenRequest): Observable<RefreshTokenResponse>;
 
   logout(request: LogoutRequest): Observable<LogoutResponse>;
@@ -113,6 +115,8 @@ export interface AuthServiceController {
   register(request: RegisterRequest): Promise<RegisterResponse> | Observable<RegisterResponse> | RegisterResponse;
 
   login(request: LoginRequest): Promise<LoginResponse> | Observable<LoginResponse> | LoginResponse;
+
+  loginAdmin(request: LoginRequest): Promise<LoginResponse> | Observable<LoginResponse> | LoginResponse;
 
   refreshToken(
     request: RefreshTokenRequest,
@@ -136,6 +140,7 @@ export function AuthServiceControllerMethods() {
     const grpcMethods: string[] = [
       "register",
       "login",
+      "loginAdmin",
       "refreshToken",
       "logout",
       "sendOtp",

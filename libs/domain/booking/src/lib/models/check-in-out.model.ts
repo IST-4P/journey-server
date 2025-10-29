@@ -20,6 +20,7 @@ export const GetManyCheckInOutsResponseSchema = z.object({
 
 export const GetCheckInOutRequestSchema = CheckInOutValidatorSchema.pick({
   id: true,
+  userId: true,
 });
 
 export const GetCheckInOutResponseSchema = CheckInOutValidatorSchema;
@@ -49,6 +50,7 @@ export const UpdateCheckOutRequestSchema = CheckInOutValidatorSchema.pick({
   .partial()
   .extend({
     id: CheckInOutValidatorSchema.shape.id,
+    userId: CheckInOutValidatorSchema.shape.userId,
     penaltyAmount: z.number().int().optional(),
     damageAmount: z.number().int().optional(),
     overtimeAmount: z.number().int().optional(),

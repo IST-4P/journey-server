@@ -15,7 +15,8 @@ export const protobufPackage = "booking";
  * GetBooking
  */
 export interface GetBookingRequest {
-  id?: string | undefined;
+  id: string;
+  userId: string;
 }
 
 export interface GetBookingResponse {
@@ -93,6 +94,7 @@ export interface CancelBookingRequest {
   id: string;
   cancelReason: string;
   cancelDate?: string | undefined;
+  userId: string;
 }
 
 /**
@@ -118,6 +120,7 @@ export interface GetManyCheckInOutsResponse {
 /** GetCheckInOut */
 export interface GetCheckInOutRequest {
   id: string;
+  userId: string;
 }
 
 export interface GetCheckInOutResponse {
@@ -165,6 +168,7 @@ export interface UpdateCheckOutRequest {
   penaltyAmount?: number | undefined;
   damageAmount?: number | undefined;
   overtimeAmount?: number | undefined;
+  userId: string;
 }
 
 /** VerifyCheckInOut */
@@ -178,6 +182,7 @@ export interface VerifyCheckInOutRequest {
  */
 export interface GetManyExtensionsRequest {
   status?: string | undefined;
+  requestedBy?: string | undefined;
   page?: number | undefined;
   limit?: number | undefined;
 }
@@ -193,6 +198,7 @@ export interface GetManyExtensionsResponse {
 /** GetExtension */
 export interface GetExtensionRequest {
   id: string;
+  requestedBy: string;
 }
 
 export interface GetExtensionResponse {

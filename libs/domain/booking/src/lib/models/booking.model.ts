@@ -4,6 +4,7 @@ import { BookingValidatorSchema } from '../validators';
 
 export const GetBookingRequestSchema = BookingValidatorSchema.pick({
   id: true,
+  userId: true,
 });
 
 export const GetBookingResponseSchema = BookingValidatorSchema;
@@ -47,6 +48,7 @@ export const CreateBookingRequestSchema = BookingValidatorSchema.pick({
 export const CancelBookingRequestSchema = BookingValidatorSchema.pick({
   id: true,
   cancelReason: true,
+  userId: true,
 }).extend({
   cancelDate: z.coerce.date(),
 });
@@ -55,6 +57,7 @@ export const CancelBookingResponseSchema = GetBookingResponseSchema;
 
 export const UpdateStatusBookingRequestSchema = BookingValidatorSchema.pick({
   id: true,
+  userId: true,
   status: true,
 });
 

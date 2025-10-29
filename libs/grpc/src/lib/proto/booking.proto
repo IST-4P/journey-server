@@ -30,7 +30,8 @@ service BookingService {
 // ======================================================== Booking
 // GetBooking
 message GetBookingRequest {
-  optional string id = 1;
+  string id = 1;
+  string userId = 2;
 }
 
 message GetBookingResponse {
@@ -117,6 +118,7 @@ message CancelBookingRequest {
   string id = 1;
   string cancelReason = 2;
   optional string cancelDate = 3;
+  string userId = 4;
 }
 
 // ======================================================== CheckInOut
@@ -140,6 +142,7 @@ message GetManyCheckInOutsResponse {
 // GetCheckInOut
 message GetCheckInOutRequest {
   string id = 1;
+  string userId = 2;
 }
 
 message GetCheckInOutResponse {
@@ -192,6 +195,7 @@ message UpdateCheckOutRequest {
   optional int32 penaltyAmount = 6;
   optional int32 damageAmount = 7;
   optional int32 overtimeAmount = 8;
+  string userId = 9;
 }
 
 // VerifyCheckInOut
@@ -203,8 +207,9 @@ message VerifyCheckInOutRequest {
 // GetManyExtensions
 message GetManyExtensionsRequest {
   optional string status = 1;
-  optional int32 page = 2;
-  optional int32 limit = 3;
+  optional string requestedBy = 2;
+  optional int32 page = 3;
+  optional int32 limit = 4;
 }
 
 message GetManyExtensionsResponse {
@@ -218,6 +223,7 @@ message GetManyExtensionsResponse {
 // GetExtension
 message GetExtensionRequest {
   string id = 1;
+  string requestedBy = 2;
 }
 
 message GetExtensionResponse {

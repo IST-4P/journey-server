@@ -4,18 +4,10 @@ import {
   RegisterRequestDTO,
   SendOTPRequestDTO,
 } from '@domain/auth';
-import {
-  AccessTokenPayload,
-  ActiveUser,
-  Auth,
-  AuthType,
-  ConditionGuard,
-  IsPublic,
-} from '@hacmieu-journey/nestjs';
+import { IsPublic } from '@hacmieu-journey/nestjs';
 import {
   Body,
   Controller,
-  Get,
   Post,
   Req,
   Res,
@@ -112,31 +104,5 @@ export class AuthController {
   @Post('forgot-password')
   async forgotPassword(@Body() body: ForgotPasswordRequestDTO) {
     return this.authService.forgotPassword(body);
-  }
-
-  // ===== PROTECTED ROUTES - Ví dụ sử dụng Guards =====
-
-  @Auth([AuthType.PaymentAPIKey])
-  @Post('payment-webhook')
-  handlePaymentWebhook(@Body() body: any) {
-    return {
-      message: 'Payment webhook received',
-      data: body,
-    };
-  }
-
-  /**
-   * Route cho phép cả Bearer Token HOẶC Payment API Key
-   * Hữu ích khi endpoint có thể được gọi từ nhiều nguồn
-   */
-  @Auth([AuthType.Bearer, AuthType.PaymentAPIKey], {
-    condition: ConditionGuard.Or,
-  })
-  @Get('flexible')
-  flexibleAuth(@ActiveUser() user: AccessTokenPayload | undefined) {
-    return {
-      message: 'Flexible authentication',
-      user: user || 'Authenticated via API Key',
-    };
   }
 }

@@ -25,7 +25,6 @@ export class BlogController {
   constructor(private readonly blogService: BlogService) {}
 
   @Get()
-  @Auth([AuthType.Admin])
   getManyBlogs(@Query() query: GetManyBlogsRequestDTO) {
     return this.blogService.getManyBlogs(query);
   }
@@ -36,16 +35,19 @@ export class BlogController {
   }
 
   @Post()
+  @Auth([AuthType.Admin])
   createBlog(@Body() body: CreateBlogRequestDTO) {
     return this.blogService.createBlog(body);
   }
 
   @Put(':id')
+  @Auth([AuthType.Admin])
   updateBlog(@Param('id') id: string, @Body() body: UpdateBlogRequestDTO) {
     return this.blogService.updateBlog({ ...body, id });
   }
 
   @Delete(':id')
+  @Auth([AuthType.Admin])
   deleteBlog(@Param() params: DeleteBlogRequestDTO) {
     return this.blogService.deleteBlog(params);
   }

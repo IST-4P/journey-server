@@ -92,6 +92,7 @@ export class BookingRepository {
       .findUnique({
         where: {
           id: data.id,
+          userId: data.userId,
         },
       })
       .then((booking) => {

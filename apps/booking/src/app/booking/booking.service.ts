@@ -39,7 +39,10 @@ export class BookingService {
   }
 
   async updateStatusBooking(data: UpdateStatusBookingRequest) {
-    const booking = await this.bookingRepository.getBooking({ id: data.id });
+    const booking = await this.bookingRepository.getBooking({
+      id: data.id,
+      userId: data.userId,
+    });
     if (!booking) {
       throw BookingNotFoundException;
     }

@@ -4,6 +4,7 @@ import { ExtensionValidatorSchema } from '../validators';
 
 export const GetManyExtensionsRequestSchema = ExtensionValidatorSchema.pick({
   status: true,
+  requestedBy: true,
 })
   .partial()
   .extend(PaginationQuerySchema.shape);
@@ -18,6 +19,7 @@ export const GetManyExtensionsResponseSchema = z.object({
 
 export const GetExtensionRequestSchema = ExtensionValidatorSchema.pick({
   id: true,
+  requestedBy: true,
 });
 
 export const GetExtensionResponseSchema = ExtensionValidatorSchema;

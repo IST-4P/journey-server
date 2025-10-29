@@ -26,7 +26,7 @@ export class CreateCheckInOutRequestDTO extends createZodDto(
   CreateCheckInOutRequestSchema.extend({
     address: z.string().optional(),
     damageNotes: z.string().optional(),
-  }).omit({ userId: true })
+  })
 ) {}
 export class UpdateCheckOutRequestDTO extends createZodDto(
   UpdateCheckOutRequestSchema.extend({

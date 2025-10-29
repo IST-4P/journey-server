@@ -1,10 +1,12 @@
 using rental.Model.Entities;
+using System.Text.Json;
 
 namespace rental.Service
 {
     public static class RentalCalculationHelper
     {
         public const double VAT_PERCENT = 10.0;
+        public const double DEPOSIT_PERCENT = 20.0; // 20% of item price * quantity
 
         public static double CalculateDiscountAmount(double rentalFee, double discountPercent, double maxDiscount)
         {
@@ -12,29 +14,47 @@ namespace rental.Service
             return Math.Min(calculatedDiscount, maxDiscount);
         }
 
-        /// <summary>
-        /// Calculate deposit based on price after discount
-        /// </summary>
-        public static double CalculateDeposit(double priceAfterDiscount)
+        // Calculate deposit based on individual item prices and quantities
+        public static double CalculateDepositForItems(List<(double unitPrice, int quantity)> items)
         {
-            if (priceAfterDiscount < 100_000)
-                return 0;
-            else if (priceAfterDiscount < 500_000)
-                return 100_000;
-            else if (priceAfterDiscount < 1_000_000)
-                return 200_000;
-            else
-                return 500_000;
+            double totalItemValue = 0;
+            foreach (var item in items)
+            {
+                totalItemValue += item.unitPrice * item.quantity;
+            }
+            return totalItemValue * (DEPOSIT_PERCENT / 100.0);
         }
 
-        /// <summary>
-        /// Calculate total price: (RentalFee - discount + deposit) * (1 + VAT/100)
-        /// </summary>
+        // Legacy method for backward compatibility
+        [Obsolete("Use CalculateDepositForItems instead")]
+        public static double CalculateDeposit(double rentalFee)
+        {
+            return rentalFee * 0.2;
+        }
+
         public static double CalculateTotalPrice(double rentalFee, double discountAmount, double deposit)
         {
             double subtotal = rentalFee - discountAmount + deposit;
             double totalWithVAT = subtotal * (1 + VAT_PERCENT / 100.0);
             return totalWithVAT;
         }
+
+        public static double CalculateRefundPercent(DateTime startDate, DateTime cancelDate)
+        {
+            var daysBefore = (startDate - cancelDate).TotalDays;
+
+            if (daysBefore >= 7)
+                return 100; // Full refund if cancelled 7+ days before
+            else if (daysBefore >= 3)
+                return 50;  // 50% refund if cancelled 3-7 days before
+            else
+                return 0;   // No refund if cancelled less than 3 days before
+        }
+
+        public static double CalculateRefundAmount(double deposit, double refundPercent)
+        {
+            return deposit * (refundPercent / 100.0);
+        }
+
     }
 }

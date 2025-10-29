@@ -17,19 +17,22 @@ namespace rental.Service
         private readonly ILogger<RentalGrpcService> _logger;
         private readonly User.UserService.UserServiceClient _userClient;
         private readonly Device.DeviceService.DeviceServiceClient _deviceClient;
+        private readonly Payment.PaymentService.PaymentServiceClient _paymentClient;
 
         public RentalGrpcService(
             RentalRepository repository,
             IMapper mapper,
             ILogger<RentalGrpcService> logger,
             User.UserService.UserServiceClient userClient,
-            Device.DeviceService.DeviceServiceClient deviceClient)
+            Device.DeviceService.DeviceServiceClient deviceClient,
+            Payment.PaymentService.PaymentServiceClient paymentClient)
         {
             _repository = repository;
             _mapper = mapper;
             _logger = logger;
             _userClient = userClient;
             _deviceClient = deviceClient;
+            _paymentClient = paymentClient;
         }
 
         // User: Create rental
@@ -37,9 +40,9 @@ namespace rental.Service
         {
             try
             {
-                if (request.Item == null)
+                if (request.Items == null || request.Items.Count == 0)
                 {
-                    throw new RpcException(new Status(StatusCode.InvalidArgument, "Item is required"));
+                    throw new RpcException(new Status(StatusCode.InvalidArgument, "At least one item is required"));
                 }
 
                 var rental = new RentalEntity();
@@ -51,104 +54,110 @@ namespace rental.Service
                 rental.Status = RentalStatus.PENDING;
                 rental.VAT = RentalCalculationHelper.VAT_PERCENT;
 
-                // Only ONE item allowed
-                var protoItem = request.Item;
-                var itemData = new RentalItemData
+                // Process multiple items
+                var itemsDataList = new List<RentalItemData>();
+                var itemDetailsList = new List<RentalItemDetail>();
+                var itemPricesList = new List<(double unitPrice, int quantity)>();
+                int totalQuantity = 0;
+                double totalRentalFee = 0;
+
+                foreach (var protoItem in request.Items)
                 {
-                    TargetId = Guid.Parse(protoItem.TargetId),
-                    IsCombo = protoItem.IsCombo,
-                    Quantity = protoItem.Quantity
-                };
-                var items = new List<RentalItemData> { itemData };
-                int totalQuantity = protoItem.Quantity;
-
-                // Fetch price and details
-                string name;
-                double unitPrice;
-                RentalTargetDetail? targetDetail = null;
-
-                if (protoItem.IsCombo)
-                {
-                    var combo = await _deviceClient.GetComboAsync(new Device.GetComboRequest
+                    var itemData = new RentalItemData
                     {
-                        ComboId = protoItem.TargetId
-                    });
-                    name = combo.Name;
-                    unitPrice = combo.Price;
-                    targetDetail = new RentalTargetDetail { Combo = combo };
-                }
-                else
-                {
-                    var device = await _deviceClient.GetDeviceAsync(new Device.GetDeviceRequest
-                    {
-                        DeviceId = protoItem.TargetId
-                    });
-                    name = device.Name;
-                    unitPrice = device.Price;
-                    targetDetail = new RentalTargetDetail { Device = device };
+                        TargetId = Guid.Parse(protoItem.TargetId),
+                        IsCombo = protoItem.IsCombo,
+                        Quantity = protoItem.Quantity
+                    };
+                    itemsDataList.Add(itemData);
+                    totalQuantity += protoItem.Quantity;
 
-                    // Validate available quantity
-                    if (device.Quantity < protoItem.Quantity)
-                    {
-                        throw new RpcException(new Status(StatusCode.FailedPrecondition, $"Not enough stock for device {protoItem.TargetId}. Available: {device.Quantity}, requested: {protoItem.Quantity}"));
-                    }
+                    // Fetch price and details
+                    string name;
+                    double unitPrice;
+                    RentalTargetDetail? targetDetail = null;
 
-                    // Reduce device quantity (send full payload to avoid overwriting with defaults)
-                    try
+                    if (protoItem.IsCombo)
                     {
-                        var updateReq = new Device.UpdateDeviceRequest
+                        var combo = await _deviceClient.GetComboAsync(new Device.GetComboRequest
                         {
-                            DeviceId = protoItem.TargetId,
-                            Name = device.Name,
-                            Price = device.Price,
-                            Description = device.Description,
-                            Status = device.Status,
-                            Quantity = Math.Max(0, device.Quantity - protoItem.Quantity),
-                            CategoryId = device.CategoryId
-                        };
-                        updateReq.Information.AddRange(device.Information);
-                        updateReq.Images.AddRange(device.Images);
-
-                        await _deviceClient.UpdateDeviceAsync(updateReq);
+                            ComboId = protoItem.TargetId
+                        });
+                        name = combo.Name;
+                        unitPrice = combo.Price;
+                        targetDetail = new RentalTargetDetail { Combo = combo };
                     }
-                    catch (Exception ex)
+                    else
                     {
-                        _logger.LogError(ex, "Failed to reduce device quantity for {DeviceId}", protoItem.TargetId);
-                        throw new RpcException(new Status(StatusCode.Internal, "Failed to update device quantity"));
+                        var device = await _deviceClient.GetDeviceAsync(new Device.GetDeviceRequest
+                        {
+                            DeviceId = protoItem.TargetId
+                        });
+                        name = device.Name;
+                        unitPrice = device.Price;
+                        targetDetail = new RentalTargetDetail { Device = device };
+
+                        // Validate available quantity
+                        if (device.Quantity < protoItem.Quantity)
+                        {
+                            throw new RpcException(new Status(StatusCode.FailedPrecondition, $"Not enough stock for device {protoItem.TargetId}. Available: {device.Quantity}, requested: {protoItem.Quantity}"));
+                        }
+
+                        // Reduce device quantity
+                        try
+                        {
+                            var updateReq = new Device.UpdateDeviceRequest
+                            {
+                                DeviceId = protoItem.TargetId,
+                                Name = device.Name,
+                                Price = device.Price,
+                                Description = device.Description,
+                                Status = device.Status,
+                                Quantity = Math.Max(0, device.Quantity - protoItem.Quantity),
+                                CategoryId = device.CategoryId
+                            };
+                            updateReq.Information.AddRange(device.Information);
+                            updateReq.Images.AddRange(device.Images);
+
+                            await _deviceClient.UpdateDeviceAsync(updateReq);
+                        }
+                        catch (Exception ex)
+                        {
+                            _logger.LogError(ex, "Failed to reduce device quantity for {DeviceId}", protoItem.TargetId);
+                            throw new RpcException(new Status(StatusCode.Internal, "Failed to update device quantity"));
+                        }
                     }
+
+                    double subtotal = unitPrice * protoItem.Quantity;
+                    totalRentalFee += subtotal;
+                    itemPricesList.Add((unitPrice, protoItem.Quantity));
+
+                    var itemDetail = new RentalItemDetail
+                    {
+                        TargetId = protoItem.TargetId,
+                        IsCombo = protoItem.IsCombo,
+                        Quantity = protoItem.Quantity,
+                        Name = name,
+                        UnitPrice = unitPrice,
+                        Subtotal = subtotal,
+                        Detail = targetDetail
+                    };
+                    itemDetailsList.Add(itemDetail);
                 }
 
-                double totalRentalFee = unitPrice * protoItem.Quantity;
-                double subtotal = totalRentalFee;
+                // Calculate deposit based on item prices (not rental fee)
+                double deposit = RentalCalculationHelper.CalculateDepositForItems(itemPricesList);
 
-                var itemDetail = new RentalItemDetail
-                {
-                    TargetId = protoItem.TargetId,
-                    IsCombo = protoItem.IsCombo,
-                    Quantity = protoItem.Quantity,
-                    Name = name,
-                    UnitPrice = unitPrice,
-                    Subtotal = subtotal,
-                    Detail = targetDetail
-                };
-
-                // Calculate discount amount (capped by maxDiscount)
                 double discountAmount = RentalCalculationHelper.CalculateDiscountAmount(
                     totalRentalFee,
                     request.DiscountPercent,
                     request.MaxDiscount
                 );
 
-                // Calculate price after discount (before deposit)
-                double priceAfterDiscount = totalRentalFee - discountAmount;
-
-                // Calculate deposit based on price after discount
-                double deposit = RentalCalculationHelper.CalculateDeposit(priceAfterDiscount);
-
-                // Final total price: (RentalFee - discount + deposit) * (1 + VAT/100)
+                // Calculate total price for reference (but client only pays deposit)
                 double totalPrice = RentalCalculationHelper.CalculateTotalPrice(totalRentalFee, discountAmount, deposit);
 
-                rental.Items = JsonSerializer.Serialize(items);
+                rental.Items = JsonSerializer.Serialize(itemsDataList);
                 rental.RentalFee = totalRentalFee;
                 rental.DiscountPercent = request.DiscountPercent;
                 rental.MaxDiscount = request.MaxDiscount;
@@ -157,6 +166,52 @@ namespace rental.Service
                 rental.TotalQuantity = totalQuantity;
 
                 var created = await _repository.CreateAsync(rental);
+
+                // Record initial status in history
+                await RecordStatusChange(created.Id, RentalStatus.PENDING, RentalStatus.PENDING, "Initial rental creation");
+
+                // Payment integration - CLIENT ONLY PAYS DEPOSIT
+                string? paymentMessage = null;
+                try
+                {
+                    var demoMode = (Environment.GetEnvironmentVariable("PAYMENT_DEMO_MODE") ?? "false").Equals("true", StringComparison.OrdinalIgnoreCase);
+
+                    if (!demoMode)
+                    {
+                        var req = new Payment.WebhookPaymentRequest
+                        {
+                            Id = (int)(DateTimeOffset.UtcNow.ToUnixTimeSeconds() % int.MaxValue),
+                            Gateway = "internal",
+                            TransactionDate = DateTime.UtcNow.ToString("yyyy-MM-dd HH:mm:ss"),
+                            TransferType = "in",
+                            TransferAmount = deposit, // Only charge deposit
+                            Accumulated = deposit,
+                            Description = $"Deposit for rental:{created.Id} user:{created.UserId}",
+                        };
+
+                        var resp = await _paymentClient.ReceiverAsync(req);
+                        paymentMessage = resp.Message;
+
+                        // If payment succeeds, mark rental as PAID
+                        if (!string.IsNullOrWhiteSpace(paymentMessage))
+                        {
+                            await _repository.UpdateAsync(created.Id, new UpdateRentalRequestDto { Status = RentalStatus.PAID.ToString() });
+                            created.Status = RentalStatus.PAID;
+                            await RecordStatusChange(created.Id, RentalStatus.PENDING, RentalStatus.PAID, "Deposit payment successful");
+                        }
+                    }
+                    else
+                    {
+                        paymentMessage = "Payment.Success (demo)";
+                        await _repository.UpdateAsync(created.Id, new UpdateRentalRequestDto { Status = RentalStatus.PAID.ToString() });
+                        created.Status = RentalStatus.PAID;
+                        await RecordStatusChange(created.Id, RentalStatus.PENDING, RentalStatus.PAID, "Deposit payment successful (demo mode)");
+                    }
+                }
+                catch (RpcException ex)
+                {
+                    _logger.LogWarning(ex, "Payment integration failed for rental {RentalId}. Leaving status as {Status}", created.Id, created.Status);
+                }
 
                 var response = new RentalResponse
                 {
@@ -176,7 +231,7 @@ namespace rental.Service
                     ActualEndDate = created.ActualEndDate?.ToString("O") ?? string.Empty,
                 };
 
-                response.Items.Add(itemDetail);
+                response.Items.AddRange(itemDetailsList);
 
                 return response;
             }
@@ -383,6 +438,37 @@ namespace rental.Service
                 rental.EndDate = newEnd;
                 await _repository.UpdateAsync(rental.Id, new UpdateRentalRequestDto { EndDate = newEnd });
 
+                // If additional fee applies, attempt payment for the extension
+                if (request.AdditionalFee > 0)
+                {
+                    try
+                    {
+                        var demoMode = (Environment.GetEnvironmentVariable("PAYMENT_DEMO_MODE") ?? "false").Equals("true", StringComparison.OrdinalIgnoreCase);
+                        if (!demoMode)
+                        {
+                            var reqPay = new Payment.WebhookPaymentRequest
+                            {
+                                Id = (int)(DateTimeOffset.UtcNow.ToUnixTimeSeconds() % int.MaxValue),
+                                Gateway = "internal",
+                                TransactionDate = DateTime.UtcNow.ToString("yyyy-MM-dd HH:mm:ss"),
+                                TransferType = "in",
+                                TransferAmount = request.AdditionalFee,
+                                Accumulated = request.AdditionalFee,
+                                Description = $"rental-extension:{rental.Id}",
+                            };
+                            await _paymentClient.ReceiverAsync(reqPay);
+                        }
+                        else
+                        {
+                            _logger.LogInformation("[Payment DEMO] Extension fee for rental {RentalId} paid successfully.", rental.Id);
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        _logger.LogWarning(ex, "Payment for rental extension failed for rental {RentalId}", rental.Id);
+                    }
+                }
+
                 // Return the updated rental
                 var items = JsonSerializer.Deserialize<List<RentalItemData>>(rental.Items) ?? new List<RentalItemData>();
                 var itemDetails = await BuildItemDetails(items);
@@ -456,6 +542,17 @@ namespace rental.Service
         {
             try
             {
+                var rentalId = Guid.Parse(request.RentalId);
+
+                // Get current rental to track status change
+                var currentRental = await _repository.GetByIdAsync(rentalId);
+                if (currentRental is null)
+                {
+                    throw new RpcException(new Status(StatusCode.NotFound, "Rental not found"));
+                }
+
+                var oldStatus = currentRental.Status;
+
                 var updateDto = new UpdateRentalRequestDto
                 {
                     Status = string.IsNullOrEmpty(request.Status) ? null : request.Status,
@@ -463,7 +560,6 @@ namespace rental.Service
                     EndDate = !string.IsNullOrEmpty(request.EndDate) ? DateTime.Parse(request.EndDate).ToUniversalTime() : null
                 };
 
-                var rentalId = Guid.Parse(request.RentalId);
                 var updated = await _repository.UpdateAsync(rentalId, updateDto);
 
                 if (updated is null)
@@ -471,35 +567,64 @@ namespace rental.Service
                     throw new RpcException(new Status(StatusCode.NotFound, "Rental not found"));
                 }
 
-            // Defensive JSON parsing for rental items
-            var items = DeserializeItemsSafe(updated.Items);
-            var itemDetails = await BuildItemDetails(items);
+                // Record status change if status was updated
+                if (!string.IsNullOrEmpty(request.Status) && Enum.TryParse<RentalStatus>(request.Status, true, out var newStatus))
+                {
+                    if (oldStatus != newStatus)
+                    {
+                        await RecordStatusChange(rentalId, oldStatus, newStatus, $"Admin updated status from {oldStatus} to {newStatus}");
 
-            var response = new RentalResponse
-            {
-                Id = updated.Id.ToString(),
-                UserId = updated.UserId.ToString(),
-                Status = updated.Status.ToString(),
-                RentalFee = updated.RentalFee,
-                Deposit = updated.Deposit ?? 0,
-                MaxDiscount = updated.MaxDiscount,
-                DiscountPercent = updated.DiscountPercent,
-                TotalPrice = updated.TotalPrice,
-                TotalQuantity = updated.TotalQuantity,
-                VAT = updated.VAT,
-                StartDate = updated.StartDate.ToString("O"),
-                EndDate = updated.EndDate.ToString("O"),
-                CreatedAt = updated.CreatedAt.ToString("O"),
-                ActualEndDate = updated.ActualEndDate?.ToString("O") ?? string.Empty,
-            };
+                        // Handle refund if status changed to CANCELLED or COMPLETED
+                        if (newStatus == RentalStatus.CANCELLED || newStatus == RentalStatus.COMPLETED)
+                        {
+                            double refundPercent = 0;
+                            if (newStatus == RentalStatus.CANCELLED)
+                            {
+                                refundPercent = RentalCalculationHelper.CalculateRefundPercent(updated.StartDate, DateTime.UtcNow);
+                            }
+                            else if (newStatus == RentalStatus.COMPLETED)
+                            {
+                                refundPercent = 100; // Full refund on completion
+                            }
 
-            foreach (var item in itemDetails)
-            {
-                response.Items.Add(item);
+                            double refundAmount = RentalCalculationHelper.CalculateRefundAmount(updated.Deposit ?? 0, refundPercent);
+                            _logger.LogInformation("Rental {RentalId} status changed to {NewStatus}. Refund: {RefundPercent}% = {RefundAmount} VND",
+                                rentalId, newStatus, refundPercent, refundAmount);
+
+                            // TODO: Integrate with payment service to process refund
+                        }
+                    }
+                }
+
+                // Defensive JSON parsing for rental items
+                var items = DeserializeItemsSafe(updated.Items);
+                var itemDetails = await BuildItemDetails(items);
+
+                var response = new RentalResponse
+                {
+                    Id = updated.Id.ToString(),
+                    UserId = updated.UserId.ToString(),
+                    Status = updated.Status.ToString(),
+                    RentalFee = updated.RentalFee,
+                    Deposit = updated.Deposit ?? 0,
+                    MaxDiscount = updated.MaxDiscount,
+                    DiscountPercent = updated.DiscountPercent,
+                    TotalPrice = updated.TotalPrice,
+                    TotalQuantity = updated.TotalQuantity,
+                    VAT = updated.VAT,
+                    StartDate = updated.StartDate.ToString("O"),
+                    EndDate = updated.EndDate.ToString("O"),
+                    CreatedAt = updated.CreatedAt.ToString("O"),
+                    ActualEndDate = updated.ActualEndDate?.ToString("O") ?? string.Empty,
+                };
+
+                foreach (var item in itemDetails)
+                {
+                    response.Items.Add(item);
+                }
+
+                return response;
             }
-
-            return response;
-        }
             catch (RpcException)
             {
                 throw;
@@ -513,189 +638,213 @@ namespace rental.Service
 
         // Admin: Delete rental
         public override async Task<DeleteRentalResponse> DeleteRental(DeleteRentalRequest request, ServerCallContext context)
-{
-    try
-    {
-        var rentalId = Guid.Parse(request.RentalId);
-        var deleted = await _repository.DeleteAsync(rentalId);
-
-        if (!deleted)
         {
-            throw new RpcException(new Status(StatusCode.NotFound, "Rental not found"));
+            try
+            {
+                var rentalId = Guid.Parse(request.RentalId);
+                var deleted = await _repository.DeleteAsync(rentalId);
+
+                if (!deleted)
+                {
+                    throw new RpcException(new Status(StatusCode.NotFound, "Rental not found"));
+                }
+
+                return new DeleteRentalResponse
+                {
+                    Message = "RentalDeletedSuccessfully"
+                };
+            }
+            catch (RpcException)
+            {
+                throw;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error deleting rental");
+                throw new RpcException(new Status(StatusCode.Internal, ex.Message));
+            }
         }
 
-        return new DeleteRentalResponse
+        // Helper methods
+        private async Task<UserRental> MapToUserRental(RentalEntity rental)
         {
-            Message = "RentalDeletedSuccessfully"
-        };
-    }
-    catch (RpcException)
-    {
-        throw;
-    }
-    catch (Exception ex)
-    {
-        _logger.LogError(ex, "Error deleting rental");
-        throw new RpcException(new Status(StatusCode.Internal, ex.Message));
-    }
-}
+            // Defensive JSON parsing for rental items
+            var items = DeserializeItemsSafe(rental.Items);
+            var itemDetails = await BuildItemDetails(items);
 
-// Helper methods
-private async Task<UserRental> MapToUserRental(RentalEntity rental)
-{
-    // Defensive JSON parsing for rental items
-    var items = DeserializeItemsSafe(rental.Items);
-    var itemDetails = await BuildItemDetails(items);
-
-    var response = new UserRental
-    {
-        Id = rental.Id.ToString(),
-        TotalPrice = rental.TotalPrice,
-        MaxDiscount = rental.MaxDiscount,
-        DiscountPercent = rental.DiscountPercent,
-        Status = rental.Status.ToString(),
-        StartDate = rental.StartDate.ToString("O"),
-        EndDate = rental.EndDate.ToString("O"),
-        CreatedAt = rental.CreatedAt.ToString("O")
-    };
-
-    foreach (var item in itemDetails)
-    {
-        response.Items.Add(item);
-    }
-
-    return response;
-}
-
-private async Task<AdminRental> MapToAdminRental(RentalEntity rental)
-{
-    var userName = "Unknown";
-    var userEmail = "";
-
-    try
-    {
-        // Fetch user info
-        var userResponse = await _userClient.GetProfileAsync(new User.GetProfileRequest
-        {
-            UserId = rental.UserId.ToString()
-        });
-        userName = userResponse.FullName;
-        userEmail = userResponse.Email;
-    }
-    catch (Exception ex)
-    {
-        _logger.LogWarning(ex, "Failed to fetch user info for rental {RentalId}", rental.Id);
-    }
-
-    // Defensive JSON parsing for rental items
-    var items = DeserializeItemsSafe(rental.Items);
-    var itemDetails = await BuildItemDetails(items);
-
-    var response = new AdminRental
-    {
-        Id = rental.Id.ToString(),
-        UserId = rental.UserId.ToString(),
-        UserName = userName,
-        UserEmail = userEmail,
-        TotalPrice = rental.TotalPrice,
-        MaxDiscount = rental.MaxDiscount,
-        DiscountPercent = rental.DiscountPercent,
-        Status = rental.Status.ToString(),
-        StartDate = rental.StartDate.ToString("O"),
-        EndDate = rental.EndDate.ToString("O"),
-        CreatedAt = rental.CreatedAt.ToString("O")
-    };
-
-    foreach (var item in itemDetails)
-    {
-        response.Items.Add(item);
-    }
-
-    return response;
-}
-
-// Build item details helper
-private async Task<List<RentalItemDetail>> BuildItemDetails(List<RentalItemData> items)
-{
-    var details = new List<RentalItemDetail>();
-
-    foreach (var item in items)
-    {
-        try
-        {
-            string name;
-            double unitPrice;
-            RentalTargetDetail? targetDetail = null;
-
-            if (item.IsCombo)
+            var response = new UserRental
             {
-                var combo = await _deviceClient.GetComboAsync(new Device.GetComboRequest
-                {
-                    ComboId = item.TargetId.ToString()
-                });
-                name = combo.Name;
-                unitPrice = combo.Price;
-                targetDetail = new RentalTargetDetail { Combo = combo };
-            }
-            else
+                Id = rental.Id.ToString(),
+                TotalPrice = rental.TotalPrice,
+                MaxDiscount = rental.MaxDiscount,
+                DiscountPercent = rental.DiscountPercent,
+                Status = rental.Status.ToString(),
+                StartDate = rental.StartDate.ToString("O"),
+                EndDate = rental.EndDate.ToString("O"),
+                CreatedAt = rental.CreatedAt.ToString("O")
+            };
+
+            foreach (var item in itemDetails)
             {
-                var device = await _deviceClient.GetDeviceAsync(new Device.GetDeviceRequest
-                {
-                    DeviceId = item.TargetId.ToString()
-                });
-                name = device.Name;
-                unitPrice = device.Price;
-                targetDetail = new RentalTargetDetail { Device = device };
+                response.Items.Add(item);
             }
 
-            details.Add(new RentalItemDetail
-            {
-                TargetId = item.TargetId.ToString(),
-                IsCombo = item.IsCombo,
-                Quantity = item.Quantity,
-                Name = name,
-                UnitPrice = unitPrice,
-                Subtotal = unitPrice * item.Quantity,
-                Detail = targetDetail
-            });
+            return response;
         }
-        catch (Exception ex)
+
+        private async Task<AdminRental> MapToAdminRental(RentalEntity rental)
         {
-            _logger.LogWarning(ex, "Failed to build detail for item {TargetId}", item.TargetId);
-            // Add placeholder detail
-            details.Add(new RentalItemDetail
+            var userName = "Unknown";
+            var userEmail = "";
+
+            try
             {
-                TargetId = item.TargetId.ToString(),
-                IsCombo = item.IsCombo,
-                Quantity = item.Quantity,
-                Name = "Unknown",
-                UnitPrice = 0,
-                Subtotal = 0
-            });
+                // Fetch user info
+                var userResponse = await _userClient.GetProfileAsync(new User.GetProfileRequest
+                {
+                    UserId = rental.UserId.ToString()
+                });
+                userName = userResponse.FullName;
+                userEmail = userResponse.Email;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogWarning(ex, "Failed to fetch user info for rental {RentalId}", rental.Id);
+            }
+
+            // Defensive JSON parsing for rental items
+            var items = DeserializeItemsSafe(rental.Items);
+            var itemDetails = await BuildItemDetails(items);
+
+            var response = new AdminRental
+            {
+                Id = rental.Id.ToString(),
+                UserId = rental.UserId.ToString(),
+                UserName = userName,
+                UserEmail = userEmail,
+                TotalPrice = rental.TotalPrice,
+                MaxDiscount = rental.MaxDiscount,
+                DiscountPercent = rental.DiscountPercent,
+                Status = rental.Status.ToString(),
+                StartDate = rental.StartDate.ToString("O"),
+                EndDate = rental.EndDate.ToString("O"),
+                CreatedAt = rental.CreatedAt.ToString("O")
+            };
+
+            foreach (var item in itemDetails)
+            {
+                response.Items.Add(item);
+            }
+
+            return response;
         }
-    }
 
-    return details;
-}
+        // Build item details helper
+        private async Task<List<RentalItemDetail>> BuildItemDetails(List<RentalItemData> items)
+        {
+            var details = new List<RentalItemDetail>();
 
-// Safely deserialize rental items JSON to a strongly-typed list.
-// Returns an empty list when the JSON is null/empty/whitespace or invalid.
-private List<RentalItemData> DeserializeItemsSafe(string? json)
-{
-    if (string.IsNullOrWhiteSpace(json))
-    {
-        return new List<RentalItemData>();
-    }
-    try
-    {
-        var result = JsonSerializer.Deserialize<List<RentalItemData>>(json);
-        return result ?? new List<RentalItemData>();
-    }
-    catch (JsonException ex)
-    {
-        _logger.LogWarning(ex, "Failed to deserialize rental items JSON. Returning empty list.");
-        return new List<RentalItemData>();
-    }
-}
+            foreach (var item in items)
+            {
+                try
+                {
+                    string name;
+                    double unitPrice;
+                    RentalTargetDetail? targetDetail = null;
+
+                    if (item.IsCombo)
+                    {
+                        var combo = await _deviceClient.GetComboAsync(new Device.GetComboRequest
+                        {
+                            ComboId = item.TargetId.ToString()
+                        });
+                        name = combo.Name;
+                        unitPrice = combo.Price;
+                        targetDetail = new RentalTargetDetail { Combo = combo };
+                    }
+                    else
+                    {
+                        var device = await _deviceClient.GetDeviceAsync(new Device.GetDeviceRequest
+                        {
+                            DeviceId = item.TargetId.ToString()
+                        });
+                        name = device.Name;
+                        unitPrice = device.Price;
+                        targetDetail = new RentalTargetDetail { Device = device };
+                    }
+
+                    details.Add(new RentalItemDetail
+                    {
+                        TargetId = item.TargetId.ToString(),
+                        IsCombo = item.IsCombo,
+                        Quantity = item.Quantity,
+                        Name = name,
+                        UnitPrice = unitPrice,
+                        Subtotal = unitPrice * item.Quantity,
+                        Detail = targetDetail
+                    });
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogWarning(ex, "Failed to build detail for item {TargetId}", item.TargetId);
+                    // Add placeholder detail
+                    details.Add(new RentalItemDetail
+                    {
+                        TargetId = item.TargetId.ToString(),
+                        IsCombo = item.IsCombo,
+                        Quantity = item.Quantity,
+                        Name = "Unknown",
+                        UnitPrice = 0,
+                        Subtotal = 0
+                    });
+                }
+            }
+
+            return details;
+        }
+
+        // Safely deserialize rental items JSON to a strongly-typed list.
+        // Returns an empty list when the JSON is null/empty/whitespace or invalid.
+        private List<RentalItemData> DeserializeItemsSafe(string? json)
+        {
+            if (string.IsNullOrWhiteSpace(json))
+            {
+                return new List<RentalItemData>();
+            }
+            try
+            {
+                var result = JsonSerializer.Deserialize<List<RentalItemData>>(json);
+                return result ?? new List<RentalItemData>();
+            }
+            catch (JsonException ex)
+            {
+                _logger.LogWarning(ex, "Failed to deserialize rental items JSON. Returning empty list.");
+                return new List<RentalItemData>();
+            }
+        }
+
+        // Record status change in rental history
+        private async Task RecordStatusChange(Guid rentalId, RentalStatus oldStatus, RentalStatus newStatus, string? notes = null)
+        {
+            try
+            {
+                var history = new RentalHistory
+                {
+                    Id = Guid.NewGuid(),
+                    RentalId = rentalId,
+                    OldStatus = oldStatus,
+                    NewStatus = newStatus,
+                    ChangedAt = DateTime.UtcNow,
+                    Notes = notes
+                };
+
+                await _repository.AddRentalHistoryAsync(history);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogWarning(ex, "Failed to record status change for rental {RentalId}", rentalId);
+                // Don't throw - status change logging is not critical
+            }
+        }
     }
 }

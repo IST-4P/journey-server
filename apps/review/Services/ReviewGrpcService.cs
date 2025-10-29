@@ -13,6 +13,7 @@ namespace review.Services
         private readonly IReviewService _reviewService;
         private readonly IMapper _mapper;
         private readonly ILogger<ReviewGrpcService> _logger;
+        
 
         public ReviewGrpcService(IReviewService reviewService, IMapper mapper, ILogger<ReviewGrpcService> logger)
         {

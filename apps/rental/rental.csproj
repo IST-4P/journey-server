@@ -33,6 +33,9 @@
   <Protobuf Include="..\..\libs\grpc\src\lib\proto\user.proto"
             GrpcServices="Client"
             ProtoRoot="..\..\libs\grpc\src\lib\proto" />
+  <Protobuf Include="..\..\libs\grpc\src\lib\proto\payment.proto"
+            GrpcServices="Client"
+            ProtoRoot="..\..\libs\grpc\src\lib\proto" />
 </ItemGroup>
 
   

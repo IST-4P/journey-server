@@ -17,7 +17,12 @@ namespace rental.Nats
             _logger = logger;
         }
 
-        public async Task PublishAsync<T>(string subject, T data) where T : class
+    internal static async Task PublishAsync(string v, object value)
+    {
+      throw new NotImplementedException();
+    }
+
+    public async Task PublishAsync<T>(string subject, T data) where T : class
         {
             try
             {

@@ -69,7 +69,7 @@ message RentalResponse {
 // User: Create Rental
 message CreateRentalRequest {
   string userId = 1;
-  RentalItem item = 2; // Only ONE item (device or combo) with quantity
+  repeated RentalItem items = 2; // Multiple items allowed (devices and/or combos)
   string startDate = 3;
   string endDate = 4;
   double discountPercent = 5; // Discount percentage (e.g., 10 for 10%)

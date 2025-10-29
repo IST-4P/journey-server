@@ -10,16 +10,16 @@ namespace rental.Model.Entities
         public Guid UserId { get; set; }
 
         // [{ "targetId": "guid", "isCombo": bool, "quantity": int }]
-        // Note: Only ONE item allowed per rental
+        // Multiple items allowed per rental
         public string Items { get; set; } = "[]";
 
         //chi phí
         public double RentalFee { get; set; }
-        public double? Deposit { get; set; }
+        public double? Deposit { get; set; } // Deposit based on device/combo prices and quantities
         public double DiscountPercent { get; set; } = 0; // Discount percentage (e.g., 10 for 10%)
         public double MaxDiscount { get; set; } = 0; // Maximum discount amount in VND
 
-        public double TotalPrice { get; set; }
+        public double TotalPrice { get; set; } // Total price (for reference only)
         public int TotalQuantity { get; set; }
         public double VAT { get; set; } = 10.0; // VAT percentage (default 10%)
 
@@ -40,6 +40,9 @@ namespace rental.Model.Entities
         // relationship
         public Guid? RentalExtensionId { get; set; }
         public RentalExtension? Rentals { get; set; }
+
+        // Navigation for history
+        public ICollection<RentalHistory>? History { get; set; }
     }
 
     public class RentalExtension //      gia hạn
@@ -62,15 +65,29 @@ namespace rental.Model.Entities
         public int Quantity { get; set; }
     }
 
+    [Table("rental_histories")]
+    public class RentalHistory
+    {
+        public Guid Id { get; set; } = Guid.NewGuid();
+        public Guid RentalId { get; set; }
+        public RentalStatus OldStatus { get; set; }
+        public RentalStatus NewStatus { get; set; }
+        public DateTime ChangedAt { get; set; } = DateTime.UtcNow;
+        public string? Notes { get; set; } // Optional notes about status change
+
+        // Navigation
+        public Rental? Rental { get; set; }
+    }
+
+
     public enum RentalStatus
     {
-        PENDING, // Chờ thanh toán
-        CONFIRMED, // Đã thanh toán, chờ nhận xe
-        ONGOING, // Đang thuê (đã check-in)
-        COMPLETED, // Hoàn thành (đã check-out)
-        CANCELLED, // Đã hủy
+        PENDING, // Chờ thanh toán deposit
+        PAID, // Đã thanh toán deposit, chờ nhận hàng
+        ONGOING, // Đang thuê 
+        COMPLETED, // Hoàn thành (đã trả)
+        CANCELLED, // Đã hủy (có thể hoàn deposit)
         EXPIRED // Hết hạn (quá thời gian không thanh toán)
-
     }
 }
 

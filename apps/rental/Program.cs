@@ -56,6 +56,7 @@ builder.Services.AddDbContext<RentalDbContext>(options =>
 // Configure gRPC clients (prefer environment variables, fall back to sensible defaults)
 var userServiceUrl = Environment.GetEnvironmentVariable("USER_GRPC_URL") ?? "http://localhost:5002";
 var deviceServiceUrl = Environment.GetEnvironmentVariable("DEVICE_GRPC_URL") ?? "http://localhost:5006";
+var paymentServiceUrl = Environment.GetEnvironmentVariable("PAYMENT_GRPC_URL") ?? "http://localhost:5009";
 
 builder.Services.AddGrpcClient<User.UserService.UserServiceClient>(options =>
 {
@@ -65,6 +66,11 @@ builder.Services.AddGrpcClient<User.UserService.UserServiceClient>(options =>
 builder.Services.AddGrpcClient<Device.DeviceService.DeviceServiceClient>(options =>
 {
     options.Address = new Uri(deviceServiceUrl);
+});
+
+builder.Services.AddGrpcClient<Payment.PaymentService.PaymentServiceClient>(options =>
+{
+    options.Address = new Uri(paymentServiceUrl);
 });
 
 

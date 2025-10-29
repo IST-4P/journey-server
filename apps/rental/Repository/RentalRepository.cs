@@ -152,6 +152,17 @@ namespace rental.Repository
             };
         }
 
+        // User: Cancel rental
+        public async Task<RentalEntity?> CancelRentalAsync(Guid id)
+        {
+            var rental = await _context.Set<RentalEntity>().FindAsync(id);
+            if (rental == null) return null;
+
+            rental.Status = RentalStatus.CANCELLED;
+            await _context.SaveChangesAsync();
+            return rental;
+        }
+
         // Admin: Update rental
         public async Task<RentalEntity?> UpdateAsync(Guid id, UpdateRentalRequestDto updateDto)
         {
@@ -159,10 +170,15 @@ namespace rental.Repository
             if (rental == null) return null;
 
             if (!string.IsNullOrEmpty(updateDto.Status))
+            {
                 if (Enum.TryParse<RentalStatus>(updateDto.Status, true, out var status))
+                {
+                    rental.Status = status;
+                }
+            }
 
-                    if (updateDto.StartDate.HasValue)
-                        rental.StartDate = updateDto.StartDate.Value;
+            if (updateDto.StartDate.HasValue)
+                rental.StartDate = updateDto.StartDate.Value;
 
             if (updateDto.EndDate.HasValue)
                 rental.EndDate = updateDto.EndDate.Value;
@@ -180,6 +196,22 @@ namespace rental.Repository
             _context.Set<RentalEntity>().Remove(rental);
             await _context.SaveChangesAsync();
             return true;
+        }
+
+        // Add rental history record
+        public async Task AddRentalHistoryAsync(RentalHistory history)
+        {
+            _context.Set<RentalHistory>().Add(history);
+            await _context.SaveChangesAsync();
+        }
+
+        // Get rental history by rental ID
+        public async Task<List<RentalHistory>> GetRentalHistoryAsync(Guid rentalId)
+        {
+            return await _context.Set<RentalHistory>()
+                .Where(h => h.RentalId == rentalId)
+                .OrderBy(h => h.ChangedAt)
+                .ToListAsync();
         }
     }
 }

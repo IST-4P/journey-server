@@ -12,6 +12,9 @@ data:
   CHAT_GRPC_SERVICE_URL: {{ .Values.config.chatUrl | quote }}
   VEHICLE_GRPC_SERVICE_URL: {{ .Values.config.vehicleUrl | quote }}
   BLOG_GRPC_SERVICE_URL: {{ .Values.config.blogUrl | quote }}
+  RENTAL_GRPC_SERVICE_URL: {{ .Values.config.rentalUrl | quote }}
+  DEVICE_GRPC_SERVICE_URL: {{ .Values.config.deviceUrl | quote }}
+  REVIEW_GRPC_SERVICE_URL: {{ .Values.config.reviewUrl | quote }}
   BOOKING_GRPC_SERVICE_URL: {{ .Values.config.bookingUrl | quote }}
   PAYMENT_GRPC_SERVICE_URL: {{ .Values.config.paymentUrl | quote }}
   ACCESS_TOKEN_EXPIRES_IN:

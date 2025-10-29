@@ -35,6 +35,24 @@ export interface RentalItemDetail {
   detail: RentalTargetDetail | undefined;
 }
 
+/** User: Cancel Rental */
+export interface CancelRentalRequest {
+  rentalId: string;
+  /** để verify ownership */
+  userId: string;
+}
+
+export interface CancelRentalResponse {
+  /** true nếu hủy thành công */
+  success: boolean;
+  /** thông báo kết quả */
+  message: string;
+  /** số tiền hoàn lại cho user */
+  refundAmount: number;
+  /** phần trăm hoàn lại (0-100) */
+  refundPercent: number;
+}
+
 /** Common response */
 export interface RentalResponse {
   id: string;
@@ -200,6 +218,8 @@ export interface RentalServiceClient {
 
   getRentalById(request: GetRentalByIdRequest): Observable<RentalResponse>;
 
+  cancelRental(request: CancelRentalRequest): Observable<CancelRentalResponse>;
+
   /** Admin operations */
 
   getAllRentals(request: GetAllRentalsRequest): Observable<GetAllRentalsAdminResponse>;
@@ -225,6 +245,10 @@ export interface RentalServiceController {
   ): Promise<GetMyRentalsResponse> | Observable<GetMyRentalsResponse> | GetMyRentalsResponse;
 
   getRentalById(request: GetRentalByIdRequest): Promise<RentalResponse> | Observable<RentalResponse> | RentalResponse;
+
+  cancelRental(
+    request: CancelRentalRequest,
+  ): Promise<CancelRentalResponse> | Observable<CancelRentalResponse> | CancelRentalResponse;
 
   /** Admin operations */
 
@@ -255,6 +279,7 @@ export function RentalServiceControllerMethods() {
       "createRental",
       "getMyRentals",
       "getRentalById",
+      "cancelRental",
       "getAllRentals",
       "updateRental",
       "deleteRental",

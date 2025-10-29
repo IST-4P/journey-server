@@ -1,0 +1,43 @@
+{{- if .Values.device.enabled }}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: device
+  labels:
+    app: device
+spec:
+  replicas: {{ .Values.device.replicas }}
+  selector:
+    matchLabels:
+      app: device
+  template:
+    metadata:
+      labels:
+        app: device
+    spec:
+      containers:
+        - name: device
+          image: {{ .Values.device.image }}
+          imagePullPolicy: {{ .Values.global.imagePullPolicy }}
+          ports:
+            - name: grpc
+              containerPort: {{ .Values.device.port.grpc }}
+              protocol: TCP
+          env:
+            - name: ASPNETCORE_URLS
+              value: "http://+:{{ .Values.device.port.grpc }}"
+            - name: ASPNETCORE_ENVIRONMENT
+              value: "Production"
+            - name: DEVICE_GRPC_SERVICE_URL
+              value: "0.0.0.0:{{ .Values.device.port.grpc }}"
+            - name: ConnectionStrings__DefaultConnection
+              valueFrom:
+                secretKeyRef:
+                  name: journey-secrets
+                  key: DEVICE_DATABASE_URL
+          envFrom:
+            - configMapRef:
+                name: journey-config
+            - secretRef:
+                name: journey-secrets
+{{- end }}

@@ -36,6 +36,7 @@ service RentalService {
   rpc CreateRental(CreateRentalRequest) returns (RentalResponse);
   rpc GetMyRentals(GetMyRentalsRequest) returns (GetMyRentalsResponse);
   rpc GetRentalById(GetRentalByIdRequest) returns (RentalResponse);
+  rpc CancelRental (CancelRentalRequest) returns (CancelRentalResponse);
   
   // Admin operations
   rpc GetAllRentals(GetAllRentalsRequest) returns (GetAllRentalsAdminResponse);
@@ -45,6 +46,19 @@ service RentalService {
   // Extensions: Rental time extension
   rpc CreateRentalExtension(CreateRentalExtensionRequest) returns (RentalResponse);
   rpc GetRentalExtensions(GetRentalExtensionsRequest) returns (GetRentalExtensionsResponse);
+}
+
+// User: Cancel Rental
+message CancelRentalRequest {
+  string rentalId = 1;
+  string userId = 2;  // để verify ownership
+}
+
+message CancelRentalResponse {
+  bool success = 1;           // true nếu hủy thành công
+  string message = 2;         // thông báo kết quả
+  double refund_amount = 3;   // số tiền hoàn lại cho user
+  double refund_percent = 4;  // phần trăm hoàn lại (0-100)
 }
 
 // Common response

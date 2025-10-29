@@ -1,0 +1,43 @@
+{{- if .Values.review.enabled }}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: review
+  labels:
+    app: review
+spec:
+  replicas: {{ .Values.review.replicas }}
+  selector:
+    matchLabels:
+      app: review
+  template:
+    metadata:
+      labels:
+        app: review
+    spec:
+      containers:
+        - name: review
+          image: {{ .Values.review.image }}
+          imagePullPolicy: {{ .Values.global.imagePullPolicy }}
+          ports:
+            - name: grpc
+              containerPort: {{ .Values.review.port.grpc }}
+              protocol: TCP
+          env:
+            - name: ASPNETCORE_URLS
+              value: "http://+:{{ .Values.review.port.grpc }}"
+            - name: ASPNETCORE_ENVIRONMENT
+              value: "Production"
+            - name: REVIEW_GRPC_SERVICE_URL
+              value: "0.0.0.0:{{ .Values.review.port.grpc }}"
+            - name: ConnectionStrings__DefaultConnection
+              valueFrom:
+                secretKeyRef:
+                  name: journey-secrets
+                  key: REVIEW_DATABASE_URL
+          envFrom:
+            - configMapRef:
+                name: journey-config
+            - secretRef:
+                name: journey-secrets
+{{- end }}

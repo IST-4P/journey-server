@@ -10,3 +10,18 @@ export const CheckInOutAlreadyExistsException = new RpcException({
   code: status.ALREADY_EXISTS,
   message: 'Error.CheckInOutAlreadyExists',
 });
+
+export const CheckOutWithoutCheckInException = new RpcException({
+  code: status.FAILED_PRECONDITION,
+  message: 'Error.CheckOutWithoutCheckIn',
+});
+
+export const CheckInNotPaidException = new RpcException({
+  code: status.FAILED_PRECONDITION,
+  message: 'Error.CheckInNotPaid',
+});
+
+export const CheckInWrongTimeException = new RpcException({
+  code: status.FAILED_PRECONDITION,
+  message: 'Error.CheckInWrongTime',
+});

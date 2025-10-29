@@ -4,6 +4,7 @@ import {
   GetCheckInOutResponse,
   GetManyCheckInOutsRequest,
   GetManyCheckInOutsResponse,
+  UpdateCheckOutRequest,
   VerifyCheckInOutRequest,
 } from '@domain/booking';
 import { Controller } from '@nestjs/common';
@@ -27,10 +28,20 @@ export class CheckInOutGrpcController {
   }
 
   @GrpcMethod('BookingService', 'CheckIn')
-  createCheckInOut(
+  createCheckIn(data: CreateCheckInOutRequest): Promise<GetCheckInOutResponse> {
+    return this.checkInOutService.checkIn(data);
+  }
+
+  @GrpcMethod('BookingService', 'CheckOut')
+  createCheckOut(
     data: CreateCheckInOutRequest
   ): Promise<GetCheckInOutResponse> {
-    return this.checkInOutService.checkIn(data);
+    return this.checkInOutService.checkOut(data);
+  }
+
+  @GrpcMethod('BookingService', 'UpdateCheckOut')
+  updateCheckOut(data: UpdateCheckOutRequest): Promise<GetCheckInOutResponse> {
+    return this.checkInOutService.updateCheckOut(data);
   }
 
   @GrpcMethod('BookingService', 'VerifyCheckInOut')

@@ -84,6 +84,22 @@ blog:
     grpc: 5005
     http: 3005
 
+device:
+  enabled: true
+  replicas: 1
+  image: 'caophi562005/journey-device:latest'
+  port:
+    grpc: 5006
+    http: 3006
+
+rental:
+  enabled: true
+  replicas: 1
+  image: 'caophi562005/journey-rental:latest'
+  port:
+    grpc: 5007
+    http: 3007
+
 booking:
   enabled: true
   replicas: 1
@@ -100,6 +116,14 @@ payment:
     grpc: 5009
     http: 3009
 
+review:
+  enabled: true
+  replicas: 1
+  image: 'caophi562005/journey-review:latest'
+  port:
+    grpc: 5010
+    http: 3010
+
 # Configuration (non-sensitive)
 config:
   natsUrl: ''
@@ -109,11 +133,15 @@ config:
   chatUrl: ''
   vehicleUrl: ''
   blogUrl: ''
+  deviceUrl: ''
+  rentalUrl: ''
+  reviewUrl: ''
   bookingUrl: ''
   paymentUrl: ''
   accessTokenExpiresIn: '1h'
   refreshTokenExpiresIn: '7d'
   otpExpires: '5m'
+  bookingCollateral: '10000'
 
 # Secrets (sensitive - DO NOT COMMIT REAL VALUES)
 secrets:
@@ -123,9 +151,12 @@ secrets:
   chatDatabaseUrl: ''
   vehicleDatabaseUrl: ''
   accessTokenSecret: ''
-  blogDatabaseUrl: ''
   bookingDatabaseUrl: ''
   paymentDatabaseUrl: ''
+  blogDatabaseUrl: ''
+  rentalDatabaseUrl: ''
+  reviewDatabaseUrl: ''
+  deviceDatabaseUrl: ''
   refreshTokenSecret: ''
   resendApiKey: ''
   paymentApiKey: ''

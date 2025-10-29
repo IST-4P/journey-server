@@ -4,6 +4,7 @@ import {
   GetExtensionResponse,
   GetManyExtensionsRequest,
   GetManyExtensionsResponse,
+  UpdateExtensionRequest,
   UpdateStatusExtensionRequest,
 } from '@domain/booking';
 import { Controller } from '@nestjs/common';
@@ -31,10 +32,22 @@ export class ExtensionGrpcController {
     return this.bookingService.createExtension(data);
   }
 
-  @GrpcMethod('BookingService', 'UpdateStatusExtension')
-  updateStatusExtension(
+  @GrpcMethod('BookingService', 'ApproveExtension')
+  approveExtension(
     data: UpdateStatusExtensionRequest
   ): Promise<GetExtensionResponse> {
-    return this.bookingService.updateStatusExtension(data);
+    return this.bookingService.approveExtension(data);
+  }
+
+  @GrpcMethod('BookingService', 'RejectExtension')
+  rejectExtension(
+    data: UpdateStatusExtensionRequest
+  ): Promise<GetExtensionResponse> {
+    return this.bookingService.rejectExtension(data);
+  }
+
+  @GrpcMethod('BookingService', 'UpdateExtension')
+  updateExtension(data: UpdateExtensionRequest): Promise<GetExtensionResponse> {
+    return this.bookingService.updateExtension(data);
   }
 }

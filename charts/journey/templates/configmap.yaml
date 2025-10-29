@@ -12,6 +12,9 @@ data:
   CHAT_GRPC_SERVICE_URL: {{ .Values.config.chatUrl | quote }}
   VEHICLE_GRPC_SERVICE_URL: {{ .Values.config.vehicleUrl | quote }}
   BLOG_GRPC_SERVICE_URL: {{ .Values.config.blogUrl | quote }}
+  RENTAL_GRPC_SERVICE_URL: {{ .Values.config.rentalUrl | quote }}
+  DEVICE_GRPC_SERVICE_URL: {{ .Values.config.deviceUrl | quote }}
+  REVIEW_GRPC_SERVICE_URL: {{ .Values.config.reviewUrl | quote }}
   BOOKING_GRPC_SERVICE_URL: {{ .Values.config.bookingUrl | quote }}
   PAYMENT_GRPC_SERVICE_URL: {{ .Values.config.paymentUrl | quote }}
   ACCESS_TOKEN_EXPIRES_IN:
@@ -19,4 +22,5 @@ data:
   REFRESH_TOKEN_EXPIRES_IN:
     {{ .Values.config.refreshTokenExpiresIn | default "7d" | quote }}
   OTP_EXPIRES: {{ .Values.config.otpExpires | default "5m" | quote }}
+  BOOKING_COLLATERAL: {{ .Values.config.bookingCollateral | default "10000" | quote }}
 

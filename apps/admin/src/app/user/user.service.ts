@@ -41,12 +41,6 @@ export class UserService implements OnModuleInit {
     return lastValueFrom(this.userService.getDriverLicense(data));
   }
 
-  async createDriverLicense(
-    data: UserProto.CreateDriverLicenseRequest
-  ): Promise<UserProto.GetDriverLicenseResponse> {
-    return lastValueFrom(this.userService.createDriverLicense(data));
-  }
-
   async updateDriverLicense(
     data: UserProto.UpdateDriverLicenseRequest
   ): Promise<UserProto.GetDriverLicenseResponse> {
@@ -57,12 +51,6 @@ export class UserService implements OnModuleInit {
     data: UserProto.GetBankAccountRequest
   ): Promise<UserProto.GetBankAccountResponse> {
     return lastValueFrom(this.userService.getBankAccount(data));
-  }
-
-  async createBankAccount(
-    data: UserProto.CreateBankAccountRequest
-  ): Promise<UserProto.GetBankAccountResponse> {
-    return lastValueFrom(this.userService.createBankAccount(data));
   }
 
   async updateBankAccount(
@@ -81,12 +69,6 @@ export class UserService implements OnModuleInit {
     data: UserProto.GetManyAddressRequest
   ): Promise<UserProto.GetManyAddressResponse> {
     return lastValueFrom(this.userService.getManyAddress(data));
-  }
-
-  async createAddress(
-    data: UserProto.CreateAddressRequest
-  ): Promise<UserProto.GetAddressResponse> {
-    return lastValueFrom(this.userService.createAddress(data));
   }
 
   async updateAddress(

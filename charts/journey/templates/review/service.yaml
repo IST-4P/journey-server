@@ -1,0 +1,17 @@
+{{- if .Values.review.enabled }}
+apiVersion: v1
+kind: Service
+metadata:
+  name: review
+  labels:
+    app: review
+spec:
+  type: ClusterIP
+  ports:
+    - name: grpc
+      port: {{ .Values.review.port.grpc }}
+      targetPort: grpc
+      protocol: TCP
+  selector:
+    app: review
+{{- end }}

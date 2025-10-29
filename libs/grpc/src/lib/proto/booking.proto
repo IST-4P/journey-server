@@ -11,12 +11,16 @@ service BookingService {
   rpc GetManyCheckInOuts(GetManyCheckInOutsRequest) returns (GetManyCheckInOutsResponse);
   rpc GetCheckInOut(GetCheckInOutRequest) returns (GetCheckInOutResponse);
   rpc CheckIn(CreateCheckInOutRequest) returns (GetCheckInOutResponse);
+  rpc CheckOut(CreateCheckInOutRequest) returns (GetCheckInOutResponse);
+  rpc UpdateCheckOut(UpdateCheckOutRequest) returns (GetCheckInOutResponse);
   rpc VerifyCheckInOut(VerifyCheckInOutRequest) returns (GetCheckInOutResponse);
 
   rpc GetManyExtensions(GetManyExtensionsRequest) returns (GetManyExtensionsResponse);
   rpc GetExtension(GetExtensionRequest) returns (GetExtensionResponse);
   rpc CreateExtension(CreateExtensionRequest) returns (GetExtensionResponse);
-  rpc UpdateStatusExtension(UpdateStatusExtensionRequest) returns (GetExtensionResponse);
+  rpc ApproveExtension(UpdateStatusExtensionRequest) returns (GetExtensionResponse);
+  rpc RejectExtension(UpdateStatusExtensionRequest) returns (GetExtensionResponse);
+  rpc UpdateExtension(UpdateExtensionRequest) returns (GetExtensionResponse);
 
   rpc GetManyHistories(GetManyHistoriesRequest) returns (GetManyHistoriesResponse);
   rpc GetHistory(GetHistoryRequest) returns (GetHistoryResponse);
@@ -26,7 +30,8 @@ service BookingService {
 // ======================================================== Booking
 // GetBooking
 message GetBookingRequest {
-  optional string id = 1;
+  string id = 1;
+  string userId = 2;
 }
 
 message GetBookingResponse {
@@ -43,28 +48,31 @@ message GetBookingResponse {
   double pickupLat = 9;
   double pickupLng = 10;
 
-  int32 rentalFee = 11;
-  int32 insuranceFee = 12;
-  int32 vat = 13;
-  int32 discount = 14;
-  int32 deposit = 15;
-  int32 totalAmount = 16;
-  int32 refundAmount = 17;
-  int32 penaltyAmount = 18;
+  int32 vehicleFeeHour = 11;
+  int32 rentalFee = 12;
+  int32 insuranceFee = 13;
+  int32 vat = 14;
+  int32 discount = 15;
+  int32 deposit = 16;
+  int32 collateral = 17;
+  int32 totalAmount = 18;
+  int32 refundAmount = 19;
+  int32 penaltyAmount = 20;
+  int32 damageAmount = 21;
+  int32 overtimeAmount = 22;
 
-  string paymentStatus = 19;
-  optional string paymentId = 20;
-  optional string paidAt = 21;
+  string paymentStatus = 23;
+  optional string paidAt = 24;
 
-  optional string notes = 22;
-  optional string cancelReason = 23;
-  optional string adminNotes = 24;
-  bool damageReported = 25;
+  optional string notes = 25;
+  optional string cancelReason = 26;
+  optional string adminNotes = 27;
+  bool damageReported = 28;
 
-  string createdAt = 26;
-  string updatedAt = 27;
-  optional string cancelledAt = 28;
-  optional string expiredAt = 29;
+  string createdAt = 29;
+  string updatedAt = 30;
+  optional string cancelledAt = 31;
+  optional string expiredAt = 32;
 }
 
 // GetManyBookings
@@ -95,19 +103,22 @@ message CreateBookingRequest {
   double pickupLat = 6;
   double pickupLng = 7;
 
-  int32 rentalFee = 8;
-  int32 insuranceFee = 9;
-  int32 vat = 10;
-  int32 discount = 11;
-  int32 deposit = 12;
+  int32 vehicleFeeHour = 8;
+  int32 rentalFee = 9;
+  int32 insuranceFee = 10;
+  int32 vat = 11;
+  int32 discount = 12;
+  int32 deposit = 13;
 
-  optional string notes = 13;
+  optional string notes = 14;
 }
 
 // CancelBooking
 message CancelBookingRequest {
   string id = 1;
   string cancelReason = 2;
+  optional string cancelDate = 3;
+  string userId = 4;
 }
 
 // ======================================================== CheckInOut
@@ -131,6 +142,7 @@ message GetManyCheckInOutsResponse {
 // GetCheckInOut
 message GetCheckInOutRequest {
   string id = 1;
+  string userId = 2;
 }
 
 message GetCheckInOutResponse {
@@ -173,19 +185,31 @@ message CreateCheckInOutRequest {
   string checkDate = 12;
 }
 
+// UpdateCheckOutRequest
+message UpdateCheckOutRequest {
+  string id = 1;
+  optional int32 mileage = 2;
+  optional int32 fuelLevel = 3;
+  optional string damageNotes = 4;
+  repeated string damageImages = 5;
+  optional int32 penaltyAmount = 6;
+  optional int32 damageAmount = 7;
+  optional int32 overtimeAmount = 8;
+  string userId = 9;
+}
+
 // VerifyCheckInOut
 message VerifyCheckInOutRequest {
   string id = 1;
-  bool verified = 2;
-  string verifiedAt = 3;
 }
 
 // ======================================================== Extension
 // GetManyExtensions
 message GetManyExtensionsRequest {
   optional string status = 1;
-  optional int32 page = 2;
-  optional int32 limit = 3;
+  optional string requestedBy = 2;
+  optional int32 page = 3;
+  optional int32 limit = 4;
 }
 
 message GetManyExtensionsResponse {
@@ -199,6 +223,7 @@ message GetManyExtensionsResponse {
 // GetExtension
 message GetExtensionRequest {
   string id = 1;
+  string requestedBy = 2;
 }
 
 message GetExtensionResponse {
@@ -221,16 +246,22 @@ message CreateExtensionRequest {
   string requestedBy = 2;
   string originalEndTime = 3;
   string newEndTime = 4;
-  int32 additionalHours = 5;
-  int32 additionalAmount = 6;
-  optional string notes = 7;
+  optional string notes = 5;
 }
 
 // UpdateStatusExtension
 message UpdateStatusExtensionRequest {
   string id = 1;
-  string status = 2;
-  optional string rejectionReason = 3;
+  optional string rejectionReason = 2;
+}
+
+// UpdateExtension
+message UpdateExtensionRequest {
+  string id = 1;
+  string newEndTime = 2;
+  int32 additionalHours = 3;
+  int32 additionalAmount = 4;
+  optional string notes = 5;
 }
 
 // ======================================================== History

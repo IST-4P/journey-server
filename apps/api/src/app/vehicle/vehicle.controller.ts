@@ -3,6 +3,7 @@ import {
   GetManyVehiclesRequestDTO,
   GetVehicleRequestDTO,
 } from '@domain/vehicle';
+import { IsPublic } from '@hacmieu-journey/nestjs';
 import { Controller, Get, Param, Query } from '@nestjs/common';
 import { VehicleService } from './vehicle.service';
 
@@ -11,6 +12,7 @@ export class FeatureController {
   constructor(private readonly vehicleService: VehicleService) {}
 
   @Get()
+  @IsPublic()
   getAllFeatures() {
     return this.vehicleService.getAllFeatures({});
   }
@@ -21,6 +23,7 @@ export class BrandController {
   constructor(private readonly vehicleService: VehicleService) {}
 
   @Get()
+  @IsPublic()
   getAllBrands() {
     return this.vehicleService.getAllBrands({});
   }
@@ -30,6 +33,7 @@ export class BrandController {
 export class ModelController {
   constructor(private readonly vehicleService: VehicleService) {}
   @Get()
+  @IsPublic()
   getAllModels(@Query() query: GetAllModelsRequestDTO) {
     return this.vehicleService.getAllModels(query);
   }
@@ -40,11 +44,13 @@ export class VehicleController {
   // private readonly logger = new Logger(VehicleController.name);
   constructor(private readonly vehicleService: VehicleService) {}
   @Get()
+  @IsPublic()
   getManyVehicles(@Query() query: GetManyVehiclesRequestDTO) {
     return this.vehicleService.getManyVehicles(query);
   }
 
   @Get(':id')
+  @IsPublic()
   getVehicle(@Param() params: GetVehicleRequestDTO) {
     return this.vehicleService.getVehicle(params);
   }

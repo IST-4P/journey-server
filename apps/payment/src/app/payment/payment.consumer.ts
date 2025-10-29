@@ -24,8 +24,8 @@ export class PaymentConsumer
   ) {
     super(natsClient, {
       streamName: 'JOURNEY_EVENTS',
-      consumerName: 'payment-service-booking-created',
-      filterSubject: 'journey.events.booking-created',
+      consumerName: 'payment-service-payment-created',
+      filterSubject: 'journey.events.payment-created',
       ackPolicy: AckPolicy.Explicit, // Phải ack thủ công
       deliverPolicy: DeliverPolicy.All, // Nhận tất cả message (kể cả cũ)
       maxDeliver: 3, // Retry tối đa 3 lần

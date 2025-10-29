@@ -37,6 +37,11 @@ export class AuthGrpcController {
     return this.authService.login(data);
   }
 
+  @GrpcMethod('AuthService', 'LoginAdmin')
+  loginAdmin(data: LoginRequest): Promise<LoginResponse> {
+    return this.authService.loginAdmin(data);
+  }
+
   @GrpcMethod('AuthService', 'RefreshToken')
   refreshToken(data: RefreshTokenRequest): Promise<RefreshTokenResponse> {
     return this.authService.refreshToken(data);

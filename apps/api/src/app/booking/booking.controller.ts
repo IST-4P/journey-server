@@ -6,11 +6,9 @@ import {
   GetBookingRequestDTO,
   GetCheckInOutRequestDTO,
   GetExtensionRequestDTO,
-  GetHistoryRequestDTO,
   GetManyBookingsRequestDTO,
   GetManyCheckInOutsRequestDTO,
   GetManyExtensionsRequestDTO,
-  GetManyHistoriesRequestDTO,
 } from '@domain/booking';
 import { ActiveUser } from '@hacmieu-journey/nestjs';
 import { Body, Controller, Get, Param, Post, Put, Query } from '@nestjs/common';
@@ -29,13 +27,16 @@ export class BookingController {
   }
 
   @Get(':id')
-  getBooking(@Param() params: GetBookingRequestDTO) {
-    return this.bookingService.getBooking(params);
+  getBooking(
+    @Param() params: GetBookingRequestDTO,
+    @ActiveUser('userId') userId: string
+  ) {
+    return this.bookingService.getBooking({ ...params, userId });
   }
 
   @Post()
   createBooking(
-    @Body() body: CreateBookingRequestDTO,
+    @Body() body: Omit<CreateBookingRequestDTO, 'userId'>,
     @ActiveUser('userId') userId: string
   ) {
     return this.bookingService.createBooking({
@@ -48,36 +49,56 @@ export class BookingController {
 
   @Put('cancel/:id')
   cancelBooking(
-    @Body() body: CancelBookingRequestDTO,
-    @Param('id') id: string
+    @Body() body: Omit<CancelBookingRequestDTO, 'id' | 'userId'>,
+    @Param('id') id: string,
+    @ActiveUser('userId') userId: string
   ) {
     return this.bookingService.cancelBooking({
       id,
       cancelReason: body.cancelReason || '',
+      userId,
     });
   }
 }
 
-@Controller('check-in-out')
+@Controller('check')
 export class CheckInOutController {
   constructor(private readonly bookingService: BookingService) {}
 
   @Get()
-  getManyCheckInOuts(@Query() query: GetManyCheckInOutsRequestDTO) {
-    return this.bookingService.getManyCheckInOuts(query);
+  getManyCheckInOuts(
+    @Query() query: GetManyCheckInOutsRequestDTO,
+    @ActiveUser('userId') userId: string
+  ) {
+    return this.bookingService.getManyCheckInOuts({ ...query, userId });
   }
 
   @Get(':id')
-  getCheckInOut(@Param() params: GetCheckInOutRequestDTO) {
-    return this.bookingService.getCheckInOut(params);
+  getCheckInOut(
+    @Param() params: Omit<GetCheckInOutRequestDTO, 'userId'>,
+    @ActiveUser('userId') userId: string
+  ) {
+    return this.bookingService.getCheckInOut({ ...params, userId });
   }
 
-  @Post()
+  @Post('check-in')
   checkIn(
-    @Body() body: CreateCheckInOutRequestDTO,
+    @Body() body: Omit<CreateCheckInOutRequestDTO, 'userId'>,
     @ActiveUser('userId') userId: string
   ) {
     return this.bookingService.checkIn({
+      ...body,
+      checkDate: body.checkDate.toISOString(),
+      userId,
+    });
+  }
+
+  @Post('check-out')
+  checkOut(
+    @Body() body: Omit<CreateCheckInOutRequestDTO, 'userId'>,
+    @ActiveUser('userId') userId: string
+  ) {
+    return this.bookingService.checkOut({
       ...body,
       checkDate: body.checkDate.toISOString(),
       userId,
@@ -90,37 +111,35 @@ export class ExtensionController {
   constructor(private readonly bookingService: BookingService) {}
 
   @Get()
-  getManyExtensions(@Query() query: GetManyExtensionsRequestDTO) {
-    return this.bookingService.getManyExtensions(query);
+  getManyExtensions(
+    @Query() query: GetManyExtensionsRequestDTO,
+    @ActiveUser('userId') userId: string
+  ) {
+    return this.bookingService.getManyExtensions({
+      ...query,
+      requestedBy: userId,
+    });
   }
 
   @Get(':id')
-  getExtension(@Param() params: GetExtensionRequestDTO) {
-    return this.bookingService.getExtension(params);
+  getExtension(
+    @Param() params: GetExtensionRequestDTO,
+    @ActiveUser('userId') userId: string
+  ) {
+    return this.bookingService.getExtension({ ...params, requestedBy: userId });
   }
 
   @Post()
-  createExtension(@Body() body: CreateExtensionRequestDTO) {
+  createExtension(
+    @Body() body: CreateExtensionRequestDTO,
+    @ActiveUser('userId') userId: string
+  ) {
     return this.bookingService.createExtension({
       ...body,
       originalEndTime: body.originalEndTime.toISOString(),
       newEndTime: body.newEndTime.toISOString(),
       notes: body.notes || undefined,
+      requestedBy: userId,
     });
-  }
-}
-
-@Controller('history')
-export class HistoryController {
-  constructor(private readonly bookingService: BookingService) {}
-
-  @Get()
-  getManyHistories(@Query() query: GetManyHistoriesRequestDTO) {
-    return this.bookingService.getManyHistories(query);
-  }
-
-  @Get(':id')
-  getHistory(@Param() params: GetHistoryRequestDTO) {
-    return this.bookingService.getHistory(params);
   }
 }

@@ -12,6 +12,7 @@ import {
   AuthTypeDecoratorPayload,
 } from '../decorators/auth.decorator';
 import { AccessTokenGuard } from './access-token.guard';
+import { AdminRoleGuard } from './admin-role.guard';
 import { PaymentAPIKeyGuard } from './payment-api-key.guard';
 
 /**
@@ -21,6 +22,7 @@ import { PaymentAPIKeyGuard } from './payment-api-key.guard';
  * @example
  * // Trong controller/method
  * @Auth([AuthType.Bearer]) // Mặc định
+ * @Auth([AuthType.Admin]) // Yêu cầu quyền ADMIN
  * @Auth([AuthType.PaymentAPIKey])
  * @Auth([AuthType.Bearer, AuthType.PaymentAPIKey], { condition: ConditionGuard.Or })
  * @IsPublic() // Không cần auth
@@ -32,11 +34,13 @@ export class AuthenticationGuard implements CanActivate {
   constructor(
     private readonly reflector: Reflector,
     private readonly accessTokenGuard: AccessTokenGuard,
+    private readonly adminRoleGuard: AdminRoleGuard,
     private readonly paymentAPIKeyGuard: PaymentAPIKeyGuard
   ) {
     // Map các loại auth type với guard tương ứng
     this.authTypeGuardMap = {
       [AuthType.Bearer]: this.accessTokenGuard,
+      [AuthType.Admin]: this.adminRoleGuard,
       [AuthType.PaymentAPIKey]: this.paymentAPIKeyGuard,
       [AuthType.None]: { canActivate: () => true },
     };

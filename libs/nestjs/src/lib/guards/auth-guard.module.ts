@@ -5,6 +5,7 @@ import { JwtModule } from '@nestjs/jwt';
 import { PassportModule } from '@nestjs/passport';
 import { JwtStrategy } from '../strategies/jwt.strategy';
 import { AccessTokenGuard } from './access-token.guard';
+import { AdminRoleGuard } from './admin-role.guard';
 import { AuthenticationGuard } from './authentication.guard';
 import { PaymentAPIKeyGuard } from './payment-api-key.guard';
 
@@ -41,6 +42,7 @@ import { PaymentAPIKeyGuard } from './payment-api-key.guard';
   providers: [
     JwtStrategy,
     AccessTokenGuard,
+    AdminRoleGuard,
     PaymentAPIKeyGuard,
     AuthenticationGuard,
     {
@@ -51,6 +53,7 @@ import { PaymentAPIKeyGuard } from './payment-api-key.guard';
   exports: [
     JwtStrategy,
     AccessTokenGuard,
+    AdminRoleGuard,
     PaymentAPIKeyGuard,
     AuthenticationGuard,
   ],

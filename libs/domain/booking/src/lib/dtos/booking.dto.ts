@@ -25,15 +25,10 @@ export class GetManyBookingsResponseDTO extends createZodDto(
 export class CreateBookingRequestDTO extends createZodDto(
   CreateBookingRequestSchema.extend({
     notes: z.string().optional(),
-  }).omit({ userId: true })
-) {}
-export class CreateBookingAdminRequestDTO extends createZodDto(
-  CreateBookingRequestSchema.extend({
-    notes: z.string().optional(),
   })
 ) {}
 export class CancelBookingRequestDTO extends createZodDto(
-  CancelBookingRequestSchema.omit({ id: true })
+  CancelBookingRequestSchema
 ) {}
 export class CancelBookingResponseDTO extends createZodDto(
   CancelBookingResponseSchema

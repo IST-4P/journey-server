@@ -2,6 +2,7 @@ import {
   CreatePaymentRequest,
   GetManyPaymentsRequest,
   GetPaymentRequest,
+  PaymentStatusValues,
   UpdateStatusPaymentRequest,
   WebhookPaymentRequest,
 } from '@domain/payment';
@@ -155,7 +156,6 @@ export class PaymentRepository {
 
       const eventData = {
         id: bookingId || rentalId,
-        status: 'PAID',
       };
 
       await Promise.all([
@@ -164,7 +164,7 @@ export class PaymentRepository {
             paymentCode,
           },
           data: {
-            status: 'PAID',
+            status: PaymentStatusValues.PAID,
           },
         }),
         bookingId

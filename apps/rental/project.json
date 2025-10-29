@@ -1,0 +1,81 @@
+{
+  "name": "rental",
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "apps/rental",
+  "projectType": "application",
+  "tags": ["type:app", "platform:dotnet"],
+  "targets": {
+    "build": {
+      "executor": "nx:run-commands",
+      "outputs": ["{workspaceRoot}/apps/rental/bin/Release"],
+      "options": {
+        "command": "dotnet build rental.csproj -c Release",
+        "cwd": "apps/rental"
+      },
+      "configurations": {
+        "development": {
+          "command": "dotnet build rental.csproj -c Debug"
+        }
+      }
+    },
+    "serve": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "dotnet run --project rental.csproj",
+        "cwd": "apps/rental"
+      },
+      "configurations": {
+        "development": {
+          "command": "dotnet run --project rental.csproj --environment Development"
+        },
+        "production": {
+          "command": "dotnet run --project rental.csproj --environment Production"
+        }
+      }
+    },
+    "publish": {
+      "executor": "nx:run-commands",
+      "dependsOn": ["build"],
+      "outputs": ["{workspaceRoot}/apps/rental/bin/Release/net8.0/publish"],
+      "options": {
+        "command": "dotnet publish rental.csproj -c Release -o bin/Release/net8.0/publish",
+        "cwd": "apps/rental"
+      }
+    },
+    "docker-build": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "docker build -t caophi562005/journey-rental:latest -f apps/rental/Dockerfile .",
+        "cwd": "{workspaceRoot}"
+      }
+    },
+    "docker-push": {
+      "executor": "nx:run-commands",
+      "dependsOn": ["docker-build"],
+      "options": {
+        "command": "docker push caophi562005/journey-rental:latest"
+      }
+    },
+    "test": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "dotnet test",
+        "cwd": "apps/rental"
+      }
+    },
+    "clean": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "dotnet clean",
+        "cwd": "apps/rental"
+      }
+    },
+    "restore": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "dotnet restore",
+        "cwd": "apps/rental"
+      }
+    }
+  }
+}

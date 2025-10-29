@@ -1,0 +1,17 @@
+{{- if .Values.device.enabled }}
+apiVersion: v1
+kind: Service
+metadata:
+  name: device
+  labels:
+    app: device
+spec:
+  type: ClusterIP
+  ports:
+    - name: grpc
+      port: {{ .Values.device.port.grpc }}
+      targetPort: grpc
+      protocol: TCP
+  selector:
+    app: device
+{{- end }}

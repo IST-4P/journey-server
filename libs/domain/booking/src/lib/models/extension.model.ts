@@ -4,6 +4,7 @@ import { ExtensionValidatorSchema } from '../validators';
 
 export const GetManyExtensionsRequestSchema = ExtensionValidatorSchema.pick({
   status: true,
+  requestedBy: true,
 })
   .partial()
   .extend(PaginationQuerySchema.shape);
@@ -18,6 +19,7 @@ export const GetManyExtensionsResponseSchema = z.object({
 
 export const GetExtensionRequestSchema = ExtensionValidatorSchema.pick({
   id: true,
+  requestedBy: true,
 });
 
 export const GetExtensionResponseSchema = ExtensionValidatorSchema;
@@ -27,6 +29,12 @@ export const CreateExtensionRequestSchema = ExtensionValidatorSchema.pick({
   requestedBy: true,
   originalEndTime: true,
   newEndTime: true,
+  notes: true,
+});
+
+export const UpdateExtensionRequestSchema = ExtensionValidatorSchema.pick({
+  id: true,
+  newEndTime: true,
   additionalHours: true,
   additionalAmount: true,
   notes: true,
@@ -35,7 +43,6 @@ export const CreateExtensionRequestSchema = ExtensionValidatorSchema.pick({
 export const UpdateStatusExtensionRequestSchema = ExtensionValidatorSchema.pick(
   {
     id: true,
-    status: true,
     rejectionReason: true,
   }
 );
@@ -50,6 +57,9 @@ export type GetExtensionRequest = z.infer<typeof GetExtensionRequestSchema>;
 export type GetExtensionResponse = z.infer<typeof GetExtensionResponseSchema>;
 export type CreateExtensionRequest = z.infer<
   typeof CreateExtensionRequestSchema
+>;
+export type UpdateExtensionRequest = z.infer<
+  typeof UpdateExtensionRequestSchema
 >;
 export type UpdateStatusExtensionRequest = z.infer<
   typeof UpdateStatusExtensionRequestSchema

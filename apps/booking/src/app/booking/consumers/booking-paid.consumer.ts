@@ -28,6 +28,6 @@ export class BookingPaidConsumer
   }
 
   protected async onMessage(event: BookingPaidEvent): Promise<void> {
-    return this.bookingRepository.bookingPaid(event);
+    return this.bookingRepository.bookingDepositPaid(event);
   }
 }

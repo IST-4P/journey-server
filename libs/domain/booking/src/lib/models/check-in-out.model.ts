@@ -20,6 +20,7 @@ export const GetManyCheckInOutsResponseSchema = z.object({
 
 export const GetCheckInOutRequestSchema = CheckInOutValidatorSchema.pick({
   id: true,
+  userId: true,
 });
 
 export const GetCheckInOutResponseSchema = CheckInOutValidatorSchema;
@@ -40,10 +41,23 @@ export const CreateCheckInOutRequestSchema = CheckInOutValidatorSchema.pick({
   checkDate: z.coerce.date(),
 });
 
+export const UpdateCheckOutRequestSchema = CheckInOutValidatorSchema.pick({
+  mileage: true,
+  fuelLevel: true,
+  damageNotes: true,
+  damageImages: true,
+})
+  .partial()
+  .extend({
+    id: CheckInOutValidatorSchema.shape.id,
+    userId: CheckInOutValidatorSchema.shape.userId,
+    penaltyAmount: z.number().int().optional(),
+    damageAmount: z.number().int().optional(),
+    overtimeAmount: z.number().int().optional(),
+  });
+
 export const VerifyCheckInOutRequestSchema = CheckInOutValidatorSchema.pick({
   id: true,
-  verified: true,
-  verifiedAt: true,
 });
 
 export type GetManyCheckInOutsRequest = z.infer<
@@ -57,6 +71,7 @@ export type GetCheckInOutResponse = z.infer<typeof GetCheckInOutResponseSchema>;
 export type CreateCheckInOutRequest = z.infer<
   typeof CreateCheckInOutRequestSchema
 >;
+export type UpdateCheckOutRequest = z.infer<typeof UpdateCheckOutRequestSchema>;
 export type VerifyCheckInOutRequest = z.infer<
   typeof VerifyCheckInOutRequestSchema
 >;

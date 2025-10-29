@@ -1,0 +1,43 @@
+{{- if .Values.rental.enabled }}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: rental
+  labels:
+    app: rental
+spec:
+  replicas: {{ .Values.rental.replicas }}
+  selector:
+    matchLabels:
+      app: rental
+  template:
+    metadata:
+      labels:
+        app: rental
+    spec:
+      containers:
+        - name: rental
+          image: {{ .Values.rental.image }}
+          imagePullPolicy: {{ .Values.global.imagePullPolicy }}
+          ports:
+            - name: grpc
+              containerPort: {{ .Values.rental.port.grpc }}
+              protocol: TCP
+          env:
+            - name: ASPNETCORE_URLS
+              value: "http://+:{{ .Values.rental.port.grpc }}"
+            - name: ASPNETCORE_ENVIRONMENT
+              value: "Production"
+            - name: RENTAL_GRPC_SERVICE_URL
+              value: "0.0.0.0:{{ .Values.rental.port.grpc }}"
+            - name: ConnectionStrings__DefaultConnection
+              valueFrom:
+                secretKeyRef:
+                  name: journey-secrets
+                  key: RENTAL_DATABASE_URL
+          envFrom:
+            - configMapRef:
+                name: journey-config
+            - secretRef:
+                name: journey-secrets
+{{- end }}

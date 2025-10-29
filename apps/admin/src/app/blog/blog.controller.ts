@@ -5,6 +5,7 @@ import {
   GetManyBlogsRequestDTO,
   UpdateBlogRequestDTO,
 } from '@domain/blog';
+import { Auth, AuthType } from '@hacmieu-journey/nestjs';
 import {
   Body,
   Controller,
@@ -34,16 +35,19 @@ export class BlogController {
   }
 
   @Post()
+  @Auth([AuthType.Admin])
   createBlog(@Body() body: CreateBlogRequestDTO) {
     return this.blogService.createBlog(body);
   }
 
   @Put(':id')
+  @Auth([AuthType.Admin])
   updateBlog(@Param('id') id: string, @Body() body: UpdateBlogRequestDTO) {
     return this.blogService.updateBlog({ ...body, id });
   }
 
   @Delete(':id')
+  @Auth([AuthType.Admin])
   deleteBlog(@Param() params: DeleteBlogRequestDTO) {
     return this.blogService.deleteBlog(params);
   }

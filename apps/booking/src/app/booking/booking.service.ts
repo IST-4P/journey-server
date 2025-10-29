@@ -35,15 +35,14 @@ export class BookingService {
   }
 
   async cancelBooking(data: CancelBookingRequest) {
-    const booking = await this.bookingRepository.getBooking(data);
-    if (!booking) {
-      throw BookingNotFoundException;
-    }
     return this.bookingRepository.cancelBooking(data);
   }
 
   async updateStatusBooking(data: UpdateStatusBookingRequest) {
-    const booking = await this.bookingRepository.getBooking({ id: data.id });
+    const booking = await this.bookingRepository.getBooking({
+      id: data.id,
+      userId: data.userId,
+    });
     if (!booking) {
       throw BookingNotFoundException;
     }

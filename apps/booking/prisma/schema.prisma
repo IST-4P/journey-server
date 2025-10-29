@@ -13,11 +13,14 @@ datasource db {
 
 enum BookingStatus {
     PENDING // Chờ thanh toán
-    PAID // Đã thanh toán, chờ nhận xe
+    DEPOSIT_PAID // Đã thanh toán giữ chỗ, chờ đến ngày nhận xe
+    // READY_FOR_CHECKIN Đến thời gian nhận xe, chờ thanh toán phần còn lại
+    FULLY_PAID // Đã thanh toán đủ, chờ check-in
     ONGOING // Đang thuê (đã check-in)
     COMPLETED // Hoàn thành (đã check-out)
     CANCELLED // Đã hủy
     EXPIRED // Hết hạn (quá thời gian không thanh toán)
+    OVERDUE // Quá hạn (quá thời gian trả xe)
 }
 
 enum CheckType {
@@ -28,17 +31,20 @@ enum CheckType {
 enum PaymentStatus {
     PENDING // Chờ thanh toán
     PAID // Đã thanh toán
-    PARTIALLY_PAID // Thanh toán một phần
     REFUNDED // Đã hoàn tiền
     FAILED // Thanh toán thất bại
 }
 
 enum HistoryAction {
     CREATED
-    PAID
+    DEPOSIT_PAID
+    FULLY_PAID
     CHECKED_IN
     CHECKED_OUT
     CANCELLED
+    REFUNDED
+    EXTENSION_REQUESTED
+    EXTENSION_APPROVED
 }
 
 enum ExtensionStatus {
@@ -66,18 +72,23 @@ model Booking {
     pickupLng     Decimal @map("pickup_lng") @db.Decimal(11, 8)
 
     // Chi phí
-    rentalFee     Int @map("rental_fee") // Phí thuê xe
-    insuranceFee  Int @map("insurance_fee") // Phí bảo hiểm
-    vat           Int @map("vat") // VAT (10%)
-    discount      Int @default(0) @map("discount") // Giảm giá (từ promo code)
-    deposit       Int @map("deposit") // Tiền cọc (thường 500k)
-    totalAmount   Int @map("total_amount") // Tổng tiền = rental + insurance + vat - discount + deposit
-    refundAmount  Int @default(0) @map("refund_amount") // Số tiền hoàn cọc
-    penaltyAmount Int @default(0) @map("penalty_amount") // Phí phạt (nếu có)
+    vehicleFeeHour Int @map("vehicle_fee_hour") // Phí sử dụng xe (theo giờ hoặc ngày)
+    rentalFee      Int @map("rental_fee") // Phí thuê xe
+    insuranceFee   Int @map("insurance_fee") // Phí bảo hiểm
+    vat            Int @map("vat") // VAT (10%)
+    discount       Int @default(0) @map("discount") // Giảm giá (từ promo code)
+    deposit        Int @map("deposit") // Tiền cọc (thường 500k)
+    collateral     Int @map("collateral") // Tiền thẻ chấp (3.000.000đ)
+    totalAmount    Int @map("total_amount") // Tổng tiền = rental + insurance + vat - discount + deposit + collateral
+    refundAmount   Int @default(0) @map("refund_amount") // Số tiền hoàn cọc
+
+    // Penalties
+    penaltyAmount  Int @default(0) @map("penalty_amount") // Phí phạt
+    damageAmount   Int @default(0) @map("damage_amount") // Phí sửa chữa hư hỏng
+    overtimeAmount Int @default(0) @map("overtime_amount") // Phí quá giờ
 
     // Payment tracking
     paymentStatus PaymentStatus @default(PENDING) @map("payment_status")
-    paymentId     String?       @map("payment_id") // Reference to Payment Service
     paidAt        DateTime?     @map("paid_at")
 
     // Ghi chú

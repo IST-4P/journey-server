@@ -1,7 +1,4 @@
 import {
-  CreateAddressRequestDTO,
-  CreateBankAccountRequestDTO,
-  CreateDriverLicenseRequestDTO,
   DeleteAddressRequestDTO,
   GetAddressRequestDTO,
   GetAllProfilesRequestDTO,
@@ -16,7 +13,6 @@ import {
   Delete,
   Get,
   Param,
-  Post,
   Put,
   Query,
 } from '@nestjs/common';
@@ -54,17 +50,6 @@ export class UserController {
     return this.userService.getDriverLicense({ userId });
   }
 
-  @Post('driver-license/:userId')
-  createDriverLicense(
-    @Param('userId') userId: string,
-    @Body() body: CreateDriverLicenseRequestDTO
-  ) {
-    return this.userService.createDriverLicense({
-      ...body,
-      userId,
-    });
-  }
-
   @Put('driver-license/:userId')
   updateDriverLicense(
     @Param('userId') userId: string,
@@ -79,17 +64,6 @@ export class UserController {
   @Get('bank-account/:userId')
   getBankAccount(@Param('userId') userId: string) {
     return this.userService.getBankAccount({ userId });
-  }
-
-  @Post('bank-account/:userId')
-  createBankAccount(
-    @Param('userId') userId: string,
-    @Body() body: CreateBankAccountRequestDTO
-  ) {
-    return this.userService.createBankAccount({
-      ...body,
-      userId,
-    });
   }
 
   @Put('bank-account/:userId')
@@ -112,14 +86,6 @@ export class UserController {
       });
     }
     return this.userService.getManyAddress({ userId: query.userId });
-  }
-
-  @Post('address/:userId')
-  createAddress(
-    @Param('userId') userId: string,
-    @Body() body: CreateAddressRequestDTO
-  ) {
-    return this.userService.createAddress(body);
   }
 
   @Put('address')

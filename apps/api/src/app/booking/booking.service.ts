@@ -53,6 +53,7 @@ export class BookingService implements OnModuleInit {
     if (vehicle.status !== 'ACTIVE') {
       throw new Error('Vehicle is not ACTIVE for booking');
     }
+    data.vehicleFeeHour = vehicle.pricePerHour;
     return lastValueFrom(this.bookingService.createBooking(data));
   }
 
@@ -82,6 +83,12 @@ export class BookingService implements OnModuleInit {
     return lastValueFrom(this.bookingService.checkIn(data));
   }
 
+  checkOut(
+    data: BookingProto.CreateCheckInOutRequest
+  ): Promise<BookingProto.GetCheckInOutResponse> {
+    return lastValueFrom(this.bookingService.checkOut(data));
+  }
+
   //================= Extensions =================//
 
   getManyExtensions(
@@ -100,19 +107,5 @@ export class BookingService implements OnModuleInit {
     data: BookingProto.CreateExtensionRequest
   ): Promise<BookingProto.GetExtensionResponse> {
     return lastValueFrom(this.bookingService.createExtension(data));
-  }
-
-  //================= Histories =================//
-
-  getManyHistories(
-    data: BookingProto.GetManyHistoriesRequest
-  ): Promise<BookingProto.GetManyHistoriesResponse> {
-    return lastValueFrom(this.bookingService.getManyHistories(data));
-  }
-
-  getHistory(
-    data: BookingProto.GetHistoryRequest
-  ): Promise<BookingProto.GetHistoryResponse> {
-    return lastValueFrom(this.bookingService.getHistory(data));
   }
 }

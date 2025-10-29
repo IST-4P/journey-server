@@ -8,7 +8,6 @@ import {
   BookingController,
   CheckInOutController,
   ExtensionController,
-  HistoryController,
 } from './booking.controller';
 import { BookingService } from './booking.service';
 
@@ -46,12 +45,7 @@ import { BookingService } from './booking.service';
       },
     ]),
   ],
-  controllers: [
-    BookingController,
-    CheckInOutController,
-    ExtensionController,
-    HistoryController,
-  ],
+  controllers: [BookingController, CheckInOutController, ExtensionController],
   providers: [
     BookingService,
     {

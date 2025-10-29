@@ -6,6 +6,7 @@ import {
   GetCheckInOutResponseSchema,
   GetManyCheckInOutsRequestSchema,
   GetManyCheckInOutsResponseSchema,
+  UpdateCheckOutRequestSchema,
   VerifyCheckInOutRequestSchema,
 } from '../models';
 
@@ -25,6 +26,12 @@ export class CreateCheckInOutRequestDTO extends createZodDto(
   CreateCheckInOutRequestSchema.extend({
     address: z.string().optional(),
     damageNotes: z.string().optional(),
+  })
+) {}
+export class UpdateCheckOutRequestDTO extends createZodDto(
+  UpdateCheckOutRequestSchema.extend({
+    damageNotes: z.string().optional(),
+    damageImages: z.array(z.string()),
   })
 ) {}
 export class VerifyCheckInOutRequestDTO extends createZodDto(

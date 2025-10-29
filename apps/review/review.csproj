@@ -7,7 +7,12 @@
   </PropertyGroup>
 
 <ItemGroup>
-  <Protobuf Include="..\..\libs\grpc\src\lib\proto\review.proto" GrpcServices="Server" />   
+  <Protobuf Include="..\..\libs\grpc\src\lib\proto\review.proto" GrpcServices="Server" />  
+  <Protobuf Include="..\..\libs\grpc\src\lib\proto\booking.proto" GrpcServices="Client" />  
+  <Protobuf Include="..\..\libs\grpc\src\lib\proto\rental.proto" GrpcServices="Client" /> 
+  <Protobuf Include="..\..\libs\grpc\src\lib\proto\device.proto" GrpcServices="Client" /> 
+  <Protobuf Include="..\..\libs\grpc\src\lib\proto\user.proto" GrpcServices="Client" /> 
+  <Protobuf Include="..\..\libs\grpc\src\lib\proto\vehicle.proto" GrpcServices="Client" />   
 </ItemGroup>
 
 

@@ -4,11 +4,11 @@ WORKDIR /src
 
 # Copy project file và restore dependencies
 COPY apps/rental/rental.csproj apps/rental/
+COPY libs/grpc/ libs/grpc/
 RUN dotnet restore apps/rental/rental.csproj
 
 # Copy toàn bộ source code
 COPY apps/rental/ apps/rental/
-COPY libs/grpc/src/lib/proto/rental.proto apps/rental/Protos/
 
 # Build project
 WORKDIR /src/apps/rental
@@ -25,15 +25,15 @@ WORKDIR /app
 COPY --from=build /app/publish .
 
 # Expose gRPC port
-EXPOSE 5005
+EXPOSE 5007
 
 # Set environment variables
-ENV ASPNETCORE_URLS=http://+:5005
+ENV ASPNETCORE_URLS=http://+:5007
 ENV ASPNETCORE_ENVIRONMENT=Production
 
 # Health check
 HEALTHCHECK --interval=30s --timeout=10s --start-period=40s --retries=3 \
-  CMD curl -f http://localhost:5005/health || exit 1
+  CMD curl -f http://localhost:5007/health || exit 1
 
 # Run the application
 ENTRYPOINT ["dotnet", "rental.dll"]

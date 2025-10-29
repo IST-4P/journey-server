@@ -7,25 +7,12 @@
   </PropertyGroup>
 
 <ItemGroup>
-  <Protobuf Include="..\..\libs\grpc\src\lib\proto\review.proto"
-            GrpcServices="Server"
-            ProtoRoot="..\..\libs\grpc\src\lib\proto" /> <!-- Review.proto as server -->
-  <Protobuf Include="..\..\libs\grpc\src\lib\proto\rental.proto"
-            GrpcServices="Client"
-            ProtoRoot="..\..\libs\grpc\src\lib\proto" /> <!-- Added rental.proto -->
-  <Protobuf Include="..\..\libs\grpc\src\lib\proto\device.proto"
-            GrpcServices="Client"
-            ProtoRoot="..\..\libs\grpc\src\lib\proto" /> <!-- Added device.proto -->
-  <Protobuf Include="..\..\libs\grpc\src\lib\proto\user.proto"
-            GrpcServices="Client"
-            ProtoRoot="..\..\libs\grpc\src\lib\proto" /> <!-- Added user.proto --> 
-  <Protobuf Include="..\..\libs\grpc\src\lib\proto\vehicle.proto" 
-            GrpcServices="Client"
-            ProtoRoot="..\..\libs\grpc\src\lib\proto" /> <!-- Added vehicle.proto -->
-  <Protobuf Include="..\..\libs\grpc\src\lib\proto\booking.proto"
-            GrpcServices="Client"
-            ProtoRoot="..\..\libs\grpc\src\lib\proto" /> <!-- Added booking.proto -->
-            
+  <Protobuf Include="..\..\libs\grpc\src\lib\proto\review.proto" GrpcServices="Server" />  
+  <Protobuf Include="..\..\libs\grpc\src\lib\proto\booking.proto" GrpcServices="Client" />  
+  <Protobuf Include="..\..\libs\grpc\src\lib\proto\rental.proto" GrpcServices="Client" /> 
+  <Protobuf Include="..\..\libs\grpc\src\lib\proto\device.proto" GrpcServices="Client" /> 
+  <Protobuf Include="..\..\libs\grpc\src\lib\proto\user.proto" GrpcServices="Client" /> 
+  <Protobuf Include="..\..\libs\grpc\src\lib\proto\vehicle.proto" GrpcServices="Client" />   
 </ItemGroup>
 
 

@@ -65,21 +65,6 @@ message RentalItemDetail {
   RentalTargetDetail detail = 7;
 }
 
-service RentalService {
-  // User operations
-  rpc CreateRental(CreateRentalRequest) returns (RentalResponse);
-  rpc GetMyRentals(GetMyRentalsRequest) returns (GetMyRentalsResponse);
-  rpc GetRentalById(GetRentalByIdRequest) returns (RentalResponse);
-  
-  // Admin operations
-  rpc GetAllRentals(GetAllRentalsRequest) returns (GetAllRentalsAdminResponse);
-  rpc UpdateRental(UpdateRentalRequest) returns (RentalResponse);
-  rpc DeleteRental(DeleteRentalRequest) returns (DeleteRentalResponse);
-
-  // Extensions: Rental time extension
-  rpc CreateRentalExtension(CreateRentalExtensionRequest) returns (RentalResponse);
-  rpc GetRentalExtensions(GetRentalExtensionsRequest) returns (GetRentalExtensionsResponse);
-}
 
 // Common response
 message RentalResponse {

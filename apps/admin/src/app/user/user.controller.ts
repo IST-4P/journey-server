@@ -29,20 +29,14 @@ export class UserController {
     return this.userService.findAllProfiles(query);
   }
 
-  @Get('profiles/:userId')
+  @Get('profile/:userId')
   getProfile(@Param('userId') userId: string) {
     return this.userService.getProfile({ userId });
   }
 
-  @Put('profiles/:userId')
-  updateProfile(
-    @Param('userId') userId: string,
-    @Body() body: UpdateProfileRequestDTO
-  ) {
-    return this.userService.updateProfile({
-      ...body,
-      userId,
-    });
+  @Put('profile')
+  updateProfile(@Body() body: UpdateProfileRequestDTO) {
+    return this.userService.updateProfile(body);
   }
 
   @Get('driver-license/:userId')

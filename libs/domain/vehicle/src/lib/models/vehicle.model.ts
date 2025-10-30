@@ -7,7 +7,9 @@ export const GetVehicleRequestSchema = VehicleValidatorSchema.pick({
   licensePlate: true,
 }).partial();
 
-export const GetVehicleResponseSchema = VehicleValidatorSchema;
+export const GetVehicleResponseSchema = VehicleValidatorSchema.omit({
+  licensePlate: true,
+});
 
 export const GetManyVehiclesRequestSchema = VehicleValidatorSchema.pick({
   id: true,
@@ -28,7 +30,9 @@ export const GetManyVehiclesRequestSchema = VehicleValidatorSchema.pick({
   .extend(PaginationQuerySchema.shape);
 
 export const GetManyVehiclesResponseSchema = z.object({
-  vehicles: z.array(VehicleValidatorSchema.omit({ vehicleFeatures: true })),
+  vehicles: z.array(
+    VehicleValidatorSchema.omit({ vehicleFeatures: true, licensePlate: true })
+  ),
   page: z.number().int(),
   limit: z.number().int(),
   totalItems: z.number().int(),

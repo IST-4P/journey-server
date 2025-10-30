@@ -25,7 +25,7 @@ export class UserController {
   @Put('profile')
   updateProfile(
     @ActiveUser('userId') userId: string,
-    @Body() body: UpdateProfileRequestDTO
+    @Body() body: Omit<UpdateProfileRequestDTO, 'userId'>
   ) {
     return this.userService.updateProfile({
       ...body,
@@ -41,7 +41,7 @@ export class UserController {
   @Post('driver-license')
   createDriverLicense(
     @ActiveUser('userId') userId: string,
-    @Body() body: CreateDriverLicenseRequestDTO
+    @Body() body: Omit<CreateDriverLicenseRequestDTO, 'userId'>
   ) {
     return this.userService.createDriverLicense({
       ...body,
@@ -52,7 +52,7 @@ export class UserController {
   @Put('driver-license')
   updateDriverLicense(
     @ActiveUser('userId') userId: string,
-    @Body() body: UpdateDriverLicenseRequestDTO
+    @Body() body: Omit<UpdateDriverLicenseRequestDTO, 'userId'>
   ) {
     return this.userService.updateDriverLicense({
       ...body,
@@ -68,7 +68,7 @@ export class UserController {
   @Post('bank-account')
   createBankAccount(
     @ActiveUser('userId') userId: string,
-    @Body() body: CreateBankAccountRequestDTO
+    @Body() body: Omit<CreateBankAccountRequestDTO, 'userId'>
   ) {
     return this.userService.createBankAccount({
       ...body,
@@ -79,7 +79,7 @@ export class UserController {
   @Put('bank-account')
   updateBankAccount(
     @ActiveUser('userId') userId: string,
-    @Body() body: UpdateBankAccountRequestDTO
+    @Body() body: Omit<UpdateBankAccountRequestDTO, 'userId'>
   ) {
     return this.userService.updateBankAccount({
       ...body,

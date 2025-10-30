@@ -151,6 +151,14 @@ export class AuthService {
   }
 
   async register(body: RegisterRequest) {
+    const user = await this.userRepository.findUnique({
+      email: body.email,
+    });
+
+    if (user) {
+      throw EmailAlreadyExistsException;
+    }
+
     try {
       await this.validateVerificationCode({
         email: body.email,

@@ -16,7 +16,7 @@ export const protobufPackage = "booking";
  */
 export interface GetBookingRequest {
   id: string;
-  userId: string;
+  userId?: string | undefined;
 }
 
 export interface GetBookingResponse {

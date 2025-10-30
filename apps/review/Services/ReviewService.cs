@@ -14,14 +14,20 @@ namespace review.Services
         private readonly ILogger<ReviewService> _logger;
         private readonly NatsPublisher _natsPublisher;
         private readonly Rental.RentalService.RentalServiceClient _rentalClient;
+        private readonly Booking.BookingService.BookingServiceClient _bookingClient;
         private const int MaxUpdateCount = 2;
 
-        public ReviewService(IReviewRepository repository, ILogger<ReviewService> logger, NatsPublisher natsPublisher, Rental.RentalService.RentalServiceClient rentalClient)
+        public ReviewService(IReviewRepository repository, ILogger<ReviewService> logger,
+        NatsPublisher natsPublisher,
+        Rental.RentalService.RentalServiceClient rentalClient,
+        Booking.BookingService.BookingServiceClient bookingClient)
+
         {
             _repository = repository;
             _logger = logger;
             _natsPublisher = natsPublisher;
             _rentalClient = rentalClient;
+            _bookingClient = bookingClient;
         }
 
         public async Task<ReviewModel> CreateReviewAsync(CreateReviewDto dto)
@@ -66,7 +72,6 @@ namespace review.Services
                 UpdateCount = 0
             };
 
-            // If RentalId provided, fetch and populate target IDs (DeviceId/ComboId)
             if (dto.RentalId.HasValue)
             {
                 try
@@ -77,9 +82,8 @@ namespace review.Services
                     });
 
                     var firstItem = rentalResp.Items.FirstOrDefault();
-                    if (firstItem != null)
+                    if (firstItem != null && Guid.TryParse(firstItem.TargetId, out var targetId))
                     {
-                        var targetId = Guid.Parse(firstItem.TargetId);
                         if (firstItem.IsCombo)
                         {
                             review.ComboId = targetId;
@@ -95,6 +99,32 @@ namespace review.Services
                 catch (Exception ex)
                 {
                     _logger.LogWarning(ex, "Failed to fetch rental details for RentalId {RentalId}", dto.RentalId);
+                }
+            }
+
+            if (dto.BookingId.HasValue)
+            {
+                try
+                {
+                    var bookingResp = await _bookingClient.GetBookingAsync(new Booking.GetBookingRequest
+                    {
+                        Id = dto.BookingId.Value.ToString()
+                    });
+
+                    var booking = bookingResp.Id != null ? bookingResp : null;
+                    if (bookingResp?.Id != null && Guid.TryParse(bookingResp.Id, out var bookingId))
+                    {
+                        if (bookingResp.VehicleId != null &&
+                            Guid.TryParse(bookingResp.VehicleId, out var vehicleId))
+                        {
+                            review.VehicleId = vehicleId;  
+                            review.Type = ReviewType.Vehicle;
+                        }
+                    }
+                }   
+                catch (Exception ex)
+                {
+                    _logger.LogWarning(ex, "Failed to fetch booking details for BookingId {BookingId}", dto.BookingId);
                 }
             }
 

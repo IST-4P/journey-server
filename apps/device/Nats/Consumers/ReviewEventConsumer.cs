@@ -4,6 +4,7 @@ using NATS.Client.JetStream.Models;
 using device.Nats.Events;
 using device.Repository;
 using System.Text.Json;
+using device.Interface;
 
 namespace device.Nats.Consumers
 {
@@ -89,7 +90,7 @@ namespace device.Nats.Consumers
         private async Task HandleReviewCreatedAsync(ReviewCreatedEvent reviewEvent)
         {
             using var scope = _serviceProvider.CreateScope();
-            var deviceRepository = scope.ServiceProvider.GetRequiredService<DeviceRepository>();
+            var deviceRepository = scope.ServiceProvider.GetRequiredService<IDeviceRepository>();
 
             if (!Guid.TryParse(reviewEvent.DeviceId, out var deviceId))
             {

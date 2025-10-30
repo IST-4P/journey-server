@@ -43,9 +43,9 @@ message GetDeviceResponse {
 message GetManyDevicesRequest {
   int32 page = 1;
   int32 limit = 2;
-  string status = 3;
-  string search = 4;
-  string categoryId = 5;
+  optional string status = 3;
+  optional string search = 4;
+  optional string categoryId = 5;
 }
 
 message GetManyDevices {
@@ -156,7 +156,7 @@ message GetComboResponse {
 message GetManyCombosRequest {
   int32 page = 1;
   int32 limit = 2;
-  string search = 3;
+  optional string search = 3;
 }
 
 message GetManyCombos {

@@ -95,7 +95,7 @@ export interface GetMyRentalsRequest {
   userId: string;
   page: number;
   limit: number;
-  status: string;
+  status?: string | undefined;
 }
 
 export interface UserRental {
@@ -179,7 +179,7 @@ export interface CreateRentalExtensionRequest {
   newEndDate: string;
   additionalFee: number;
   additionalHours: number;
-  notes: string;
+  notes?: string | undefined;
 }
 
 export interface GetRentalExtensionsRequest {

@@ -1,0 +1,7 @@
+{
+  "name": "domain-rental",
+  "$schema": "../../../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "libs/domain/rental/src",
+  "projectType": "library",
+  "tags": ["type:domain", "scope:rental"]
+}

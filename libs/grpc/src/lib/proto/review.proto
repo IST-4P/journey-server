@@ -47,11 +47,11 @@ enum SortOrder {
 // Review entity 
 message Review { 
   string id = 1;
-  string booking_id = 2;
-  string vehicle_id = 3;
-  string device_id = 4;
-  string combo_id = 5;
-  string user_id = 6;
+  string bookingId = 2;
+  string vehicleId = 3;
+  string deviceId = 4;
+  string comboId = 5;
+  string userId = 6;
 
   int32 rating = 7;
   string title = 8;
@@ -63,17 +63,17 @@ message Review {
   string updated_at = 13;
 
   int32 update_count = 14;
-  string rental_id = 15;
+  string rentalId = 15;
 }
 
 // Review summary (no content/images)
 message ReviewSummary { 
   string id = 1;
-  string booking_id = 2;
-  string vehicle_id = 3;
-  string device_id = 4;
-  string combo_id = 5;
-  string user_id = 6;
+  string bookingId = 2;
+  string vehicleId = 3;
+  string deviceId = 4;
+  string comboId = 5;
+  string userId = 6;
 
   int32 rating = 7;
   string title = 8;
@@ -83,14 +83,14 @@ message ReviewSummary {
   string updated_at = 11;
 
   int32 update_count = 12;
-  string rental_id = 13;
+  string rentalId = 13;
 }
 
 // Request messages
 message CreateReviewRequest {
-  optional string booking_id = 1;
-  string user_id = 2; 
-  optional string rental_id = 3;
+  optional string bookingId = 1;
+  string userId = 2; 
+  optional string rentalId = 3;
   int32 rating = 4;
   string title = 5;
   ReviewType type = 6;
@@ -99,8 +99,8 @@ message CreateReviewRequest {
 }
 
 message UpdateReviewRequest {
-  string review_id = 1;
-  string user_id = 2;
+  string reviewId = 1;
+  string userId = 2;
   
   int32 rating = 3;
   string title = 4;
@@ -109,76 +109,76 @@ message UpdateReviewRequest {
 }
 
 message DeleteReviewRequest {
-  string review_id = 1;
-  string user_id = 2;
+  string reviewId = 1;
+  string userId = 2;
 }
 
 message GetReviewByIdRequest {
-  string review_id = 1;
+  string reviewId = 1;
 }
 
 message GetMyReviewsRequest {
-  string user_id = 1;
+  string userId = 1;
   int32 page = 2;
   int32 limit = 3;
   
   // Query options
-  string search_text = 4;
-  int32 min_rating = 5;
-  int32 max_rating = 6;
-  string start_date = 7;  // ISO 8601 format
-  string end_date = 8;    // ISO 8601 format
-  SortField sort_by = 9;
-  SortOrder sort_order = 10;
+  optional string search_text = 4;
+  optional int32 min_rating = 5;
+  optional int32 max_rating = 6;
+  optional string start_date = 7;  // ISO 8601 format
+  optional string end_date = 8;    // ISO 8601 format
+  optional SortField sort_by = 9;
+  optional SortOrder sort_order = 10;
 }
 
 message GetReviewsByVehicleRequest {
-  string vehicle_id = 1;
+  string vehicleId = 1;
   int32 page = 2;
   int32 limit = 3;
   
   // Query options
-  string search_text = 4;
-  int32 min_rating = 5;
-  int32 max_rating = 6;
-  string start_date = 7;
-  string end_date = 8;
-  SortField sort_by = 9;
-  SortOrder sort_order = 10;
+  optional string search_text = 4;
+  optional int32 min_rating = 5;
+  optional int32 max_rating = 6;
+  optional string start_date = 7;
+  optional string end_date = 8;
+  optional SortField sort_by = 9;
+  optional SortOrder sort_order = 10;
 }
 
 message GetReviewsByDeviceRequest {
-  string device_id = 1;
+  string deviceId = 1;
   int32 page = 2;
   int32 limit = 3;
   
   // Query options
-  string search_text = 4;
-  int32 min_rating = 5;
-  int32 max_rating = 6;
-  string start_date = 7;
-  string end_date = 8;
-  SortField sort_by = 9;
-  SortOrder sort_order = 10;
+  optional string search_text = 4;
+  optional int32 min_rating = 5;
+  optional int32 max_rating = 6;
+  optional string start_date = 7;
+  optional string end_date = 8;
+  optional SortField sort_by = 9;
+  optional SortOrder sort_order = 10;
 }
 
 message GetReviewsByComboRequest {
-  string combo_id = 1;
+  string comboId = 1;
   int32 page = 2;
   int32 limit = 3;
   
   // Query options
-  string search_text = 4;
-  int32 min_rating = 5;
-  int32 max_rating = 6;
-  string start_date = 7;
-  string end_date = 8;
-  SortField sort_by = 9;
-  SortOrder sort_order = 10;
+  optional string search_text = 4;
+  optional int32 min_rating = 5;
+  optional int32 max_rating = 6;
+  optional string start_date = 7;
+  optional string end_date = 8;
+  optional SortField sort_by = 9;
+  optional SortOrder sort_order = 10;
 }
 
 message GetAllReviewsRequest {
-  string admin_id = 1;
+  string adminId = 1;
   int32 page = 2;
   int32 limit = 3;
   ReviewType type = 4;
@@ -194,8 +194,8 @@ message GetAllReviewsRequest {
 }
 
 message AdminDeleteReviewRequest {
-  string review_id = 1;
-  string admin_id = 2;
+  string reviewId = 1;
+  string adminId = 2;
 }
 
 // Response messages

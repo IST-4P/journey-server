@@ -19,7 +19,7 @@ export class EmailService {
 
   sendOTP(body: { email: string; code: string }) {
     return this.resend.emails.send({
-      from: 'Phi <no-reply@hacmieu.xyz>',
+      from: 'HacMieu Journey <no-reply@hacmieu.xyz>',
       to: [body.email],
       subject: 'Mã OTP',
       html: this.otpTemplate.replace(/\{\{code\}\}/g, body.code),

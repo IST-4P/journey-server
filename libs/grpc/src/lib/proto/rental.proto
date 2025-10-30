@@ -100,7 +100,7 @@ message GetMyRentalsRequest {
   string userId = 1;
   int32 page = 2;
   int32 limit = 3;
-  string status = 4;
+  optional string status = 4;
 }
 
 message UserRental {
@@ -183,7 +183,7 @@ message CreateRentalExtensionRequest {
   string newEndDate = 3;
   double additionalFee = 4;
   double additionalHours = 5;
-  string notes = 6;
+  optional string notes = 6;
 }
 
 message GetRentalExtensionsRequest {

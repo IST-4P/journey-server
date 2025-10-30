@@ -34,9 +34,9 @@ export interface GetDeviceResponse {
 export interface GetManyDevicesRequest {
   page: number;
   limit: number;
-  status: string;
-  search: string;
-  categoryId: string;
+  status?: string | undefined;
+  search?: string | undefined;
+  categoryId?: string | undefined;
 }
 
 export interface GetManyDevices {
@@ -143,7 +143,7 @@ export interface GetComboResponse {
 export interface GetManyCombosRequest {
   page: number;
   limit: number;
-  search: string;
+  search?: string | undefined;
 }
 
 export interface GetManyCombos {

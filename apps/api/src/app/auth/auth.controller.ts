@@ -19,8 +19,8 @@ import { AuthService } from './auth.service';
 
 const cookieOptions: CookieOptions = {
   httpOnly: true,
-  secure: true,
-  sameSite: 'none',
+  secure: false,
+  sameSite: 'lax',
   // domain: '.hacmieu.xyz',
   path: '/',
 };

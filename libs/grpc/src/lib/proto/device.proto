@@ -106,14 +106,14 @@ message CreateDeviceRequest {
 // UpdateDevice
 message UpdateDeviceRequest {
   string deviceId = 1;
-  string name = 2;
-  double price = 3;
-  string description = 4;
-  string status = 5;
-  int32 quantity = 6;
+  optional string name = 2;
+  optional double price = 3;
+  optional string description = 4;
+  optional string status = 5;
+  optional int32 quantity = 6;
   repeated string information = 7;
   repeated string images = 8;
-  string categoryId = 9;
+  optional string categoryId = 9;
 }
 
 // DeleteDevice
@@ -195,9 +195,9 @@ message CreateComboRequest {
 // UpdateCombo
 message UpdateComboRequest {
   string comboId = 1;
-  string name = 2;
-  double price = 3;
-  string description = 4;
+  optional string name = 2;
+  optional double price = 3;
+  optional string description = 4;
   repeated string images = 5;
   repeated ComboDeviceInput deviceItems = 6;
 }

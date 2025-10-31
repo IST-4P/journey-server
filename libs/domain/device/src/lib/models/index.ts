@@ -1,6 +1,10 @@
 import { PaginationQuerySchema } from '@domain/shared';
 import { z } from 'zod';
-import { ComboValidatorSchema, DeviceValidatorSchema } from '../validators';
+import {
+  ComboDeviceItemValidatorSchema,
+  ComboValidatorSchema,
+  DeviceValidatorSchema,
+} from '../validators';
 
 // Device models
 export const GetDeviceRequestSchema = z.object({
@@ -15,6 +19,7 @@ export const GetManyDevicesRequestSchema = z
     search: z.string(),
     categoryId: z.string().uuid(),
   })
+  .partial()
   .extend(PaginationQuerySchema.shape);
 
 export const GetManyDevicesResponseSchema = z.object({
@@ -48,6 +53,8 @@ export const UpdateDeviceRequestSchema = DeviceValidatorSchema.omit({
   .partial()
   .extend({
     deviceId: z.string().uuid(),
+    images: z.array(z.string()),
+    information: z.array(z.string()),
   });
 
 export const DeleteDeviceRequestSchema = z.object({
@@ -87,14 +94,20 @@ export const CreateComboRequestSchema = ComboValidatorSchema.omit({
   id: true,
   createdAt: true,
   updatedAt: true,
+  devices: true,
+}).extend({
+  deviceItems: z.array(ComboDeviceItemValidatorSchema),
 });
 
 export const UpdateComboRequestSchema = ComboValidatorSchema.omit({
   createdAt: true,
   updatedAt: true,
+  devices: true,
 })
   .partial()
   .extend({
+    deviceItems: z.array(ComboDeviceItemValidatorSchema),
+    images: z.array(z.string()),
     comboId: z.string().uuid(),
   });
 

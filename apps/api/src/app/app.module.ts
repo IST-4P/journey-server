@@ -9,7 +9,7 @@ import { DeviceModule } from './device/device.module';
 import { NotificationModule } from './notification/notification.module';
 import { PaymentModule } from './payment/payment.module';
 import { RentalModule } from './rental/rental.module';
-import { ReviewModule } from './review/review';
+import { ReviewModule } from './review/review.module';
 import { UserModule } from './user/user.module';
 import { VehicleModule } from './vehicle/vehicle.module';
 

@@ -21,7 +21,6 @@ namespace rental.Model.Entities
 
         public double TotalPrice { get; set; } // Total price (for reference only)
         public int TotalQuantity { get; set; }
-        public double VAT { get; set; } = 10.0; // VAT percentage (default 10%)
 
         //trạng thái
         public RentalStatus Status { get; set; } = RentalStatus.PENDING;

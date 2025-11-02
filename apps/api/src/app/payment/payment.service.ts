@@ -24,4 +24,16 @@ export class PaymentService implements OnModuleInit {
   ): Promise<PaymentProto.WebhookPaymentResponse> {
     return lastValueFrom(this.chatService.receiver(data));
   }
+
+  getManyPayments(
+    data: PaymentProto.GetManyPaymentsRequest
+  ): Promise<PaymentProto.GetManyPaymentsResponse> {
+    return lastValueFrom(this.chatService.getManyPayments(data));
+  }
+
+  getPayment(
+    data: PaymentProto.GetPaymentRequest
+  ): Promise<PaymentProto.GetPaymentResponse> {
+    return lastValueFrom(this.chatService.getPayment(data));
+  }
 }

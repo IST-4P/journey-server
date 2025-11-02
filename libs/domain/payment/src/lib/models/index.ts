@@ -20,6 +20,7 @@ export const GetManyPaymentsResponse = z.object({
 
 export const GetPaymentRequest = PaymentValidator.pick({
   id: true,
+  userId: true,
 });
 
 export const GetPaymentResponse = PaymentValidator;
@@ -50,6 +51,7 @@ export const CreatePaymentRequest = PaymentValidator.pick({
 
 export const UpdateStatusPaymentRequest = PaymentValidator.pick({
   id: true,
+  userId: true,
   status: true,
 });
 

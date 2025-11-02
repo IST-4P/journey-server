@@ -36,6 +36,8 @@ namespace Blog.Repository
                     Title = b.Title,
                     Type = b.Type,
                     Region = b.Region,
+                    Thumbnail = b.Thumbnail,
+                    Tag = b.Tag,
                     CreatedAt = b.CreateAt,
                     UpdatedAt = b.UpdateAt
                 })
@@ -102,6 +104,7 @@ namespace Blog.Repository
                     Type = b.Type,
                     Content = b.Content,
                     Region = b.Region,
+                    Tag = b.Tag,
                     Thumbnail = b.Thumbnail,
                     CreatedAt = b.CreateAt,
                     UpdatedAt = b.UpdateAt
@@ -128,6 +131,7 @@ namespace Blog.Repository
                     Type = b.Type,
                     Content = b.Content,
                     Region = b.Region,
+                    Tag = b.Tag,
                     Thumbnail = b.Thumbnail,
                     CreatedAt = b.CreateAt,
                     UpdatedAt = b.UpdateAt
@@ -144,6 +148,7 @@ namespace Blog.Repository
                 Type = blog.Type,
                 Content = blog.Content,
                 Region = blog.Region,
+                Tag = blog.Tag,
                 Thumbnail = blog.Thumbnail
             };
 
@@ -165,6 +170,7 @@ namespace Blog.Repository
             existingBlog.Content = blog.Content ?? existingBlog.Content;
             existingBlog.Region = blog.Region ?? existingBlog.Region;
             existingBlog.Thumbnail = blog.Thumbnail ?? existingBlog.Thumbnail;
+            existingBlog.Tag = blog.Tag ?? existingBlog.Tag;
             existingBlog.UpdateAt = DateTime.UtcNow;
 
             await _context.SaveChangesAsync();

@@ -45,7 +45,7 @@ message GetManyDevicesRequest {
   int32 limit = 2;
   string status = 3;
   string search = 4;
-  string categoryId = 5;
+  optional string categoryId = 5;
 }
 
 message GetManyDevices {
@@ -57,6 +57,7 @@ message GetManyDevices {
   repeated string information = 6;
   repeated string images = 7;
   string categoryName = 8;
+  string id = 9;
 }
 
 message GetManyDevicesResponse {

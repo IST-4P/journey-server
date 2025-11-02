@@ -144,7 +144,8 @@ namespace device.Service
                 foreach (var d in dtos)
                 {
                     res.Devices.Add(new GetManyDevices
-                    {
+                    {   
+                        Id = d.Id.ToString(),
                         Name = d.Name,
                         Price = d.Price,
                         Description = d.Description ?? "",

@@ -43,6 +43,7 @@ namespace Blog.Services
                     Content = blog.Content,
                     Type = blog.Type,
                     Region = blog.Region,
+                    Tag = blog.Tag,
                     Thumbnail = blog.Thumbnail,
                     CreatedAt = blog.CreatedAt.ToString("O"),
                     UpdatedAt = blog.UpdatedAt.ToString("O")
@@ -121,6 +122,7 @@ namespace Blog.Services
                     Type = request.Type,
                     Content = request.Content,
                     Region = request.Region,
+                    Tag = request.Tag,
                     Thumbnail = request.Thumbnail
                 };
 

@@ -24,6 +24,10 @@ namespace Blog.DTOs
 
         [FileExtensions(Extensions = "jpg,jpeg,png", ErrorMessage = "Thumbnail must be a valid image file (jpg, jpeg, png)")]
         public required string Thumbnail { get; set; }
+
+        [Required(ErrorMessage = "Tag is required")]
+        [StringLength(100, ErrorMessage = "Tag cannot exceed 100 characters")]
+        public required string Tag { get; set; }
     }
 
     public class UpdateBlogRequestDto
@@ -33,6 +37,9 @@ namespace Blog.DTOs
 
         [StringLength(1000, ErrorMessage = "Type cannot exceed 1000 characters")]
         public string? Type { get; set; }
+
+        [StringLength(100, ErrorMessage = "Tag cannot exceed 100 characters")]
+        public string? Tag { get; set; }
 
         [HtmlContent(ErrorMessage = "Content must be valid HTML")]
         public string? Content { get; set; }

@@ -18,7 +18,7 @@ export class RentalController {
 
   @Get()
   getManyRentals(
-    @Query() query: GetMyRentalsRequestDTO,
+    @Query() query: Omit<GetMyRentalsRequestDTO, 'userId'>,
     @ActiveUser('userId') userId: string
   ) {
     return this.rentalService.getMyRentals({
@@ -27,9 +27,9 @@ export class RentalController {
     });
   }
 
-  @Get(':id')
-  getRentalById(@Param() query: GetRentalByIdRequestDTO) {
-    return this.rentalService.getRentalById(query);
+  @Get(':rentalId')
+  getRentalById(@Param() params: GetRentalByIdRequestDTO) {
+    return this.rentalService.getRentalById(params);
   }
 
   @Post()
@@ -43,9 +43,9 @@ export class RentalController {
     });
   }
 
-  @Put('cancel/:id')
+  @Put('cancel/:rentalId')
   cancelRental(
-    @Param() params: CancelRentalRequestDTO,
+    @Param() params: Omit<CancelRentalRequestDTO, 'userId'>,
     @ActiveUser('userId') userId: string
   ) {
     return this.rentalService.cancelRental({ ...params, userId });

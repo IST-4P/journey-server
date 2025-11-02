@@ -39,9 +39,9 @@ export class ComboController {
     return this.deviceService.getManyCombos(query);
   }
 
-  @Get(':id')
+  @Get(':comboId')
   @IsPublic()
-  getCombo(@Param() query: GetComboRequestDTO) {
-    return this.deviceService.getCombo(query);
+  getCombo(@Param() params: GetComboRequestDTO) {
+    return this.deviceService.getCombo(params);
   }
 }

@@ -35,9 +35,9 @@ export class ReviewController {
     return this.reviewService.getMyReviews({ ...query, userId });
   }
 
-  @Get(':id')
-  getReviewById(@Param() query: GetReviewByIdRequestDTO) {
-    return this.reviewService.getReviewById(query);
+  @Get(':reviewId')
+  getReviewById(@Param() params: GetReviewByIdRequestDTO) {
+    return this.reviewService.getReviewById(params);
   }
 
   @Post()

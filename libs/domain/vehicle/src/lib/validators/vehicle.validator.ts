@@ -14,7 +14,7 @@ export const VehicleValidatorSchema = z.object({
   brandId: z.string().uuid(),
   modelId: z.string().uuid(),
   licensePlate: z.string().min(1),
-  seats: z.number().int().positive(),
+  seats: z.coerce.number().int().positive(),
   fuelType: FuelTypeEnum,
   transmission: TransmissionTypeEnum,
   pricePerHour: z.number().positive(),

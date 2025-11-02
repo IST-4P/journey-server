@@ -18,34 +18,28 @@ export class ReviewService implements OnModuleInit {
       );
   }
 
-  getMyReviews(
-    data: ReviewProto.GetMyReviewsRequest
-  ): Promise<ReviewProto.GetMyReviewsResponse> {
-    return lastValueFrom(this.reviewService.getMyReviews(data));
-  }
-
   getReviewById(
     data: ReviewProto.GetReviewByIdRequest
   ): Promise<ReviewProto.ReviewResponse> {
     return lastValueFrom(this.reviewService.getReviewById(data));
   }
 
-  createReview(
-    data: ReviewProto.CreateReviewRequest
-  ): Promise<ReviewProto.ReviewResponse> {
-    return lastValueFrom(this.reviewService.createReview(data));
+  getAllReviews(
+    data: ReviewProto.GetAllReviewsRequest
+  ): Promise<ReviewProto.GetReviewsResponse> {
+    return lastValueFrom(this.reviewService.getAllReviews(data));
+  }
+
+  adminDeleteReview(
+    data: ReviewProto.AdminDeleteReviewRequest
+  ): Promise<ReviewProto.DeleteReviewResponse> {
+    return lastValueFrom(this.reviewService.adminDeleteReview(data));
   }
 
   updateReview(
     data: ReviewProto.UpdateReviewRequest
   ): Promise<ReviewProto.ReviewResponse> {
     return lastValueFrom(this.reviewService.updateReview(data));
-  }
-
-  deleteReview(
-    data: ReviewProto.DeleteReviewRequest
-  ): Promise<ReviewProto.DeleteReviewResponse> {
-    return lastValueFrom(this.reviewService.deleteReview(data));
   }
 
   getReviewsByVehicle(

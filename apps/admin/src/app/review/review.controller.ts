@@ -1,21 +1,19 @@
 import {
-  CreateReviewRequestDTO,
-  DeleteReviewRequestDTO,
-  GetMyReviewsRequestDTO,
+  AdminDeleteReviewRequestDTO,
+  GetAllReviewsRequestDTO,
   GetReviewByIdRequestDTO,
   GetReviewsByComboRequestDTO,
   GetReviewsByDeviceRequestDTO,
   GetReviewsByVehicleRequestDTO,
   UpdateReviewRequestDTO,
 } from '@domain/review';
-import { ActiveUser } from '@hacmieu-journey/nestjs';
+import { ActiveUser, Auth, AuthType } from '@hacmieu-journey/nestjs';
 import {
   Body,
   Controller,
   Delete,
   Get,
   Param,
-  Post,
   Put,
   Query,
 } from '@nestjs/common';
@@ -28,31 +26,25 @@ export class ReviewController {
   constructor(private readonly reviewService: ReviewService) {}
 
   @Get()
-  getMyReviews(
-    @Query() query: Omit<GetMyReviewsRequestDTO, 'userId'>,
+  @Auth([AuthType.Admin])
+  getAllReviews(
+    @Query() query: GetAllReviewsRequestDTO,
     @ActiveUser('userId') userId: string
   ) {
-    return this.reviewService.getMyReviews({ ...query, userId });
+    return this.reviewService.getAllReviews({
+      ...query,
+      adminId: userId,
+    } as any);
   }
 
   @Get(':id')
+  @Auth([AuthType.Admin])
   getReviewById(@Param() query: GetReviewByIdRequestDTO) {
     return this.reviewService.getReviewById(query);
   }
 
-  @Post()
-  createReview(
-    @Body() body: Omit<CreateReviewRequestDTO, 'userId'>,
-    @ActiveUser('userId') userId: string
-  ) {
-    return this.reviewService.createReview({
-      ...body,
-      type: body.type as any, // Any is the best
-      userId,
-    });
-  }
-
   @Put()
+  @Auth([AuthType.Admin])
   updateReview(
     @Body() body: Omit<UpdateReviewRequestDTO, 'userId'>,
     @ActiveUser('userId') userId: string
@@ -64,17 +56,19 @@ export class ReviewController {
   }
 
   @Delete(':id')
+  @Auth([AuthType.Admin])
   deleteReview(
-    @Param() params: Omit<DeleteReviewRequestDTO, 'userId'>,
+    @Param() params: Omit<AdminDeleteReviewRequestDTO, 'adminId'>,
     @ActiveUser('userId') userId: string
   ) {
-    return this.reviewService.deleteReview({
+    return this.reviewService.adminDeleteReview({
       reviewId: params.reviewId,
-      userId,
+      adminId: userId,
     });
   }
 
   @Get('vehicle/:vehicleId')
+  @Auth([AuthType.Admin])
   getReviewsByVehicle(
     @Param('vehicleId') vehicleId: string,
     @Query() query: Omit<GetReviewsByVehicleRequestDTO, 'vehicleId'>
@@ -86,6 +80,7 @@ export class ReviewController {
   }
 
   @Get('combo/:comboId')
+  @Auth([AuthType.Admin])
   getReviewsByCombo(
     @Param('comboId') comboId: string,
     @Query() query: Omit<GetReviewsByComboRequestDTO, 'comboId'>
@@ -97,6 +92,7 @@ export class ReviewController {
   }
 
   @Get('device/:deviceId')
+  @Auth([AuthType.Admin])
   getReviewsByDevice(
     @Param('deviceId') deviceId: string,
     @Query() query: Omit<GetReviewsByDeviceRequestDTO, 'deviceId'>

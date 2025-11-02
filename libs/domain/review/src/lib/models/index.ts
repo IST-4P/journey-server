@@ -84,19 +84,19 @@ export const GetReviewsByComboRequestSchema = z
   })
   .extend(PaginationQuerySchema.shape);
 
-export const GetAllReviewsRequestSchema = z.object({
-  adminId: z.string().uuid(),
-  page: z.number().int().optional(),
-  limit: z.number().int().optional(),
-  type: z.string().optional(),
-  search_text: z.string().optional(),
-  min_rating: z.number().int().min(1).max(5).optional(),
-  max_rating: z.number().int().min(1).max(5).optional(),
-  start_date: z.string().optional(),
-  end_date: z.string().optional(),
-  sort_by: z.string().optional(),
-  sort_order: z.string().optional(),
-});
+export const GetAllReviewsRequestSchema = z
+  .object({
+    adminId: z.string().uuid(),
+    type: z.string().optional(),
+    searchText: z.string().optional(),
+    minRating: z.number().int().min(1).max(5).optional(),
+    maxRating: z.number().int().min(1).max(5).optional(),
+    startDate: z.string().optional(),
+    endDate: z.string().optional(),
+    sortBy: z.string().optional(),
+    sortOrder: z.string().optional(),
+  })
+  .extend(PaginationQuerySchema.shape);
 
 export const AdminDeleteReviewRequestSchema = z.object({
   reviewId: z.string().uuid(),

@@ -1,7 +1,7 @@
+import { PresignedUploadFileBodyType } from '@domain/media';
 import { Injectable } from '@nestjs/common';
 import path from 'path';
 import { v4 as uuidv4 } from 'uuid';
-import { PresignedUploadFileBodyType } from './media.model';
 import { S3Service } from './s3.service';
 
 @Injectable()
@@ -19,7 +19,6 @@ export class MediaService {
       randomFilename
     );
     const url = presignedUrl.split('?')[0];
-    console.log(JSON.stringify({ presignedUrl, url }));
     return {
       presignedUrl,
       url,

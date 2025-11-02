@@ -161,6 +161,10 @@ secrets:
   resendApiKey: ''
   paymentApiKey: ''
   redisUrl: ''
+  digitalOceanSpacesKey: ''
+  digitalOceanSpacesSecret: ''
+  digitalOceanSpacesRegion: ''
+  digitalOceanSpacesEndPoint: ''
 
 # Ingress configuration
 ingress:

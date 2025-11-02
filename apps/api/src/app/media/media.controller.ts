@@ -1,6 +1,6 @@
+import { PresignedUploadFileBodyDTO } from '@domain/media';
 import { IsPublic } from '@hacmieu-journey/nestjs';
 import { Body, Controller, Post } from '@nestjs/common';
-import { PresignedUploadFileBodyDTO } from './media.dto';
 import { MediaService } from './media.service';
 
 @Controller('media')

@@ -10,7 +10,7 @@ export class S3Service {
   constructor(private readonly configService: ConfigService) {
     this.S3Client = new S3Client({
       endpoint: this.configService.getOrThrow<string>(
-        'DIGITAL_OCEAN_END_POINT'
+        'DIGITAL_OCEAN_SPACES_END_POINT'
       ),
       region: this.configService.getOrThrow<string>(
         'DIGITAL_OCEAN_SPACES_REGION'
@@ -30,7 +30,7 @@ export class S3Service {
     const contentType = mime.lookup(filename) || 'application/octet-stream';
     const command = new PutObjectCommand({
       Bucket: 'IMAGES',
-      Key: 'images/' + filename,
+      Key: filename,
       ACL: 'public-read',
       ContentType: contentType,
     });

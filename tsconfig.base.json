@@ -29,6 +29,7 @@
       "@domain/device": ["libs/domain/device/src/index.ts"],
       "@domain/rental": ["libs/domain/rental/src/index.ts"],
       "@domain/review": ["libs/domain/review/src/index.ts"],
+      "@domain/media": ["libs/domain/media/src/index.ts"],
       "@hacmieu-journey/grpc": ["libs/grpc/src/index.ts"],
       "@hacmieu-journey/nats": ["libs/nats/src/index.ts"],
       "@hacmieu-journey/nestjs": ["libs/nestjs/src/index.ts"],

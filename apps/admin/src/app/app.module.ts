@@ -7,6 +7,7 @@ import { BookingModule } from './booking/booking.module';
 import { ChatModule } from './chat/chat.module';
 import { DeviceModule } from './device/device.module';
 import { NotificationModule } from './notification/notification.module';
+import { RentalModule } from './rental/rental.module';
 import { ReviewModule } from './review/review.module';
 import { UserModule } from './user/user.module';
 import { VehicleModule } from './vehicle/vehicle.module';
@@ -24,6 +25,7 @@ import { VehicleModule } from './vehicle/vehicle.module';
     BookingModule,
     DeviceModule,
     ReviewModule,
+    RentalModule,
   ],
   controllers: [],
   providers: [],

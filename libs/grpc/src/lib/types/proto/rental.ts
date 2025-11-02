@@ -193,9 +193,9 @@ export interface GetRentalExtensionsResponse {
 /** Admin: Update Rental */
 export interface UpdateRentalRequest {
   rentalId: string;
-  status: string;
-  startDate: string;
-  endDate: string;
+  status?: string | undefined;
+  startDate?: string | undefined;
+  endDate?: string | undefined;
 }
 
 /** Admin: Delete Rental */

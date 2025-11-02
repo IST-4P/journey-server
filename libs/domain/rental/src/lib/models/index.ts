@@ -64,13 +64,13 @@ export const GetRentalByIdRequestSchema = z.object({
   rentalId: z.string().uuid(),
 });
 
-export const GetAllRentalsRequestSchema = z.object({
-  page: z.number().int().optional(),
-  limit: z.number().int().optional(),
-  status: z.string().optional(),
-  userId: z.string().uuid().optional(),
-  requesterId: z.string().uuid(),
-});
+export const GetAllRentalsRequestSchema = z
+  .object({
+    status: z.string(),
+    userId: z.string().uuid(),
+    requesterId: z.string().uuid(),
+  })
+  .extend(PaginationQuerySchema.shape);
 
 export const AdminRentalSchema = z.object({
   id: z.string().uuid(),

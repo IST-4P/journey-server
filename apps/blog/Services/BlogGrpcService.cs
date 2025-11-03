@@ -123,7 +123,8 @@ namespace Blog.Services
                     Content = request.Content,
                     Region = request.Region,
                     Tag = request.Tag,
-                    Thumbnail = request.Thumbnail
+                    Thumbnail = request.Thumbnail,
+                    Summary = request.Summary
                 };
 
                 var createdBlog = await _blogRepository.AddBlogAsync(addDto);
@@ -137,7 +138,8 @@ namespace Blog.Services
                     Region = createdBlog.Region,
                     Thumbnail = createdBlog.Thumbnail,
                     CreatedAt = createdBlog.CreateAt.ToString("O"),
-                    UpdatedAt = createdBlog.UpdateAt.ToString("O")
+                    UpdatedAt = createdBlog.UpdateAt.ToString("O"),
+                    Summary = createdBlog.Summary
                 };
             }
             catch (Exception ex)
@@ -172,7 +174,8 @@ namespace Blog.Services
                     Content = string.IsNullOrEmpty(request.Content) ? null : request.Content,
                     Type = string.IsNullOrEmpty(request.Type) ? null : request.Type,
                     Region = string.IsNullOrEmpty(request.Region) ? null : request.Region,
-                    Thumbnail = string.IsNullOrEmpty(request.Thumbnail) ? null : request.Thumbnail
+                    Thumbnail = string.IsNullOrEmpty(request.Thumbnail) ? null : request.Thumbnail,
+                    Summary = string.IsNullOrEmpty(request.Summary) ? null : request.Summary
                 };
 
                 var updatedBlog = await _blogRepository.UpdateBlogAsync(Id, updateDto);
@@ -191,7 +194,8 @@ namespace Blog.Services
                     Region = updatedBlog.Region,
                     Thumbnail = updatedBlog.Thumbnail,
                     CreatedAt = updatedBlog.CreateAt.ToString("O"),
-                    UpdatedAt = updatedBlog.UpdateAt.ToString("O")
+                    UpdatedAt = updatedBlog.UpdateAt.ToString("O"),
+                    Summary = updatedBlog.Summary
                 };
             }
             catch (RpcException)
@@ -226,7 +230,7 @@ namespace Blog.Services
 
                 return new DeleteBlogResponse
                 {
-                    Message = "BlogDeletedSuccessfully"
+                    Message = "Blog.DeletedSuccessfully"
                 };
             }
             catch (RpcException)

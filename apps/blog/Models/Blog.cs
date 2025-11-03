@@ -36,6 +36,10 @@ namespace Blog.Models
         [StringLength(100, ErrorMessage = "Tag cannot exceed 100 characters")]
         public required string Tag { get; set; }
 
+        [Required(ErrorMessage = "Summary is required")]
+        [StringLength(1000, ErrorMessage = "Summary cannot exceed 1000 characters")]
+        public required string Summary { get; set; }
+
         public DateTime CreateAt { get; set; } = DateTime.UtcNow;
         public DateTime UpdateAt { get; set; } = DateTime.UtcNow;
 

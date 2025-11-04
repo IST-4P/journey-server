@@ -146,36 +146,35 @@ message GetVehicleResponse {
   string name = 3;
   string brandId = 4;
   string modelId = 5;
-  string licensePlate = 6;
 
-  int32 seats = 7;
-  string fuelType = 8;
-  string transmission = 9;
+  int32 seats = 6;
+  string fuelType = 7;
+  string transmission = 8;
 
-  int32 pricePerHour = 10;
-  int32 pricePerDay = 11;
+  int32 pricePerHour = 9;
+  int32 pricePerDay = 10;
 
-  string location = 12;
-  string city = 13;
-  string ward = 14;
-  double latitude = 15;
-  double longitude = 16;
+  string location = 11;
+  string city = 12;
+  string ward = 13;
+  double latitude = 14;
+  double longitude = 15;
 
-  string description = 17;
-  repeated string terms = 18;
+  string description = 16;
+  repeated string terms = 17;
 
-  string status = 19;
+  string status = 18;
 
-  int32 totalTrips = 20;
-  double averageRating = 21;
-  repeated string totalReviewIds = 22;
+  int32 totalTrips = 19;
+  double averageRating = 20;
+  repeated string totalReviewIds = 21;
 
-  repeated string images = 23;
+  repeated string images = 22;
 
-  repeated VehicleFeature vehicleFeatures = 24;
+  repeated VehicleFeature vehicleFeatures = 23;
 
-  string createdAt = 25;
-  string updatedAt = 26;
+  string createdAt = 24;
+  string updatedAt = 25;
 }
 
 // GetManyVehicles

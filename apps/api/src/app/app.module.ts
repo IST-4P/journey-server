@@ -5,8 +5,12 @@ import { AuthModule } from './auth/auth.module';
 import { BlogModule } from './blog/blog.module';
 import { BookingModule } from './booking/booking.module';
 import { ChatModule } from './chat/chat.module';
+import { DeviceModule } from './device/device.module';
+import { MediaModule } from './media/media.module';
 import { NotificationModule } from './notification/notification.module';
 import { PaymentModule } from './payment/payment.module';
+import { RentalModule } from './rental/rental.module';
+import { ReviewModule } from './review/review.module';
 import { UserModule } from './user/user.module';
 import { VehicleModule } from './vehicle/vehicle.module';
 
@@ -22,6 +26,10 @@ import { VehicleModule } from './vehicle/vehicle.module';
     BookingModule,
     PaymentModule,
     VehicleModule,
+    DeviceModule,
+    RentalModule,
+    ReviewModule,
+    MediaModule,
   ],
   providers: [],
 })

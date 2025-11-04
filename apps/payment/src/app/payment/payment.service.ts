@@ -18,7 +18,13 @@ export class PaymentService {
     if (payments.payments.length === 0) {
       throw PaymentNotFoundException;
     }
-    return payments;
+    return {
+      ...payments,
+      payments: payments.payments.map((payment) => ({
+        ...payment,
+        paymentCode: payment.paymentCode ?? '',
+      })),
+    };
   }
 
   async getPayment(data: GetPaymentRequest) {
@@ -26,7 +32,10 @@ export class PaymentService {
     if (!payment) {
       throw PaymentNotFoundException;
     }
-    return payment;
+    return {
+      ...payment,
+      paymentCode: payment.paymentCode ?? '',
+    };
   }
 
   async createPayment(data: CreatePaymentRequest) {
@@ -34,7 +43,10 @@ export class PaymentService {
   }
 
   async updateStatusPayment(data: UpdateStatusPaymentRequest) {
-    const payment = await this.paymentRepository.getPayment({ id: data.id });
+    const payment = await this.paymentRepository.getPayment({
+      id: data.id,
+      userId: data.userId,
+    });
     if (!payment) {
       throw PaymentNotFoundException;
     }

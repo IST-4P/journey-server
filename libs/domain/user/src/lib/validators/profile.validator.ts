@@ -4,7 +4,10 @@ import { GenderEnum, RoleEnum } from '../enums';
 export const ProfileValidatorSchema = z.object({
   id: z.string().uuid(),
   email: z.string().email({ message: 'Error.InvalidEmail' }),
-  fullName: z.string().min(2).max(100, { message: 'Error.InvalidFullName' }),
+  fullName: z
+    .string({ message: 'InvalidFullName' })
+    .min(2)
+    .max(100, { message: 'Error.InvalidFullName' }),
   phone: z
     .string()
     .regex(/^(\+84|0)[0-9]{9}$/, { message: 'Error.InvalidPhone' }),

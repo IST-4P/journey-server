@@ -35,16 +35,16 @@ export class PaymentRepository {
       .padStart(10, '0')}`;
   }
 
-  async getManyPayments(data: GetManyPaymentsRequest) {
-    const skip = (data.page - 1) * data.limit;
-    const take = data.limit;
+  async getManyPayments({ page, limit, ...where }: GetManyPaymentsRequest) {
+    const skip = (page - 1) * limit;
+    const take = limit;
 
     const [totalItems, payments] = await Promise.all([
       this.prismaService.payment.count({
-        where: data,
+        where,
       }),
       this.prismaService.payment.findMany({
-        where: data,
+        where,
         skip,
         take,
       }),
@@ -52,8 +52,8 @@ export class PaymentRepository {
 
     return {
       payments,
-      page: data.page,
-      limit: data.limit,
+      page,
+      limit,
       totalItems,
       totalPages: Math.ceil(totalItems / take),
     };

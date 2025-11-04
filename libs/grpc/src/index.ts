@@ -2,8 +2,11 @@ import * as AuthProto from './lib/types/proto/auth';
 import * as BlogProto from './lib/types/proto/blog';
 import * as BookingProto from './lib/types/proto/booking';
 import * as ChatProto from './lib/types/proto/chat';
+import * as DeviceProto from './lib/types/proto/device';
 import * as NotificationProto from './lib/types/proto/notification';
 import * as PaymentProto from './lib/types/proto/payment';
+import * as RentalProto from './lib/types/proto/rental';
+import * as ReviewProto from './lib/types/proto/review';
 import * as UserProto from './lib/types/proto/user';
 import * as VehicleProto from './lib/types/proto/vehicle';
 
@@ -12,8 +15,11 @@ export {
   BlogProto,
   BookingProto,
   ChatProto,
+  DeviceProto,
   NotificationProto,
   PaymentProto,
+  RentalProto,
+  ReviewProto,
   UserProto,
   VehicleProto,
 };

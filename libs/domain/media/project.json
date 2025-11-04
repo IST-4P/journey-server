@@ -1,0 +1,7 @@
+{
+  "name": "domain-media",
+  "$schema": "../../../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "libs/domain/media/src",
+  "projectType": "library",
+  "tags": ["type:domain", "scope:media"]
+}

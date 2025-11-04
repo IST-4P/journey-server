@@ -137,7 +137,6 @@ export interface GetVehicleResponse {
   name: string;
   brandId: string;
   modelId: string;
-  licensePlate: string;
   seats: number;
   fuelType: string;
   transmission: string;

@@ -34,9 +34,9 @@ export interface GetDeviceResponse {
 export interface GetManyDevicesRequest {
   page: number;
   limit: number;
-  status: string;
-  search: string;
-  categoryId: string;
+  status?: string | undefined;
+  search?: string | undefined;
+  categoryId?: string | undefined;
 }
 
 export interface GetManyDevices {
@@ -97,14 +97,14 @@ export interface CreateDeviceRequest {
 /** UpdateDevice */
 export interface UpdateDeviceRequest {
   deviceId: string;
-  name: string;
-  price: number;
-  description: string;
-  status: string;
-  quantity: number;
+  name?: string | undefined;
+  price?: number | undefined;
+  description?: string | undefined;
+  status?: string | undefined;
+  quantity?: number | undefined;
   information: string[];
   images: string[];
-  categoryId: string;
+  categoryId?: string | undefined;
 }
 
 /** DeleteDevice */
@@ -143,7 +143,7 @@ export interface GetComboResponse {
 export interface GetManyCombosRequest {
   page: number;
   limit: number;
-  search: string;
+  search?: string | undefined;
 }
 
 export interface GetManyCombos {
@@ -182,9 +182,9 @@ export interface CreateComboRequest {
 /** UpdateCombo */
 export interface UpdateComboRequest {
   comboId: string;
-  name: string;
-  price: number;
-  description: string;
+  name?: string | undefined;
+  price?: number | undefined;
+  description?: string | undefined;
   images: string[];
   deviceItems: ComboDeviceInput[];
 }

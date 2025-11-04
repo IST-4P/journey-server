@@ -1,6 +1,10 @@
-import { WebhookPaymentRequestDTO } from '@domain/payment';
-import { Auth, AuthType } from '@hacmieu-journey/nestjs';
-import { Body, Controller, Post } from '@nestjs/common';
+import {
+  GetManyPaymentsRequestDTO,
+  GetPaymentRequestDTO,
+  WebhookPaymentRequestDTO,
+} from '@domain/payment';
+import { ActiveUser, Auth, AuthType } from '@hacmieu-journey/nestjs';
+import { Body, Controller, Get, Param, Post, Query } from '@nestjs/common';
 import { PaymentService } from './payment.service';
 
 @Controller('payment')
@@ -13,5 +17,21 @@ export class PaymentController {
   @Post('receiver')
   receiver(@Body() data: WebhookPaymentRequestDTO) {
     return this.paymentService.receiver(data);
+  }
+
+  @Get()
+  getManyPayments(
+    @Query() query: GetManyPaymentsRequestDTO,
+    @ActiveUser('userId') userId: string
+  ) {
+    return this.paymentService.getManyPayments({ ...query, userId });
+  }
+
+  @Get(':id')
+  getPayment(
+    @Param() params: GetPaymentRequestDTO,
+    @ActiveUser('userId') userId: string
+  ) {
+    return this.paymentService.getPayment({ ...params, userId });
   }
 }

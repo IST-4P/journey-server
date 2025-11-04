@@ -25,6 +25,41 @@ export interface WebhookPaymentRequest {
   description: string;
 }
 
+export interface GetPaymentRequest {
+  id: string;
+  userId: string;
+}
+
+export interface GetPaymentResponse {
+  id: string;
+  sequenceNumber: number;
+  paymentCode: string;
+  userId: string;
+  type: string;
+  bookingId?: string | undefined;
+  rentalId?: string | undefined;
+  amount: number;
+  status: string;
+  createdAt: string;
+  updatedAt?: string | undefined;
+}
+
+export interface GetManyPaymentsRequest {
+  userId?: string | undefined;
+  type?: string | undefined;
+  status?: string | undefined;
+  page: number;
+  limit: number;
+}
+
+export interface GetManyPaymentsResponse {
+  payments: GetPaymentResponse[];
+  page: number;
+  limit: number;
+  totalItems: number;
+  totalPages: number;
+}
+
 export interface WebhookPaymentResponse {
   message: string;
 }
@@ -33,17 +68,29 @@ export const PAYMENT_PACKAGE_NAME = "payment";
 
 export interface PaymentServiceClient {
   receiver(request: WebhookPaymentRequest): Observable<WebhookPaymentResponse>;
+
+  getPayment(request: GetPaymentRequest): Observable<GetPaymentResponse>;
+
+  getManyPayments(request: GetManyPaymentsRequest): Observable<GetManyPaymentsResponse>;
 }
 
 export interface PaymentServiceController {
   receiver(
     request: WebhookPaymentRequest,
   ): Promise<WebhookPaymentResponse> | Observable<WebhookPaymentResponse> | WebhookPaymentResponse;
+
+  getPayment(
+    request: GetPaymentRequest,
+  ): Promise<GetPaymentResponse> | Observable<GetPaymentResponse> | GetPaymentResponse;
+
+  getManyPayments(
+    request: GetManyPaymentsRequest,
+  ): Promise<GetManyPaymentsResponse> | Observable<GetManyPaymentsResponse> | GetManyPaymentsResponse;
 }
 
 export function PaymentServiceControllerMethods() {
   return function (constructor: Function) {
-    const grpcMethods: string[] = ["receiver"];
+    const grpcMethods: string[] = ["receiver", "getPayment", "getManyPayments"];
     for (const method of grpcMethods) {
       const descriptor: any = Reflect.getOwnPropertyDescriptor(constructor.prototype, method);
       GrpcMethod("PaymentService", method)(constructor.prototype[method], method, descriptor);

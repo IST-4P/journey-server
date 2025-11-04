@@ -25,7 +25,7 @@ export class BookingController {
   }
 
   @Get(':id')
-  getBooking(@Param() params: GetBookingRequestDTO) {
+  getBooking(@Param() params: Omit<GetBookingRequestDTO, 'userId'>) {
     return this.bookingService.getBooking(params);
   }
 }

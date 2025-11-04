@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Cookie API Login</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+        
+        .container {
+            background: white;
+            padding: 40px;
+            border-radius: 12px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+            max-width: 500px;
+            width: 100%;
+        }
+        
+        h1 {
+            color: #333;
+            margin-bottom: 10px;
+            font-size: 24px;
+        }
+        
+        .api-url {
+            color: #666;
+            font-size: 12px;
+            margin-bottom: 30px;
+            word-break: break-all;
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 8px;
+            color: #555;
+            font-weight: 600;
+        }
+        
+        input {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e0e0e0;
+            border-radius: 6px;
+            font-size: 14px;
+            transition: border-color 0.3s;
+        }
+        
+        input:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+        
+        button {
+            width: 100%;
+            padding: 14px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 6px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+        
+        button:hover {
+            transform: translateY(-2px);
+        }
+        
+        button:active {
+            transform: translateY(0);
+        }
+        
+        button:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+        
+        .result {
+            margin-top: 30px;
+            padding: 20px;
+            border-radius: 8px;
+            display: none;
+        }
+        
+        .result.success {
+            background: #d4edda;
+            border: 1px solid #c3e6cb;
+            color: #155724;
+        }
+        
+        .result.error {
+            background: #f8d7da;
+            border: 1px solid #f5c6cb;
+            color: #721c24;
+        }
+        
+        .result h3 {
+            margin-bottom: 10px;
+            font-size: 16px;
+        }
+        
+        .result pre {
+            background: rgba(0,0,0,0.05);
+            padding: 12px;
+            border-radius: 4px;
+            overflow-x: auto;
+            font-size: 12px;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+        }
+        
+        .cookies-info {
+            margin-top: 20px;
+            padding: 15px;
+            background: #fff3cd;
+            border: 1px solid #ffeaa7;
+            border-radius: 6px;
+        }
+        
+        .cookies-info h4 {
+            color: #856404;
+            margin-bottom: 8px;
+            font-size: 14px;
+        }
+        
+        .cookies-info p {
+            color: #856404;
+            font-size: 12px;
+            line-height: 1.5;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🍪 Test Cookie API</h1>
+        <div class="api-url">journey-api.hacmieu.xyz/api/auth/login</div>
+        
+        <form id="loginForm">
+            <div class="form-group">
+                <label for="email">Email:</label>
+                <input type="email" id="email" name="email" placeholder="test@example.com" required>
+            </div>
+            
+            <div class="form-group">
+                <label for="password">Password:</label>
+                <input type="password" id="password" name="password" placeholder="••••••••" required>
+            </div>
+            
+            <button type="submit" id="submitBtn">Đăng nhập & Kiểm tra Cookie</button>
+        </form>
+        
+        <div id="result" class="result">
+            <h3>Kết quả:</h3>
+            <pre id="resultContent"></pre>
+        </div>
+        
+        <div class="cookies-info">
+            <h4>📌 Lưu ý:</h4>
+            <p>
+                • Mở Developer Tools (F12) → Tab "Application" → "Cookies" để xem cookie<br>
+                • Nếu không thấy cookie, kiểm tra console để xem lỗi CORS<br>
+                • Cookie với sameSite='none' cần HTTPS và secure=true
+            </p>
+        </div>
+    </div>
+
+    <script>
+        const form = document.getElementById('loginForm');
+        const resultDiv = document.getElementById('result');
+        const resultContent = document.getElementById('resultContent');
+        const submitBtn = document.getElementById('submitBtn');
+
+        form.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+            
+            submitBtn.disabled = true;
+            submitBtn.textContent = 'Đang gửi...';
+            resultDiv.style.display = 'none';
+            
+            try {
+                const response = await fetch('https://journey-api.hacmieu.xyz/api/auth/login', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    credentials: 'include', // Quan trọng: cho phép gửi/nhận cookies
+                    body: JSON.stringify({
+                        email: email,
+                        password: password
+                    })
+                });
+                
+                const data = await response.json();
+                
+                // Hiển thị kết quả
+                resultDiv.style.display = 'block';
+                
+                if (response.ok) {
+                    resultDiv.className = 'result success';
+                    
+                    // Kiểm tra cookies
+                    const cookies = document.cookie;
+                    
+                    resultContent.textContent = 
+                        '✅ Response Status: ' + response.status + '\n\n' +
+                        '📦 Response Data:\n' + JSON.stringify(data, null, 2) + '\n\n' +
+                        '🍪 Cookies hiện tại:\n' + (cookies || '(Không có cookie nào)') + '\n\n' +
+                        '💡 Kiểm tra:\n' +
+                        '- Mở DevTools (F12) → Application → Cookies\n' +
+                        '- Xem cookie có được set không\n' +
+                        '- Nếu cookie có httpOnly=true, nó sẽ không hiện ở document.cookie';
+                } else {
+                    resultDiv.className = 'result error';
+                    resultContent.textContent = 
+                        '❌ Response Status: ' + response.status + '\n\n' +
+                        '📦 Error Data:\n' + JSON.stringify(data, null, 2);
+                }
+                
+            } catch (error) {
+                resultDiv.style.display = 'block';
+                resultDiv.className = 'result error';
+                resultContent.textContent = 
+                    '❌ Lỗi kết nối:\n' + error.message + '\n\n' +
+                    '🔍 Có thể do:\n' +
+                    '- CORS không được cấu hình đúng\n' +
+                    '- API không hoạt động\n' +
+                    '- Mạng bị chặn\n\n' +
+                    'Kiểm tra Console (F12) để xem chi tiết';
+                
+                console.error('Error:', error);
+            } finally {
+                submitBtn.disabled = false;
+                submitBtn.textContent = 'Đăng nhập & Kiểm tra Cookie';
+            }
+        });
+    </script>
+</body>
+</html>

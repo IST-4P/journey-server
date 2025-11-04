@@ -23,7 +23,7 @@ export class NotificationController {
   @Get('list')
   getManyNotifications(
     @ActiveUser('userId') userId: string,
-    @Query() query: GetManyNotificationsRequestDTO
+    @Query() query: Omit<GetManyNotificationsRequestDTO, 'userId'>
   ) {
     return this.notificationService.getManyNotifications({
       ...query,
@@ -45,7 +45,7 @@ export class NotificationController {
   @Put()
   markAsRead(
     @ActiveUser('userId') userId: string,
-    @Body() body: MarkAsReadRequestDTO
+    @Body() body: Omit<MarkAsReadRequestDTO, 'userId'>
   ) {
     return this.notificationService.markAllAsRead({
       ...body,

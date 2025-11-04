@@ -11,6 +11,24 @@ import { GetComboResponse, GetDeviceResponse } from "./device";
 
 export const protobufPackage = "rental";
 
+/** User: Cancel Rental */
+export interface CancelRentalRequest {
+  rentalId: string;
+  /** để verify ownership */
+  userId: string;
+}
+
+export interface CancelRentalResponse {
+  /** true nếu hủy thành công */
+  success: boolean;
+  /** thông báo kết quả */
+  message: string;
+  /** số tiền hoàn lại cho user */
+  refundAmount: number;
+  /** phần trăm hoàn lại (0-100) */
+  refundPercent: number;
+}
+
 /** Single rental item (device or combo with quantity) */
 export interface RentalItem {
   targetId: string;
@@ -33,24 +51,6 @@ export interface RentalItemDetail {
   unitPrice: number;
   subtotal: number;
   detail: RentalTargetDetail | undefined;
-}
-
-/** User: Cancel Rental */
-export interface CancelRentalRequest {
-  rentalId: string;
-  /** để verify ownership */
-  userId: string;
-}
-
-export interface CancelRentalResponse {
-  /** true nếu hủy thành công */
-  success: boolean;
-  /** thông báo kết quả */
-  message: string;
-  /** số tiền hoàn lại cho user */
-  refundAmount: number;
-  /** phần trăm hoàn lại (0-100) */
-  refundPercent: number;
 }
 
 /** Common response */
@@ -95,7 +95,7 @@ export interface GetMyRentalsRequest {
   userId: string;
   page: number;
   limit: number;
-  status: string;
+  status?: string | undefined;
 }
 
 export interface UserRental {
@@ -179,7 +179,7 @@ export interface CreateRentalExtensionRequest {
   newEndDate: string;
   additionalFee: number;
   additionalHours: number;
-  notes: string;
+  notes?: string | undefined;
 }
 
 export interface GetRentalExtensionsRequest {
@@ -193,9 +193,9 @@ export interface GetRentalExtensionsResponse {
 /** Admin: Update Rental */
 export interface UpdateRentalRequest {
   rentalId: string;
-  status: string;
-  startDate: string;
-  endDate: string;
+  status?: string | undefined;
+  startDate?: string | undefined;
+  endDate?: string | undefined;
 }
 
 /** Admin: Delete Rental */

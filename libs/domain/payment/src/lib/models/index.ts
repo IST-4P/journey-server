@@ -2,7 +2,7 @@ import { PaginationQuerySchema } from '@domain/shared';
 import { z } from 'zod';
 import { PaymentValidator, RefundValidator } from '../validators';
 
-export const GetManyPaymentsRequest = PaymentValidator.pick({
+export const GetManyPaymentsRequestSchema = PaymentValidator.pick({
   userId: true,
   type: true,
   status: true,
@@ -10,7 +10,7 @@ export const GetManyPaymentsRequest = PaymentValidator.pick({
   .partial()
   .extend(PaginationQuerySchema.shape);
 
-export const GetManyPaymentsResponse = z.object({
+export const GetManyPaymentsResponseSchema = z.object({
   payments: z.array(PaymentValidator),
   page: z.number().int(),
   limit: z.number().int(),
@@ -18,13 +18,14 @@ export const GetManyPaymentsResponse = z.object({
   totalPages: z.number().int(),
 });
 
-export const GetPaymentRequest = PaymentValidator.pick({
+export const GetPaymentRequestSchema = PaymentValidator.pick({
   id: true,
+  userId: true,
 });
 
-export const GetPaymentResponse = PaymentValidator;
+export const GetPaymentResponseSchema = PaymentValidator;
 
-export const WebhookPaymentRequest = z.object({
+export const WebhookPaymentRequestSchema = z.object({
   id: z.number(),
   gateway: z.string(),
   transactionDate: z.string(),
@@ -39,7 +40,7 @@ export const WebhookPaymentRequest = z.object({
   description: z.string(),
 });
 
-export const CreatePaymentRequest = PaymentValidator.pick({
+export const CreatePaymentRequestSchema = PaymentValidator.pick({
   id: true,
   userId: true,
   bookingId: true,
@@ -48,24 +49,25 @@ export const CreatePaymentRequest = PaymentValidator.pick({
   amount: true,
 });
 
-export const UpdateStatusPaymentRequest = PaymentValidator.pick({
+export const UpdateStatusPaymentRequestSchema = PaymentValidator.pick({
   id: true,
+  userId: true,
   status: true,
 });
 
-export const GetRefundRequest = RefundValidator.pick({
+export const GetRefundRequestSchema = RefundValidator.pick({
   id: true,
 });
 
-export const GetRefundResponse = RefundValidator;
+export const GetRefundResponseSchema = RefundValidator;
 
-export const GetManyRefundsRequest = RefundValidator.pick({
+export const GetManyRefundsRequestSchema = RefundValidator.pick({
   status: true,
 })
   .partial()
   .extend(PaginationQuerySchema.shape);
 
-export const GetManyRefundsResponse = z.object({
+export const GetManyRefundsResponseSchema = z.object({
   refunds: z.array(RefundValidator),
   page: z.number().int(),
   limit: z.number().int(),
@@ -73,12 +75,12 @@ export const GetManyRefundsResponse = z.object({
   totalPages: z.number().int(),
 });
 
-export const UpdateRefundStatusRequest = RefundValidator.pick({
+export const UpdateRefundStatusRequestSchema = RefundValidator.pick({
   id: true,
   status: true,
 });
 
-export const CreateRefundRequest = RefundValidator.pick({
+export const CreateRefundRequestSchema = RefundValidator.pick({
   id: true,
   userId: true,
   paymentId: true,
@@ -88,20 +90,26 @@ export const CreateRefundRequest = RefundValidator.pick({
   penaltyAmount: true,
 });
 
-export type GetManyPaymentsRequest = z.infer<typeof GetManyPaymentsRequest>;
-export type GetManyPaymentsResponse = z.infer<typeof GetManyPaymentsResponse>;
-export type GetPaymentRequest = z.infer<typeof GetPaymentRequest>;
-export type GetPaymentResponse = z.infer<typeof GetPaymentResponse>;
-export type CreatePaymentRequest = z.infer<typeof CreatePaymentRequest>;
+export type GetManyPaymentsRequest = z.infer<
+  typeof GetManyPaymentsRequestSchema
+>;
+export type GetManyPaymentsResponse = z.infer<
+  typeof GetManyPaymentsResponseSchema
+>;
+export type GetPaymentRequest = z.infer<typeof GetPaymentRequestSchema>;
+export type GetPaymentResponse = z.infer<typeof GetPaymentResponseSchema>;
+export type CreatePaymentRequest = z.infer<typeof CreatePaymentRequestSchema>;
 export type UpdateStatusPaymentRequest = z.infer<
-  typeof UpdateStatusPaymentRequest
+  typeof UpdateStatusPaymentRequestSchema
 >;
-export type WebhookPaymentRequest = z.infer<typeof WebhookPaymentRequest>;
-export type GetRefundRequest = z.infer<typeof GetRefundRequest>;
-export type GetRefundResponse = z.infer<typeof GetRefundResponse>;
-export type GetManyRefundsRequest = z.infer<typeof GetManyRefundsRequest>;
-export type GetManyRefundsResponse = z.infer<typeof GetManyRefundsResponse>;
+export type WebhookPaymentRequest = z.infer<typeof WebhookPaymentRequestSchema>;
+export type GetRefundRequest = z.infer<typeof GetRefundRequestSchema>;
+export type GetRefundResponse = z.infer<typeof GetRefundResponseSchema>;
+export type GetManyRefundsRequest = z.infer<typeof GetManyRefundsRequestSchema>;
+export type GetManyRefundsResponse = z.infer<
+  typeof GetManyRefundsResponseSchema
+>;
 export type UpdateRefundStatusRequest = z.infer<
-  typeof UpdateRefundStatusRequest
+  typeof UpdateRefundStatusRequestSchema
 >;
-export type CreateRefundRequest = z.infer<typeof CreateRefundRequest>;
+export type CreateRefundRequest = z.infer<typeof CreateRefundRequestSchema>;

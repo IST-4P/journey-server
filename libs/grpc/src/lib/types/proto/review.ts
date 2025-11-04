@@ -102,15 +102,19 @@ export interface GetMyReviewsRequest {
   page: number;
   limit: number;
   /** Query options */
-  searchText: string;
-  minRating: number;
-  maxRating: number;
+  searchText?: string | undefined;
+  minRating?: number | undefined;
+  maxRating?:
+    | number
+    | undefined;
   /** ISO 8601 format */
-  startDate: string;
+  startDate?:
+    | string
+    | undefined;
   /** ISO 8601 format */
-  endDate: string;
-  sortBy: SortField;
-  sortOrder: SortOrder;
+  endDate?: string | undefined;
+  sortBy?: SortField | undefined;
+  sortOrder?: SortOrder | undefined;
 }
 
 export interface GetReviewsByVehicleRequest {
@@ -118,13 +122,13 @@ export interface GetReviewsByVehicleRequest {
   page: number;
   limit: number;
   /** Query options */
-  searchText: string;
-  minRating: number;
-  maxRating: number;
-  startDate: string;
-  endDate: string;
-  sortBy: SortField;
-  sortOrder: SortOrder;
+  searchText?: string | undefined;
+  minRating?: number | undefined;
+  maxRating?: number | undefined;
+  startDate?: string | undefined;
+  endDate?: string | undefined;
+  sortBy?: SortField | undefined;
+  sortOrder?: SortOrder | undefined;
 }
 
 export interface GetReviewsByDeviceRequest {
@@ -132,13 +136,13 @@ export interface GetReviewsByDeviceRequest {
   page: number;
   limit: number;
   /** Query options */
-  searchText: string;
-  minRating: number;
-  maxRating: number;
-  startDate: string;
-  endDate: string;
-  sortBy: SortField;
-  sortOrder: SortOrder;
+  searchText?: string | undefined;
+  minRating?: number | undefined;
+  maxRating?: number | undefined;
+  startDate?: string | undefined;
+  endDate?: string | undefined;
+  sortBy?: SortField | undefined;
+  sortOrder?: SortOrder | undefined;
 }
 
 export interface GetReviewsByComboRequest {
@@ -146,13 +150,13 @@ export interface GetReviewsByComboRequest {
   page: number;
   limit: number;
   /** Query options */
-  searchText: string;
-  minRating: number;
-  maxRating: number;
-  startDate: string;
-  endDate: string;
-  sortBy: SortField;
-  sortOrder: SortOrder;
+  searchText?: string | undefined;
+  minRating?: number | undefined;
+  maxRating?: number | undefined;
+  startDate?: string | undefined;
+  endDate?: string | undefined;
+  sortBy?: SortField | undefined;
+  sortOrder?: SortOrder | undefined;
 }
 
 export interface GetAllReviewsRequest {

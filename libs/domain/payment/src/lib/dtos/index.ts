@@ -1,23 +1,23 @@
 import { createZodDto } from 'nestjs-zod';
 import z from 'zod';
 import {
-  CreatePaymentRequest,
-  CreateRefundRequest,
-  GetManyPaymentsRequest,
-  GetManyPaymentsResponse,
-  GetManyRefundsRequest,
-  GetManyRefundsResponse,
-  GetPaymentRequest,
-  GetPaymentResponse,
-  GetRefundRequest,
-  GetRefundResponse,
-  UpdateRefundStatusRequest,
-  UpdateStatusPaymentRequest,
-  WebhookPaymentRequest,
+  CreatePaymentRequestSchema,
+  CreateRefundRequestSchema,
+  GetManyPaymentsRequestSchema,
+  GetManyPaymentsResponseSchema,
+  GetManyRefundsRequestSchema,
+  GetManyRefundsResponseSchema,
+  GetPaymentRequestSchema,
+  GetPaymentResponseSchema,
+  GetRefundRequestSchema,
+  GetRefundResponseSchema,
+  UpdateRefundStatusRequestSchema,
+  UpdateStatusPaymentRequestSchema,
+  WebhookPaymentRequestSchema,
 } from '../models';
 
 export class WebhookPaymentRequestDTO extends createZodDto(
-  WebhookPaymentRequest.extend({
+  WebhookPaymentRequestSchema.extend({
     accountNumber: z.string().optional(),
     code: z.string().optional(),
     content: z.string().optional(),
@@ -29,28 +29,36 @@ export class WebhookPaymentRequestDTO extends createZodDto(
   })
 ) {}
 export class GetManyPaymentsRequestDTO extends createZodDto(
-  GetManyPaymentsRequest
+  GetManyPaymentsRequestSchema
 ) {}
 export class GetManyPaymentsResponseDTO extends createZodDto(
-  GetManyPaymentsResponse
+  GetManyPaymentsResponseSchema
 ) {}
-export class GetPaymentRequestDTO extends createZodDto(GetPaymentRequest) {}
-export class GetPaymentResponseDTO extends createZodDto(GetPaymentResponse) {}
+export class GetPaymentRequestDTO extends createZodDto(
+  GetPaymentRequestSchema
+) {}
+export class GetPaymentResponseDTO extends createZodDto(
+  GetPaymentResponseSchema
+) {}
 export class CreatePaymentRequestDTO extends createZodDto(
-  CreatePaymentRequest
+  CreatePaymentRequestSchema
 ) {}
 export class UpdateStatusPaymentRequestDTO extends createZodDto(
-  UpdateStatusPaymentRequest
+  UpdateStatusPaymentRequestSchema
 ) {}
-export class GetRefundRequestDTO extends createZodDto(GetRefundRequest) {}
-export class GetRefundResponseDTO extends createZodDto(GetRefundResponse) {}
+export class GetRefundRequestDTO extends createZodDto(GetRefundRequestSchema) {}
+export class GetRefundResponseDTO extends createZodDto(
+  GetRefundResponseSchema
+) {}
 export class GetManyRefundsRequestDTO extends createZodDto(
-  GetManyRefundsRequest
+  GetManyRefundsRequestSchema
 ) {}
 export class GetManyRefundsResponseDTO extends createZodDto(
-  GetManyRefundsResponse
+  GetManyRefundsResponseSchema
 ) {}
 export class UpdateRefundStatusRequestDTO extends createZodDto(
-  UpdateRefundStatusRequest
+  UpdateRefundStatusRequestSchema
 ) {}
-export class CreateRefundRequestDTO extends createZodDto(CreateRefundRequest) {}
+export class CreateRefundRequestDTO extends createZodDto(
+  CreateRefundRequestSchema
+) {}

@@ -4,6 +4,8 @@ package payment;
 
 service PaymentService {
   rpc Receiver(WebhookPaymentRequest) returns (WebhookPaymentResponse);
+  rpc GetPayment(GetPaymentRequest) returns (GetPaymentResponse);
+  rpc GetManyPayments(GetManyPaymentsRequest) returns (GetManyPaymentsResponse);
 }
 
 message WebhookPaymentRequest {
@@ -19,6 +21,41 @@ message WebhookPaymentRequest {
   optional string subAccount = 10;
   optional string referenceCode = 11;
   string description = 12;
+}
+
+message GetPaymentRequest {
+  string id = 1;
+  string userId = 2;
+}
+
+message GetPaymentResponse {
+  string id = 1;
+  int32 sequenceNumber = 2;
+  string paymentCode = 3;
+  string userId = 4;
+  string type = 5;
+  optional string bookingId = 6;
+  optional string rentalId = 7;
+  double amount = 8;
+  string status = 9;
+  string createdAt = 10;
+  optional string updatedAt = 11;
+}
+
+message GetManyPaymentsRequest {
+  optional string userId = 1;
+  optional string type = 2;
+  optional string status = 3;
+  int32 page = 4;
+  int32 limit = 5;
+}
+
+message GetManyPaymentsResponse {
+  repeated GetPaymentResponse payments = 1;
+  int32 page = 2;
+  int32 limit = 3;
+  int32 totalItems = 4;
+  int32 totalPages = 5;
 }
 
 message WebhookPaymentResponse {

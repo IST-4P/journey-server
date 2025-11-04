@@ -25,11 +25,13 @@ export class BlogController {
   constructor(private readonly blogService: BlogService) {}
 
   @Get()
+  @Auth([AuthType.Admin])
   getManyBlogs(@Query() query: GetManyBlogsRequestDTO) {
     return this.blogService.getManyBlogs(query);
   }
 
   @Get(':id')
+  @Auth([AuthType.Admin])
   getBlog(@Param() query: GetBlogRequestDTO) {
     return this.blogService.getBlog(query);
   }

@@ -9,8 +9,11 @@ export const RegisterRequestSchema = UserValidatorSchema.pick({
   password: true,
 })
   .extend({
-    confirmPassword: z.string().min(4).max(100),
-    code: z.string().length(6),
+    confirmPassword: z
+      .string({ message: 'Error.InvalidConfirmPassword' })
+      .min(4)
+      .max(100),
+    code: z.string({ message: 'Error.InvalidOTP' }).length(6),
   })
   .strict()
   .superRefine(({ confirmPassword, password }, ctx) => {

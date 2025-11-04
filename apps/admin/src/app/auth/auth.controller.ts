@@ -1,4 +1,8 @@
-import { ForgotPasswordRequestDTO, LoginRequestDTO } from '@domain/auth';
+import {
+  ForgotPasswordRequestDTO,
+  LoginRequestDTO,
+  SendOTPRequestDTO,
+} from '@domain/auth';
 import { IsPublic } from '@hacmieu-journey/nestjs';
 import {
   Body,
@@ -42,6 +46,12 @@ export class AuthController {
     });
 
     return { message: 'Message.LoginSuccessfully' };
+  }
+
+  @IsPublic()
+  @Post('otp')
+  async sendOTP(@Body() body: SendOTPRequestDTO) {
+    return this.authService.sendOTP(body);
   }
 
   @IsPublic()

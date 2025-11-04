@@ -27,6 +27,12 @@ export class AuthService implements OnModuleInit {
     return lastValueFrom(this.authService.refreshToken(data));
   }
 
+  async sendOTP(
+    data: AuthProto.SendOTPRequest
+  ): Promise<AuthProto.SendOTPResponse> {
+    return lastValueFrom(this.authService.sendOtp(data));
+  }
+
   async logout(
     data: AuthProto.LogoutRequest
   ): Promise<AuthProto.LogoutResponse> {

@@ -177,9 +177,9 @@ jobs:
           - name: blog
             dockerfile: apps/blog/Dockerfile
             type: dotnet
-          - name: rental
-            dockerfile: apps/rental/Dockerfile
-            type: dotnet
+          # - name: rental
+          #   dockerfile: apps/rental/Dockerfile
+          #   type: dotnet
           - name: device
             dockerfile: apps/device/Dockerfile
             type: dotnet

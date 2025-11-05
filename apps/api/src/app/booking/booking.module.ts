@@ -1,4 +1,4 @@
-import { BookingProto, VehicleProto } from '@hacmieu-journey/grpc';
+import { BookingProto, UserProto, VehicleProto } from '@hacmieu-journey/grpc';
 import { NatsModule } from '@hacmieu-journey/nats';
 import { Module } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
@@ -39,6 +39,20 @@ import { BookingService } from './booking.service';
               'localhost:5004',
             package: VehicleProto.VEHICLE_PACKAGE_NAME,
             protoPath: join(__dirname, '../../libs/grpc/proto/vehicle.proto'),
+          },
+        }),
+        inject: [ConfigService],
+      },
+      {
+        name: UserProto.USER_PACKAGE_NAME,
+        useFactory: (configService: ConfigService) => ({
+          transport: Transport.GRPC,
+          options: {
+            url:
+              configService.getOrThrow('USER_GRPC_SERVICE_URL') ||
+              'localhost:5001',
+            package: UserProto.USER_PACKAGE_NAME,
+            protoPath: join(__dirname, '../../libs/grpc/proto/user.proto'),
           },
         }),
         inject: [ConfigService],

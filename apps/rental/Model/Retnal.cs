@@ -14,12 +14,13 @@ namespace rental.Model.Entities
         public string Items { get; set; } = "[]";
 
         //chi phí
-        public double RentalFee { get; set; }
-        public double? Deposit { get; set; } // Deposit based on device/combo prices and quantities
+        public double RentalFee { get; set; } // Tổng giá trị thuê (sum of all items)
+        public double? Deposit { get; set; } // 20% of RentalFee
+        public double? RemainingAmount { get; set; } // 80% of RentalFee (paid on pickup)
         public double DiscountPercent { get; set; } = 0; // Discount percentage (e.g., 10 for 10%)
         public double MaxDiscount { get; set; } = 0; // Maximum discount amount in VND
 
-        public double TotalPrice { get; set; } // Total price (for reference only)
+        public double TotalPrice { get; set; } // = RentalFee (total amount to pay)
         public int TotalQuantity { get; set; }
 
         //trạng thái
@@ -82,9 +83,10 @@ namespace rental.Model.Entities
     public enum RentalStatus
     {
         PENDING, // Chờ thanh toán deposit
-        PAID, // Đã thanh toán deposit, chờ nhận hàng
-        ONGOING, // Đang thuê 
-        COMPLETED, // Hoàn thành (đã trả)
+        DEPOSIT_PAID, // Đã thanh toán deposit (20%), chờ nhận hàng
+        RECEIVED, // Đã nhận hàng và thanh toán phần còn lại (80%), đang thuê
+        ONGOING, // Đang thuê (alias for RECEIVED)
+        COMPLETED, // Hoàn thành (đã trả hàng)
         CANCELLED, // Đã hủy (có thể hoàn deposit)
         EXPIRED // Hết hạn (quá thời gian không thanh toán)
     }

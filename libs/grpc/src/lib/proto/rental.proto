@@ -17,6 +17,7 @@ service RentalService {
   rpc GetAllRentals(GetAllRentalsRequest) returns (GetAllRentalsAdminResponse);
   rpc UpdateRental(UpdateRentalRequest) returns (RentalResponse);
   rpc DeleteRental(DeleteRentalRequest) returns (DeleteRentalResponse);
+  rpc GetHistoryRental(GetHistoryRentalRequest) returns (GetHistoryRentalResponse);
 
   // Extensions: Rental time extension
   rpc CreateRentalExtension(CreateRentalExtensionRequest) returns (RentalResponse);
@@ -72,12 +73,12 @@ message RentalResponse {
   string userId = 2;
   repeated RentalItemDetail items = 3;
   string status = 4;
-  double rentalFee = 5;
-  double deposit = 6;
+  double rentalFee = 5; // Total item value (sum of all items before discount)
+  double deposit = 6; // 20% of total price (paid upfront)
   double maxDiscount = 7; // Max discount amount in VND that can be deducted
-  double totalPrice = 8; 
+  double totalPrice = 8; // (RentalFee - Discount) × 1.1 (including VAT 10%)
   int32 totalQuantity = 9; 
-  double VAT = 10; // VAT percentage (e.g., 10 for 10%)
+  double remainingAmount = 10; // 80% of total price (paid on pickup)
   string startDate = 11;
   string endDate = 12;
   string createdAt = 13;
@@ -209,4 +210,25 @@ message DeleteRentalRequest {
 
 message DeleteRentalResponse {
   string message = 1;
+}
+
+// =============================
+// Rental History messages
+// =============================
+
+message RentalHistoryMessage {
+  string id = 1;
+  string rentalId = 2;
+  string oldStatus = 3;
+  string newStatus = 4;
+  string changedAt = 5; // ISO string
+  optional string notes = 6;
+}
+
+message GetHistoryRentalRequest {
+  string rentalId = 1;
+}
+
+message GetHistoryRentalResponse {
+  repeated RentalHistoryMessage histories = 1;
 }

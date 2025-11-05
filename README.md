@@ -19,46 +19,46 @@
 ### Kiến trúc tổng quan
 
 ```
-┌────────────────────────────────────────────────────────────────┐
-│                         Client Layer                           │
+┌─────────────────────────────────────────────────────────────────┐
+│                         Client Layer                             │
 │  ┌─────────────┐  ┌─────────────┐  ┌──────────────────┐        │
-│  │   Web App   │  │  Mobile App │  │ Admin Dashboard  │        │
+│  │   Web App   │  │  Mobile App │  │ Admin Dashboard   │        │
 │  └──────┬──────┘  └──────┬──────┘  └────────┬─────────┘        │
-└─────────┼─────────────────┼───────────────────┼────────────────┘
+└─────────┼─────────────────┼───────────────────┼─────────────────┘
           │                 │                   │
           ▼                 ▼                   ▼
-┌────────────────────────────────────────────────────────────────┐
-│                      API Gateway Layer                         │
-│  ┌──────────────────┐              ┌──────────────────┐        │
-│  │   API Gateway    │              │  Admin Gateway   │        │
-│  │   Port: 3000     │              │   Port: 3100     │        │
-│  └────────┬─────────┘              └────────┬─────────┘        │
-└───────────┼──────────────────────────────────┼─────────────────┘
+┌─────────────────────────────────────────────────────────────────┐
+│                      API Gateway Layer                           │
+│  ┌──────────────────┐              ┌──────────────────┐         │
+│  │   API Gateway    │              │  Admin Gateway   │         │
+│  │   Port: 3000     │              │   Port: 3100     │         │
+│  └────────┬─────────┘              └────────┬─────────┘         │
+└───────────┼──────────────────────────────────┼──────────────────┘
             │                                  │
             ▼                                  ▼
-┌────────────────────────────────────────────────────────────────┐
-│                    Microservices Layer                         │
-│                                                                │
-│  Node.js Services (NestJS)     │     .NET Services (C#)        │
+┌─────────────────────────────────────────────────────────────────┐
+│                    Microservices Layer                           │
+│                                                                  │
+│  Node.js Services (NestJS)     │     .NET Services (C#)         │
 │  ┌─────────────────────────┐   │   ┌─────────────────────────┐ │
 │  │ Auth         (gRPC 5000)│   │   │ Blog        (gRPC 5005) │ │
 │  │ User         (gRPC 5001)│   │   │ Device      (gRPC 5006) │ │
 │  │ Notification (gRPC 5002)│   │   │ Rental      (gRPC 5007) │ │
 │  │ Chat         (gRPC 5003)│   │   │ Review      (gRPC 5010) │ │
-│  │ Vehicle      (gRPC 5004)│   │   └─────────────────────────┘ |        
-│  │ Booking      (gRPC 5008)│   │                               |
-│  │ Payment      (gRPC 5009)│   │                               │
-│  └─────────────────────────┘   │                               │
-└────────────────────────────────────────────────────────────────┘
+│  │ Vehicle      (gRPC 5004)│   │   │ Complaint   (gRPC 5011) │ │
+│  │ Booking      (gRPC 5008)│   │   └─────────────────────────┘ │
+│  │ Payment      (gRPC 5009)│   │                                │
+│  └─────────────────────────┘   │                                │
+└─────────────────────────────────────────────────────────────────┘
             │                                  │
             ▼                                  ▼
-┌────────────────────────────────────────────────────────────────┐
-│                    Infrastructure Layer                        │
+┌─────────────────────────────────────────────────────────────────┐
+│                    Infrastructure Layer                          │
 │  ┌──────────────┐  ┌──────────────┐  ┌──────────────────┐      │
 │  │ PostgreSQL   │  │    Redis     │  │  NATS JetStream  │      │
 │  │ (Per Service)│  │ (Cache/WS)   │  │   (Port 4222)    │      │
 │  └──────────────┘  └──────────────┘  └──────────────────┘      │
-└────────────────────────────────────────────────────────────────┘
+└─────────────────────────────────────────────────────────────────┘
 ```
 
 ### Đặc điểm kiến trúc
@@ -207,6 +207,14 @@
   - `Rental` (Id, UserId, Items (JSON array), RentalFee, Deposit, DiscountPercent, MaxDiscount, TotalPrice, TotalQuantity, Status, StartDate, EndDate, ActualEndDate, ReviewId, RentalExtensionId)
   - `RentalExtension` (Id, NewEndDate, AdditionalFee, Reason, Status)
   - `RentalHistory` (Id, RentalId, Status, ChangedAt, ChangedBy, Notes)
+- **Item Structure** (JSON):
+  ```json
+  {
+    "targetId": "guid",
+    "isCombo": boolean,
+    "quantity": number
+  }
+  ```
 - **Enums**: `RentalStatus` (PENDING, APPROVED, ONGOING, COMPLETED, CANCELLED, EXPIRED, OVERDUE), `ExtensionStatus`
 - **NATS Events Published**:
   - `rental.created`: Khi tạo đơn thuê mới
@@ -239,7 +247,28 @@
   - Content: max 2000 chars
   - UpdateCount: max 2 lần
 
-#### 11. **Blog Service** (Port 5005)
+#### 11. **Complaint Service** (Port 5011)
+- **Framework**: .NET 9.0, EF Core, gRPC, NATS, AutoMapper
+- **Chức năng**:
+  - Xử lý khiếu nại từ khách hàng
+  - Liên kết với Rental hoặc Booking
+  - Admin response
+  - Evidence management (upload ảnh)
+  - Status tracking
+- **Database Models** (EF Core):
+  - `ComplaintEntity` (Id, UserId, RentalId, BookingId, DeviceId, VehicleId, ComboId, Type, Title, Content, EvidenceImages, Status, AdminResponse, CreatedAt, UpdatedAt, ResolvedAt)
+- **Enums**: 
+  - `ComplaintStatus` (Pending, Processing, Resolved, Rejected)
+  - `ComplaintType` (Device, Vehicle, Combo, Service, Other)
+- **NATS Events Published**:
+  - `complaint.created`: Khi tạo khiếu nại mới
+  - `complaint.updated`: Khi cập nhật status
+  - `complaint.resolved`: Khi resolve/reject
+  - `complaint.deleted`: Khi xóa khiếu nại
+- **NATS Stream**: `COMPLAINT` (retention 90 days)
+- **Proto Integration**: Client cho Rental, Booking, Device, User services
+
+#### 12. **Blog Service** (Port 5005)
 - **Framework**: .NET, EF Core, gRPC
 - **Chức năng**:
   - Quản lý blog posts
@@ -270,6 +299,7 @@
 - **gRPC**: Grpc.AspNetCore 2.70, Google.Protobuf 3.29
 - **Messaging**: NATS.Client 2.4 (Core + JetStream)
 - **Mapping**: AutoMapper 12.0
+- **Config**: DotNetEnv 3.1
 
 ### Infrastructure
 
@@ -304,7 +334,9 @@
 - **Nx**: Monorepo management và build orchestration
 - **Docker Compose**: Local development environment
 - **Prisma Studio**: Database GUI
-- **Postman**: Testing
+- **ESLint + Prettier**: Code quality và formatting
+- **Jest**: Unit testing
+
 ---
 
 ## 📊 Database Schema
@@ -318,6 +350,17 @@ Mỗi service có database riêng để đảm bảo:
 - **Fault Isolation**: Lỗi database ở 1 service không ảnh hưởng toàn bộ hệ thống
 
 ---
+
+## 🔄 NATS JetStream Event Architecture
+
+### NATS Streams Configuration
+
+| Stream | Subjects | Retention | Max Age | Services |
+|--------|----------|-----------|---------|----------|
+| **RENTAL** | rental.created<br/>rental.updated<br/>rental.completed<br/>rental.cancelled | Workqueue | 30 days | Rental (Publisher) |
+| **REVIEW** | review.created | Workqueue | 30 days | Review (Publisher)<br/>Device (Consumer)<br/>Vehicle (Consumer) |
+| **COMPLAINT** | complaint.created<br/>complaint.updated<br/>complaint.resolved<br/>complaint.deleted | Workqueue | 90 days | Complaint (Publisher) |
+
 ### Event Flow Examples
 
 #### 1. Rental Created Event Flow
@@ -332,6 +375,125 @@ NATS JetStream (RENTAL stream)
         ├→ Notification Service (send confirmation)
         ├→ Payment Service (create payment record)
         └→ Device Service (update inventory)
+```
+
+**Event Payload** (`rental.created`):
+```json
+{
+  "rentalId": "uuid",
+  "userId": "uuid",
+  "items": [
+    { "targetId": "device-uuid", "isCombo": false, "quantity": 2 },
+    { "targetId": "combo-uuid", "isCombo": true, "quantity": 1 }
+  ],
+  "deposit": 500000,
+  "totalPrice": 2500000,
+  "startDate": "2024-01-15T10:00:00Z",
+  "endDate": "2024-01-20T10:00:00Z",
+  "status": "PENDING"
+}
+```
+
+#### 2. Review Created Event Flow
+```
+User submits review
+        ↓
+Review Service → review.created event
+        ↓
+NATS JetStream (REVIEW stream)
+        ↓
+Consumers:
+        ├→ Device Service (update device rating)
+        ├→ Vehicle Service (update vehicle rating)
+        └→ Notification Service (notify reviewed user)
+```
+
+**Event Payload** (`review.created`):
+```json
+{
+  "reviewId": "uuid",
+  "userId": "uuid",
+  "deviceId": "uuid", // hoặc vehicleId hoặc comboId
+  "rating": 5,
+  "type": "Device", // Device | Vehicle | Combo
+  "title": "Excellent camera!",
+  "content": "The camera quality is amazing...",
+  "createdAt": "2024-01-20T15:30:00Z"
+}
+```
+
+**Device Consumer Logic**:
+```csharp
+// Device Service lắng nghe review.created
+private async Task HandleReviewCreatedAsync(ReviewCreatedEvent reviewEvent)
+{
+    if (!string.IsNullOrEmpty(reviewEvent.DeviceId)) {
+        var device = await _deviceRepository.GetByIdAsync(reviewEvent.DeviceId);
+        
+        // Add review ID to device's review list
+        device.TotalReviewIds.Add(reviewEvent.ReviewId);
+        
+        // Recalculate average rating (call Review Service)
+        var newRating = await CalculateAverageRating(device.TotalReviewIds);
+        device.AverageRating = newRating;
+        
+        await _deviceRepository.UpdateAsync(device);
+    }
+}
+```
+
+#### 3. Complaint Resolution Event Flow
+```
+Admin resolves complaint
+        ↓
+Complaint Service → complaint.resolved event
+        ↓
+NATS JetStream (COMPLAINT stream)
+        ↓
+Consumers:
+        ├→ Notification Service (notify user về resolution)
+        ├→ User Service (có thể update credit score nếu cần)
+        └→ Analytics Service (track complaint metrics)
+```
+
+**Event Payload** (`complaint.resolved`):
+```json
+{
+  "complaintId": "uuid",
+  "userId": "uuid",
+  "rentalId": "uuid",
+  "status": "Resolved", // hoặc "Rejected"
+  "adminResponse": "We have refunded 100% of your deposit...",
+  "resolvedAt": "2024-01-21T09:00:00Z"
+}
+```
+
+#### 4. Rental Cancellation with Refund
+```
+User cancels rental
+        ↓
+Rental Service
+        ├→ Calculate refund (100%/50%/0%)
+        └→ rental.cancelled event
+                ↓
+        NATS JetStream (RENTAL stream)
+                ↓
+        Consumers:
+                ├→ Payment Service (process refund)
+                ├→ Device Service (release inventory)
+                └→ Notification Service (send cancellation email)
+```
+
+**Event Payload** (`rental.cancelled`):
+```json
+{
+  "rentalId": "uuid",
+  "userId": "uuid",
+  "cancelledAt": "2024-01-10T14:00:00Z",
+  "refundAmount": 500000,
+  "refundPercent": 100, // 100% refund nếu cancel >7 ngày trước
+  "reason": "User requested cancellation"
+}
 ```
 
 ### Event Sourcing Benefits
@@ -383,8 +545,8 @@ NATS JetStream (RENTAL stream)
 
 ### Authentication & Authorization
 - **JWT Tokens**: Access & Refresh tokens
-- **Role-based Access Control** (RBAC): USER, ADMIN
-- **Passport Strategies**: Local, JWT, OAuth (Google)
+- **Role-based Access Control** (RBAC): USER, ADMIN, SUPER_ADMIN
+- **Passport Strategies**: Local, JWT, OAuth (Google, Facebook)
 - **Session Management**: Redis-based session store
 
 ### Data Security
@@ -489,6 +651,33 @@ NATS JetStream (RENTAL stream)
    ├→ Review Service creates review
    ├→ NATS: publish review.created event
    └→ Device Service updates rating (consumer)
+```
+
+### Complaint Resolution Flow
+```
+1. User encounters issue during rental/booking
+   └→ User navigates to complaints section
+
+2. User creates complaint
+   ├→ API Gateway → Complaint Service (gRPC)
+   ├→ Complaint Service fetches rental/booking data
+   ├→ Complaint Service creates complaint (status: PENDING)
+   ├→ Complaint Service uploads evidence images (S3)
+   └→ NATS: publish complaint.created event
+       └→ Notification Service → notify admin
+
+3. Admin reviews complaint
+   ├→ Admin Gateway → Complaint Service
+   ├→ Admin updates status to PROCESSING
+   └→ NATS: publish complaint.updated event
+
+4. Admin resolves complaint
+   ├→ Admin adds response and decision
+   ├→ Complaint Service updates status to RESOLVED
+   ├→ NATS: publish complaint.resolved event
+   └→ Notification Service → notify user
+       ├→ If refund needed → Payment Service processes
+       └→ User Service may update credit score
 ```
 
 ---

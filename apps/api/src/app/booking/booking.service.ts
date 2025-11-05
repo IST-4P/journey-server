@@ -1,4 +1,4 @@
-import { BookingProto, VehicleProto } from '@hacmieu-journey/grpc';
+import { BookingProto, UserProto, VehicleProto } from '@hacmieu-journey/grpc';
 import { Inject, Injectable, Logger, OnModuleInit } from '@nestjs/common';
 import { ClientGrpc } from '@nestjs/microservices';
 import { lastValueFrom } from 'rxjs';
@@ -8,12 +8,15 @@ export class BookingService implements OnModuleInit {
   private readonly logger = new Logger(BookingService.name);
   private bookingService!: BookingProto.BookingServiceClient;
   private vehicleService!: VehicleProto.VehicleServiceClient;
+  private userService!: UserProto.UserServiceClient;
 
   constructor(
     @Inject(BookingProto.BOOKING_PACKAGE_NAME)
     private bookingClient: ClientGrpc,
     @Inject(VehicleProto.VEHICLE_PACKAGE_NAME)
-    private vehicleClient: ClientGrpc
+    private vehicleClient: ClientGrpc,
+    @Inject(UserProto.USER_PACKAGE_NAME)
+    private userClient: ClientGrpc
   ) {}
 
   onModuleInit() {
@@ -25,6 +28,9 @@ export class BookingService implements OnModuleInit {
       this.vehicleClient.getService<VehicleProto.VehicleServiceClient>(
         VehicleProto.VEHICLE_SERVICE_NAME
       );
+    this.userService = this.userClient.getService<UserProto.UserServiceClient>(
+      UserProto.USER_SERVICE_NAME
+    );
   }
 
   //================= Bookings =================//
@@ -44,14 +50,28 @@ export class BookingService implements OnModuleInit {
   async createBooking(
     data: BookingProto.CreateBookingRequest
   ): Promise<BookingProto.GetBookingResponse> {
+    const license = await lastValueFrom(
+      this.userService.getDriverLicense(data)
+    );
+
+    if (!license) {
+      throw new Error('Error.DriverLicenseNotFound');
+    }
+
+    if (license.isVerified === false) {
+      throw new Error('Error.DriverLicenseNotVerified');
+    }
+
     const vehicle = await lastValueFrom(
       this.vehicleService.getVehicle({ id: data.vehicleId })
     );
+
     if (!vehicle) {
-      throw new Error('Vehicle not found');
+      throw new Error('Error.VehicleNotFound');
     }
+
     if (vehicle.status !== 'ACTIVE') {
-      throw new Error('Vehicle is not ACTIVE for booking');
+      throw new Error('Error.VehicleNotActive');
     }
     data.vehicleFeeHour = vehicle.pricePerHour;
     return lastValueFrom(this.bookingService.createBooking(data));

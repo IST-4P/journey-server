@@ -13,7 +13,7 @@ namespace review.Services
         private readonly IReviewService _reviewService;
         private readonly IMapper _mapper;
         private readonly ILogger<ReviewGrpcService> _logger;
-        
+
 
         public ReviewGrpcService(IReviewService reviewService, IMapper mapper, ILogger<ReviewGrpcService> logger)
         {
@@ -44,7 +44,7 @@ namespace review.Services
                 return new Review.ReviewResponse
                 {
                     Review = protoReview,
-                    Message = "Review created successfully"
+                    Message = "Successfully.ReviewCreated"
                 };
             }
             catch (RpcException)
@@ -53,7 +53,7 @@ namespace review.Services
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error creating review");
+                _logger.LogError(ex, "Error.CreatingReview");
                 throw new RpcException(new Status(StatusCode.Internal, "An error occurred while creating the review"));
             }
         }
@@ -78,7 +78,7 @@ namespace review.Services
                 return new Review.ReviewResponse
                 {
                     Review = protoReview,
-                    Message = "Review updated successfully"
+                    Message = "Successfully.ReviewUpdated"
                 };
             }
             catch (RpcException)
@@ -87,7 +87,7 @@ namespace review.Services
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error updating review");
+                _logger.LogError(ex, "Error.UpdatingReview");
                 throw new RpcException(new Status(StatusCode.Internal, "An error occurred while updating the review"));
             }
         }
@@ -104,7 +104,7 @@ namespace review.Services
                 return new Review.DeleteReviewResponse
                 {
                     Success = success,
-                    Message = success ? "Review deleted successfully" : "Failed to delete review"
+                    Message = success ? "Successfully.ReviewDeleted" : "Error.FailedToDeleteReview"
                 };
             }
             catch (RpcException)
@@ -113,7 +113,7 @@ namespace review.Services
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error deleting review");
+                _logger.LogError(ex, "Error.DeletingReview");
                 throw new RpcException(new Status(StatusCode.Internal, "An error occurred while deleting the review"));
             }
         }
@@ -135,7 +135,7 @@ namespace review.Services
                 return new Review.ReviewResponse
                 {
                     Review = protoReview,
-                    Message = "Review retrieved successfully"
+                    Message = "Successfully.ReviewRetrieved"
                 };
             }
             catch (RpcException)
@@ -144,7 +144,7 @@ namespace review.Services
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error getting review");
+                _logger.LogError(ex, "Error.GettingReviewById");
                 throw new RpcException(new Status(StatusCode.Internal, "An error occurred while retrieving the review"));
             }
         }
@@ -159,7 +159,10 @@ namespace review.Services
                     request.SortBy, request.SortOrder);
 
                 var pagedResult = await _reviewService.GetMyReviewsAsync(userId, query);
-
+                if (pagedResult == null)
+                {
+                    throw new RpcException(new Status(StatusCode.NotFound, "Not found"));
+                }
                 var response = new Review.GetMyReviewsResponse
                 {
                     Page = pagedResult.Page,
@@ -181,7 +184,7 @@ namespace review.Services
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error getting user reviews");
+                _logger.LogError(ex, "Error.GettingUserReviews");
                 throw new RpcException(new Status(StatusCode.Internal, "An error occurred while retrieving user reviews"));
             }
         }
@@ -196,7 +199,10 @@ namespace review.Services
                     request.SortBy, request.SortOrder);
 
                 var pagedResult = await _reviewService.GetReviewsByVehicleIdAsync(vehicleId, query);
-
+                if (pagedResult == null)
+                {
+                    throw new RpcException(new Status(StatusCode.NotFound, "Not found"));
+                }
                 var response = new Review.GetReviewsResponse
                 {
                     Page = pagedResult.Page,
@@ -218,7 +224,7 @@ namespace review.Services
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error getting vehicle reviews");
+                _logger.LogError(ex, "Error.GettingVehicleReviews");
                 throw new RpcException(new Status(StatusCode.Internal, "An error occurred while retrieving vehicle reviews"));
             }
         }
@@ -234,6 +240,10 @@ namespace review.Services
 
                 var pagedResult = await _reviewService.GetReviewsByDeviceIdAsync(deviceId, query);
 
+                if (pagedResult == null)
+                {
+                    throw new RpcException(new Status(StatusCode.NotFound, "Not found"));
+                }
                 var response = new Review.GetReviewsResponse
                 {
                     Page = pagedResult.Page,
@@ -255,7 +265,7 @@ namespace review.Services
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error getting device reviews");
+                _logger.LogError(ex, "Error.GettingDeviceReviews");
                 throw new RpcException(new Status(StatusCode.Internal, "An error occurred while retrieving device reviews"));
             }
         }
@@ -270,7 +280,10 @@ namespace review.Services
                     request.SortBy, request.SortOrder);
 
                 var pagedResult = await _reviewService.GetReviewsByComboIdAsync(comboId, query);
-
+                if (pagedResult == null)
+                {
+                    throw new RpcException(new Status(StatusCode.NotFound, "Not found"));
+                }
                 var response = new Review.GetReviewsResponse
                 {
                     Page = pagedResult.Page,
@@ -292,7 +305,7 @@ namespace review.Services
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error getting combo reviews");
+                _logger.LogError(ex, "Error.GettingComboReviews");
                 throw new RpcException(new Status(StatusCode.Internal, "An error occurred while retrieving combo reviews"));
             }
         }
@@ -333,7 +346,7 @@ namespace review.Services
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error getting all reviews");
+                _logger.LogError(ex, "Error.GettingAllReviews");
                 throw new RpcException(new Status(StatusCode.Internal, "An error occurred while retrieving all reviews"));
             }
         }
@@ -350,7 +363,7 @@ namespace review.Services
                 return new Review.DeleteReviewResponse
                 {
                     Success = success,
-                    Message = success ? "Review deleted successfully by admin" : "Failed to delete review"
+                    Message = success ? "Successfully.ReviewDeleted" : "Error.FailedToDeleteReview"
                 };
             }
             catch (RpcException)
@@ -359,7 +372,7 @@ namespace review.Services
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error admin deleting review");
+                _logger.LogError(ex, "Error.AdminDeletingReview");
                 throw new RpcException(new Status(StatusCode.Internal, "An error occurred while deleting the review"));
             }
         }

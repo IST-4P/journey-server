@@ -102,7 +102,7 @@ model Booking {
     updatedAt   DateTime  @updatedAt @map("updated_at")
     cancelledAt DateTime? @map("cancelled_at")
     expiredAt   DateTime? @map("expired_at")
-
+ 
     // Relations
     history  BookingHistory[]
     checkIns CheckInOut[]

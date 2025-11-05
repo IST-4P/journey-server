@@ -57,6 +57,7 @@ message GetManyDevices {
   repeated string information = 6;
   repeated string images = 7;
   string categoryName = 8;
+  string id = 9;
 }
 
 message GetManyDevicesResponse {

@@ -11,6 +11,8 @@ namespace Blog.DTOs
         public string Content { get; set; } = string.Empty;
         public string Region { get; set; } = string.Empty;
         public string Thumbnail { get; set; } = string.Empty;
+        public string Summary { get; set; } = string.Empty;
+        public string Tag { get; set; } = string.Empty;
         public DateTime CreatedAt { get; set; }
         public DateTime UpdatedAt { get; set; }
     }
@@ -22,6 +24,9 @@ namespace Blog.DTOs
         public string Title { get; set; } = string.Empty;
         public string Type { get; set; } = string.Empty;
         public string Region { get; set; } = string.Empty;
+        public string Thumbnail { get; set; } = string.Empty;
+        public string Tag { get; set; } = string.Empty;
+        public string Summary { get; set; } = string.Empty;
         public DateTime CreatedAt { get; set; }
         public DateTime UpdatedAt { get; set; }
     }
@@ -33,6 +38,8 @@ namespace Blog.DTOs
         public string Type { get; set; } = string.Empty;
         public string Region { get; set; } = string.Empty;
         public string Thumbnail { get; set; } = string.Empty;
+        public string Tag { get; set; } = string.Empty;
+        public string Summary { get; set; } = string.Empty;
         public DateTime CreatedAt { get; set; }
         public DateTime UpdatedAt { get; set; }
     }

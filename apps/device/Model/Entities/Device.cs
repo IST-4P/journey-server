@@ -7,6 +7,7 @@ namespace device.Model.Entities
     {
         public Guid Id { get; set; }
         public required string Name { get; set; }
+        public string? Brand {get;set;}
         public string? Description { get; set; }
         public required double Price { get; set; }
         public List<string>? Information { get; set; }
@@ -37,6 +38,7 @@ namespace device.Model.Entities
         public ICollection<Device>? Devices { get; set; }
 
     }
+    // thể hiện combo chứa những thiết bị nào
     [Table("combos")]
     public class Combo
     {
@@ -52,7 +54,7 @@ namespace device.Model.Entities
         public DateTime UpdateAt { get; set; } = DateTime.UtcNow;
 
     }
-
+    // bảng nối combo - device
     [Table("combo_devices")]
     public class ComboDevice
     {
@@ -66,15 +68,5 @@ namespace device.Model.Entities
 
         public int Quantity { get; set; } = 1;
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
-    }
-
-    public class ApiResponse
-    {
-        public string Message { get; set; } = string.Empty;
-    }
-    public class ApiErrorResponse
-    {
-        public string Message { get; set; } = string.Empty;
-        public int StatusCode { get; set; }
     }
 }

@@ -151,7 +151,6 @@ namespace review.Services
                     Rating = review.Rating,
                     Type = review.Type.ToString(),
                     CreatedAt = review.CreatedAt.ToString("o"),
-                    // Use target IDs already populated in review entity
                     DeviceId = review.DeviceId?.ToString(),
                     ComboId = review.ComboId?.ToString(),
                     VehicleId = review.VehicleId?.ToString()
@@ -163,7 +162,6 @@ namespace review.Services
             catch (Exception ex)
             {
                 _logger.LogError(ex, $"Failed to publish review.created event for review {review.Id}");
-                // Don't throw - the review was created successfully
             }
         }
 

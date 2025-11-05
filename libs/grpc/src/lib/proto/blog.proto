@@ -44,7 +44,7 @@ message GetManyBlogs {
   string thumbnail = 5;
   string createdAt = 6;
   string updatedAt = 7;
-  string tag = 8
+  string tag = 8;
 }
 
 message GetManyBlogsResponse {

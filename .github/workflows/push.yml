@@ -174,18 +174,18 @@ jobs:
           - name: payment
             dockerfile: apps/payment/Dockerfile
             type: nodejs
-          # - name: blog
-          #   dockerfile: apps/blog/Dockerfile
-          #   type: dotnet
-          # - name: rental
-          #   dockerfile: apps/rental/Dockerfile
-          #   type: dotnet
-          # - name: device
-          #   dockerfile: apps/device/Dockerfile
-          #   type: dotnet
-          # - name: review
-          #   dockerfile: apps/review/Dockerfile
-          #   type: dotnet
+          - name: blog
+            dockerfile: apps/blog/Dockerfile
+            type: dotnet
+          - name: rental
+            dockerfile: apps/rental/Dockerfile
+            type: dotnet
+          - name: device
+            dockerfile: apps/device/Dockerfile
+            type: dotnet
+          - name: review
+            dockerfile: apps/review/Dockerfile
+            type: dotnet
 
     steps:
       - uses: actions/checkout@v4

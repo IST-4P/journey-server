@@ -29,7 +29,5 @@ import { VehicleModule } from './vehicle/vehicle.module';
     RentalModule,
     PaymentModule,
   ],
-  controllers: [],
-  providers: [],
 })
 export class AppModule {}

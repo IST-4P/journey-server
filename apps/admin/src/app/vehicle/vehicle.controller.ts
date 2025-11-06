@@ -5,6 +5,7 @@ import {
   CreateVehicleRequestDTO,
   DeleteBrandRequestDTO,
   DeleteModelRequestDTO,
+  GetAllModelsRequestDTO,
   GetFeatureRequestDTO,
   GetManyVehiclesRequestDTO,
   GetVehicleRequestDTO,
@@ -87,8 +88,8 @@ export class BrandController {
 export class ModelController {
   constructor(private readonly vehicleService: VehicleService) {}
   @Get()
-  getAllModels() {
-    return this.vehicleService.getAllModels({});
+  getAllModels(@Query() query: GetAllModelsRequestDTO) {
+    return this.vehicleService.getAllModels(query);
   }
 
   @Post()

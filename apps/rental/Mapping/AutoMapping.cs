@@ -27,7 +27,6 @@ namespace rental.Mapping
                 .ForMember(dest => dest.Deposit, opt => opt.Ignore())
                 .ForMember(dest => dest.DiscountPercent, opt => opt.Ignore())
                 .ForMember(dest => dest.MaxDiscount, opt => opt.Ignore())
-                .ForMember(dest => dest.VAT, opt => opt.Ignore())
                 .ForMember(dest => dest.TotalPrice, opt => opt.Ignore())
                 .ForMember(dest => dest.CreatedAt, opt => opt.Ignore())
                 .ForAllMembers(opts => opts.Condition((src, dest, srcMember) => srcMember != null));

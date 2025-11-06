@@ -56,12 +56,10 @@ namespace rental.Service
                 rental.EndDate = DateTime.Parse(request.EndDate).ToUniversalTime();
                 rental.CreatedAt = DateTime.UtcNow;
                 rental.Status = RentalStatus.PENDING;
-                rental.VAT = RentalCalculationHelper.VAT_PERCENT;
 
                 // Process multiple items
                 var itemsDataList = new List<RentalItemData>();
                 var itemDetailsList = new List<RentalItemDetail>();
-                var itemPricesList = new List<(double unitPrice, int quantity)>();
                 int totalQuantity = 0;
                 double totalRentalFee = 0;
 
@@ -134,7 +132,6 @@ namespace rental.Service
 
                     double subtotal = unitPrice * protoItem.Quantity;
                     totalRentalFee += subtotal;
-                    itemPricesList.Add((unitPrice, protoItem.Quantity));
 
                     var itemDetail = new RentalItemDetail
                     {
@@ -149,23 +146,28 @@ namespace rental.Service
                     itemDetailsList.Add(itemDetail);
                 }
 
-                // Calculate deposit based on item prices (not rental fee)
-                double deposit = RentalCalculationHelper.CalculateDepositForItems(itemPricesList);
-
+                // Calculate discount
                 double discountAmount = RentalCalculationHelper.CalculateDiscountAmount(
                     totalRentalFee,
                     request.DiscountPercent,
                     request.MaxDiscount
                 );
 
-                // Calculate total price for reference (but client only pays deposit)
-                double totalPrice = RentalCalculationHelper.CalculateTotalPrice(totalRentalFee, discountAmount, deposit);
+                // Calculate total price: (RentalFee - Discount) × 1.1 (including VAT 10%)
+                double totalPrice = RentalCalculationHelper.CalculateTotalPrice(totalRentalFee, discountAmount);
+
+                // Calculate deposit: 20% of total price (paid upfront)
+                double deposit = RentalCalculationHelper.CalculateDeposit(totalPrice);
+
+                // Calculate remaining amount: 80% of total price (paid on pickup)
+                double remainingAmount = RentalCalculationHelper.CalculateRemainingAmount(totalPrice);
 
                 rental.Items = JsonSerializer.Serialize(itemsDataList);
                 rental.RentalFee = totalRentalFee;
                 rental.DiscountPercent = request.DiscountPercent;
                 rental.MaxDiscount = request.MaxDiscount;
                 rental.Deposit = deposit;
+                rental.RemainingAmount = remainingAmount;
                 rental.TotalPrice = totalPrice;
                 rental.TotalQuantity = totalQuantity;
 
@@ -196,20 +198,20 @@ namespace rental.Service
                         var resp = await _paymentClient.ReceiverAsync(req);
                         paymentMessage = resp.Message;
 
-                        // If payment succeeds, mark rental as PAID
+                        // If payment succeeds, mark rental as DEPOSIT_PAID
                         if (!string.IsNullOrWhiteSpace(paymentMessage))
                         {
-                            await _repository.UpdateAsync(created.Id, new UpdateRentalRequestDto { Status = RentalStatus.PAID.ToString() });
-                            created.Status = RentalStatus.PAID;
-                            await RecordStatusChange(created.Id, RentalStatus.PENDING, RentalStatus.PAID, "Deposit payment successful");
+                            await _repository.UpdateAsync(created.Id, new UpdateRentalRequestDto { Status = RentalStatus.DEPOSIT_PAID.ToString() });
+                            created.Status = RentalStatus.DEPOSIT_PAID;
+                            await RecordStatusChange(created.Id, RentalStatus.PENDING, RentalStatus.DEPOSIT_PAID, "Deposit payment successful");
                         }
                     }
                     else
                     {
                         paymentMessage = "Payment.Success (demo)";
-                        await _repository.UpdateAsync(created.Id, new UpdateRentalRequestDto { Status = RentalStatus.PAID.ToString() });
-                        created.Status = RentalStatus.PAID;
-                        await RecordStatusChange(created.Id, RentalStatus.PENDING, RentalStatus.PAID, "Deposit payment successful (demo mode)");
+                        await _repository.UpdateAsync(created.Id, new UpdateRentalRequestDto { Status = RentalStatus.DEPOSIT_PAID.ToString() });
+                        created.Status = RentalStatus.DEPOSIT_PAID;
+                        await RecordStatusChange(created.Id, RentalStatus.PENDING, RentalStatus.DEPOSIT_PAID, "Deposit payment successful (demo mode)");
                     }
                 }
                 catch (RpcException ex)
@@ -245,11 +247,11 @@ namespace rental.Service
                     Status = created.Status.ToString(),
                     RentalFee = created.RentalFee,
                     Deposit = created.Deposit ?? 0,
+                    RemainingAmount = created.RemainingAmount ?? 0,
                     MaxDiscount = created.MaxDiscount,
                     DiscountPercent = created.DiscountPercent,
                     TotalPrice = created.TotalPrice,
                     TotalQuantity = created.TotalQuantity,
-                    VAT = created.VAT,
                     StartDate = created.StartDate.ToString("O"),
                     EndDate = created.EndDate.ToString("O"),
                     CreatedAt = created.CreatedAt.ToString("O"),
@@ -279,9 +281,9 @@ namespace rental.Service
                     throw new RpcException(new Status(StatusCode.NotFound, "Rental not found"));
                 }
 
-                if (rental.Status != RentalStatus.PENDING && rental.Status != RentalStatus.PAID)
+                if (rental.Status != RentalStatus.PENDING && rental.Status != RentalStatus.DEPOSIT_PAID)
                 {
-                    throw new RpcException(new Status(StatusCode.FailedPrecondition, "Only PENDING or PAID rentals can be cancelled"));
+                    throw new RpcException(new Status(StatusCode.FailedPrecondition, "Only PENDING or DEPOSIT_PAID rentals can be cancelled"));
                 }
 
                 // Calculate refund amount based on cancellation time
@@ -412,7 +414,6 @@ namespace rental.Service
                     DiscountPercent = rental.DiscountPercent,
                     TotalPrice = rental.TotalPrice,
                     TotalQuantity = rental.TotalQuantity,
-                    VAT = rental.VAT,
                     StartDate = rental.StartDate.ToString("O"),
                     EndDate = rental.EndDate.ToString("O"),
                     CreatedAt = rental.CreatedAt.ToString("O"),
@@ -583,7 +584,6 @@ namespace rental.Service
                     DiscountPercent = rental.DiscountPercent,
                     TotalPrice = rental.TotalPrice,
                     TotalQuantity = rental.TotalQuantity,
-                    VAT = rental.VAT,
                     StartDate = rental.StartDate.ToString("O"),
                     EndDate = rental.EndDate.ToString("O"),
                     CreatedAt = rental.CreatedAt.ToString("O"),
@@ -746,7 +746,6 @@ namespace rental.Service
                     DiscountPercent = updated.DiscountPercent,
                     TotalPrice = updated.TotalPrice,
                     TotalQuantity = updated.TotalQuantity,
-                    VAT = updated.VAT,
                     StartDate = updated.StartDate.ToString("O"),
                     EndDate = updated.EndDate.ToString("O"),
                     CreatedAt = updated.CreatedAt.ToString("O"),
@@ -979,6 +978,53 @@ namespace rental.Service
             {
                 _logger.LogWarning(ex, "Failed to record status change for rental {RentalId}", rentalId);
                 // Don't throw - status change logging is not critical
+            }
+        }
+
+        // Get rental history
+        public override async Task<GetHistoryRentalResponse> GetHistoryRental(GetHistoryRentalRequest request, ServerCallContext context)
+        {
+            try
+            {
+                if (!Guid.TryParse(request.RentalId, out var rentalId))
+                {
+                    throw new RpcException(new Status(StatusCode.InvalidArgument, "Invalid rental ID format"));
+                }
+
+                // Verify rental exists
+                var rental = await _repository.GetByIdAsync(rentalId);
+                if (rental == null)
+                {
+                    throw new RpcException(new Status(StatusCode.NotFound, "Rental not found"));
+                }
+
+                // Get history records
+                var histories = await _repository.GetRentalHistoryAsync(rentalId);
+
+                var response = new GetHistoryRentalResponse();
+                foreach (var history in histories)
+                {
+                    response.Histories.Add(new RentalHistoryMessage
+                    {
+                        Id = history.Id.ToString(),
+                        RentalId = history.RentalId.ToString(),
+                        OldStatus = history.OldStatus.ToString(),
+                        NewStatus = history.NewStatus.ToString(),
+                        ChangedAt = history.ChangedAt.ToString("o"), // ISO 8601 format
+                        Notes = history.Notes ?? ""
+                    });
+                }
+
+                return response;
+            }
+            catch (RpcException)
+            {
+                throw;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error getting rental history for rental {RentalId}", request.RentalId);
+                throw new RpcException(new Status(StatusCode.Internal, "Failed to get rental history"));
             }
         }
     }

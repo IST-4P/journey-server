@@ -5,11 +5,13 @@ package payment;
 service PaymentService {
   rpc Receiver(WebhookPaymentRequest) returns (WebhookPaymentResponse);
   rpc GetPayment(GetPaymentRequest) returns (GetPaymentResponse);
+  rpc GetPaymentAdmin(GetPaymentAdminRequest) returns (GetPaymentResponse);
   rpc GetManyPayments(GetManyPaymentsRequest) returns (GetManyPaymentsResponse);
 
   rpc GetRefund(GetRefundRequest) returns (GetRefundResponse);
   rpc GetManyRefunds(GetManyRefundsRequest) returns (GetManyRefundsResponse);
   rpc UpdateRefundStatus(UpdateRefundStatusRequest) returns (GetRefundResponse);
+  rpc GetRefundAdmin(GetRefundAdminRequest) returns (GetRefundResponse);
 }
 
 message WebhookPaymentRequest {
@@ -30,6 +32,10 @@ message WebhookPaymentRequest {
 message GetPaymentRequest {
   string id = 1;
   string userId = 2;
+}
+
+message GetPaymentAdminRequest {
+  string id = 1;
 }
 
 message GetPaymentResponse {
@@ -69,6 +75,10 @@ message WebhookPaymentResponse {
 message GetRefundRequest {
   string id = 1;
   string userId = 2;
+}
+
+message GetRefundAdminRequest {
+  string id = 1;
 }
 
 message GetRefundResponse {

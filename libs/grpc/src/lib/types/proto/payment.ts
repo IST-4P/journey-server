@@ -30,6 +30,10 @@ export interface GetPaymentRequest {
   userId: string;
 }
 
+export interface GetPaymentAdminRequest {
+  id: string;
+}
+
 export interface GetPaymentResponse {
   id: string;
   sequenceNumber: number;
@@ -67,6 +71,10 @@ export interface WebhookPaymentResponse {
 export interface GetRefundRequest {
   id: string;
   userId: string;
+}
+
+export interface GetRefundAdminRequest {
+  id: string;
 }
 
 export interface GetRefundResponse {
@@ -112,6 +120,8 @@ export interface PaymentServiceClient {
 
   getPayment(request: GetPaymentRequest): Observable<GetPaymentResponse>;
 
+  getPaymentAdmin(request: GetPaymentAdminRequest): Observable<GetPaymentResponse>;
+
   getManyPayments(request: GetManyPaymentsRequest): Observable<GetManyPaymentsResponse>;
 
   getRefund(request: GetRefundRequest): Observable<GetRefundResponse>;
@@ -119,6 +129,8 @@ export interface PaymentServiceClient {
   getManyRefunds(request: GetManyRefundsRequest): Observable<GetManyRefundsResponse>;
 
   updateRefundStatus(request: UpdateRefundStatusRequest): Observable<GetRefundResponse>;
+
+  getRefundAdmin(request: GetRefundAdminRequest): Observable<GetRefundResponse>;
 }
 
 export interface PaymentServiceController {
@@ -128,6 +140,10 @@ export interface PaymentServiceController {
 
   getPayment(
     request: GetPaymentRequest,
+  ): Promise<GetPaymentResponse> | Observable<GetPaymentResponse> | GetPaymentResponse;
+
+  getPaymentAdmin(
+    request: GetPaymentAdminRequest,
   ): Promise<GetPaymentResponse> | Observable<GetPaymentResponse> | GetPaymentResponse;
 
   getManyPayments(
@@ -143,6 +159,10 @@ export interface PaymentServiceController {
   updateRefundStatus(
     request: UpdateRefundStatusRequest,
   ): Promise<GetRefundResponse> | Observable<GetRefundResponse> | GetRefundResponse;
+
+  getRefundAdmin(
+    request: GetRefundAdminRequest,
+  ): Promise<GetRefundResponse> | Observable<GetRefundResponse> | GetRefundResponse;
 }
 
 export function PaymentServiceControllerMethods() {
@@ -150,10 +170,12 @@ export function PaymentServiceControllerMethods() {
     const grpcMethods: string[] = [
       "receiver",
       "getPayment",
+      "getPaymentAdmin",
       "getManyPayments",
       "getRefund",
       "getManyRefunds",
       "updateRefundStatus",
+      "getRefundAdmin",
     ];
     for (const method of grpcMethods) {
       const descriptor: any = Reflect.getOwnPropertyDescriptor(constructor.prototype, method);

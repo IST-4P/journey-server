@@ -29,7 +29,7 @@ export class PaymentController {
 
   @Get(':id')
   getPayment(
-    @Param() params: GetPaymentRequestDTO,
+    @Param() params: Omit<GetPaymentRequestDTO, 'userId'>,
     @ActiveUser('userId') userId: string
   ) {
     return this.paymentService.getPayment({ ...params, userId });

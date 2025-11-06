@@ -1,3 +1,4 @@
+import { VerifyDriverLicenseRequest } from '@domain/user';
 import { Injectable } from '@nestjs/common';
 import { Prisma } from '@prisma-clients/user';
 import { PrismaService } from '../prisma/prisma.service';
@@ -29,6 +30,20 @@ export class DriverLicenseRepository {
     return this.prisma.driverLicense.update({
       where: { userId },
       data,
+    });
+  }
+
+  async verifyDriverLicense({
+    userId,
+    isVerified,
+    rejectedReason,
+  }: VerifyDriverLicenseRequest) {
+    return this.prisma.driverLicense.update({
+      where: { userId },
+      data: {
+        isVerified,
+        rejectedReason,
+      },
     });
   }
 }

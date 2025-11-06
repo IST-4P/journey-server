@@ -1,5 +1,12 @@
 import { BookingProto, UserProto, VehicleProto } from '@hacmieu-journey/grpc';
-import { Inject, Injectable, Logger, OnModuleInit } from '@nestjs/common';
+import {
+  Inject,
+  Injectable,
+  Logger,
+  NotFoundException,
+  OnModuleInit,
+  UnauthorizedException,
+} from '@nestjs/common';
 import { ClientGrpc } from '@nestjs/microservices';
 import { lastValueFrom } from 'rxjs';
 
@@ -55,11 +62,11 @@ export class BookingService implements OnModuleInit {
     );
 
     if (!license) {
-      throw new Error('Error.DriverLicenseNotFound');
+      throw new NotFoundException('Error.DriverLicenseNotFound');
     }
 
     if (license.isVerified === false) {
-      throw new Error('Error.DriverLicenseNotVerified');
+      throw new UnauthorizedException('Error.DriverLicenseNotVerified');
     }
 
     const vehicle = await lastValueFrom(
@@ -67,13 +74,14 @@ export class BookingService implements OnModuleInit {
     );
 
     if (!vehicle) {
-      throw new Error('Error.VehicleNotFound');
+      throw new NotFoundException('Error.VehicleNotFound');
     }
 
     if (vehicle.status !== 'ACTIVE') {
-      throw new Error('Error.VehicleNotActive');
+      throw new UnauthorizedException('Error.VehicleNotActive');
     }
     data.vehicleFeeHour = vehicle.pricePerHour;
+    data.vehicleFeeDay = vehicle.pricePerDay;
     return lastValueFrom(this.bookingService.createBooking(data));
   }
 
@@ -127,5 +135,18 @@ export class BookingService implements OnModuleInit {
     data: BookingProto.CreateExtensionRequest
   ): Promise<BookingProto.GetExtensionResponse> {
     return lastValueFrom(this.bookingService.createExtension(data));
+  }
+
+  //================= Histories =================//
+
+  getManyHistories(
+    data: BookingProto.GetManyHistoriesRequest
+  ): Promise<BookingProto.GetManyHistoriesResponse> {
+    return lastValueFrom(this.bookingService.getManyHistories(data));
+  }
+  getHistory(
+    data: BookingProto.GetHistoryRequest
+  ): Promise<BookingProto.GetHistoryResponse> {
+    return lastValueFrom(this.bookingService.getHistory(data));
   }
 }

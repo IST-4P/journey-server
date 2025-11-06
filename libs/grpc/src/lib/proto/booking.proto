@@ -104,13 +104,9 @@ message CreateBookingRequest {
   double pickupLng = 7;
 
   int32 vehicleFeeHour = 8;
-  int32 rentalFee = 9;
-  int32 insuranceFee = 10;
-  int32 vat = 11;
-  int32 discount = 12;
-  int32 deposit = 13;
+  int32 vehicleFeeDay = 9;
 
-  optional string notes = 14;
+  optional string notes = 10;
 }
 
 // CancelBooking

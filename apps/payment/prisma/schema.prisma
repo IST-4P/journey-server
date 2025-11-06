@@ -72,9 +72,9 @@ model PaymentTransaction {
 model Refund {
     id             String       @id @default(uuid())
     userId         String
-    paymentId      String // Liên kết với Payment
     bookingId      String?
     rentalId       String?
+    principal      Int
     amount         Int // Số tiền hoà
     penaltyAmount  Int          @default(0) // Số tiền phạt (nếu có)
     damageAmount   Int          @default(0) // Số tiền thiệt hại (nếu có)
@@ -84,7 +84,6 @@ model Refund {
     updatedAt      DateTime     @updatedAt
 
     @@index([userId])
-    @@index([paymentId])
     @@index([bookingId])
     @@index([rentalId])
     @@index([status])

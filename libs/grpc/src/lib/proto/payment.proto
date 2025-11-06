@@ -6,6 +6,10 @@ service PaymentService {
   rpc Receiver(WebhookPaymentRequest) returns (WebhookPaymentResponse);
   rpc GetPayment(GetPaymentRequest) returns (GetPaymentResponse);
   rpc GetManyPayments(GetManyPaymentsRequest) returns (GetManyPaymentsResponse);
+
+  rpc GetRefund(GetRefundRequest) returns (GetRefundResponse);
+  rpc GetManyRefunds(GetManyRefundsRequest) returns (GetManyRefundsResponse);
+  rpc UpdateRefundStatus(UpdateRefundStatusRequest) returns (GetRefundResponse);
 }
 
 message WebhookPaymentRequest {
@@ -60,4 +64,45 @@ message GetManyPaymentsResponse {
 
 message WebhookPaymentResponse {
   string message = 1;
+}
+
+message GetRefundRequest {
+  string id = 1;
+  string userId = 2;
+}
+
+message GetRefundResponse {
+  string id = 1;
+  string userId = 2;
+  optional string bookingId = 3;
+  optional string rentalId = 4;
+  int32 principal = 5;
+  int32 amount = 6;
+  int32 penaltyAmount = 7;
+  int32 damageAmount = 8;
+  int32 overtimeAmount = 9;
+  string status = 10;
+  string createdAt = 11;
+  string updatedAt = 12;
+}
+
+message GetManyRefundsRequest {
+  optional string userId = 1;
+  optional string status = 2;
+  int32 page = 3;
+  int32 limit = 4;
+}
+
+message GetManyRefundsResponse {
+  repeated GetRefundResponse refunds = 1;
+  int32 page = 2;
+  int32 limit = 3;
+  int32 totalItems = 4;
+  int32 totalPages = 5;
+}
+
+// UpdateRefundStatus
+message UpdateRefundStatusRequest {
+  string id = 1;
+  string status = 2;
 }

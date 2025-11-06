@@ -12,7 +12,11 @@ import { NatsClient } from '@hacmieu-journey/nats';
 import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { PrismaService } from '../prisma/prisma.service';
-import { BookingNotFoundException } from './booking.error';
+import {
+  BookingCannotCancelWithCheckInsException,
+  BookingNotFoundException,
+  BookingTimeInvalidException,
+} from './booking.error';
 
 @Injectable()
 export class BookingRepository {
@@ -23,8 +27,12 @@ export class BookingRepository {
   ) {}
 
   private calculateDuration(startTime: Date, endTime: Date): number {
+    startTime = new Date(startTime);
+    endTime = new Date(endTime);
+    console.log('startTime: ', startTime);
+    console.log('endTime: ', endTime);
     if (endTime <= startTime) {
-      throw new Error('End time must be after start time');
+      throw BookingTimeInvalidException;
     }
     endTime = new Date(endTime);
     startTime = new Date(startTime);
@@ -57,15 +65,30 @@ export class BookingRepository {
     }
   }
 
-  async getManyBookings(data: GetManyBookingsRequest) {
-    const skip = (data.page - 1) * data.limit;
-    const take = data.limit;
+  convertHoursToDaysAndHours(totalHours: number): {
+    days: number;
+    hours: number;
+    totalHours: number;
+  } {
+    const days = Math.floor(totalHours / 24);
+    const remainingHours = totalHours % 24;
+
+    return {
+      days,
+      hours: remainingHours,
+      totalHours,
+    };
+  }
+
+  async getManyBookings({ page, limit, ...where }: GetManyBookingsRequest) {
+    const skip = (page - 1) * limit;
+    const take = limit;
     const [totalItems, bookings] = await Promise.all([
       this.prismaService.booking.count({
-        where: data,
+        where,
       }),
       this.prismaService.booking.findMany({
-        where: data,
+        where,
         skip,
         take,
         orderBy: {
@@ -80,10 +103,10 @@ export class BookingRepository {
         pickupLat: booking.pickupLat.toNumber(),
         pickupLng: booking.pickupLng.toNumber(),
       })),
-      page: data.page,
-      limit: data.limit,
+      page,
+      limit,
       totalItems,
-      totalPages: Math.ceil(totalItems / data.limit),
+      totalPages: Math.ceil(totalItems / limit),
     };
   }
 
@@ -107,23 +130,44 @@ export class BookingRepository {
   }
 
   async createBooking(data: CreateBookingRequest) {
-    const totalAmount =
-      data.rentalFee +
-      data.insuranceFee +
-      data.vat -
-      data.discount +
-      data.deposit;
-
-    const collateral =
-      this.configService.get<number>('BOOKING_COLLATERAL') || 0;
-
     return this.prismaService.$transaction(async (tx) => {
+      const durationHours = this.calculateDuration(
+        data.startTime,
+        data.endTime
+      );
+      const durationDayAndHours =
+        this.convertHoursToDaysAndHours(durationHours);
+
+      const rentalFee =
+        durationDayAndHours.days * data.vehicleFeeDay +
+        durationDayAndHours.hours * data.vehicleFeeHour;
+
+      const insuranceFeePercent =
+        this.configService.get<number>('BOOKING_INSURANCE_FEE') || 0;
+
+      const insuranceFee = rentalFee * insuranceFeePercent;
+
+      const deposit = this.configService.get<number>('BOOKING_DEPOSIT') || 0;
+
+      const vatPercent = this.configService.get<number>('BOOKING_VAT') || 0;
+
+      const totalAmount = Math.round(
+        (rentalFee + insuranceFee + deposit) * (1 + vatPercent)
+      ); // Tổng cộng bao gồm VAT 10%
+
+      const collateral =
+        this.configService.get<number>('BOOKING_COLLATERAL') || 0;
+
       const createBooking = await tx.booking.create({
         data: {
           ...data,
-          duration: this.calculateDuration(data.startTime, data.endTime),
+          rentalFee,
+          insuranceFee,
+          vat: Math.round((rentalFee + insuranceFee) * 0.1),
+          deposit,
+          duration: durationHours,
           totalAmount,
-          collateral,
+          collateral: Number(collateral),
         },
       });
 
@@ -174,7 +218,7 @@ export class BookingRepository {
         throw BookingNotFoundException;
       }
       if (booking.checkIns.length > 0) {
-        throw new Error('Cannot cancel booking with existing check-ins');
+        throw BookingCannotCancelWithCheckInsException;
       }
       const refundPercentage = this.calculateRefundPercentage(
         data.cancelDate,

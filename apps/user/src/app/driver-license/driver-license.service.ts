@@ -2,6 +2,7 @@ import {
   CreateDriverLicenseRequest,
   GetDriverLicenseRequest,
   UpdateDriverLicenseRequest,
+  VerifyDriverLicenseRequest,
 } from '@domain/user';
 import { Injectable } from '@nestjs/common';
 import {
@@ -42,5 +43,15 @@ export class DriverLicenseService {
       throw DriverLicenseNotFoundException;
     }
     return this.driverLicenseRepo.updateDriverLicense(userId, data);
+  }
+
+  async verifyDriverLicense(data: VerifyDriverLicenseRequest) {
+    const result = await this.driverLicenseRepo.findDriverLicenseByUserId(
+      data.userId
+    );
+    if (!result) {
+      throw DriverLicenseNotFoundException;
+    }
+    return this.driverLicenseRepo.verifyDriverLicense(data);
   }
 }

@@ -15,16 +15,16 @@ export class RefundRepository {
     private readonly natsClient: NatsClient
   ) {}
 
-  async getManyRefunds(data: GetManyRefundsRequest) {
-    const skip = (data.page - 1) * data.limit;
-    const take = data.limit;
+  async getManyRefunds({ page, limit, ...where }: GetManyRefundsRequest) {
+    const skip = (page - 1) * limit;
+    const take = limit;
 
     const [totalItems, refunds] = await Promise.all([
       this.prismaService.refund.count({
-        where: data,
+        where,
       }),
       this.prismaService.refund.findMany({
-        where: data,
+        where,
         skip,
         take,
       }),
@@ -32,10 +32,10 @@ export class RefundRepository {
 
     return {
       refunds,
-      page: data.page,
-      limit: data.limit,
+      page,
+      limit,
       totalItems,
-      totalPages: Math.ceil(totalItems / take),
+      totalPages: Math.ceil(totalItems / limit),
     };
   }
 

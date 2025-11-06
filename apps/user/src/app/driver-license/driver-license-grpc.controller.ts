@@ -3,6 +3,7 @@ import {
   GetDriverLicenseRequest,
   GetDriverLicenseResponse,
   UpdateDriverLicenseRequest,
+  VerifyDriverLicenseRequest,
 } from '@domain/user';
 import { Controller } from '@nestjs/common';
 import { GrpcMethod } from '@nestjs/microservices';
@@ -31,5 +32,12 @@ export class DriverLicenseGrpcController {
     data: UpdateDriverLicenseRequest
   ): Promise<GetDriverLicenseResponse> {
     return this.driverLicenseService.updateDriverLicense(data);
+  }
+
+  @GrpcMethod('UserService', 'VerifyDriverLicense')
+  verifyDriverLicense(
+    data: VerifyDriverLicenseRequest
+  ): Promise<GetDriverLicenseResponse> {
+    return this.driverLicenseService.verifyDriverLicense(data);
   }
 }

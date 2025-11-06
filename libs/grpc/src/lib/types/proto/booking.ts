@@ -81,11 +81,7 @@ export interface CreateBookingRequest {
   pickupLat: number;
   pickupLng: number;
   vehicleFeeHour: number;
-  rentalFee: number;
-  insuranceFee: number;
-  vat: number;
-  discount: number;
-  deposit: number;
+  vehicleFeeDay: number;
   notes?: string | undefined;
 }
 

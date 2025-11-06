@@ -23,4 +23,7 @@ data:
     {{ .Values.config.refreshTokenExpiresIn | default "7d" | quote }}
   OTP_EXPIRES: {{ .Values.config.otpExpires | default "5m" | quote }}
   BOOKING_COLLATERAL: {{ .Values.config.bookingCollateral | default "10000" | quote }}
+  BOOKING_DEPOSIT: {{ .Values.config.bookingDeposit | default "10000000" | quote }}
+  BOOKING_VAT: {{ .Values.config.bookingVat | default "0.1" | quote }}
+  BOOKING_INSURANCE_FEE: {{ .Values.config.bookingInsuranceFee | default "0.15" | quote }}
 

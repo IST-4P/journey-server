@@ -27,6 +27,13 @@ export const UpdateDriverLicenseRequestSchema =
     userId: z.string().uuid(),
   });
 
+export const VerifyDriverLicenseRequestSchema =
+  DriverLicenseValidatorSchema.pick({
+    userId: true,
+    isVerified: true,
+    rejectedReason: true,
+  });
+
 export type GetDriverLicenseRequest = z.infer<
   typeof GetDriverLicenseRequestSchema
 >;
@@ -38,4 +45,7 @@ export type CreateDriverLicenseRequest = z.infer<
 >;
 export type UpdateDriverLicenseRequest = z.infer<
   typeof UpdateDriverLicenseRequestSchema
+>;
+export type VerifyDriverLicenseRequest = z.infer<
+  typeof VerifyDriverLicenseRequestSchema
 >;

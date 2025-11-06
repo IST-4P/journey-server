@@ -10,15 +10,15 @@ import { PrismaService } from '../prisma/prisma.service';
 export class HistoryRepository {
   constructor(private readonly prismaService: PrismaService) {}
 
-  async getManyHistories(data: GetManyHistoriesRequest) {
-    const skip = (data.page - 1) * data.limit;
-    const take = data.limit;
+  async getManyHistories({ page, limit, ...where }: GetManyHistoriesRequest) {
+    const skip = (page - 1) * limit;
+    const take = limit;
     const [totalItems, histories] = await Promise.all([
       this.prismaService.bookingHistory.count({
-        where: data,
+        where,
       }),
       this.prismaService.bookingHistory.findMany({
-        where: data,
+        where,
         skip,
         take,
         orderBy: {
@@ -29,10 +29,10 @@ export class HistoryRepository {
 
     return {
       histories,
-      page: data.page,
-      limit: data.limit,
+      page,
+      limit,
       totalItems,
-      totalPages: Math.ceil(totalItems / data.limit),
+      totalPages: Math.ceil(totalItems / limit),
     };
   }
 

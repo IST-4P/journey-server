@@ -40,11 +40,14 @@ export class RefundCreatedConsumer
       ...event,
       bookingId: event.bookingId ? event.bookingId : null,
       rentalId: event.rentalId ? event.rentalId : null,
-      paymentId: event.bookingId ? event.bookingId : event.rentalId!,
+      principal: event.collateral + event.deposit,
       amount:
         event.collateral +
         event.deposit -
         (event.penaltyAmount + event.damageAmount + event.overtimeAmount),
+      penaltyAmount: event.penaltyAmount,
+      damageAmount: event.damageAmount,
+      overtimeAmount: event.overtimeAmount,
     });
   }
 }

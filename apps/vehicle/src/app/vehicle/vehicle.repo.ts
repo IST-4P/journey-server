@@ -78,7 +78,10 @@ export class VehicleRepository {
         },
       }),
       this.prisma.vehicle.findMany({
-        where,
+        where: {
+          ...query,
+          ...where,
+        },
         skip,
         take,
       }),

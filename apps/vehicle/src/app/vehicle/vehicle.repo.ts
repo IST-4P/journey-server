@@ -7,6 +7,7 @@ import {
   VehicleStatus,
 } from '@domain/vehicle';
 import { Injectable } from '@nestjs/common';
+import { Prisma } from '@prisma-clients/vehicle';
 import { PrismaService } from '../prisma/prisma.service';
 
 @Injectable()
@@ -45,11 +46,37 @@ export class VehicleRepository {
       });
   }
 
-  async getManyVehicles({ page, limit, ...where }: GetManyVehiclesRequest) {
+  async getManyVehicles({ page, limit, ...query }: GetManyVehiclesRequest) {
     const skip = (page - 1) * limit;
     const take = limit;
+
+    let where: Prisma.VehicleWhereInput = {};
+    if (query.name) {
+      where.name = { contains: query.name, mode: 'insensitive' };
+    }
+    if (query.licensePlate) {
+      where.licensePlate = {
+        contains: query.licensePlate,
+        mode: 'insensitive',
+      };
+    }
+    if (query.city) {
+      where.city = { contains: query.city, mode: 'insensitive' };
+    }
+    if (query.ward) {
+      where.ward = {
+        contains: query.ward,
+        mode: 'insensitive',
+      };
+    }
+
     const [totalItems, vehicles] = await Promise.all([
-      this.prisma.vehicle.count({ where }),
+      this.prisma.vehicle.count({
+        where: {
+          ...query,
+          ...where,
+        },
+      }),
       this.prisma.vehicle.findMany({
         where,
         skip,

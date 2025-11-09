@@ -57,8 +57,16 @@ export class BookingService implements OnModuleInit {
   async createBooking(
     data: BookingProto.CreateBookingRequest
   ): Promise<BookingProto.GetBookingResponse> {
+    const profile = await lastValueFrom(
+      this.userService.getProfile({ userId: data.userId })
+    );
+
+    if (profile.creditScore < 50) {
+      throw new UnauthorizedException('Error.CreditScoreTooLow');
+    }
+
     const license = await lastValueFrom(
-      this.userService.getDriverLicense(data)
+      this.userService.getDriverLicense({ userId: data.userId })
     );
 
     if (!license) {

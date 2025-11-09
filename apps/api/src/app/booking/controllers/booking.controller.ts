@@ -49,12 +49,11 @@ export class BookingController {
 
   @Put('cancel')
   cancelBooking(
-    @Body() body: Omit<CancelBookingRequestDTO, 'cancelDate' | 'userId'>,
+    @Body() body: Omit<CancelBookingRequestDTO, 'userId'>,
     @ActiveUser('userId') userId: string
   ) {
     return this.bookingService.cancelBooking({
       ...body,
-      cancelDate: String(new Date()),
       userId,
     });
   }

@@ -45,7 +45,6 @@ export const CancelBookingRequestSchema = BookingValidatorSchema.pick({
   id: true,
   userId: true,
 }).extend({
-  cancelDate: z.coerce.date(),
   cancelReason: z.string(),
 });
 

@@ -89,7 +89,6 @@ export interface CreateBookingRequest {
 export interface CancelBookingRequest {
   id: string;
   cancelReason: string;
-  cancelDate?: string | undefined;
   userId: string;
 }
 

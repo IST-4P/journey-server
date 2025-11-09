@@ -32,13 +32,13 @@ export class ExtensionController {
 
   @Post()
   createExtension(
-    @Body() body: CreateExtensionRequestDTO,
+    @Body() body: Omit<CreateExtensionRequestDTO, 'requestedBy'>,
     @ActiveUser('userId') userId: string
   ) {
     return this.bookingService.createExtension({
       ...body,
-      originalEndTime: body.originalEndTime.toISOString(),
-      newEndTime: body.newEndTime.toISOString(),
+      originalEndTime: String(body.originalEndTime),
+      newEndTime: String(body.newEndTime),
       notes: body.notes || undefined,
       requestedBy: userId,
     });

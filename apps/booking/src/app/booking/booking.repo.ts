@@ -236,8 +236,9 @@ export class BookingRepository {
       if (booking.checkIns.length > 0) {
         throw BookingCannotCancelWithCheckInsException;
       }
+
       const refundPercentage = this.calculateRefundPercentage(
-        data.cancelDate,
+        new Date(),
         booking.startTime
       );
       if (refundPercentage === 0) {

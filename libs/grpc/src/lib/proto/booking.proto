@@ -113,8 +113,7 @@ message CreateBookingRequest {
 message CancelBookingRequest {
   string id = 1;
   string cancelReason = 2;
-  optional string cancelDate = 3;
-  string userId = 4;
+  string userId = 3;
 }
 
 // ======================================================== CheckInOut

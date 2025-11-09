@@ -138,16 +138,19 @@ export class BookingRepository {
       const durationDayAndHours =
         this.convertHoursToDaysAndHours(durationHours);
 
-      const rentalFee =
+      const rentalFee = Math.round(
         durationDayAndHours.days * data.vehicleFeeDay +
-        durationDayAndHours.hours * data.vehicleFeeHour;
+          durationDayAndHours.hours * data.vehicleFeeHour
+      );
 
       const insuranceFeePercent =
         this.configService.get<number>('BOOKING_INSURANCE_FEE') || 0;
 
-      const insuranceFee = rentalFee * insuranceFeePercent;
+      const insuranceFee = Math.round(rentalFee * insuranceFeePercent);
 
-      const deposit = this.configService.get<number>('BOOKING_DEPOSIT') || 0;
+      const deposit = Math.round(
+        this.configService.get<number>('BOOKING_DEPOSIT') || 0
+      );
 
       const vatPercent = this.configService.get<number>('BOOKING_VAT') || 0;
 
@@ -155,19 +158,20 @@ export class BookingRepository {
         (rentalFee + insuranceFee + deposit) * (1 + vatPercent)
       ); // Tổng cộng bao gồm VAT 10%
 
-      const collateral =
-        this.configService.get<number>('BOOKING_COLLATERAL') || 0;
+      const collateral = Math.round(
+        this.configService.get<number>('BOOKING_COLLATERAL') || 0
+      );
 
       const createBooking = await tx.booking.create({
         data: {
           ...data,
           rentalFee,
           insuranceFee,
-          vat: Math.round((rentalFee + insuranceFee) * 0.1),
+          vat: Math.round((rentalFee + insuranceFee) * vatPercent),
           deposit,
           duration: durationHours,
           totalAmount,
-          collateral: Number(collateral),
+          collateral,
         },
       });
 
@@ -190,7 +194,18 @@ export class BookingRepository {
         }
       );
 
-      await Promise.all([createBookingHistory$, createPayment$]);
+      const reservedVehicle$ = this.natsClient.publish(
+        'journey.events.vehicle-reserved',
+        {
+          id: data.vehicleId,
+        }
+      );
+
+      await Promise.all([
+        createBookingHistory$,
+        createPayment$,
+        reservedVehicle$,
+      ]);
 
       return {
         ...createBooking,

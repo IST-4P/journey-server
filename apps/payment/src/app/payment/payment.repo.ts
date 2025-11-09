@@ -149,14 +149,10 @@ export class PaymentRepository {
       if (!payment) {
         throw PaymentNotFoundException;
       }
-      const { amount, bookingId, rentalId } = payment;
+      const { amount } = payment;
       if (amount !== data.transferAmount) {
         throw AmountPriceMismatchException;
       }
-
-      const eventData = {
-        id: bookingId || rentalId,
-      };
 
       await Promise.all([
         tx.payment.update({
@@ -167,9 +163,6 @@ export class PaymentRepository {
             status: PaymentStatusValues.PAID,
           },
         }),
-        bookingId
-          ? this.natsClient.publish('journey.events.booking-paid', eventData)
-          : this.natsClient.publish('journey.events.rental-paid', eventData),
       ]);
     });
 

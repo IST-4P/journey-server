@@ -13,6 +13,7 @@ import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { PrismaService } from '../prisma/prisma.service';
 import {
+  BookingCannotCancelLessThan5DaysException,
   BookingCannotCancelWithCheckInsException,
   BookingNotFoundException,
   BookingTimeInvalidException,
@@ -239,6 +240,9 @@ export class BookingRepository {
         data.cancelDate,
         booking.startTime
       );
+      if (refundPercentage === 0) {
+        throw BookingCannotCancelLessThan5DaysException;
+      }
       const refundAmount = (booking.deposit * refundPercentage) / 100;
 
       const updateStatusBooking$ = tx.booking.update({
@@ -331,18 +335,7 @@ export class BookingRepository {
         },
       });
 
-      const updateStatusVehicle$ = this.natsClient.publish(
-        'journey.events.vehicle-reserved',
-        {
-          id: booking.vehicleId,
-        }
-      );
-
-      await Promise.all([
-        updateStatusBooking$,
-        createBookingHistory$,
-        updateStatusVehicle$,
-      ]);
+      await Promise.all([updateStatusBooking$, createBookingHistory$]);
     });
   }
 }

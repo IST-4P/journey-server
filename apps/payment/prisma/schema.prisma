@@ -75,7 +75,7 @@ model Refund {
     bookingId      String?
     rentalId       String?
     principal      Int
-    amount         Int // Số tiền hoà
+    amount         Int // Số tiền hoàn trả
     penaltyAmount  Int          @default(0) // Số tiền phạt (nếu có)
     damageAmount   Int          @default(0) // Số tiền thiệt hại (nếu có)
     overtimeAmount Int          @default(0) // Số tiền trả thêm (nếu có)

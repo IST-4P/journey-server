@@ -111,8 +111,8 @@ export class BookingRepository {
           rentalFee: allPrices.rentalFee,
           insuranceFee: allPrices.insuranceFee,
           vat: allPrices.vat,
-          deposit,
-          collateral,
+          deposit: Number(deposit),
+          collateral: Number(collateral),
           duration: durationHours,
           totalAmount: allPrices.totalAmount,
         },
@@ -186,7 +186,7 @@ export class BookingRepository {
       if (refundPercentage === 0) {
         throw BookingCannotCancelLessThan5DaysException;
       }
-      const refundAmount = (booking.deposit * refundPercentage) / 100;
+      const refundAmount = (booking.collateral * refundPercentage) / 100;
 
       const updateStatusBooking$ = tx.booking.update({
         where: {
@@ -216,8 +216,8 @@ export class BookingRepository {
           penaltyAmount: 0,
           damageAmount: 0,
           overtimeAmount: 0,
-          collateral: 0,
-          deposit: refundAmount,
+          collateral: refundAmount,
+          deposit: 0,
         }
       );
 

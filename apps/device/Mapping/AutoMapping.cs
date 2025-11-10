@@ -8,9 +8,7 @@ namespace device.Mapping
     {
         public AutoMapping()
         {
-            // ============================================
             // DEVICE MAPPINGS - ADMIN
-            // ============================================
 
             CreateMap<device.Model.Entities.Device, AdminDeviceDto>()
                 .ForMember(dest => dest.CategoryName, opt => opt.MapFrom(src => src.Category != null ? src.Category.Name : null));
@@ -30,9 +28,7 @@ namespace device.Mapping
                 .ForMember(dest => dest.ComboDevices, opt => opt.Ignore())
                 .ForAllMembers(opts => opts.Condition((src, dest, srcMember) => srcMember != null));
 
-            // ============================================
             // DEVICE MAPPINGS - USER
-            // ============================================
 
             CreateMap<device.Model.Entities.Device, UserDeviceDto>()
                 .ForMember(dest => dest.CategoryName, opt => opt.MapFrom(src => src.Category != null ? src.Category.Name : null))
@@ -50,9 +46,7 @@ namespace device.Mapping
                         : new List<ComboUserDto>()
                 ));
 
-            // ============================================
             // COMBO MAPPINGS - ADMIN
-            // ============================================
 
             CreateMap<Combo, AdminComboDto>()
                 .ForMember(dest => dest.Devices, opt => opt.MapFrom(src =>
@@ -80,14 +74,33 @@ namespace device.Mapping
                 .ForMember(dest => dest.ComboDevices, opt => opt.Ignore()) // Handle separately in service
                 .ForAllMembers(opts => opts.Condition((src, dest, srcMember) => srcMember != null));
 
-            // ============================================
             // COMBO MAPPINGS - USER (summary only)
-            // ============================================
 
             CreateMap<Combo, ComboUserDto>()
                 .ForMember(dest => dest.ComboId, opt => opt.MapFrom(src => src.Id))
                 .ForMember(dest => dest.DeviceCount, opt => opt.MapFrom(src =>
                     src.ComboDevices != null ? src.ComboDevices.Count : 0));
+
+            // CATEGORY MAPPINGS  
+
+            CreateMap<Category, CategoryDto>()
+                .ForMember(dest => dest.Id, opt => opt.MapFrom(src => src.Id))
+                .ForMember(dest => dest.Name, opt => opt.MapFrom(src => src.Name))
+                .ForMember(dest => dest.LogoUrl, opt => opt.MapFrom(src => src.LogoUrl))
+                .ForMember(dest => dest.CreateAt, opt => opt.MapFrom(src => src.CreateAt))
+                .ForMember(dest => dest.UpdateAt, opt => opt.MapFrom(src => src.UpdateAt))
+                .ForAllMembers(opt => opt.Ignore());
+
+            CreateMap<CreateCategoryDto, Category>()
+                .ForMember(dest => dest.Id, opt => opt.Ignore())
+                .ForMember(dest => dest.CreateAt, opt => opt.Ignore())
+                .ForMember(dest => dest.UpdateAt, opt => opt.Ignore());
+
+            CreateMap<UpdateCategoryDto, Category>()
+                .ForMember(dest => dest.UpdateAt, opt => opt.Ignore())
+                .ForAllMembers(opt => opt.Condition((src, dest, srcMember) => srcMember != null));
+
+
         }
     }
 }

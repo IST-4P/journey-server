@@ -1,4 +1,5 @@
 import {
+  CalculateVehiclePriceRequest,
   CreateVehicleRequest,
   DeleteVehicleRequest,
   GetManyVehiclesRequest,
@@ -6,13 +7,19 @@ import {
   UpdateVehicleRequest,
   VehicleStatus,
 } from '@domain/vehicle';
+import { calculateVehiclePrice } from '@hacmieu-journey/nestjs';
 import { Injectable } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
 import { Prisma } from '@prisma-clients/vehicle';
 import { PrismaService } from '../prisma/prisma.service';
+import { VehicleNotFoundException } from './vehicle.error';
 
 @Injectable()
 export class VehicleRepository {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly configService: ConfigService
+  ) {}
 
   async getVehicle(data: GetVehicleRequest) {
     return this.prisma.vehicle
@@ -177,6 +184,45 @@ export class VehicleRepository {
     return this.prisma.vehicle.delete({
       where: { id: data.id },
     });
+  }
+
+  async calculatePrice(data: CalculateVehiclePriceRequest) {
+    const vehicle = await this.prisma.vehicle.findUnique({
+      where: { id: data.vehicleId },
+    });
+
+    if (!vehicle) {
+      throw VehicleNotFoundException;
+    }
+
+    const vehicleFeeDay = vehicle.pricePerDay;
+    const vehicleFeeHour = vehicle.pricePerHour;
+
+    const vatPercent =
+      this.configService.getOrThrow<number>('BOOKING_VAT') || 0;
+
+    const deposit =
+      this.configService.getOrThrow<number>('BOOKING_DEPOSIT') || 0;
+
+    const insuranceFeePercent =
+      this.configService.getOrThrow<number>('BOOKING_INSURANCE_FEE') || 0;
+
+    const allPrices = calculateVehiclePrice({
+      vehicleFeeDay,
+      vehicleFeeHour,
+      insuranceFeePercent,
+      vatPercent,
+      deposit,
+      hours: data.hours,
+    });
+
+    return {
+      rentalFee: allPrices.rentalFee,
+      insuranceFee: allPrices.insuranceFee,
+      totalAmount: allPrices.totalAmount,
+      vat: allPrices.vat,
+      deposit,
+    };
   }
 
   async updateStatus(data: { id: string; status: VehicleStatus }) {

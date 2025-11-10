@@ -11,7 +11,6 @@ COPY webpack.*.config.js ./
 
 COPY apps/notification ./apps/notification
 COPY libs/nats ./libs/nats
-COPY libs/prisma ./libs/prisma
 COPY libs/nestjs ./libs/nestjs
 COPY libs/grpc ./libs/grpc
 COPY libs/domain/notification ./libs/domain/notification

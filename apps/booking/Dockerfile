@@ -11,7 +11,6 @@ COPY webpack.*.config.js ./
 
 COPY apps/booking ./apps/booking
 COPY libs/nats ./libs/nats
-COPY libs/prisma ./libs/prisma
 COPY libs/nestjs ./libs/nestjs
 COPY libs/grpc ./libs/grpc
 COPY libs/domain/booking ./libs/domain/booking

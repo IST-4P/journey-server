@@ -11,7 +11,6 @@ COPY webpack.*.config.js ./
 
 COPY apps/vehicle ./apps/vehicle
 COPY libs/nats ./libs/nats
-COPY libs/prisma ./libs/prisma
 COPY libs/nestjs ./libs/nestjs
 COPY libs/grpc ./libs/grpc
 COPY libs/domain/vehicle ./libs/domain/vehicle

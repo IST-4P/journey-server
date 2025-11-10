@@ -10,10 +10,6 @@ import {
 } from '@domain/auth';
 import { NatsClient } from '@hacmieu-journey/nats';
 import { AccessTokenPayloadCreate } from '@hacmieu-journey/nestjs';
-import {
-  isNotFoundPrismaError,
-  isUniqueConstraintPrismaError,
-} from '@hacmieu-journey/prisma';
 import { HttpException, Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { randomInt } from 'crypto';
@@ -185,41 +181,34 @@ export class AuthService {
       ]);
 
       // Tạo profile trong User Service qua NATS
-      try {
-        const eventData = {
-          userId: user.id,
-          email: user.email,
-          name: user.name,
-          phone: user.phone,
-          role: user.role,
-          createdAt: user.createdAt.toISOString(),
-        };
-
-        await this.natsClient.publish(
-          'journey.events.user-registered',
-          eventData
-        );
-
-        // this.logger.log(
-        //   `✅ Published user-registered event for user: ${user.id}`
-        // );
-      } catch (natsError) {
-        // Log error but don't fail registration
-        this.logger.error(
-          `❌ Failed to publish user-registered event:`,
-          natsError
-        );
-      }
-
-      return {
-        message: 'Message.RegisterSuccessfully',
+      const eventData = {
+        userId: user.id,
+        email: user.email,
+        name: user.name,
+        phone: user.phone,
+        role: user.role,
+        createdAt: user.createdAt.toISOString(),
       };
-    } catch (error) {
-      if (isUniqueConstraintPrismaError(error)) {
-        throw EmailAlreadyExistsException;
-      }
-      throw error;
+
+      await this.natsClient.publish(
+        'journey.events.user-registered',
+        eventData
+      );
+
+      // this.logger.log(
+      //   `✅ Published user-registered event for user: ${user.id}`
+      // );
+    } catch (natsError) {
+      // Log error but don't fail registration
+      this.logger.error(
+        `❌ Failed to publish user-registered event:`,
+        natsError
+      );
     }
+
+    return {
+      message: 'Message.RegisterSuccessfully',
+    };
   }
 
   async login(body: LoginRequest) {
@@ -322,21 +311,20 @@ export class AuthService {
   }
 
   async logout({ refreshToken }: LogoutRequest) {
-    try {
-      // Kiểm tra token có hợp lệ không
-      await this.tokenService.verifyRefreshToken(refreshToken);
-
-      // Xoá token trong DB
-      await this.authRepository.deleteRefreshToken({ token: refreshToken });
-
-      return { message: 'Message.LogoutSuccessfully' };
-    } catch (error) {
-      if (isNotFoundPrismaError(error)) {
-        throw RefreshTokenAlreadyUsedException;
-      }
-
-      throw UnauthorizedAccessException;
+    const refreshTokenInDB = await this.authRepository.findUniqueRefreshToken({
+      token: refreshToken,
+    });
+    if (!refreshTokenInDB) {
+      throw RefreshTokenAlreadyUsedException;
     }
+
+    // Kiểm tra token có hợp lệ không
+    await this.tokenService.verifyRefreshToken(refreshToken);
+
+    // Xoá token trong DB
+    await this.authRepository.deleteRefreshToken({ token: refreshToken });
+
+    return { message: 'Message.LogoutSuccessfully' };
   }
 
   async forgotPassword(body: ForgotPasswordRequest) {

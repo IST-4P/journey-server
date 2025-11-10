@@ -58,6 +58,19 @@ export const UpdateVehicleRequestSchema =
 
 export const DeleteVehicleRequestSchema = GetVehicleRequestSchema;
 
+export const CalculateVehiclePriceRequestSchema = z.object({
+  vehicleId: z.coerce.string().uuid(),
+  hours: z.coerce.number().int().min(1),
+});
+
+export const CalculateVehiclePriceResponseSchema = z.object({
+  rentalFee: z.number().min(0),
+  insuranceFee: z.number().min(0),
+  vat: z.number().min(0),
+  totalAmount: z.number().min(0),
+  deposit: z.number().min(0),
+});
+
 export type GetVehicleRequest = z.infer<typeof GetVehicleRequestSchema>;
 export type GetVehicleResponse = z.infer<typeof GetVehicleResponseSchema>;
 export type GetManyVehiclesRequest = z.infer<
@@ -69,3 +82,9 @@ export type GetManyVehiclesResponse = z.infer<
 export type CreateVehicleRequest = z.infer<typeof CreateVehicleRequestSchema>;
 export type UpdateVehicleRequest = z.infer<typeof UpdateVehicleRequestSchema>;
 export type DeleteVehicleRequest = z.infer<typeof DeleteVehicleRequestSchema>;
+export type CalculateVehiclePriceRequest = z.infer<
+  typeof CalculateVehiclePriceRequestSchema
+>;
+export type CalculateVehiclePriceResponse = z.infer<
+  typeof CalculateVehiclePriceResponseSchema
+>;

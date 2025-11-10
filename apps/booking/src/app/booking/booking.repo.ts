@@ -9,6 +9,11 @@ import {
   UpdateStatusBookingRequest,
 } from '@domain/booking';
 import { NatsClient } from '@hacmieu-journey/nats';
+import {
+  calculateDuration,
+  calculateRefundPercentage,
+  calculateVehiclePrice,
+} from '@hacmieu-journey/nestjs';
 import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { PrismaService } from '../prisma/prisma.service';
@@ -16,7 +21,6 @@ import {
   BookingCannotCancelLessThan5DaysException,
   BookingCannotCancelWithCheckInsException,
   BookingNotFoundException,
-  BookingTimeInvalidException,
 } from './booking.error';
 
 @Injectable()
@@ -26,60 +30,6 @@ export class BookingRepository {
     private readonly natsClient: NatsClient,
     private readonly configService: ConfigService
   ) {}
-
-  private calculateDuration(startTime: Date, endTime: Date): number {
-    startTime = new Date(startTime);
-    endTime = new Date(endTime);
-    console.log('startTime: ', startTime);
-    console.log('endTime: ', endTime);
-    if (endTime <= startTime) {
-      throw BookingTimeInvalidException;
-    }
-    endTime = new Date(endTime);
-    startTime = new Date(startTime);
-    const diffMs = endTime.getTime() - startTime.getTime();
-    const diffHours = diffMs / (1000 * 60 * 60);
-
-    return diffHours;
-  }
-
-  private calculateRefundPercentage(cancelDate: Date, startDate: Date): number {
-    // Chuyển đổi sang Date object nếu là string
-    const cancel = new Date(cancelDate);
-    const start = new Date(startDate);
-
-    // Reset time về đầu ngày để so sánh chính xác số ngày
-    cancel.setHours(0, 0, 0, 0);
-    start.setHours(0, 0, 0, 0);
-
-    // Tính số ngày chênh lệch
-    const diffTime = start.getTime() - cancel.getTime();
-    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-
-    // Áp dụng chính sách hoàn tiền
-    if (diffDays > 10) {
-      return 100; // Hoàn 100% nếu hủy trước > 10 ngày
-    } else if (diffDays > 5) {
-      return 30; // Hoàn 30% nếu hủy trước > 5 ngày
-    } else {
-      return 0; // Không hoàn tiền nếu hủy trong vòng 5 ngày
-    }
-  }
-
-  convertHoursToDaysAndHours(totalHours: number): {
-    days: number;
-    hours: number;
-    totalHours: number;
-  } {
-    const days = Math.floor(totalHours / 24);
-    const remainingHours = totalHours % 24;
-
-    return {
-      days,
-      hours: remainingHours,
-      totalHours,
-    };
-  }
 
   async getManyBookings({ page, limit, ...where }: GetManyBookingsRequest) {
     const skip = (page - 1) * limit;
@@ -132,47 +82,39 @@ export class BookingRepository {
 
   async createBooking(data: CreateBookingRequest) {
     return this.prismaService.$transaction(async (tx) => {
-      const durationHours = this.calculateDuration(
-        data.startTime,
-        data.endTime
-      );
-      const durationDayAndHours =
-        this.convertHoursToDaysAndHours(durationHours);
+      const durationHours = calculateDuration(data.startTime, data.endTime);
 
-      const rentalFee = Math.round(
-        durationDayAndHours.days * data.vehicleFeeDay +
-          durationDayAndHours.hours * data.vehicleFeeHour
-      );
+      const vatPercent =
+        this.configService.getOrThrow<number>('BOOKING_VAT') || 0;
+
+      const deposit =
+        this.configService.getOrThrow<number>('BOOKING_DEPOSIT') || 0;
+
+      const collateral =
+        this.configService.getOrThrow<number>('BOOKING_COLLATERAL') || 0;
 
       const insuranceFeePercent =
-        this.configService.get<number>('BOOKING_INSURANCE_FEE') || 0;
+        this.configService.getOrThrow<number>('BOOKING_INSURANCE_FEE') || 0;
 
-      const insuranceFee = Math.round(rentalFee * insuranceFeePercent);
-
-      const deposit = Math.round(
-        this.configService.get<number>('BOOKING_DEPOSIT') || 0
-      );
-
-      const vatPercent = this.configService.get<number>('BOOKING_VAT') || 0;
-
-      const totalAmount = Math.round(
-        (rentalFee + insuranceFee + deposit) * (1 + vatPercent)
-      ); // Tổng cộng bao gồm VAT 10%
-
-      const collateral = Math.round(
-        this.configService.get<number>('BOOKING_COLLATERAL') || 0
-      );
+      const allPrices = calculateVehiclePrice({
+        vehicleFeeDay: data.vehicleFeeDay,
+        vehicleFeeHour: data.vehicleFeeHour,
+        insuranceFeePercent,
+        vatPercent,
+        deposit,
+        hours: durationHours,
+      });
 
       const createBooking = await tx.booking.create({
         data: {
           ...data,
-          rentalFee,
-          insuranceFee,
-          vat: Math.round((rentalFee + insuranceFee) * vatPercent),
+          rentalFee: allPrices.rentalFee,
+          insuranceFee: allPrices.insuranceFee,
+          vat: allPrices.vat,
           deposit,
-          duration: durationHours,
-          totalAmount,
           collateral,
+          duration: durationHours,
+          totalAmount: allPrices.totalAmount,
         },
       });
 
@@ -237,7 +179,7 @@ export class BookingRepository {
         throw BookingCannotCancelWithCheckInsException;
       }
 
-      const refundPercentage = this.calculateRefundPercentage(
+      const refundPercentage = calculateRefundPercentage(
         new Date(),
         booking.startTime
       );

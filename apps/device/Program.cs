@@ -53,6 +53,7 @@ builder.Services.AddDbContext<DeviceDbContext>(options =>
 
 builder.Services.AddScoped<IDeviceRepository, DeviceRepository>();
 builder.Services.AddScoped<IComboRepository, ComboRepository>();
+builder.Services.AddScoped<ICategoryRepository, CategoryRepository>();
 
 var app = builder.Build();
 

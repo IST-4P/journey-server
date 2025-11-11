@@ -36,7 +36,7 @@ message GetManyBlogsRequest {
   int32 page = 4;
   int32 limit = 5;
 }
-
+//no content
 message GetManyBlogs {
   string id = 1;
   string title = 2;

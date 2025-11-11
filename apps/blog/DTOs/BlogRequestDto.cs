@@ -32,6 +32,10 @@ namespace Blog.DTOs
         [Required(ErrorMessage = "Summary is required")]
         [StringLength(1000, ErrorMessage = "Summary cannot exceed 1000 characters")]
         public required string Summary { get; set; }
+
+        [Required(ErrorMessage = "AuthorId is required")]
+        public required string AuthorId { get; set; }
+
     }
 
     public class UpdateBlogRequestDto
@@ -56,6 +60,7 @@ namespace Blog.DTOs
 
         [StringLength(1000, ErrorMessage = "Summary cannot exceed 1000 characters")]
         public string? Summary { get; set; }
+        public string? AuthorId { get; set; }
     }
 
     public class BlogFilterDto

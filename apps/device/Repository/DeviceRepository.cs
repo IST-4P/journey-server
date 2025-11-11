@@ -52,6 +52,7 @@ namespace device.Repository
                 "name" => desc ? queryable.OrderByDescending(d => d.Name) : queryable.OrderBy(d => d.Name),
                 "price" => desc ? queryable.OrderByDescending(d => d.Price) : queryable.OrderBy(d => d.Price),
                 "updateat" => desc ? queryable.OrderByDescending(d => d.UpdateAt) : queryable.OrderBy(d => d.UpdateAt),
+                "category" => desc ? queryable.OrderByDescending(d => d.CategoryId) : queryable.OrderBy(d => d.CategoryId),
                 _ => desc ? queryable.OrderByDescending(d => d.CreateAt) : queryable.OrderBy(d => d.CreateAt),
             };
         }

@@ -25,7 +25,8 @@ message GetBlogResponse {
   string createdAt = 7;
   string updatedAt = 8;
   string tag = 9;
-  string summary = 10;
+  string authorId = 10;
+  string summary = 11;
 }
 
 // GetManyBlogs
@@ -46,7 +47,8 @@ message GetManyBlogs {
   string createdAt = 6;
   string updatedAt = 7;
   string tag = 8;
-  string summary = 9;
+  string authorId = 9;
+  string summary = 10;
 }
 
 message GetManyBlogsResponse {
@@ -65,7 +67,8 @@ message CreateBlogRequest {
   string region = 4;
   string thumbnail = 5;
   string tag = 6;
-  string summary = 7;
+  string authorId = 7;
+  string summary = 8;
 }
 
 // UpdateBlog
@@ -77,7 +80,8 @@ message UpdateBlogRequest {
   optional string region = 5;
   optional string thumbnail = 6;
   optional string tag = 7;
-  optional string summary = 8;
+  optional string authorId = 8;
+  optional string summary = 9;
 }
 
 // DeleteBlog

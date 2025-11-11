@@ -41,6 +41,12 @@ export const WebhookPaymentRequestSchema = z.object({
   description: z.string(),
 });
 
+export const WebhookPaymentResponseSchema = z.object({
+  message: z.string(),
+  paymentCode: z.string(),
+  userId: z.string(),
+});
+
 export const CreatePaymentRequestSchema = PaymentValidator.pick({
   id: true,
   userId: true,
@@ -107,6 +113,9 @@ export type UpdateStatusPaymentRequest = z.infer<
   typeof UpdateStatusPaymentRequestSchema
 >;
 export type WebhookPaymentRequest = z.infer<typeof WebhookPaymentRequestSchema>;
+export type WebhookPaymentResponse = z.infer<
+  typeof WebhookPaymentResponseSchema
+>;
 export type GetRefundRequest = z.infer<typeof GetRefundRequestSchema>;
 export type GetRefundResponse = z.infer<typeof GetRefundResponseSchema>;
 export type GetManyRefundsRequest = z.infer<typeof GetManyRefundsRequestSchema>;

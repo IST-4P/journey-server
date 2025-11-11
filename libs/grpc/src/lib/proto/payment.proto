@@ -71,6 +71,8 @@ message GetManyPaymentsResponse {
 
 message WebhookPaymentResponse {
   string message = 1;
+  string paymentCode = 2;
+  string userId = 3;
 }
 
 message GetRefundRequest {

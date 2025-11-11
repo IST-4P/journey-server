@@ -190,6 +190,12 @@ export class PaymentRepository {
           ? this.natsClient.publish('journey.events.rental-paid', eventData)
           : undefined,
       ]);
+
+      return {
+        paymentCode,
+        userId: payment.userId,
+        message: 'Message.ReceivedSuccessfully',
+      };
     });
 
     return result;

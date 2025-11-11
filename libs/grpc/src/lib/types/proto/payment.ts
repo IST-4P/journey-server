@@ -67,6 +67,8 @@ export interface GetManyPaymentsResponse {
 
 export interface WebhookPaymentResponse {
   message: string;
+  paymentCode: string;
+  userId: string;
 }
 
 export interface GetRefundRequest {

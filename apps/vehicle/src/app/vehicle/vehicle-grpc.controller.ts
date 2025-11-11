@@ -1,4 +1,6 @@
 import {
+  CalculateVehiclePriceRequest,
+  CalculateVehiclePriceResponse,
   CreateVehicleRequest,
   DeleteVehicleRequest,
   GetManyVehiclesRequest,
@@ -14,32 +16,39 @@ import { VehicleService } from './vehicle.service';
 
 @Controller()
 export class VehicleGrpcController {
-  constructor(private readonly featureService: VehicleService) {}
+  constructor(private readonly vehicleService: VehicleService) {}
 
   @GrpcMethod('VehicleService', 'GetManyVehicles')
   getManyVehicles(
     data: GetManyVehiclesRequest
   ): Promise<GetManyVehiclesResponse> {
-    return this.featureService.getManyVehicles(data);
+    return this.vehicleService.getManyVehicles(data);
   }
 
   @GrpcMethod('VehicleService', 'GetVehicle')
   getVehicle(data: GetVehicleRequest): Promise<GetVehicleResponse> {
-    return this.featureService.getVehicleById(data);
+    return this.vehicleService.getVehicleById(data);
   }
 
   @GrpcMethod('VehicleService', 'CreateVehicle')
   createVehicle(data: CreateVehicleRequest): Promise<GetVehicleResponse> {
-    return this.featureService.createVehicle(data);
+    return this.vehicleService.createVehicle(data);
   }
 
   @GrpcMethod('VehicleService', 'UpdateVehicle')
   updateVehicle(data: UpdateVehicleRequest): Promise<GetVehicleResponse> {
-    return this.featureService.updateVehicle(data);
+    return this.vehicleService.updateVehicle(data);
   }
 
   @GrpcMethod('VehicleService', 'DeleteVehicle')
   deleteVehicle(data: DeleteVehicleRequest): Promise<MessageResponse> {
-    return this.featureService.deleteVehicle(data);
+    return this.vehicleService.deleteVehicle(data);
+  }
+
+  @GrpcMethod('VehicleService', 'CalculateVehiclePrice')
+  calculatePrice(
+    data: CalculateVehiclePriceRequest
+  ): Promise<CalculateVehiclePriceResponse> {
+    return this.vehicleService.calculatePrice(data);
   }
 }

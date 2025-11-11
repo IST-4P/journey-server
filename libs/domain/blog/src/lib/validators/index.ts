@@ -6,6 +6,8 @@ export const BlogValidatorSchema = z.object({
   content: z.string(),
   type: z.string(),
   region: z.string(),
+  tag: z.string(),
+  summary: z.string(),
   thumbnail: z.string(),
   createdAt: z.coerce.date(),
   updatedAt: z.coerce.date().optional(),

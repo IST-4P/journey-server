@@ -47,6 +47,12 @@ export class UserService implements OnModuleInit {
     return lastValueFrom(this.userService.updateDriverLicense(data));
   }
 
+  async verifyDriverLicense(
+    data: UserProto.VerifyDriverLicenseRequest
+  ): Promise<UserProto.GetDriverLicenseResponse> {
+    return lastValueFrom(this.userService.verifyDriverLicense(data));
+  }
+
   async getBankAccount(
     data: UserProto.GetBankAccountRequest
   ): Promise<UserProto.GetBankAccountResponse> {

@@ -120,6 +120,13 @@ export interface UpdateDriverLicenseRequest {
   selfieImageUrl?: string | undefined;
 }
 
+/** VerifyDriverLicense */
+export interface VerifyDriverLicenseRequest {
+  userId: string;
+  isVerified: boolean;
+  rejectedReason?: string | undefined;
+}
+
 /** GetBankAccount */
 export interface GetBankAccountRequest {
   userId: string;
@@ -230,6 +237,8 @@ export interface UserServiceClient {
 
   updateDriverLicense(request: UpdateDriverLicenseRequest): Observable<GetDriverLicenseResponse>;
 
+  verifyDriverLicense(request: VerifyDriverLicenseRequest): Observable<GetDriverLicenseResponse>;
+
   getBankAccount(request: GetBankAccountRequest): Observable<GetBankAccountResponse>;
 
   createBankAccount(request: CreateBankAccountRequest): Observable<GetBankAccountResponse>;
@@ -270,6 +279,10 @@ export interface UserServiceController {
 
   updateDriverLicense(
     request: UpdateDriverLicenseRequest,
+  ): Promise<GetDriverLicenseResponse> | Observable<GetDriverLicenseResponse> | GetDriverLicenseResponse;
+
+  verifyDriverLicense(
+    request: VerifyDriverLicenseRequest,
   ): Promise<GetDriverLicenseResponse> | Observable<GetDriverLicenseResponse> | GetDriverLicenseResponse;
 
   getBankAccount(
@@ -314,6 +327,7 @@ export function UserServiceControllerMethods() {
       "getDriverLicense",
       "createDriverLicense",
       "updateDriverLicense",
+      "verifyDriverLicense",
       "getBankAccount",
       "createBankAccount",
       "updateBankAccount",

@@ -9,10 +9,19 @@ import {
   UpdateStatusBookingRequest,
 } from '@domain/booking';
 import { NatsClient } from '@hacmieu-journey/nats';
+import {
+  calculateDuration,
+  calculateRefundPercentage,
+  calculateVehiclePrice,
+} from '@hacmieu-journey/nestjs';
 import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { PrismaService } from '../prisma/prisma.service';
-import { BookingNotFoundException } from './booking.error';
+import {
+  BookingCannotCancelLessThan5DaysException,
+  BookingCannotCancelWithCheckInsException,
+  BookingNotFoundException,
+} from './booking.error';
 
 @Injectable()
 export class BookingRepository {
@@ -22,50 +31,15 @@ export class BookingRepository {
     private readonly configService: ConfigService
   ) {}
 
-  private calculateDuration(startTime: Date, endTime: Date): number {
-    if (endTime <= startTime) {
-      throw new Error('End time must be after start time');
-    }
-    endTime = new Date(endTime);
-    startTime = new Date(startTime);
-    const diffMs = endTime.getTime() - startTime.getTime();
-    const diffHours = diffMs / (1000 * 60 * 60);
-
-    return diffHours;
-  }
-
-  private calculateRefundPercentage(cancelDate: Date, startDate: Date): number {
-    // Chuyển đổi sang Date object nếu là string
-    const cancel = new Date(cancelDate);
-    const start = new Date(startDate);
-
-    // Reset time về đầu ngày để so sánh chính xác số ngày
-    cancel.setHours(0, 0, 0, 0);
-    start.setHours(0, 0, 0, 0);
-
-    // Tính số ngày chênh lệch
-    const diffTime = start.getTime() - cancel.getTime();
-    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-
-    // Áp dụng chính sách hoàn tiền
-    if (diffDays > 10) {
-      return 100; // Hoàn 100% nếu hủy trước > 10 ngày
-    } else if (diffDays > 5) {
-      return 30; // Hoàn 30% nếu hủy trước > 5 ngày
-    } else {
-      return 0; // Không hoàn tiền nếu hủy trong vòng 5 ngày
-    }
-  }
-
-  async getManyBookings(data: GetManyBookingsRequest) {
-    const skip = (data.page - 1) * data.limit;
-    const take = data.limit;
+  async getManyBookings({ page, limit, ...where }: GetManyBookingsRequest) {
+    const skip = (page - 1) * limit;
+    const take = limit;
     const [totalItems, bookings] = await Promise.all([
       this.prismaService.booking.count({
-        where: data,
+        where,
       }),
       this.prismaService.booking.findMany({
-        where: data,
+        where,
         skip,
         take,
         orderBy: {
@@ -80,10 +54,10 @@ export class BookingRepository {
         pickupLat: booking.pickupLat.toNumber(),
         pickupLng: booking.pickupLng.toNumber(),
       })),
-      page: data.page,
-      limit: data.limit,
+      page,
+      limit,
       totalItems,
-      totalPages: Math.ceil(totalItems / data.limit),
+      totalPages: Math.ceil(totalItems / limit),
     };
   }
 
@@ -107,23 +81,40 @@ export class BookingRepository {
   }
 
   async createBooking(data: CreateBookingRequest) {
-    const totalAmount =
-      data.rentalFee +
-      data.insuranceFee +
-      data.vat -
-      data.discount +
-      data.deposit;
-
-    const collateral =
-      this.configService.get<number>('BOOKING_COLLATERAL') || 0;
-
     return this.prismaService.$transaction(async (tx) => {
+      const durationHours = calculateDuration(data.startTime, data.endTime);
+
+      const vatPercent =
+        this.configService.getOrThrow<number>('BOOKING_VAT') || 0;
+
+      const deposit =
+        this.configService.getOrThrow<number>('BOOKING_DEPOSIT') || 0;
+
+      const collateral =
+        this.configService.getOrThrow<number>('BOOKING_COLLATERAL') || 0;
+
+      const insuranceFeePercent =
+        this.configService.getOrThrow<number>('BOOKING_INSURANCE_FEE') || 0;
+
+      const allPrices = calculateVehiclePrice({
+        vehicleFeeDay: data.vehicleFeeDay,
+        vehicleFeeHour: data.vehicleFeeHour,
+        insuranceFeePercent,
+        vatPercent,
+        deposit,
+        hours: durationHours,
+      });
+
       const createBooking = await tx.booking.create({
         data: {
           ...data,
-          duration: this.calculateDuration(data.startTime, data.endTime),
-          totalAmount,
-          collateral,
+          rentalFee: allPrices.rentalFee,
+          insuranceFee: allPrices.insuranceFee,
+          vat: allPrices.vat,
+          deposit: Number(deposit),
+          collateral: Number(collateral),
+          duration: durationHours,
+          totalAmount: allPrices.totalAmount,
         },
       });
 
@@ -146,7 +137,18 @@ export class BookingRepository {
         }
       );
 
-      await Promise.all([createBookingHistory$, createPayment$]);
+      const reservedVehicle$ = this.natsClient.publish(
+        'journey.events.vehicle-reserved',
+        {
+          id: data.vehicleId,
+        }
+      );
+
+      await Promise.all([
+        createBookingHistory$,
+        createPayment$,
+        reservedVehicle$,
+      ]);
 
       return {
         ...createBooking,
@@ -174,13 +176,17 @@ export class BookingRepository {
         throw BookingNotFoundException;
       }
       if (booking.checkIns.length > 0) {
-        throw new Error('Cannot cancel booking with existing check-ins');
+        throw BookingCannotCancelWithCheckInsException;
       }
-      const refundPercentage = this.calculateRefundPercentage(
-        data.cancelDate,
+
+      const refundPercentage = calculateRefundPercentage(
+        new Date(),
         booking.startTime
       );
-      const refundAmount = (booking.deposit * refundPercentage) / 100;
+      if (refundPercentage === 0) {
+        throw BookingCannotCancelLessThan5DaysException;
+      }
+      const refundAmount = (booking.collateral * refundPercentage) / 100;
 
       const updateStatusBooking$ = tx.booking.update({
         where: {
@@ -210,8 +216,8 @@ export class BookingRepository {
           penaltyAmount: 0,
           damageAmount: 0,
           overtimeAmount: 0,
-          collateral: 0,
-          deposit: refundAmount,
+          collateral: refundAmount,
+          deposit: 0,
         }
       );
 
@@ -272,18 +278,7 @@ export class BookingRepository {
         },
       });
 
-      const updateStatusVehicle$ = this.natsClient.publish(
-        'journey.events.vehicle-reserved',
-        {
-          id: booking.vehicleId,
-        }
-      );
-
-      await Promise.all([
-        updateStatusBooking$,
-        createBookingHistory$,
-        updateStatusVehicle$,
-      ]);
+      await Promise.all([updateStatusBooking$, createBookingHistory$]);
     });
   }
 }

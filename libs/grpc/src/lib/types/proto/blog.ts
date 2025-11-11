@@ -24,6 +24,8 @@ export interface GetBlogResponse {
   thumbnail: string;
   createdAt: string;
   updatedAt: string;
+  tag: string;
+  summary: string;
 }
 
 /** GetManyBlogs */
@@ -43,6 +45,8 @@ export interface GetManyBlogs {
   thumbnail: string;
   createdAt: string;
   updatedAt: string;
+  tag: string;
+  summary: string;
 }
 
 export interface GetManyBlogsResponse {
@@ -60,6 +64,8 @@ export interface CreateBlogRequest {
   type: string;
   region: string;
   thumbnail: string;
+  tag: string;
+  summary: string;
 }
 
 /** UpdateBlog */
@@ -70,6 +76,8 @@ export interface UpdateBlogRequest {
   type?: string | undefined;
   region?: string | undefined;
   thumbnail?: string | undefined;
+  tag?: string | undefined;
+  summary?: string | undefined;
 }
 
 /** DeleteBlog */

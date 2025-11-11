@@ -48,6 +48,7 @@ export interface GetManyDevices {
   information: string[];
   images: string[];
   categoryName: string;
+  id: string;
 }
 
 export interface GetManyDevicesResponse {

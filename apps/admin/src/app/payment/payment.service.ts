@@ -19,12 +19,6 @@ export class PaymentService implements OnModuleInit {
       );
   }
 
-  receiver(
-    data: PaymentProto.WebhookPaymentRequest
-  ): Promise<PaymentProto.WebhookPaymentResponse> {
-    return lastValueFrom(this.chatService.receiver(data));
-  }
-
   getManyPayments(
     data: PaymentProto.GetManyPaymentsRequest
   ): Promise<PaymentProto.GetManyPaymentsResponse> {
@@ -32,9 +26,15 @@ export class PaymentService implements OnModuleInit {
   }
 
   getPayment(
-    data: PaymentProto.GetPaymentRequest
+    data: PaymentProto.GetPaymentAdminRequest
   ): Promise<PaymentProto.GetPaymentResponse> {
-    return lastValueFrom(this.chatService.getPayment(data));
+    return lastValueFrom(this.chatService.getPaymentAdmin(data));
+  }
+
+  getRefund(
+    data: PaymentProto.GetRefundAdminRequest
+  ): Promise<PaymentProto.GetRefundResponse> {
+    return lastValueFrom(this.chatService.getRefundAdmin(data));
   }
 
   getManyRefunds(
@@ -43,9 +43,9 @@ export class PaymentService implements OnModuleInit {
     return lastValueFrom(this.chatService.getManyRefunds(data));
   }
 
-  getRefund(
-    data: PaymentProto.GetRefundRequest
+  updateRefundStatus(
+    data: PaymentProto.UpdateRefundStatusRequest
   ): Promise<PaymentProto.GetRefundResponse> {
-    return lastValueFrom(this.chatService.getRefund(data));
+    return lastValueFrom(this.chatService.updateRefundStatus(data));
   }
 }

@@ -72,7 +72,8 @@ model Booking {
     pickupLng     Decimal @map("pickup_lng") @db.Decimal(11, 8)
 
     // Chi phí
-    vehicleFeeHour Int @map("vehicle_fee_hour") // Phí sử dụng xe (theo giờ hoặc ngày)
+    vehicleFeeHour Int @map("vehicle_fee_hour") // Phí sử dụng xe (theo giờ)
+    vehicleFeeDay  Int @map("vehicle_fee_day") // Phí sử dụng xe (theo ngày)
     rentalFee      Int @map("rental_fee") // Phí thuê xe
     insuranceFee   Int @map("insurance_fee") // Phí bảo hiểm
     vat            Int @map("vat") // VAT (10%)
@@ -102,7 +103,7 @@ model Booking {
     updatedAt   DateTime  @updatedAt @map("updated_at")
     cancelledAt DateTime? @map("cancelled_at")
     expiredAt   DateTime? @map("expired_at")
- 
+
     // Relations
     history  BookingHistory[]
     checkIns CheckInOut[]

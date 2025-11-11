@@ -34,6 +34,12 @@ export class VehicleService implements OnModuleInit {
     return lastValueFrom(this.vehicleService.getVehicle(data));
   }
 
+  calculateVehiclePrice(
+    data: VehicleProto.CalculateVehiclePriceRequest
+  ): Promise<VehicleProto.CalculateVehiclePriceResponse> {
+    return lastValueFrom(this.vehicleService.calculateVehiclePrice(data));
+  }
+
   //================= Features =================//
 
   getAllFeatures(

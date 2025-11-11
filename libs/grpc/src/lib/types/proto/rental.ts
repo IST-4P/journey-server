@@ -59,14 +59,17 @@ export interface RentalResponse {
   userId: string;
   items: RentalItemDetail[];
   status: string;
+  /** Total item value (sum of all items before discount) */
   rentalFee: number;
+  /** 20% of total price (paid upfront) */
   deposit: number;
   /** Max discount amount in VND that can be deducted */
   maxDiscount: number;
+  /** (RentalFee - Discount) × 1.1 (including VAT 10%) */
   totalPrice: number;
   totalQuantity: number;
-  /** VAT percentage (e.g., 10 for 10%) */
-  VAT: number;
+  /** 80% of total price (paid on pickup) */
+  remainingAmount: number;
   startDate: string;
   endDate: string;
   createdAt: string;
@@ -207,6 +210,24 @@ export interface DeleteRentalResponse {
   message: string;
 }
 
+export interface RentalHistoryMessage {
+  id: string;
+  rentalId: string;
+  oldStatus: string;
+  newStatus: string;
+  /** ISO string */
+  changedAt: string;
+  notes?: string | undefined;
+}
+
+export interface GetHistoryRentalRequest {
+  rentalId: string;
+}
+
+export interface GetHistoryRentalResponse {
+  histories: RentalHistoryMessage[];
+}
+
 export const RENTAL_PACKAGE_NAME = "rental";
 
 export interface RentalServiceClient {
@@ -227,6 +248,8 @@ export interface RentalServiceClient {
   updateRental(request: UpdateRentalRequest): Observable<RentalResponse>;
 
   deleteRental(request: DeleteRentalRequest): Observable<DeleteRentalResponse>;
+
+  getHistoryRental(request: GetHistoryRentalRequest): Observable<GetHistoryRentalResponse>;
 
   /** Extensions: Rental time extension */
 
@@ -262,6 +285,10 @@ export interface RentalServiceController {
     request: DeleteRentalRequest,
   ): Promise<DeleteRentalResponse> | Observable<DeleteRentalResponse> | DeleteRentalResponse;
 
+  getHistoryRental(
+    request: GetHistoryRentalRequest,
+  ): Promise<GetHistoryRentalResponse> | Observable<GetHistoryRentalResponse> | GetHistoryRentalResponse;
+
   /** Extensions: Rental time extension */
 
   createRentalExtension(
@@ -283,6 +310,7 @@ export function RentalServiceControllerMethods() {
       "getAllRentals",
       "updateRental",
       "deleteRental",
+      "getHistoryRental",
       "createRentalExtension",
       "getRentalExtensions",
     ];

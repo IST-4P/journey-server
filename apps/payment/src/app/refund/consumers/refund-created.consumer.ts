@@ -36,15 +36,25 @@ export class RefundCreatedConsumer
   }
 
   protected async onMessage(event: RefundCreatedEvent): Promise<void> {
+    const {
+      collateral,
+      deposit,
+      penaltyAmount,
+      damageAmount,
+      overtimeAmount,
+      ...restEvent
+    } = event;
+
     await this.refundRepository.createRefund({
-      ...event,
+      ...restEvent,
       bookingId: event.bookingId ? event.bookingId : null,
       rentalId: event.rentalId ? event.rentalId : null,
-      paymentId: event.bookingId ? event.bookingId : event.rentalId!,
+      principal: collateral + deposit,
       amount:
-        event.collateral +
-        event.deposit -
-        (event.penaltyAmount + event.damageAmount + event.overtimeAmount),
+        collateral + deposit - (penaltyAmount + damageAmount + overtimeAmount),
+      penaltyAmount,
+      damageAmount,
+      overtimeAmount,
     });
   }
 }

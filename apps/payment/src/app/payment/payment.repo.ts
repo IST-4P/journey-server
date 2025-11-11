@@ -9,6 +9,7 @@ import {
 import { NatsClient } from '@hacmieu-journey/nats';
 import { Injectable } from '@nestjs/common';
 import { parse } from 'date-fns';
+import { GetPaymentAdminRequest } from 'libs/grpc/src/lib/types/proto/payment';
 import { PrismaService } from '../prisma/prisma.service';
 import {
   AmountPriceMismatchException,
@@ -60,6 +61,12 @@ export class PaymentRepository {
   }
 
   async getPayment(data: GetPaymentRequest) {
+    return this.prismaService.payment.findUnique({
+      where: data,
+    });
+  }
+
+  async getPaymentAdmin(data: GetPaymentAdminRequest) {
     return this.prismaService.payment.findUnique({
       where: data,
     });

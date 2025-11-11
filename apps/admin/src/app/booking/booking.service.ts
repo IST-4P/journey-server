@@ -35,6 +35,12 @@ export class BookingService implements OnModuleInit {
   ): Promise<BookingProto.GetBookingResponse> {
     return lastValueFrom(this.bookingService.getBooking(data));
   }
+
+  updateStatusBooking(
+    data: BookingProto.UpdateStatusBookingRequest
+  ): Promise<BookingProto.GetBookingResponse> {
+    return lastValueFrom(this.bookingService.updateStatusBooking(data));
+  }
   //================= CheckInOuts =================//
 
   getManyCheckInOuts(

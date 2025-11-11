@@ -52,7 +52,6 @@ export const CancelBookingResponseSchema = GetBookingResponseSchema;
 
 export const UpdateStatusBookingRequestSchema = BookingValidatorSchema.pick({
   id: true,
-  userId: true,
   status: true,
 });
 

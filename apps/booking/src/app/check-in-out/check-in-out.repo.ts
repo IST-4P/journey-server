@@ -89,15 +89,19 @@ export class CheckInOutRepository {
         throw CheckInNotPaidException;
       }
 
-      const checkDate = new Date(data.checkDate);
+      const checkDate = new Date(data.checkDate!);
+      console.log('checkDate: ', checkDate);
+      console.log('booking.startTime: ', booking.startTime);
 
       if (checkDate < booking.startTime) {
         throw CheckInWrongTimeException;
       }
 
+      const { checkDate: _, ...body } = data;
+
       const createCheckIn$ = tx.checkInOut.create({
         data: {
-          ...data,
+          ...body,
           verified: true,
           verifiedAt: new Date(),
         },
@@ -164,17 +168,17 @@ export class CheckInOutRepository {
       let overtimeAmount = 0;
 
       // Nếu trả xe qua giờ, tính phí phạt
-      const checkDate = new Date(data.checkDate);
+      const checkDate = new Date(data.checkDate!);
       if (checkDate > booking.endTime) {
         const diffInHours =
           (checkDate.getTime() - booking.endTime.getTime()) / (1000 * 60 * 60);
         const formattedHours = Number(diffInHours.toFixed(1));
         overtimeAmount = formattedHours * booking.vehicleFeeHour * 1.5;
       }
-
+      const { checkDate: _, ...body } = data;
       const createCheckOut$ = tx.checkInOut.create({
         data: {
-          ...data,
+          ...body,
           verified: false,
         },
       });

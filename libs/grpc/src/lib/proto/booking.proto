@@ -7,6 +7,7 @@ service BookingService {
   rpc GetBooking(GetBookingRequest) returns (GetBookingResponse);
   rpc CreateBooking(CreateBookingRequest) returns (GetBookingResponse);
   rpc CancelBooking(CancelBookingRequest) returns (GetBookingResponse);
+  rpc UpdateStatusBooking(UpdateStatusBookingRequest) returns (GetBookingResponse);
 
   rpc GetManyCheckInOuts(GetManyCheckInOutsRequest) returns (GetManyCheckInOutsResponse);
   rpc GetCheckInOut(GetCheckInOutRequest) returns (GetCheckInOutResponse);
@@ -116,6 +117,11 @@ message CancelBookingRequest {
   string userId = 3;
 }
 
+message UpdateStatusBookingRequest {
+  string id = 1;
+  string status = 2;
+}
+
 // ======================================================== CheckInOut
 // GetManyCheckInOuts
 message GetManyCheckInOutsRequest {
@@ -177,7 +183,7 @@ message CreateCheckInOutRequest {
   int32 fuelLevel = 9;
   optional string damageNotes = 10;
   repeated string damageImages = 11;
-  string checkDate = 12;
+  optional string checkDate = 12;
 }
 
 // UpdateCheckOutRequest

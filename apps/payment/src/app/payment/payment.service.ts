@@ -6,6 +6,7 @@ import {
   WebhookPaymentRequest,
 } from '@domain/payment';
 import { Injectable } from '@nestjs/common';
+import { GetPaymentAdminRequest } from 'libs/grpc/src/lib/types/proto/payment';
 import { PaymentNotFoundException } from './payment.error';
 import { PaymentRepository } from './payment.repo';
 
@@ -29,6 +30,17 @@ export class PaymentService {
 
   async getPayment(data: GetPaymentRequest) {
     const payment = await this.paymentRepository.getPayment(data);
+    if (!payment) {
+      throw PaymentNotFoundException;
+    }
+    return {
+      ...payment,
+      paymentCode: payment.paymentCode ?? '',
+    };
+  }
+
+  async getPaymentAdmin(data: GetPaymentAdminRequest) {
+    const payment = await this.paymentRepository.getPaymentAdmin(data);
     if (!payment) {
       throw PaymentNotFoundException;
     }

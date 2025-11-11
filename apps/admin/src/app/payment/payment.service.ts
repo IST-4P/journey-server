@@ -5,7 +5,7 @@ import { lastValueFrom } from 'rxjs';
 
 @Injectable()
 export class PaymentService implements OnModuleInit {
-  private chatService!: PaymentProto.PaymentServiceClient;
+  private paymentService!: PaymentProto.PaymentServiceClient;
 
   constructor(
     @Inject(PaymentProto.PAYMENT_PACKAGE_NAME)
@@ -13,7 +13,7 @@ export class PaymentService implements OnModuleInit {
   ) {}
 
   onModuleInit() {
-    this.chatService =
+    this.paymentService =
       this.client.getService<PaymentProto.PaymentServiceClient>(
         PaymentProto.PAYMENT_SERVICE_NAME
       );
@@ -22,30 +22,30 @@ export class PaymentService implements OnModuleInit {
   getManyPayments(
     data: PaymentProto.GetManyPaymentsRequest
   ): Promise<PaymentProto.GetManyPaymentsResponse> {
-    return lastValueFrom(this.chatService.getManyPayments(data));
+    return lastValueFrom(this.paymentService.getManyPayments(data));
   }
 
   getPayment(
     data: PaymentProto.GetPaymentAdminRequest
   ): Promise<PaymentProto.GetPaymentResponse> {
-    return lastValueFrom(this.chatService.getPaymentAdmin(data));
+    return lastValueFrom(this.paymentService.getPaymentAdmin(data));
   }
 
   getRefund(
     data: PaymentProto.GetRefundAdminRequest
   ): Promise<PaymentProto.GetRefundResponse> {
-    return lastValueFrom(this.chatService.getRefundAdmin(data));
+    return lastValueFrom(this.paymentService.getRefundAdmin(data));
   }
 
   getManyRefunds(
     data: PaymentProto.GetManyRefundsRequest
   ): Promise<PaymentProto.GetManyRefundsResponse> {
-    return lastValueFrom(this.chatService.getManyRefunds(data));
+    return lastValueFrom(this.paymentService.getManyRefunds(data));
   }
 
   updateRefundStatus(
     data: PaymentProto.UpdateRefundStatusRequest
   ): Promise<PaymentProto.GetRefundResponse> {
-    return lastValueFrom(this.chatService.updateRefundStatus(data));
+    return lastValueFrom(this.paymentService.updateRefundStatus(data));
   }
 }

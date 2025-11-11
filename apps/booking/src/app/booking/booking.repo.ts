@@ -236,6 +236,14 @@ export class BookingRepository {
   }
 
   async updateStatusBooking(data: UpdateStatusBookingRequest) {
+    const booking = await this.prismaService.booking.findUnique({
+      where: {
+        id: data.id,
+      },
+    });
+    if (!booking) {
+      throw BookingNotFoundException;
+    }
     return this.prismaService.booking
       .update({
         where: { id: data.id },

@@ -9,6 +9,7 @@ import {
   GetManyHistoriesRequestDTO,
   UpdateCheckOutRequestDTO,
   UpdateExtensionRequestDTO,
+  UpdateStatusBookingRequestDTO,
   UpdateStatusExtensionRequestDTO,
   VerifyCheckInOutRequestDTO,
 } from '@domain/booking';
@@ -30,6 +31,12 @@ export class BookingController {
   @Auth([AuthType.Admin])
   getBooking(@Param() params: Omit<GetBookingRequestDTO, 'userId'>) {
     return this.bookingService.getBooking(params);
+  }
+
+  @Put('status')
+  @Auth([AuthType.Admin])
+  updateStatusBooking(@Body() body: UpdateStatusBookingRequestDTO) {
+    return this.bookingService.updateStatusBooking(body);
   }
 }
 

@@ -8,6 +8,7 @@ import {
 } from '@domain/payment';
 import { Controller } from '@nestjs/common';
 import { GrpcMethod } from '@nestjs/microservices';
+import { GetRefundAdminRequest } from 'libs/grpc/src/lib/types/proto/payment';
 import { RefundService } from './refund.service';
 
 @Controller()
@@ -22,6 +23,11 @@ export class RefundGrpcController {
   @GrpcMethod('PaymentService', 'GetRefund')
   getRefund(data: GetRefundRequest): Promise<GetRefundResponse> {
     return this.refundService.getRefund(data);
+  }
+
+  @GrpcMethod('PaymentService', 'GetRefundAdmin')
+  getRefundAdmin(data: GetRefundAdminRequest): Promise<GetRefundResponse> {
+    return this.refundService.getRefundAdmin(data);
   }
 
   @GrpcMethod('PaymentService', 'CreateRefund')

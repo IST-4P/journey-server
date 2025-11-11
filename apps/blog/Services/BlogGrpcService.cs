@@ -76,7 +76,10 @@ namespace Blog.Services
                 };
 
                 var pagedResult = await _blogRepository.GetBlogsWithFilterAsync(filter);
-
+                if (pagedResult == null)
+                {
+                    throw new RpcException(new Status(StatusCode.NotFound, "Error.NoBlogsFound"));
+                }
                 var response = new GetManyBlogsResponse
                 {
                     Page = pagedResult.Page,
@@ -100,6 +103,10 @@ namespace Blog.Services
                 }
 
                 return response;
+            }
+            catch (RpcException)
+            {
+                throw;
             }
             catch (Exception ex)
             {

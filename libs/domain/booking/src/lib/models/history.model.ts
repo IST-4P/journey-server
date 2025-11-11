@@ -4,6 +4,7 @@ import { HistoryValidatorSchema } from '../validators';
 
 export const GetManyHistoriesRequestSchema = HistoryValidatorSchema.pick({
   action: true,
+  bookingId: true,
 })
   .partial()
   .extend(PaginationQuerySchema.shape);

@@ -155,7 +155,7 @@ export class PaymentRepository {
       }
 
       const eventData = {
-        id: bookingId || rentalId,
+        id: payment.id,
       };
 
       await Promise.all([
@@ -169,7 +169,9 @@ export class PaymentRepository {
         }),
         bookingId
           ? this.natsClient.publish('journey.events.booking-paid', eventData)
-          : this.natsClient.publish('journey.events.rental-paid', eventData),
+          : rentalId
+          ? this.natsClient.publish('journey.events.rental-paid', eventData)
+          : undefined,
       ]);
     });
 

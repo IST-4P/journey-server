@@ -63,6 +63,7 @@ export const GetRefundResponseSchema = RefundValidator;
 
 export const GetManyRefundsRequestSchema = RefundValidator.pick({
   status: true,
+  userId: true,
 })
   .partial()
   .extend(PaginationQuerySchema.shape);
@@ -83,11 +84,13 @@ export const UpdateRefundStatusRequestSchema = RefundValidator.pick({
 export const CreateRefundRequestSchema = RefundValidator.pick({
   id: true,
   userId: true,
-  paymentId: true,
   bookingId: true,
   rentalId: true,
   amount: true,
+  principal: true,
   penaltyAmount: true,
+  damageAmount: true,
+  overtimeAmount: true,
 });
 
 export type GetManyPaymentsRequest = z.infer<

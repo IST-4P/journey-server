@@ -239,6 +239,19 @@ export interface MessageResponse {
   message: string;
 }
 
+export interface CalculateVehiclePriceRequest {
+  vehicleId: string;
+  hours: number;
+}
+
+export interface CalculateVehiclePriceResponse {
+  rentalFee: number;
+  insuranceFee: number;
+  vat: number;
+  totalAmount: number;
+  deposit: number;
+}
+
 export const VEHICLE_PACKAGE_NAME = "vehicle";
 
 export interface VehicleServiceClient {
@@ -277,6 +290,8 @@ export interface VehicleServiceClient {
   updateVehicle(request: UpdateVehicleRequest): Observable<GetVehicleResponse>;
 
   deleteVehicle(request: GetVehicleRequest): Observable<MessageResponse>;
+
+  calculateVehiclePrice(request: CalculateVehiclePriceRequest): Observable<CalculateVehiclePriceResponse>;
 }
 
 export interface VehicleServiceController {
@@ -335,6 +350,10 @@ export interface VehicleServiceController {
   ): Promise<GetVehicleResponse> | Observable<GetVehicleResponse> | GetVehicleResponse;
 
   deleteVehicle(request: GetVehicleRequest): Promise<MessageResponse> | Observable<MessageResponse> | MessageResponse;
+
+  calculateVehiclePrice(
+    request: CalculateVehiclePriceRequest,
+  ): Promise<CalculateVehiclePriceResponse> | Observable<CalculateVehiclePriceResponse> | CalculateVehiclePriceResponse;
 }
 
 export function VehicleServiceControllerMethods() {
@@ -358,6 +377,7 @@ export function VehicleServiceControllerMethods() {
       "createVehicle",
       "updateVehicle",
       "deleteVehicle",
+      "calculateVehiclePrice",
     ];
     for (const method of grpcMethods) {
       const descriptor: any = Reflect.getOwnPropertyDescriptor(constructor.prototype, method);

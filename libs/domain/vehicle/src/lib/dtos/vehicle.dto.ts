@@ -1,6 +1,7 @@
 import { createZodDto } from 'nestjs-zod';
 import z from 'zod';
 import {
+  CalculateVehiclePriceRequestSchema,
   CreateVehicleRequestSchema,
   DeleteVehicleRequestSchema,
   GetManyVehiclesRequestSchema,
@@ -40,4 +41,8 @@ export class UpdateVehicleRequestDTO extends createZodDto(
 
 export class DeleteVehicleRequestDTO extends createZodDto(
   DeleteVehicleRequestSchema
+) {}
+
+export class CalculateVehiclePriceRequestDTO extends createZodDto(
+  CalculateVehiclePriceRequestSchema
 ) {}

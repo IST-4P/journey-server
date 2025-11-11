@@ -10,6 +10,7 @@ service UserService {
   rpc GetDriverLicense(GetDriverLicenseRequest) returns (GetDriverLicenseResponse);
   rpc CreateDriverLicense(CreateDriverLicenseRequest) returns (GetDriverLicenseResponse);
   rpc UpdateDriverLicense(UpdateDriverLicenseRequest) returns (GetDriverLicenseResponse);
+  rpc VerifyDriverLicense(VerifyDriverLicenseRequest) returns (GetDriverLicenseResponse);
 
   rpc GetBankAccount(GetBankAccountRequest) returns (GetBankAccountResponse);
   rpc CreateBankAccount(CreateBankAccountRequest) returns (GetBankAccountResponse);
@@ -130,6 +131,13 @@ message UpdateDriverLicenseRequest {
   optional string frontImageUrl = 9;
   optional string backImageUrl = 10;
   optional string selfieImageUrl = 11;
+}
+
+// VerifyDriverLicense
+message VerifyDriverLicenseRequest {
+  string userId = 1;
+  bool isVerified = 2;
+  optional string rejectedReason = 3;
 }
 
 // GetBankAccount

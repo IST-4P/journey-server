@@ -1,4 +1,5 @@
 import {
+  CalculateVehiclePriceRequest,
   CreateVehicleRequest,
   DeleteVehicleRequest,
   GetManyVehiclesRequest,
@@ -63,5 +64,9 @@ export class VehicleService {
     return {
       message: 'Message.VehicleDeletedSuccessfully',
     };
+  }
+
+  async calculatePrice(data: CalculateVehiclePriceRequest) {
+    return this.vehicleRepo.calculatePrice(data);
   }
 }

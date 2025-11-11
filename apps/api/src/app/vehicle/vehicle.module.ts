@@ -9,6 +9,7 @@ import {
   FeatureController,
   ModelController,
   VehicleController,
+  VehiclePriceController,
 } from './vehicle.controller';
 import { VehicleService } from './vehicle.service';
 
@@ -34,6 +35,7 @@ import { VehicleService } from './vehicle.service';
   ],
   controllers: [
     VehicleController,
+    VehiclePriceController,
     FeatureController,
     BrandController,
     ModelController,

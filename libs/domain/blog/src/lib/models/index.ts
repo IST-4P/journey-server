@@ -30,6 +30,8 @@ export const CreateBlogRequestSchema = BlogValidatorSchema.pick({
   type: true,
   region: true,
   thumbnail: true,
+  tag: true,
+  summary: true,
 });
 
 export const UpdateBlogResponseSchema =

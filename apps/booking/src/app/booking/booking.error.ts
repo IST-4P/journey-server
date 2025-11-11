@@ -10,3 +10,18 @@ export const BookingAlreadyExistsException = new RpcException({
   code: status.ALREADY_EXISTS,
   message: 'Error.BookingAlreadyExists',
 });
+
+export const BookingTimeInvalidException = new RpcException({
+  code: status.INVALID_ARGUMENT,
+  message: 'Error.BookingTimeInvalid',
+});
+
+export const BookingCannotCancelWithCheckInsException = new RpcException({
+  code: status.FAILED_PRECONDITION,
+  message: 'Error.BookingCannotCancelWithCheckIns',
+});
+
+export const BookingCannotCancelLessThan5DaysException = new RpcException({
+  code: status.FAILED_PRECONDITION,
+  message: 'Error.BookingCannotCancelLessThan5Days',
+});

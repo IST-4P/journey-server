@@ -4,12 +4,13 @@ import { Module } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { ClientsModule, Transport } from '@nestjs/microservices';
 import { join } from 'path';
+import { BookingService } from './booking.service';
 import {
   BookingController,
   CheckInOutController,
   ExtensionController,
-} from './booking.controller';
-import { BookingService } from './booking.service';
+  HistoryController,
+} from './controllers';
 
 @Module({
   imports: [
@@ -59,7 +60,12 @@ import { BookingService } from './booking.service';
       },
     ]),
   ],
-  controllers: [BookingController, CheckInOutController, ExtensionController],
+  controllers: [
+    BookingController,
+    CheckInOutController,
+    ExtensionController,
+    HistoryController,
+  ],
   providers: [
     BookingService,
     {

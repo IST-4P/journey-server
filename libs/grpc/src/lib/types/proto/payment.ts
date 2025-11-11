@@ -30,6 +30,10 @@ export interface GetPaymentRequest {
   userId: string;
 }
 
+export interface GetPaymentAdminRequest {
+  id: string;
+}
+
 export interface GetPaymentResponse {
   id: string;
   sequenceNumber: number;
@@ -64,6 +68,51 @@ export interface WebhookPaymentResponse {
   message: string;
 }
 
+export interface GetRefundRequest {
+  id: string;
+  userId: string;
+}
+
+export interface GetRefundAdminRequest {
+  id: string;
+}
+
+export interface GetRefundResponse {
+  id: string;
+  userId: string;
+  bookingId?: string | undefined;
+  rentalId?: string | undefined;
+  principal: number;
+  amount: number;
+  penaltyAmount: number;
+  damageAmount: number;
+  overtimeAmount: number;
+  status: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface GetManyRefundsRequest {
+  userId?: string | undefined;
+  status?: string | undefined;
+  page: number;
+  limit: number;
+}
+
+export interface GetManyRefundsResponse {
+  refunds: GetRefundResponse[];
+  page: number;
+  limit: number;
+  totalItems: number;
+  totalPages: number;
+}
+
+/** UpdateRefundStatus */
+export interface UpdateRefundStatusRequest {
+  id: string;
+  status: string;
+}
+
 export const PAYMENT_PACKAGE_NAME = "payment";
 
 export interface PaymentServiceClient {
@@ -71,7 +120,17 @@ export interface PaymentServiceClient {
 
   getPayment(request: GetPaymentRequest): Observable<GetPaymentResponse>;
 
+  getPaymentAdmin(request: GetPaymentAdminRequest): Observable<GetPaymentResponse>;
+
   getManyPayments(request: GetManyPaymentsRequest): Observable<GetManyPaymentsResponse>;
+
+  getRefund(request: GetRefundRequest): Observable<GetRefundResponse>;
+
+  getManyRefunds(request: GetManyRefundsRequest): Observable<GetManyRefundsResponse>;
+
+  updateRefundStatus(request: UpdateRefundStatusRequest): Observable<GetRefundResponse>;
+
+  getRefundAdmin(request: GetRefundAdminRequest): Observable<GetRefundResponse>;
 }
 
 export interface PaymentServiceController {
@@ -83,14 +142,41 @@ export interface PaymentServiceController {
     request: GetPaymentRequest,
   ): Promise<GetPaymentResponse> | Observable<GetPaymentResponse> | GetPaymentResponse;
 
+  getPaymentAdmin(
+    request: GetPaymentAdminRequest,
+  ): Promise<GetPaymentResponse> | Observable<GetPaymentResponse> | GetPaymentResponse;
+
   getManyPayments(
     request: GetManyPaymentsRequest,
   ): Promise<GetManyPaymentsResponse> | Observable<GetManyPaymentsResponse> | GetManyPaymentsResponse;
+
+  getRefund(request: GetRefundRequest): Promise<GetRefundResponse> | Observable<GetRefundResponse> | GetRefundResponse;
+
+  getManyRefunds(
+    request: GetManyRefundsRequest,
+  ): Promise<GetManyRefundsResponse> | Observable<GetManyRefundsResponse> | GetManyRefundsResponse;
+
+  updateRefundStatus(
+    request: UpdateRefundStatusRequest,
+  ): Promise<GetRefundResponse> | Observable<GetRefundResponse> | GetRefundResponse;
+
+  getRefundAdmin(
+    request: GetRefundAdminRequest,
+  ): Promise<GetRefundResponse> | Observable<GetRefundResponse> | GetRefundResponse;
 }
 
 export function PaymentServiceControllerMethods() {
   return function (constructor: Function) {
-    const grpcMethods: string[] = ["receiver", "getPayment", "getManyPayments"];
+    const grpcMethods: string[] = [
+      "receiver",
+      "getPayment",
+      "getPaymentAdmin",
+      "getManyPayments",
+      "getRefund",
+      "getManyRefunds",
+      "updateRefundStatus",
+      "getRefundAdmin",
+    ];
     for (const method of grpcMethods) {
       const descriptor: any = Reflect.getOwnPropertyDescriptor(constructor.prototype, method);
       GrpcMethod("PaymentService", method)(constructor.prototype[method], method, descriptor);

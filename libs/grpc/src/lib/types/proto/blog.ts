@@ -25,6 +25,7 @@ export interface GetBlogResponse {
   createdAt: string;
   updatedAt: string;
   tag: string;
+  authorId: string;
   summary: string;
 }
 
@@ -37,6 +38,7 @@ export interface GetManyBlogsRequest {
   limit: number;
 }
 
+/** no content */
 export interface GetManyBlogs {
   id: string;
   title: string;
@@ -46,6 +48,7 @@ export interface GetManyBlogs {
   createdAt: string;
   updatedAt: string;
   tag: string;
+  authorId: string;
   summary: string;
 }
 
@@ -65,6 +68,7 @@ export interface CreateBlogRequest {
   region: string;
   thumbnail: string;
   tag: string;
+  authorId: string;
   summary: string;
 }
 
@@ -77,6 +81,7 @@ export interface UpdateBlogRequest {
   region?: string | undefined;
   thumbnail?: string | undefined;
   tag?: string | undefined;
+  authorId?: string | undefined;
   summary?: string | undefined;
 }
 

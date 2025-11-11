@@ -52,6 +52,7 @@ export interface GetManyPaymentsRequest {
   userId?: string | undefined;
   type?: string | undefined;
   status?: string | undefined;
+  paymentCode?: string | undefined;
   page: number;
   limit: number;
 }

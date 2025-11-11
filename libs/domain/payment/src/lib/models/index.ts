@@ -6,6 +6,7 @@ export const GetManyPaymentsRequestSchema = PaymentValidator.pick({
   userId: true,
   type: true,
   status: true,
+  paymentCode: true,
 })
   .partial()
   .extend(PaginationQuerySchema.shape);

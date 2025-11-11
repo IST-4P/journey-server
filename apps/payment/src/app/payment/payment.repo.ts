@@ -8,6 +8,7 @@ import {
 } from '@domain/payment';
 import { NatsClient } from '@hacmieu-journey/nats';
 import { Injectable } from '@nestjs/common';
+import { Prisma } from '@prisma-clients/payment';
 import { parse } from 'date-fns';
 import { GetPaymentAdminRequest } from 'libs/grpc/src/lib/types/proto/payment';
 import { PrismaService } from '../prisma/prisma.service';
@@ -40,12 +41,21 @@ export class PaymentRepository {
     const skip = (page - 1) * limit;
     const take = limit;
 
+    let query: Prisma.PaymentWhereInput = where;
+
+    if (where.paymentCode) {
+      query.paymentCode = {
+        contains: where.paymentCode,
+        mode: 'insensitive',
+      };
+    }
+
     const [totalItems, payments] = await Promise.all([
       this.prismaService.payment.count({
-        where,
+        where: query,
       }),
       this.prismaService.payment.findMany({
-        where,
+        where: query,
         skip,
         take,
       }),

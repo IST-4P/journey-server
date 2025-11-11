@@ -56,8 +56,9 @@ message GetManyPaymentsRequest {
   optional string userId = 1;
   optional string type = 2;
   optional string status = 3;
-  int32 page = 4;
-  int32 limit = 5;
+  optional string paymentCode = 4;
+  int32 page = 5;
+  int32 limit = 6;
 }
 
 message GetManyPaymentsResponse {

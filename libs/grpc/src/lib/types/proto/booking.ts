@@ -240,6 +240,7 @@ export interface UpdateExtensionRequest {
  */
 export interface GetManyHistoriesRequest {
   action?: string | undefined;
+  bookingId?: string | undefined;
   page?: number | undefined;
   limit?: number | undefined;
 }

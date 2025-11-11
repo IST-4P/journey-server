@@ -263,8 +263,9 @@ message UpdateExtensionRequest {
 // GetManyHistories
 message GetManyHistoriesRequest {
   optional string action = 1;
-  optional int32 page = 2;
-  optional int32 limit = 3;
+  optional string bookingId = 2;
+  optional int32 page = 3;
+  optional int32 limit = 4;
 }
 
 message GetManyHistoriesResponse {

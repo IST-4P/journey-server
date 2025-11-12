@@ -61,7 +61,9 @@ namespace Blog.Repository
             {
                 query = query.Where(b =>
                     b.Title.ToLower().Contains(filter.SearchTerm.ToLower()) ||
-                    b.Content.ToLower().Contains(filter.SearchTerm.ToLower()));
+                    b.Content.ToLower().Contains(filter.SearchTerm.ToLower()) ||
+                    b.Tag.ToLower().Contains(filter.SearchTerm.ToLower()) ||
+                    b.Type.ToLower().Contains(filter.SearchTerm.ToLower()));
             }
 
             if (filter.FromDate.HasValue)

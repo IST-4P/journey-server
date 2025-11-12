@@ -7,10 +7,12 @@ import {
   GetManyPaymentsResponseSchema,
   GetManyRefundsRequestSchema,
   GetManyRefundsResponseSchema,
+  GetManyTransactionsRequestSchema,
   GetPaymentRequestSchema,
   GetPaymentResponseSchema,
   GetRefundRequestSchema,
   GetRefundResponseSchema,
+  GetTransactionRequestSchema,
   UpdateRefundStatusRequestSchema,
   UpdateStatusPaymentRequestSchema,
   WebhookPaymentRequestSchema,
@@ -61,4 +63,13 @@ export class UpdateRefundStatusRequestDTO extends createZodDto(
 ) {}
 export class CreateRefundRequestDTO extends createZodDto(
   CreateRefundRequestSchema
+) {}
+export class GetManyTransactionsRequestDTO extends createZodDto(
+  GetManyTransactionsRequestSchema.extend({
+    startDate: z.string().optional(),
+    endDate: z.string().optional(),
+  })
+) {}
+export class GetTransactionRequestDTO extends createZodDto(
+  GetTransactionRequestSchema
 ) {}

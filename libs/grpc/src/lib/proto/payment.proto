@@ -12,6 +12,10 @@ service PaymentService {
   rpc GetManyRefunds(GetManyRefundsRequest) returns (GetManyRefundsResponse);
   rpc UpdateRefundStatus(UpdateRefundStatusRequest) returns (GetRefundResponse);
   rpc GetRefundAdmin(GetRefundAdminRequest) returns (GetRefundResponse);
+
+  rpc GetTransaction(GetTransactionRequest) returns (GetTransactionResponse);
+  rpc GetManyTransactions(GetManyTransactionsRequest) returns (GetManyTransactionsResponse);
+  rpc GetInformationTransaction(GetInformationTransactionRequest) returns (GetInformationTransactionResponse);
 }
 
 message WebhookPaymentRequest {
@@ -118,4 +122,62 @@ message GetManyRefundsResponse {
 message UpdateRefundStatusRequest {
   string id = 1;
   string status = 2;
+}
+
+// GetTransaction
+message GetTransactionRequest {
+  int32 id = 1;
+}
+
+message GetTransactionResponse {
+  string id = 1;
+  string gateway = 2;
+  string transactionDate = 3;
+  optional string accountNumber = 4;
+  optional string subAccount = 5;
+  double amountIn = 6;
+  double amountOut = 7;
+  double accumulated = 8;
+  optional string code = 9;
+  optional string transactionContent = 10;
+  optional string referenceNumber = 11;
+  optional string body = 12;
+  string createdAt = 13;
+}
+
+message GetManyTransactionsRequest {
+  optional string type = 1;
+  optional string code = 2;
+  optional string startDate = 3;
+  optional string endDate = 4;
+  int32 page = 5;
+  int32 limit = 6;
+}
+
+message GetManyTransactions {
+  int32 id = 1;
+  string code = 2;
+  string gateway = 3;
+  string transactionDate = 4;
+  string accountNumber = 5;
+  double amountIn = 6;
+  double amountOut = 7;
+  string transactionContent = 8;
+}
+
+message GetManyTransactionsResponse {
+  repeated GetManyTransactions transactions = 1;
+  int32 page = 2;
+  int32 limit = 3;
+  int32 totalItems = 4;
+  int32 totalPages = 5;
+}
+
+message GetInformationTransactionRequest {}
+
+message GetInformationTransactionResponse {
+  double totalAmountIn = 1;
+  double totalAmountOut = 2;
+  int32 totalTransactions = 3;
+  double difference = 4;
 }

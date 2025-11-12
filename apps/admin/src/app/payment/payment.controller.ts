@@ -1,9 +1,12 @@
 import {
   GetManyPaymentsRequestDTO,
   GetManyRefundsRequestDTO,
+  GetManyTransactionsRequestDTO,
   GetPaymentRequestDTO,
   GetRefundRequestDTO,
+  GetTransactionRequestDTO,
 } from '@domain/payment';
+import { Auth, AuthType } from '@hacmieu-journey/nestjs';
 import { Controller, Get, Param, Query } from '@nestjs/common';
 import { PaymentService } from './payment.service';
 
@@ -38,5 +41,30 @@ export class RefundController {
   @Get(':id')
   getRefund(@Param() params: Omit<GetRefundRequestDTO, 'userId'>) {
     return this.paymentService.getRefund(params);
+  }
+}
+
+@Controller('transaction')
+export class TransactionController {
+  // private readonly logger = new Logger(TransactionController.name);
+
+  constructor(private readonly paymentService: PaymentService) {}
+
+  @Get()
+  @Auth([AuthType.Admin])
+  getManyTransactions(@Query() query: GetManyTransactionsRequestDTO) {
+    return this.paymentService.getManyTransactions(query);
+  }
+
+  @Get('information')
+  @Auth([AuthType.Admin])
+  getInformationTransaction() {
+    return this.paymentService.getInformationTransaction({});
+  }
+
+  @Get(':id')
+  @Auth([AuthType.Admin])
+  getTransaction(@Param() params: GetTransactionRequestDTO) {
+    return this.paymentService.getTransaction(params);
   }
 }

@@ -1,6 +1,7 @@
 import {
   CreatePaymentRequest,
   GetManyPaymentsRequest,
+  GetPaymentAdminRequest,
   GetPaymentRequest,
   PaymentStatusValues,
   UpdateStatusPaymentRequest,
@@ -10,7 +11,6 @@ import { NatsClient } from '@hacmieu-journey/nats';
 import { Injectable } from '@nestjs/common';
 import { Prisma } from '@prisma-clients/payment';
 import { parse } from 'date-fns';
-import { GetPaymentAdminRequest } from 'libs/grpc/src/lib/types/proto/payment';
 import { PrismaService } from '../prisma/prisma.service';
 import {
   AmountPriceMismatchException,

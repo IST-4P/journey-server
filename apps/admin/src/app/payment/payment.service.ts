@@ -48,4 +48,22 @@ export class PaymentService implements OnModuleInit {
   ): Promise<PaymentProto.GetRefundResponse> {
     return lastValueFrom(this.paymentService.updateRefundStatus(data));
   }
+
+  getManyTransactions(
+    data: PaymentProto.GetManyTransactionsRequest
+  ): Promise<PaymentProto.GetManyTransactionsResponse> {
+    return lastValueFrom(this.paymentService.getManyTransactions(data));
+  }
+
+  getTransaction(
+    data: PaymentProto.GetTransactionRequest
+  ): Promise<PaymentProto.GetTransactionResponse> {
+    return lastValueFrom(this.paymentService.getTransaction(data));
+  }
+
+  getInformationTransaction(
+    data: PaymentProto.GetInformationTransactionRequest
+  ): Promise<PaymentProto.GetInformationTransactionResponse> {
+    return lastValueFrom(this.paymentService.getInformationTransaction(data));
+  }
 }

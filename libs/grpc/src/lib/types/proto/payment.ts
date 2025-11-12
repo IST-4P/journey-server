@@ -116,6 +116,65 @@ export interface UpdateRefundStatusRequest {
   status: string;
 }
 
+/** GetTransaction */
+export interface GetTransactionRequest {
+  id: number;
+}
+
+export interface GetTransactionResponse {
+  id: string;
+  gateway: string;
+  transactionDate: string;
+  accountNumber?: string | undefined;
+  subAccount?: string | undefined;
+  amountIn: number;
+  amountOut: number;
+  accumulated: number;
+  code?: string | undefined;
+  transactionContent?: string | undefined;
+  referenceNumber?: string | undefined;
+  body?: string | undefined;
+  createdAt: string;
+}
+
+export interface GetManyTransactionsRequest {
+  type?: string | undefined;
+  code?: string | undefined;
+  startDate?: string | undefined;
+  endDate?: string | undefined;
+  page: number;
+  limit: number;
+}
+
+export interface GetManyTransactions {
+  id: number;
+  code: string;
+  gateway: string;
+  transactionDate: string;
+  accountNumber: string;
+  amountIn: number;
+  amountOut: number;
+  transactionContent: string;
+}
+
+export interface GetManyTransactionsResponse {
+  transactions: GetManyTransactions[];
+  page: number;
+  limit: number;
+  totalItems: number;
+  totalPages: number;
+}
+
+export interface GetInformationTransactionRequest {
+}
+
+export interface GetInformationTransactionResponse {
+  totalAmountIn: number;
+  totalAmountOut: number;
+  totalTransactions: number;
+  difference: number;
+}
+
 export const PAYMENT_PACKAGE_NAME = "payment";
 
 export interface PaymentServiceClient {
@@ -134,6 +193,12 @@ export interface PaymentServiceClient {
   updateRefundStatus(request: UpdateRefundStatusRequest): Observable<GetRefundResponse>;
 
   getRefundAdmin(request: GetRefundAdminRequest): Observable<GetRefundResponse>;
+
+  getTransaction(request: GetTransactionRequest): Observable<GetTransactionResponse>;
+
+  getManyTransactions(request: GetManyTransactionsRequest): Observable<GetManyTransactionsResponse>;
+
+  getInformationTransaction(request: GetInformationTransactionRequest): Observable<GetInformationTransactionResponse>;
 }
 
 export interface PaymentServiceController {
@@ -166,6 +231,21 @@ export interface PaymentServiceController {
   getRefundAdmin(
     request: GetRefundAdminRequest,
   ): Promise<GetRefundResponse> | Observable<GetRefundResponse> | GetRefundResponse;
+
+  getTransaction(
+    request: GetTransactionRequest,
+  ): Promise<GetTransactionResponse> | Observable<GetTransactionResponse> | GetTransactionResponse;
+
+  getManyTransactions(
+    request: GetManyTransactionsRequest,
+  ): Promise<GetManyTransactionsResponse> | Observable<GetManyTransactionsResponse> | GetManyTransactionsResponse;
+
+  getInformationTransaction(
+    request: GetInformationTransactionRequest,
+  ):
+    | Promise<GetInformationTransactionResponse>
+    | Observable<GetInformationTransactionResponse>
+    | GetInformationTransactionResponse;
 }
 
 export function PaymentServiceControllerMethods() {
@@ -179,6 +259,9 @@ export function PaymentServiceControllerMethods() {
       "getManyRefunds",
       "updateRefundStatus",
       "getRefundAdmin",
+      "getTransaction",
+      "getManyTransactions",
+      "getInformationTransaction",
     ];
     for (const method of grpcMethods) {
       const descriptor: any = Reflect.getOwnPropertyDescriptor(constructor.prototype, method);

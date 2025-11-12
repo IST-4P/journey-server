@@ -17,12 +17,14 @@ import {
   PaymentNotFoundException,
   PaymentTransactionExistsException,
 } from './payment.error';
+import { PaymentProducer } from './payment.producer';
 
 @Injectable()
 export class PaymentRepository {
   constructor(
     private readonly prismaService: PrismaService,
-    private readonly natsClient: NatsClient
+    private readonly natsClient: NatsClient,
+    private readonly paymentProducer: PaymentProducer
   ) {}
 
   generatePaymentCode(sequenceNumber: number, type: string): string {
@@ -96,10 +98,15 @@ export class PaymentRepository {
       );
 
       // Update payment code
-      await tx.payment.update({
+      const updatedPayment$ = tx.payment.update({
         where: { id: payment.id },
         data: { paymentCode },
       });
+
+      const addCancelPaymentJob$ = this.paymentProducer.cancelPaymentJob(
+        payment.id
+      );
+      await Promise.all([updatedPayment$, addCancelPaymentJob$]);
     });
   }
 
@@ -189,6 +196,7 @@ export class PaymentRepository {
           : rentalId
           ? this.natsClient.publish('journey.events.rental-paid', eventData)
           : undefined,
+        this.paymentProducer.removeJob(payment.id),
       ]);
 
       return {

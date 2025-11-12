@@ -289,4 +289,47 @@ export class BookingRepository {
       await Promise.all([updateStatusBooking$, createBookingHistory$]);
     });
   }
+
+  async bookingExpired(data: { id: string }) {
+    await this.prismaService.$transaction(async (tx) => {
+      const booking = await tx.booking.findUnique({
+        where: {
+          id: data.id,
+        },
+      });
+
+      if (!booking) {
+        throw BookingNotFoundException;
+      }
+
+      const updateStatusBooking$ = tx.booking.update({
+        where: { id: data.id },
+        data: {
+          status: BookingStatusValues.EXPIRED,
+          paymentStatus: PaymentStatusValues.FAILED,
+        },
+      });
+
+      const createBookingHistory$ = tx.bookingHistory.create({
+        data: {
+          bookingId: data.id,
+          action: HistoryActionValues.CANCELLED,
+          notes: 'Booking expired',
+        },
+      });
+
+      const vehicleActive$ = this.natsClient.publish(
+        'journey.events.vehicle-active',
+        {
+          id: booking.vehicleId,
+        }
+      );
+
+      await Promise.all([
+        updateStatusBooking$,
+        createBookingHistory$,
+        vehicleActive$,
+      ]);
+    });
+  }
 }

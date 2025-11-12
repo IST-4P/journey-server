@@ -19,7 +19,7 @@ export * from './lib/decorators/active-user.decorator';
 export * from './lib/decorators/auth.decorator';
 
 // Constants
-export * from './lib/constants/auth.constant';
+export * from './lib/constants';
 
 // Interfaces
 export * from './lib/interfaces/jwt.interface';

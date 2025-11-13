@@ -95,20 +95,20 @@ export class ExtensionController {
 
   @Get(':id')
   @Auth([AuthType.Admin])
-  getExtension(@Param() params: GetExtensionRequestDTO) {
+  getExtension(@Param() params: Omit<GetExtensionRequestDTO, 'requestedBy'>) {
     return this.bookingService.getExtension(params);
   }
 
-  @Put('approve/:id')
+  @Put('approve')
   @Auth([AuthType.Admin])
-  approveExtension(@Param() params: UpdateStatusExtensionRequestDTO) {
-    return this.bookingService.approveExtension(params);
+  approveExtension(@Body() body: UpdateStatusExtensionRequestDTO) {
+    return this.bookingService.approveExtension(body);
   }
 
-  @Put('reject/:id')
+  @Put('reject')
   @Auth([AuthType.Admin])
-  rejectExtension(@Param() params: UpdateStatusExtensionRequestDTO) {
-    return this.bookingService.rejectExtension(params);
+  rejectExtension(@Body() body: UpdateStatusExtensionRequestDTO) {
+    return this.bookingService.rejectExtension(body);
   }
 
   @Put(':id')

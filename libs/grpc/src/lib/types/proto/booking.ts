@@ -197,6 +197,7 @@ export interface VerifyCheckInOutRequest {
 export interface GetManyExtensionsRequest {
   status?: string | undefined;
   requestedBy?: string | undefined;
+  bookingId?: string | undefined;
   page?: number | undefined;
   limit?: number | undefined;
 }
@@ -212,7 +213,7 @@ export interface GetManyExtensionsResponse {
 /** GetExtension */
 export interface GetExtensionRequest {
   id: string;
-  requestedBy: string;
+  requestedBy?: string | undefined;
 }
 
 export interface GetExtensionResponse {

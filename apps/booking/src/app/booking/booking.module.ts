@@ -3,7 +3,11 @@ import { Module } from '@nestjs/common';
 import { BookingGrpcController } from './booking-grpc.controller';
 import { BookingRepository } from './booking.repo';
 import { BookingService } from './booking.service';
-import { BookingExpiredConsumer, BookingPaidConsumer } from './consumers';
+import {
+  BookingExpiredConsumer,
+  BookingExtensionConsumer,
+  BookingPaidConsumer,
+} from './consumers';
 
 @Module({
   imports: [NatsModule],
@@ -13,6 +17,7 @@ import { BookingExpiredConsumer, BookingPaidConsumer } from './consumers';
     BookingService,
     BookingPaidConsumer,
     BookingExpiredConsumer,
+    BookingExtensionConsumer,
   ],
 })
 export class BookingModule {}

@@ -2,8 +2,8 @@ import { NatsModule } from '@hacmieu-journey/nats';
 import { PAYMENT_QUEUE_NAME } from '@hacmieu-journey/nestjs';
 import { BullModule } from '@nestjs/bullmq';
 import { Module } from '@nestjs/common';
+import { PaymentBookingConsumer, PaymentExtensionConsumer } from './consumers';
 import { PaymentGrpcController } from './payment-grpc.controller';
-import { PaymentConsumer } from './payment.consumer';
 import { PaymentProducer } from './payment.producer';
 import { PaymentQueue } from './payment.queue';
 import { PaymentRepository } from './payment.repo';
@@ -20,7 +20,8 @@ import { PaymentService } from './payment.service';
   providers: [
     PaymentRepository,
     PaymentService,
-    PaymentConsumer,
+    PaymentBookingConsumer,
+    PaymentExtensionConsumer,
     PaymentProducer,
     PaymentQueue,
   ],

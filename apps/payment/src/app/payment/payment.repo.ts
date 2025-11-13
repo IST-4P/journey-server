@@ -110,6 +110,28 @@ export class PaymentRepository {
     });
   }
 
+  async createPaymentForExtension(data: CreatePaymentRequest) {
+    return await this.prismaService.$transaction(async (tx) => {
+      // Tạo payment với sequenceNumber tự động tăng
+      const payment = await tx.payment.create({
+        data,
+      });
+
+      // Generate payment code
+      const paymentCode = this.generatePaymentCode(
+        payment.sequenceNumber,
+        payment.type
+      );
+
+      // Update payment code
+      const updatedPayment$ = tx.payment.update({
+        where: { id: payment.id },
+        data: { paymentCode },
+      });
+      await Promise.all([updatedPayment$]);
+    });
+  }
+
   async updatePaymentStatus(data: UpdateStatusPaymentRequest) {
     return this.prismaService.payment.update({
       where: {
@@ -165,11 +187,13 @@ export class PaymentRepository {
 
       // Kiểm tra nội dung chuyển tiền và tổng số tiền có khớp không
       const paymentCode = data.code ? String(data.code) : String(data.content);
+      console.log(paymentCode);
       const payment = await tx.payment.findUnique({
         where: {
           paymentCode,
         },
       });
+      console.log(payment);
       if (!payment) {
         throw PaymentNotFoundException;
       }
@@ -182,22 +206,46 @@ export class PaymentRepository {
         id: payment.id,
       };
 
-      await Promise.all([
-        tx.payment.update({
-          where: {
-            paymentCode,
-          },
-          data: {
-            status: PaymentStatusValues.PAID,
-          },
-        }),
-        bookingId
-          ? this.natsClient.publish('journey.events.booking-paid', eventData)
-          : rentalId
-          ? this.natsClient.publish('journey.events.rental-paid', eventData)
-          : undefined,
-        this.paymentProducer.removeJob(payment.id),
-      ]);
+      if (paymentCode.startsWith('EX')) {
+        await Promise.all([
+          tx.payment.update({
+            where: {
+              paymentCode,
+            },
+            data: {
+              status: PaymentStatusValues.PAID,
+            },
+          }),
+          bookingId
+            ? this.natsClient.publish(
+                'journey.events.booking-extension',
+                eventData
+              )
+            : rentalId
+            ? this.natsClient.publish(
+                'journey.events.rental-extension',
+                eventData
+              )
+            : undefined,
+        ]);
+      } else {
+        await Promise.all([
+          tx.payment.update({
+            where: {
+              paymentCode,
+            },
+            data: {
+              status: PaymentStatusValues.PAID,
+            },
+          }),
+          bookingId
+            ? this.natsClient.publish('journey.events.booking-paid', eventData)
+            : rentalId
+            ? this.natsClient.publish('journey.events.rental-paid', eventData)
+            : undefined,
+          this.paymentProducer.removeJob(payment.id),
+        ]);
+      }
 
       return {
         paymentCode,

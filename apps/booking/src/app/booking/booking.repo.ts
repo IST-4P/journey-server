@@ -17,6 +17,7 @@ import {
 } from '@hacmieu-journey/nestjs';
 import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
+import { ExtensionNotFoundException } from '../extension/extension.error';
 import { PrismaService } from '../prisma/prisma.service';
 import {
   BookingCannotCancelLessThan5DaysException,
@@ -128,7 +129,7 @@ export class BookingRepository {
       });
 
       const createPayment$ = this.natsClient.publish(
-        'journey.events.payment-created',
+        'journey.events.payment-booking',
         {
           id: createBooking.id,
           userId: createBooking.userId,
@@ -331,6 +332,27 @@ export class BookingRepository {
         createBookingHistory$,
         vehicleActive$,
       ]);
+    });
+  }
+
+  async bookingExtension(data: { id: string }) {
+    await this.prismaService.$transaction(async (tx) => {
+      const extension = await tx.bookingExtension.findUnique({
+        where: {
+          id: data.id,
+        },
+      });
+
+      if (!extension) {
+        return ExtensionNotFoundException;
+      }
+      const newTime = new Date(extension.newEndTime);
+      await tx.booking.update({
+        where: { id: extension.bookingId },
+        data: {
+          endTime: newTime,
+        },
+      });
     });
   }
 

@@ -222,8 +222,9 @@ message VerifyCheckInOutRequest {
 message GetManyExtensionsRequest {
   optional string status = 1;
   optional string requestedBy = 2;
-  optional int32 page = 3;
-  optional int32 limit = 4;
+  optional string bookingId = 3;
+  optional int32 page = 4;
+  optional int32 limit = 5;
 }
 
 message GetManyExtensionsResponse {
@@ -237,7 +238,7 @@ message GetManyExtensionsResponse {
 // GetExtension
 message GetExtensionRequest {
   string id = 1;
-  string requestedBy = 2;
+  optional string requestedBy = 2;
 }
 
 message GetExtensionResponse {

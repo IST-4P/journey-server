@@ -54,6 +54,10 @@ export class PaymentService {
     return this.paymentRepository.createPayment(data);
   }
 
+  async createPaymentForExtension(data: CreatePaymentRequest) {
+    return this.paymentRepository.createPaymentForExtension(data);
+  }
+
   async updateStatusPayment(data: UpdateStatusPaymentRequest) {
     const payment = await this.paymentRepository.getPayment({
       id: data.id,

@@ -20,6 +20,20 @@ namespace rental.Model.Dto
         public DateTime EndDate { get; set; }
     }
 
+    public class CreateRentalExtensionRequestDto
+    {
+        [Required]
+        public Guid RentalId { get; set; }
+
+        [Required]
+        public DateTime NewEndDate { get; set; }
+
+        public double? AdditionalFee { get; set; }
+        public double? AdditionalHours { get; set; }
+        public Guid? RequestedBy { get; set; } // UserId người yêu cầu gia hạn
+        public string? Notes { get; set; }
+    }
+
     // Request DTO for Admin (Update)
     public class UpdateRentalRequestDto
     {

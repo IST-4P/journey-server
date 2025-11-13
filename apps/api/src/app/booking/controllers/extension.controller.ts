@@ -13,7 +13,7 @@ export class ExtensionController {
 
   @Get()
   getManyExtensions(
-    @Query() query: GetManyExtensionsRequestDTO,
+    @Query() query: Omit<GetManyExtensionsRequestDTO, 'requestedBy'>,
     @ActiveUser('userId') userId: string
   ) {
     return this.bookingService.getManyExtensions({
@@ -24,7 +24,7 @@ export class ExtensionController {
 
   @Get(':id')
   getExtension(
-    @Param() params: GetExtensionRequestDTO,
+    @Param() params: Omit<GetExtensionRequestDTO, 'requestedBy'>,
     @ActiveUser('userId') userId: string
   ) {
     return this.bookingService.getExtension({ ...params, requestedBy: userId });
@@ -32,14 +32,14 @@ export class ExtensionController {
 
   @Post()
   createExtension(
-    @Body() body: Omit<CreateExtensionRequestDTO, 'requestedBy'>,
+    @Body()
+    body: Omit<CreateExtensionRequestDTO, 'requestedBy' | 'originalEndTime'>,
     @ActiveUser('userId') userId: string
   ) {
     return this.bookingService.createExtension({
       ...body,
-      originalEndTime: String(body.originalEndTime),
+      originalEndTime: '',
       newEndTime: String(body.newEndTime),
-      notes: body.notes || undefined,
       requestedBy: userId,
     });
   }

@@ -140,9 +140,13 @@ export class BookingService implements OnModuleInit {
     return lastValueFrom(this.bookingService.getExtension(data));
   }
 
-  createExtension(
+  async createExtension(
     data: BookingProto.CreateExtensionRequest
   ): Promise<BookingProto.GetExtensionResponse> {
+    const booking = await lastValueFrom(
+      this.bookingService.getBooking({ id: data.bookingId })
+    );
+    data.originalEndTime = booking.endTime;
     return lastValueFrom(this.bookingService.createExtension(data));
   }
 

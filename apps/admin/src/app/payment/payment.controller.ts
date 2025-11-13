@@ -5,9 +5,11 @@ import {
   GetPaymentRequestDTO,
   GetRefundRequestDTO,
   GetTransactionRequestDTO,
+  RefundStatusValues,
+  UpdateRefundStatusRequestDTO,
 } from '@domain/payment';
 import { Auth, AuthType } from '@hacmieu-journey/nestjs';
-import { Controller, Get, Param, Query } from '@nestjs/common';
+import { Controller, Get, Param, Put, Query } from '@nestjs/common';
 import { PaymentService } from './payment.service';
 
 @Controller('payment')
@@ -41,6 +43,26 @@ export class RefundController {
   @Get(':id')
   getRefund(@Param() params: Omit<GetRefundRequestDTO, 'userId'>) {
     return this.paymentService.getRefund(params);
+  }
+
+  @Put('completed/:id')
+  completedRefund(
+    @Param() params: Omit<UpdateRefundStatusRequestDTO, 'status'>
+  ) {
+    return this.paymentService.updateRefundStatus({
+      ...params,
+      status: RefundStatusValues.COMPLETED,
+    });
+  }
+
+  @Put('cancelled/:id')
+  cancelledRefund(
+    @Param() params: Omit<UpdateRefundStatusRequestDTO, 'status'>
+  ) {
+    return this.paymentService.updateRefundStatus({
+      ...params,
+      status: RefundStatusValues.CANCELLED,
+    });
   }
 }
 

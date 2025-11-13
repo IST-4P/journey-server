@@ -168,6 +168,12 @@ secrets:
   digitalOceanSpacesSecret: ''
   digitalOceanSpacesRegion: ''
   digitalOceanSpacesEndPoint: ''
+  userGrpcServiceUrlNet: ''
+  vehicleGrpcServiceUrlNet: ''
+  deviceGrpcServiceUrlNet: ''
+  rentalGrpcServiceUrlNet: ''
+  bookingGrpcServiceUrlNet: ''
+  paymentGrpcServiceUrlNet: ''
 
 # Ingress configuration
 ingress:

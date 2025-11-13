@@ -54,9 +54,9 @@ builder.Services.AddDbContext<RentalDbContext>(options =>
     options.UseNpgsql(connectionString));
 
 // Configure gRPC clients (prefer environment variables, fall back to sensible defaults)
-var userServiceUrl = Environment.GetEnvironmentVariable("USER_GRPC_URL") ?? "http://localhost:5002";
-var deviceServiceUrl = Environment.GetEnvironmentVariable("DEVICE_GRPC_URL") ?? "http://localhost:5006";
-var paymentServiceUrl = Environment.GetEnvironmentVariable("PAYMENT_GRPC_URL") ?? "http://localhost:5009";
+var userServiceUrl = Environment.GetEnvironmentVariable("USER_GRPC_SERVICE_URL_NET") ?? "http://localhost:5002";
+var deviceServiceUrl = Environment.GetEnvironmentVariable("DEVICE_GRPC_SERVICE_URL_NET") ?? "http://localhost:5006";
+var paymentServiceUrl = Environment.GetEnvironmentVariable("PAYMENT_GRPC_SERVICE_URL_NET") ?? "http://localhost:5009";
 
 builder.Services.AddGrpcClient<User.UserService.UserServiceClient>(options =>
 {

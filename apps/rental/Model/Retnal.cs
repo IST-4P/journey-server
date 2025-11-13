@@ -17,7 +17,7 @@ namespace rental.Model.Entities
         public double RentalFee { get; set; } // Tổng giá trị thuê (sum of all items)
         public double? Deposit { get; set; } // 20% of RentalFee
         public double? RemainingAmount { get; set; } // 80% of RentalFee (paid on pickup)
-        public double DiscountPercent { get; set; } = 0; // Discount percentage (e.g., 10 for 10%)
+        public double DiscountPercent { get; set; } = 0; // Discount percentage 
         public double MaxDiscount { get; set; } = 0; // Maximum discount amount in VND
 
         public double TotalPrice { get; set; } // = RentalFee (total amount to pay)
@@ -45,7 +45,7 @@ namespace rental.Model.Entities
         public ICollection<RentalHistory>? History { get; set; }
     }
 
-    public class RentalExtension //      gia hạn
+    public class RentalExtension //gia hạn
     {
         public Guid Id { get; set; } = Guid.NewGuid();
         public DateTime? NewEndDate { get; set; }
@@ -55,6 +55,7 @@ namespace rental.Model.Entities
         public DateTime? CreatedAt { get; set; } = DateTime.UtcNow;
         public string? Notes { get; set; }
         public Guid? RentalId { get; set; }
+        public ExtensionStatus Status { get; set; }
     }
 
     // Helper class for JSON serialization of rental items
@@ -79,6 +80,12 @@ namespace rental.Model.Entities
         public Rental? Rental { get; set; }
     }
 
+    public enum ExtensionStatus
+    {
+        PENDING,  // Chờ duyệt
+        APPROVED, // Đã duyệt
+        REJECTED // Đã từ chối
+    }
 
     public enum RentalStatus
     {

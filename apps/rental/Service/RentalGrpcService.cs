@@ -14,7 +14,6 @@ namespace rental.Service
     public class RentalGrpcService : global::Rental.RentalService.RentalServiceBase
     {
         private readonly RentalRepository _repository;
-        private readonly IMapper _mapper;
         private readonly ILogger<RentalGrpcService> _logger;
         private readonly User.UserService.UserServiceClient _userClient;
         private readonly Device.DeviceService.DeviceServiceClient _deviceClient;
@@ -23,7 +22,6 @@ namespace rental.Service
 
         public RentalGrpcService(
             RentalRepository repository,
-            IMapper mapper,
             ILogger<RentalGrpcService> logger,
             User.UserService.UserServiceClient userClient,
             Device.DeviceService.DeviceServiceClient deviceClient,
@@ -31,7 +29,6 @@ namespace rental.Service
             NatsPublisher natsPublisher)
         {
             _repository = repository;
-            _mapper = mapper;
             _logger = logger;
             _userClient = userClient;
             _deviceClient = deviceClient;
@@ -171,7 +168,17 @@ namespace rental.Service
                 rental.TotalPrice = totalPrice;
                 rental.TotalQuantity = totalQuantity;
 
-                var created = await _repository.CreateAsync(rental);
+                var createDto = new CreateRentalRequestDto
+                {
+                    UserId = rental.UserId,
+                    StartDate = rental.StartDate,
+                    EndDate = rental.EndDate,
+                    Items = rental.Items.ToString()! != null ?
+                        JsonSerializer.Deserialize<List<RentalItemData>>(rental.Items.ToString()!) ?? new List<RentalItemData>()
+                        : new List<RentalItemData>()
+                };
+
+                var created = await _repository.CreateAsync(createDto);
 
                 // Record initial status in history
                 await RecordStatusChange(created.Id, RentalStatus.PENDING, RentalStatus.PENDING, "Initial rental creation");
@@ -522,7 +529,7 @@ namespace rental.Service
                     rental.ActualEndDate = rental.EndDate;
                 }
 
-                var extension = new RentalExtensionEntity
+                var createdDto = new CreateRentalExtensionRequestDto
                 {
                     RentalId = rental.Id,
                     NewEndDate = newEnd,
@@ -532,7 +539,7 @@ namespace rental.Service
                     Notes = string.IsNullOrWhiteSpace(request.Notes) ? null : request.Notes
                 };
 
-                await _repository.CreateExtensionAsync(extension);
+                var extensionCreated = await _repository.CreateExtensionAsync(createdDto);
 
                 // Update the rental's end date to reflect the extension
                 rental.EndDate = newEnd;

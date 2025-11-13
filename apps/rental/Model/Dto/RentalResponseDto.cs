@@ -2,7 +2,7 @@ using System;
 
 namespace rental.Model.Dto
 {
-    // Response for User - basic info with enriched data
+    // Response for User
     public class UserRentalDto
     {
         public Guid Id { get; set; }
@@ -17,13 +17,12 @@ namespace rental.Model.Dto
         public ReviewSummaryDto? Review { get; set; } // Optional - rental may not have review
     }
 
-    // Response for Admin - full info including UserId with enriched data
+    // Response for Admin 
     public class AdminRentalDto
     {
         public Guid Id { get; set; }
         public Guid UserId { get; set; }
-        public string UserName { get; set; } = string.Empty; // User full name
-        public string UserEmail { get; set; } = string.Empty;
+        public string UserName { get; set; } = string.Empty; 
         public Guid TargetId { get; set; }
         public bool IsCombo { get; set; }
         public string TargetName { get; set; } = string.Empty; // Device or Combo name
@@ -32,6 +31,7 @@ namespace rental.Model.Dto
         public DateTime StartDate { get; set; }
         public DateTime EndDate { get; set; }
         public DateTime CreatedAt { get; set; }
+        public DateTime UpdatedAt { get; set; }
         public ReviewSummaryDto? Review { get; set; } // Optional - rental may not have review
     }
 }

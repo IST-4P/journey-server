@@ -17,19 +17,37 @@ namespace rental.Repository
         }
 
         // User: Create rental
-        public async Task<RentalEntity> CreateAsync(RentalEntity rental)
+        public async Task<RentalEntity> CreateAsync(CreateRentalRequestDto rental)
         {
-            _context.Set<RentalEntity>().Add(rental);
+            var entity = new RentalEntity
+            {
+                UserId = rental.UserId,
+                Items = rental.Items.ToString()!,
+                StartDate = rental.StartDate,
+                EndDate = rental.EndDate,
+                Status = RentalStatus.PENDING
+            };
+            _context.Set<RentalEntity>().Add(entity);
             await _context.SaveChangesAsync();
-            return rental;
+            return entity;
         }
 
         // User: Create rental extention
-        public async Task<RentalExtensionEntity> CreateExtensionAsync(RentalExtensionEntity extension)
+        public async Task<RentalExtensionEntity> CreateExtensionAsync(CreateRentalExtensionRequestDto extension)
         {
-            _context.Set<RentalExtensionEntity>().Add(extension);
+            var entity = new RentalExtensionEntity
+            {
+                RentalId = extension.RentalId,
+                NewEndDate = extension.NewEndDate,
+                AdditionalFee = extension.AdditionalFee,
+                AdditionalHours = extension.AdditionalHours,
+                RequestedBy = extension.RequestedBy,
+                Notes = extension.Notes,
+                Status = ExtensionStatus.PENDING
+            };
+            _context.Set<RentalExtensionEntity>().Add(entity);
             await _context.SaveChangesAsync();
-            return extension;
+            return entity;
         }
 
         public async Task<List<RentalExtensionEntity>> GetExtensionsByRentalIdAsync(Guid rentalId)

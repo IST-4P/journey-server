@@ -25,15 +25,19 @@ export class CheckInOutRepository {
     private readonly natsClient: NatsClient
   ) {}
 
-  async getManyCheckInOuts(data: GetManyCheckInOutsRequest) {
-    const skip = (data.page - 1) * data.limit;
-    const take = data.limit;
+  async getManyCheckInOuts({
+    page,
+    limit,
+    ...where
+  }: GetManyCheckInOutsRequest) {
+    const skip = (page - 1) * limit;
+    const take = limit;
     const [totalItems, checkInOuts] = await Promise.all([
       this.prismaService.checkInOut.count({
-        where: data,
+        where,
       }),
       this.prismaService.checkInOut.findMany({
-        where: data,
+        where,
         skip,
         take,
         orderBy: {
@@ -48,10 +52,10 @@ export class CheckInOutRepository {
         latitude: checkInOut.latitude.toNumber(),
         longitude: checkInOut.longitude.toNumber(),
       })),
-      page: data.page,
-      limit: data.limit,
+      page,
+      limit,
       totalItems,
-      totalPages: Math.ceil(totalItems / data.limit),
+      totalPages: Math.ceil(totalItems / limit),
     };
   }
 
@@ -89,15 +93,19 @@ export class CheckInOutRepository {
         throw CheckInNotPaidException;
       }
 
-      const checkDate = new Date(data.checkDate);
+      const checkDate = new Date(data.checkDate!);
+      console.log('checkDate: ', checkDate);
+      console.log('booking.startTime: ', booking.startTime);
 
       if (checkDate < booking.startTime) {
         throw CheckInWrongTimeException;
       }
 
+      const { checkDate: _, ...body } = data;
+
       const createCheckIn$ = tx.checkInOut.create({
         data: {
-          ...data,
+          ...body,
           verified: true,
           verifiedAt: new Date(),
         },
@@ -164,17 +172,17 @@ export class CheckInOutRepository {
       let overtimeAmount = 0;
 
       // Nếu trả xe qua giờ, tính phí phạt
-      const checkDate = new Date(data.checkDate);
+      const checkDate = new Date(data.checkDate!);
       if (checkDate > booking.endTime) {
         const diffInHours =
           (checkDate.getTime() - booking.endTime.getTime()) / (1000 * 60 * 60);
         const formattedHours = Number(diffInHours.toFixed(1));
         overtimeAmount = formattedHours * booking.vehicleFeeHour * 1.5;
       }
-
+      const { checkDate: _, ...body } = data;
       const createCheckOut$ = tx.checkInOut.create({
         data: {
-          ...data,
+          ...body,
           verified: false,
         },
       });
@@ -185,6 +193,7 @@ export class CheckInOutRepository {
           overtimeAmount: {
             increment: overtimeAmount,
           },
+          status: BookingStatusValues.COMPLETED,
         },
       });
 
@@ -287,7 +296,7 @@ export class CheckInOutRepository {
       penaltyAmount: verified.booking.penaltyAmount,
       damageAmount: verified.booking.damageAmount,
       overtimeAmount: verified.booking.overtimeAmount,
-      collateral: verified.booking.collateral,
+      collateral: 0,
       deposit: verified.booking.deposit,
     });
     return verified;

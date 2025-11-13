@@ -23,7 +23,9 @@ export class GetExtensionResponseDTO extends createZodDto(
   GetExtensionResponseSchema
 ) {}
 export class CreateExtensionRequestDTO extends createZodDto(
-  CreateExtensionRequestSchema
+  CreateExtensionRequestSchema.extend({
+    notes: z.string().optional(),
+  })
 ) {}
 export class UpdateStatusExtensionRequestDTO extends createZodDto(
   UpdateStatusExtensionRequestSchema.extend({

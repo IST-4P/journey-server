@@ -3,8 +3,10 @@ import {
   CreateBookingRequest,
   GetBookingRequest,
   GetBookingResponse,
+  GetInformationBookingResponse,
   GetManyBookingsRequest,
   GetManyBookingsResponse,
+  UpdateStatusBookingRequest,
 } from '@domain/booking';
 import { Controller } from '@nestjs/common';
 import { GrpcMethod } from '@nestjs/microservices';
@@ -34,5 +36,17 @@ export class BookingGrpcController {
   @GrpcMethod('BookingService', 'CancelBooking')
   cancelBooking(data: CancelBookingRequest): Promise<GetBookingResponse> {
     return this.bookingService.cancelBooking(data);
+  }
+
+  @GrpcMethod('BookingService', 'UpdateStatusBooking')
+  updateStatusBooking(
+    data: UpdateStatusBookingRequest
+  ): Promise<GetBookingResponse> {
+    return this.bookingService.updateStatusBooking(data);
+  }
+
+  @GrpcMethod('BookingService', 'GetInformationBooking')
+  getInformationBooking(): Promise<GetInformationBookingResponse> {
+    return this.bookingService.getInformationBooking();
   }
 }

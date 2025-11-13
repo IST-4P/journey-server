@@ -94,3 +94,7 @@ export const calculateVehiclePrice = (data: VehiclePrice) => {
     vat: vatAmount,
   };
 };
+
+export const generateCancelPaymentJobId = (paymentId: string) => {
+  return `paymentCode-${paymentId}`;
+};

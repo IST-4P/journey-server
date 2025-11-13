@@ -2,6 +2,7 @@ import { PaymentProto } from '@hacmieu-journey/grpc';
 import { Inject, Injectable, OnModuleInit } from '@nestjs/common';
 import { ClientGrpc } from '@nestjs/microservices';
 import { lastValueFrom } from 'rxjs';
+import { PaymentGateway } from './payment.gateway';
 
 @Injectable()
 export class PaymentService implements OnModuleInit {
@@ -9,7 +10,8 @@ export class PaymentService implements OnModuleInit {
 
   constructor(
     @Inject(PaymentProto.PAYMENT_PACKAGE_NAME)
-    private client: ClientGrpc
+    private client: ClientGrpc,
+    private readonly paymentGateway: PaymentGateway
   ) {}
 
   onModuleInit() {
@@ -19,10 +21,12 @@ export class PaymentService implements OnModuleInit {
       );
   }
 
-  receiver(
+  async receiver(
     data: PaymentProto.WebhookPaymentRequest
   ): Promise<PaymentProto.WebhookPaymentResponse> {
-    return lastValueFrom(this.chatService.receiver(data));
+    const result = await lastValueFrom(this.chatService.receiver(data));
+    this.paymentGateway.handlePaymentSuccess(result);
+    return result;
   }
 
   getManyPayments(

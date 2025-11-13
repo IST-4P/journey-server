@@ -5,6 +5,7 @@ import { ConfigService } from '@nestjs/config';
 import { ClientsModule, Transport } from '@nestjs/microservices';
 import { join } from 'path';
 import { PaymentController, RefundController } from './payment.controller';
+import { PaymentGateway } from './payment.gateway';
 import { PaymentService } from './payment.service';
 
 @Module({
@@ -30,6 +31,7 @@ import { PaymentService } from './payment.service';
   controllers: [PaymentController, RefundController],
   providers: [
     PaymentService,
+    PaymentGateway,
     {
       provide: 'PAYMENT_SERVICE',
       useExisting: PaymentService,

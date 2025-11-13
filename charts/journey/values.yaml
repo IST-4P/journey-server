@@ -145,6 +145,12 @@ config:
   bookingDeposit: ''
   bookingVat: ''
   bookingInsuranceFee: ''
+  userGrpcServiceUrlNet: ''
+  vehicleGrpcServiceUrlNet: ''
+  deviceGrpcServiceUrlNet: ''
+  rentalGrpcServiceUrlNet: ''
+  bookingGrpcServiceUrlNet: ''
+  paymentGrpcServiceUrlNet: ''
 
 # Secrets (sensitive - DO NOT COMMIT REAL VALUES)
 secrets:

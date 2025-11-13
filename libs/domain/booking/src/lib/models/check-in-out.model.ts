@@ -38,7 +38,7 @@ export const CreateCheckInOutRequestSchema = CheckInOutValidatorSchema.pick({
   damageNotes: true,
   damageImages: true,
 }).extend({
-  checkDate: z.coerce.date(),
+  checkDate: z.coerce.date().optional(),
 });
 
 export const UpdateCheckOutRequestSchema = CheckInOutValidatorSchema.pick({

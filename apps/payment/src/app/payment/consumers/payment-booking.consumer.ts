@@ -2,7 +2,7 @@ import { PaymentType } from '@domain/payment';
 import { NatsClient, NatsConsumer } from '@hacmieu-journey/nats';
 import { Injectable, OnModuleInit } from '@nestjs/common';
 import { AckPolicy, DeliverPolicy } from 'nats';
-import { PaymentService } from './payment.service';
+import { PaymentService } from '../payment.service';
 
 interface BookingCreatedEvent {
   id: string;
@@ -14,7 +14,7 @@ interface BookingCreatedEvent {
 }
 
 @Injectable()
-export class PaymentConsumer
+export class PaymentBookingConsumer
   extends NatsConsumer<BookingCreatedEvent>
   implements OnModuleInit
 {
@@ -24,8 +24,8 @@ export class PaymentConsumer
   ) {
     super(natsClient, {
       streamName: 'JOURNEY_EVENTS',
-      consumerName: 'payment-service-payment-created',
-      filterSubject: 'journey.events.payment-created',
+      consumerName: 'payment-service-payment-booking',
+      filterSubject: 'journey.events.payment-booking',
       ackPolicy: AckPolicy.Explicit, // Phải ack thủ công
       deliverPolicy: DeliverPolicy.All, // Nhận tất cả message (kể cả cũ)
       maxDeliver: 3, // Retry tối đa 3 lần

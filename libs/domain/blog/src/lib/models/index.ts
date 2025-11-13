@@ -32,12 +32,14 @@ export const CreateBlogRequestSchema = BlogValidatorSchema.pick({
   thumbnail: true,
   tag: true,
   summary: true,
+  authorId: true,
 });
 
-export const UpdateBlogResponseSchema =
-  CreateBlogRequestSchema.partial().extend({
+export const UpdateBlogRequestSchema = CreateBlogRequestSchema.partial().extend(
+  {
     id: BlogValidatorSchema.shape.id,
-  });
+  }
+);
 
 export const DeleteBlogRequestSchema = BlogValidatorSchema.pick({
   id: true,
@@ -48,5 +50,5 @@ export type GetManyBlogsResponse = z.infer<typeof GetManyBlogsResponseSchema>;
 export type GetBlogRequest = z.infer<typeof GetBlogRequestSchema>;
 export type GetBlogResponse = z.infer<typeof GetBlogResponseSchema>;
 export type CreateBlogRequest = z.infer<typeof CreateBlogRequestSchema>;
-export type UpdateBlogRequest = z.infer<typeof UpdateBlogResponseSchema>;
+export type UpdateBlogRequest = z.infer<typeof UpdateBlogRequestSchema>;
 export type DeleteBlogRequest = z.infer<typeof DeleteBlogRequestSchema>;

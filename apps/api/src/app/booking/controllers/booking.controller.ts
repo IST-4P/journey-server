@@ -33,7 +33,7 @@ export class BookingController {
     @Body()
     body: Omit<
       CreateBookingRequestDTO,
-      'vehicleFeeDay' | 'vehicleFeeHour' | 'userId'
+      'vehicleName' | 'vehicleFeeDay' | 'vehicleFeeHour' | 'userId'
     >,
     @ActiveUser('userId') userId: string
   ) {
@@ -44,6 +44,7 @@ export class BookingController {
       userId,
       vehicleFeeHour: 0,
       vehicleFeeDay: 0,
+      vehicleName: '',
     });
   }
 

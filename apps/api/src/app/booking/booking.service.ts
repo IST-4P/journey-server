@@ -90,6 +90,7 @@ export class BookingService implements OnModuleInit {
     }
     data.vehicleFeeHour = vehicle.pricePerHour;
     data.vehicleFeeDay = vehicle.pricePerDay;
+    data.vehicleName = vehicle.name;
     return lastValueFrom(this.bookingService.createBooking(data));
   }
 

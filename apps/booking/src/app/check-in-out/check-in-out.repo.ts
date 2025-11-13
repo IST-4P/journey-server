@@ -25,15 +25,19 @@ export class CheckInOutRepository {
     private readonly natsClient: NatsClient
   ) {}
 
-  async getManyCheckInOuts(data: GetManyCheckInOutsRequest) {
-    const skip = (data.page - 1) * data.limit;
-    const take = data.limit;
+  async getManyCheckInOuts({
+    page,
+    limit,
+    ...where
+  }: GetManyCheckInOutsRequest) {
+    const skip = (page - 1) * limit;
+    const take = limit;
     const [totalItems, checkInOuts] = await Promise.all([
       this.prismaService.checkInOut.count({
-        where: data,
+        where,
       }),
       this.prismaService.checkInOut.findMany({
-        where: data,
+        where,
         skip,
         take,
         orderBy: {
@@ -48,10 +52,10 @@ export class CheckInOutRepository {
         latitude: checkInOut.latitude.toNumber(),
         longitude: checkInOut.longitude.toNumber(),
       })),
-      page: data.page,
-      limit: data.limit,
+      page,
+      limit,
       totalItems,
-      totalPages: Math.ceil(totalItems / data.limit),
+      totalPages: Math.ceil(totalItems / limit),
     };
   }
 
@@ -189,6 +193,7 @@ export class CheckInOutRepository {
           overtimeAmount: {
             increment: overtimeAmount,
           },
+          status: BookingStatusValues.COMPLETED,
         },
       });
 
@@ -291,7 +296,7 @@ export class CheckInOutRepository {
       penaltyAmount: verified.booking.penaltyAmount,
       damageAmount: verified.booking.damageAmount,
       overtimeAmount: verified.booking.overtimeAmount,
-      collateral: verified.booking.collateral,
+      collateral: 0,
       deposit: verified.booking.deposit,
     });
     return verified;

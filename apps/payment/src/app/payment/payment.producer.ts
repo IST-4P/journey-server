@@ -14,11 +14,12 @@ export class PaymentProducer {
   }
 
   async cancelPaymentJob(paymentId: string) {
+    console.log('add queue');
     await this.paymentQueue.add(
       CANCEL_PAYMENT_JOB_NAME,
       { paymentId },
       {
-        delay: 1000 * 60 * 60 * 24,
+        delay: 1000 * 60 * 15, // 15 minutes
         jobId: generateCancelPaymentJobId(paymentId),
         removeOnComplete: true,
         removeOnFail: true,
@@ -27,6 +28,7 @@ export class PaymentProducer {
   }
 
   removeJob(paymentId: string) {
+    console.log('remove queue');
     return this.paymentQueue.remove(generateCancelPaymentJobId(paymentId));
   }
 }

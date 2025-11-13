@@ -13,6 +13,7 @@ export const GetManyBookingsRequestSchema = BookingValidatorSchema.pick({
   userId: true,
   vehicleId: true,
   status: true,
+  vehicleName: true,
 })
   .partial()
   .extend(PaginationQuerySchema.shape);
@@ -28,6 +29,7 @@ export const GetManyBookingsResponseSchema = z.object({
 export const CreateBookingRequestSchema = BookingValidatorSchema.pick({
   userId: true,
   vehicleId: true,
+  vehicleName: true,
   startTime: true,
   endTime: true,
 

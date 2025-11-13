@@ -106,8 +106,10 @@ message GetRefundResponse {
 message GetManyRefundsRequest {
   optional string userId = 1;
   optional string status = 2;
-  int32 page = 3;
-  int32 limit = 4;
+  optional string bookingId = 3;
+  optional string rentalId = 4;
+  int32 page = 5;
+  int32 limit = 6;
 }
 
 message GetManyRefundsResponse {

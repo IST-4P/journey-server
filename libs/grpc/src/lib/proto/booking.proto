@@ -39,41 +39,41 @@ message GetBookingResponse {
   string id = 1;
   string userId = 2;
   string vehicleId = 3;
-  string status = 4;
+  string vehicleName = 4;
+  string status = 5;
 
-  string startTime = 5;
-  string endTime = 6;
-  int32 duration = 7;
+  string startTime = 6;
+  string endTime = 7;
+  int32 duration = 8;
 
-  string pickupAddress = 8;
-  double pickupLat = 9;
-  double pickupLng = 10;
+  string pickupAddress = 9;
+  double pickupLat = 10;
+  double pickupLng = 11;
+  int32 vehicleFeeHour = 12;
+  int32 rentalFee = 13;
+  int32 insuranceFee = 14;
+  int32 vat = 15;
+  int32 discount = 16;
+  int32 deposit = 17;
+  int32 collateral = 18;
+  int32 totalAmount = 19;
+  int32 refundAmount = 20;
+  int32 penaltyAmount = 21;
+  int32 damageAmount = 22;
+  int32 overtimeAmount = 23;
 
-  int32 vehicleFeeHour = 11;
-  int32 rentalFee = 12;
-  int32 insuranceFee = 13;
-  int32 vat = 14;
-  int32 discount = 15;
-  int32 deposit = 16;
-  int32 collateral = 17;
-  int32 totalAmount = 18;
-  int32 refundAmount = 19;
-  int32 penaltyAmount = 20;
-  int32 damageAmount = 21;
-  int32 overtimeAmount = 22;
+  string paymentStatus = 24;
+  optional string paidAt = 25;
 
-  string paymentStatus = 23;
-  optional string paidAt = 24;
+  optional string notes = 26;
+  optional string cancelReason = 27;
+  optional string adminNotes = 28;
+  bool damageReported = 29;
 
-  optional string notes = 25;
-  optional string cancelReason = 26;
-  optional string adminNotes = 27;
-  bool damageReported = 28;
-
-  string createdAt = 29;
-  string updatedAt = 30;
-  optional string cancelledAt = 31;
-  optional string expiredAt = 32;
+  string createdAt = 30;
+  string updatedAt = 31;
+  optional string cancelledAt = 32;
+  optional string expiredAt = 33;
 }
 
 // GetManyBookings
@@ -81,8 +81,9 @@ message GetManyBookingsRequest {
   optional string userId = 1;
   optional string vehicleId = 2;
   optional string status = 3;
-  optional int32 page = 4;
-  optional int32 limit = 5;
+  optional string vehicleName = 4;
+  optional int32 page = 5;
+  optional int32 limit = 6;
 }
 
 message GetManyBookingsResponse {
@@ -97,17 +98,18 @@ message GetManyBookingsResponse {
 message CreateBookingRequest {
   string userId = 1;
   string vehicleId = 2;
-  string startTime = 3;
-  string endTime = 4;
+  string vehicleName = 3;
+  string startTime = 4;
+  string endTime = 5;
 
-  string pickupAddress = 5;
-  double pickupLat = 6;
-  double pickupLng = 7;
+  string pickupAddress = 6;
+  double pickupLat = 7;
+  double pickupLng = 8;
 
-  int32 vehicleFeeHour = 8;
-  int32 vehicleFeeDay = 9;
+  int32 vehicleFeeHour = 9;
+  int32 vehicleFeeDay = 10;
 
-  optional string notes = 10;
+  optional string notes = 11;
 }
 
 // CancelBooking

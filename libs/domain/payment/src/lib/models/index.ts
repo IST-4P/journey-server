@@ -79,6 +79,8 @@ export const GetRefundResponseSchema = RefundValidator;
 export const GetManyRefundsRequestSchema = RefundValidator.pick({
   status: true,
   userId: true,
+  bookingId: true,
+  rentalId: true,
 })
   .partial()
   .extend(PaginationQuerySchema.shape);

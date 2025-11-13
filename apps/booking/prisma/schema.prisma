@@ -56,10 +56,11 @@ enum ExtensionStatus {
 // ==================== MAIN MODELS ====================
 
 model Booking {
-    id        String        @id @default(uuid())
-    userId    String        @map("user_id") // Reference to User Service
-    vehicleId String        @map("vehicle_id") // Reference to Vehicle Service
-    status    BookingStatus @default(PENDING)
+    id          String        @id @default(uuid())
+    userId      String        @map("user_id") // Reference to User Service
+    vehicleId   String        @map("vehicle_id") // Reference to Vehicle Service
+    vehicleName String        @map("vehicle_name") // Tên xe tại thời điểm booking
+    status      BookingStatus @default(PENDING)
 
     // Thời gian thuê
     startTime DateTime @map("start_time")

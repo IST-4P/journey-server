@@ -53,7 +53,10 @@ export class GetRefundResponseDTO extends createZodDto(
   GetRefundResponseSchema
 ) {}
 export class GetManyRefundsRequestDTO extends createZodDto(
-  GetManyRefundsRequestSchema
+  GetManyRefundsRequestSchema.extend({
+    bookingId: z.string().optional(),
+    rentalId: z.string().optional(),
+  })
 ) {}
 export class GetManyRefundsResponseDTO extends createZodDto(
   GetManyRefundsResponseSchema

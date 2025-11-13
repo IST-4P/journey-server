@@ -15,9 +15,10 @@ export class PaymentQueue extends WorkerHost {
     switch (job.name) {
       case CANCEL_PAYMENT_JOB_NAME: {
         const { paymentId } = job.data;
-        await this.natsClient.publish('journey.events.booking-expired', {
-          id: paymentId,
-        });
+        // await this.natsClient.publish('journey.events.booking-expired', {
+        //   id: paymentId,
+        // });
+        console.log('cancel: ', paymentId);
         return {};
       }
       default: {

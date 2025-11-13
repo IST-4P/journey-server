@@ -100,6 +100,17 @@ export interface UpdateStatusBookingRequest {
   status: string;
 }
 
+export interface GetInformationBookingRequest {
+}
+
+export interface GetInformationBookingResponse {
+  totalBookings: number;
+  pendingBookings: number;
+  ongoingBookings: number;
+  completedBookings: number;
+  cancelledBookings: number;
+}
+
 /**
  * ======================================================== CheckInOut
  * GetManyCheckInOuts
@@ -294,6 +305,8 @@ export interface BookingServiceClient {
 
   updateStatusBooking(request: UpdateStatusBookingRequest): Observable<GetBookingResponse>;
 
+  getInformationBooking(request: GetInformationBookingRequest): Observable<GetInformationBookingResponse>;
+
   getManyCheckInOuts(request: GetManyCheckInOutsRequest): Observable<GetManyCheckInOutsResponse>;
 
   getCheckInOut(request: GetCheckInOutRequest): Observable<GetCheckInOutResponse>;
@@ -345,6 +358,10 @@ export interface BookingServiceController {
   updateStatusBooking(
     request: UpdateStatusBookingRequest,
   ): Promise<GetBookingResponse> | Observable<GetBookingResponse> | GetBookingResponse;
+
+  getInformationBooking(
+    request: GetInformationBookingRequest,
+  ): Promise<GetInformationBookingResponse> | Observable<GetInformationBookingResponse> | GetInformationBookingResponse;
 
   getManyCheckInOuts(
     request: GetManyCheckInOutsRequest,
@@ -415,6 +432,7 @@ export function BookingServiceControllerMethods() {
       "createBooking",
       "cancelBooking",
       "updateStatusBooking",
+      "getInformationBooking",
       "getManyCheckInOuts",
       "getCheckInOut",
       "checkIn",

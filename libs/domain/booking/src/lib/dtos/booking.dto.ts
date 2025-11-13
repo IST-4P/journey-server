@@ -6,6 +6,7 @@ import {
   CreateBookingRequestSchema,
   GetBookingRequestSchema,
   GetBookingResponseSchema,
+  GetInformationBookingResponseSchema,
   GetManyBookingsRequestSchema,
   GetManyBookingsResponseSchema,
   UpdateStatusBookingRequestSchema,
@@ -36,4 +37,7 @@ export class CancelBookingResponseDTO extends createZodDto(
 ) {}
 export class UpdateStatusBookingRequestDTO extends createZodDto(
   UpdateStatusBookingRequestSchema
+) {}
+export class GetInformationBookingResponseDTO extends createZodDto(
+  GetInformationBookingResponseSchema
 ) {}

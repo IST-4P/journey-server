@@ -57,6 +57,14 @@ export const UpdateStatusBookingRequestSchema = BookingValidatorSchema.pick({
   status: true,
 });
 
+export const GetInformationBookingResponseSchema = z.object({
+  totalBookings: z.number().int(),
+  pendingBookings: z.number().int(),
+  ongoingBookings: z.number().int(),
+  completedBookings: z.number().int(),
+  cancelledBookings: z.number().int(),
+});
+
 export type GetBookingRequest = z.infer<typeof GetBookingRequestSchema>;
 export type GetBookingResponse = z.infer<typeof GetBookingResponseSchema>;
 export type GetManyBookingsRequest = z.infer<
@@ -70,4 +78,7 @@ export type CancelBookingRequest = z.infer<typeof CancelBookingRequestSchema>;
 export type CancelBookingResponse = z.infer<typeof CancelBookingResponseSchema>;
 export type UpdateStatusBookingRequest = z.infer<
   typeof UpdateStatusBookingRequestSchema
+>;
+export type GetInformationBookingResponse = z.infer<
+  typeof GetInformationBookingResponseSchema
 >;

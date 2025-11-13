@@ -8,6 +8,7 @@ service BookingService {
   rpc CreateBooking(CreateBookingRequest) returns (GetBookingResponse);
   rpc CancelBooking(CancelBookingRequest) returns (GetBookingResponse);
   rpc UpdateStatusBooking(UpdateStatusBookingRequest) returns (GetBookingResponse);
+  rpc GetInformationBooking(GetInformationBookingRequest) returns (GetInformationBookingResponse);
 
   rpc GetManyCheckInOuts(GetManyCheckInOutsRequest) returns (GetManyCheckInOutsResponse);
   rpc GetCheckInOut(GetCheckInOutRequest) returns (GetCheckInOutResponse);
@@ -122,6 +123,16 @@ message CancelBookingRequest {
 message UpdateStatusBookingRequest {
   string id = 1;
   string status = 2;
+}
+
+message GetInformationBookingRequest {}
+
+message GetInformationBookingResponse {
+  int32 totalBookings = 1;
+  int32 pendingBookings = 2;
+  int32 ongoingBookings = 3;
+  int32 completedBookings = 4;
+  int32 cancelledBookings = 5;
 }
 
 // ======================================================== CheckInOut

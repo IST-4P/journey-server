@@ -41,4 +41,8 @@ export class BookingService {
   async updateStatusBooking(data: UpdateStatusBookingRequest) {
     return this.bookingRepository.updateStatusBooking(data);
   }
+
+  async getInformationBooking() {
+    return this.bookingRepository.getInformationBooking();
+  }
 }

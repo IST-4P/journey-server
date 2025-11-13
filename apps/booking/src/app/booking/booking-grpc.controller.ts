@@ -3,6 +3,7 @@ import {
   CreateBookingRequest,
   GetBookingRequest,
   GetBookingResponse,
+  GetInformationBookingResponse,
   GetManyBookingsRequest,
   GetManyBookingsResponse,
   UpdateStatusBookingRequest,
@@ -42,5 +43,10 @@ export class BookingGrpcController {
     data: UpdateStatusBookingRequest
   ): Promise<GetBookingResponse> {
     return this.bookingService.updateStatusBooking(data);
+  }
+
+  @GrpcMethod('BookingService', 'GetInformationBooking')
+  getInformationBooking(): Promise<GetInformationBookingResponse> {
+    return this.bookingService.getInformationBooking();
   }
 }

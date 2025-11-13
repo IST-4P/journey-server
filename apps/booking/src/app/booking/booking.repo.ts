@@ -348,11 +348,14 @@ export class BookingRepository {
     }, {} as Record<BookingStatus, number>);
 
     return {
-      all: Object.values(statusCounts).reduce((sum, count) => sum + count, 0),
-      pending: statusCounts['PENDING'] || 0,
-      ongoing: statusCounts['ONGOING'] || 0,
-      completed: statusCounts['COMPLETED'] || 0,
-      cancelled: statusCounts['CANCELLED'] || 0,
+      totalBookings: Object.values(statusCounts).reduce(
+        (sum, count) => sum + count,
+        0
+      ),
+      pendingBookings: statusCounts['PENDING'] || 0,
+      ongoingBookings: statusCounts['ONGOING'] || 0,
+      completedBookings: statusCounts['COMPLETED'] || 0,
+      cancelledBookings: statusCounts['CANCELLED'] || 0,
     };
   }
 }

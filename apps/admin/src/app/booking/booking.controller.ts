@@ -27,6 +27,12 @@ export class BookingController {
     return this.bookingService.getManyBookings(query);
   }
 
+  @Get('information')
+  @Auth([AuthType.Admin])
+  getInformationBooking() {
+    return this.bookingService.getInformationBooking();
+  }
+
   @Get(':id')
   @Auth([AuthType.Admin])
   getBooking(@Param() params: Omit<GetBookingRequestDTO, 'userId'>) {

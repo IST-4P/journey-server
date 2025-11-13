@@ -1,4 +1,5 @@
 import {
+  BookingStatus,
   BookingStatusValues,
   CancelBookingRequest,
   CreateBookingRequest,
@@ -331,5 +332,27 @@ export class BookingRepository {
         vehicleActive$,
       ]);
     });
+  }
+
+  async getInformationBooking() {
+    const statusGroups = await this.prismaService.booking.groupBy({
+      by: ['status'],
+      _count: {
+        id: true,
+      },
+    });
+
+    const statusCounts = statusGroups.reduce((acc, item) => {
+      acc[item.status] = item._count.id;
+      return acc;
+    }, {} as Record<BookingStatus, number>);
+
+    return {
+      all: Object.values(statusCounts).reduce((sum, count) => sum + count, 0),
+      pending: statusCounts['PENDING'] || 0,
+      ongoing: statusCounts['ONGOING'] || 0,
+      completed: statusCounts['COMPLETED'] || 0,
+      cancelled: statusCounts['CANCELLED'] || 0,
+    };
   }
 }

@@ -20,10 +20,10 @@ export class DeviceController {
     return this.deviceService.getManyDevices(query);
   }
 
-  @Get(':id')
+  @Get(':deviceId')
   @IsPublic()
-  getDevice(@Param() query: GetDeviceRequestDTO) {
-    return this.deviceService.getDevice(query);
+  getDevice(@Param() params: GetDeviceRequestDTO) {
+    return this.deviceService.getDevice(params);
   }
 }
 

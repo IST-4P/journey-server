@@ -29,6 +29,10 @@ export interface GetChatsRequest {
 
 export interface GetChatsResponse {
   chats: Chat[];
+  page: number;
+  limit: number;
+  totalItems: number;
+  totalPages: number;
 }
 
 /** CreateChat */

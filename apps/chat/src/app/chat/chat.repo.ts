@@ -1,5 +1,6 @@
 import { CreateChatRequest, GetChatsRequest } from '@domain/chat';
 import { Injectable } from '@nestjs/common';
+import { Prisma } from '@prisma-clients/chat';
 import { PrismaService } from '../prisma/prisma.service';
 
 @Injectable()
@@ -51,30 +52,42 @@ export class ChatRepository {
   //   return conversations;
   // }
 
-  getChats(data: GetChatsRequest) {
+  async getChats(data: GetChatsRequest) {
     const skip = (data.page - 1) * data.limit;
     const take = data.limit;
-    return this.prismaService.chat.findMany({
-      where: {
-        OR: [
-          // Trường hợp 1: Tin nhắn từ người dùng hiện tại gửi cho người kia.
-          {
-            fromUserId: data.fromUserId,
-            toUserId: data.toUserId,
-          },
-          // Trường hợp 2: Tin nhắn từ người kia gửi cho người dùng hiện tại.
-          {
-            fromUserId: data.toUserId,
-            toUserId: data.fromUserId,
-          },
-        ],
-      },
-      skip,
-      take,
-      orderBy: {
-        createdAt: 'desc',
-      },
-    });
+    const where: Prisma.ChatWhereInput = {
+      OR: [
+        // Trường hợp 1: Tin nhắn từ người dùng hiện tại gửi cho người kia.
+        {
+          fromUserId: data.fromUserId,
+          toUserId: data.toUserId,
+        },
+        // Trường hợp 2: Tin nhắn từ người kia gửi cho người dùng hiện tại.
+        {
+          fromUserId: data.toUserId,
+          toUserId: data.fromUserId,
+        },
+      ],
+    };
+    const [totalItems, chats] = await Promise.all([
+      this.prismaService.chat.count({ where }),
+      this.prismaService.chat.findMany({
+        where,
+        skip,
+        take,
+        orderBy: {
+          createdAt: 'desc',
+        },
+      }),
+    ]);
+
+    return {
+      chats,
+      page: data.page,
+      limit: data.limit,
+      totalItems,
+      totalPages: Math.ceil(totalItems / data.limit),
+    };
   }
 
   createChat(data: CreateChatRequest) {

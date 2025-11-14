@@ -7,8 +7,7 @@ export class ChatService {
   constructor(private readonly chatRepository: ChatRepository) {}
 
   async getChats(data: GetChatsRequest) {
-    const chats = await this.chatRepository.getChats(data);
-    return { chats };
+    return this.chatRepository.getChats(data);
   }
 
   createChat(data: CreateChatRequest) {

@@ -65,6 +65,85 @@ export interface GetManyConversationsResponse {
   totalPages: number;
 }
 
+/** Complaint */
+export interface Complaint {
+  id: string;
+  userId: string;
+  title: string;
+  status: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+/** GetManyComplaints */
+export interface GetManyComplaintsRequest {
+  status?: string | undefined;
+  page: number;
+  limit: number;
+}
+
+export interface GetManyComplaintsResponse {
+  complaints: Complaint[];
+  page: number;
+  limit: number;
+  totalItems: number;
+  totalPages: number;
+}
+
+/** CreateComplaint */
+export interface CreateComplaintRequest {
+  userId: string;
+  title: string;
+}
+
+export interface GetComplaintResponse {
+  id: string;
+  userId: string;
+  title: string;
+  status: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+/** UpdateComplaintStatus */
+export interface UpdateComplaintStatusRequest {
+  id: string;
+  status: string;
+}
+
+/** ComplaintMessage */
+export interface ComplaintMessage {
+  id: string;
+  complaintId: string;
+  senderId: string;
+  messageType: string;
+  content: string;
+  createdAt: string;
+}
+
+/** GetManyComplaintMessages */
+export interface GetManyComplaintMessagesRequest {
+  complaintId: string;
+  page: number;
+  limit: number;
+}
+
+export interface GetManyComplaintMessagesResponse {
+  complaintMessages: ComplaintMessage[];
+  page: number;
+  limit: number;
+  totalItems: number;
+  totalPages: number;
+}
+
+/** CreateComplaintMessage */
+export interface CreateComplaintMessageRequest {
+  complaintId: string;
+  senderId: string;
+  messageType: string;
+  content: string;
+}
+
 export const CHAT_PACKAGE_NAME = "chat";
 
 export interface ChatServiceClient {
@@ -73,6 +152,16 @@ export interface ChatServiceClient {
   createChat(request: CreateChatRequest): Observable<CreateChatResponse>;
 
   getManyConversations(request: GetManyConversationsRequest): Observable<GetManyConversationsResponse>;
+
+  getManyComplaints(request: GetManyComplaintsRequest): Observable<GetManyComplaintsResponse>;
+
+  createComplaint(request: CreateComplaintRequest): Observable<GetComplaintResponse>;
+
+  updateComplaintStatus(request: UpdateComplaintStatusRequest): Observable<GetComplaintResponse>;
+
+  getManyComplaintMessages(request: GetManyComplaintMessagesRequest): Observable<GetManyComplaintMessagesResponse>;
+
+  createComplaintMessage(request: CreateComplaintMessageRequest): Observable<ComplaintMessage>;
 }
 
 export interface ChatServiceController {
@@ -85,11 +174,43 @@ export interface ChatServiceController {
   getManyConversations(
     request: GetManyConversationsRequest,
   ): Promise<GetManyConversationsResponse> | Observable<GetManyConversationsResponse> | GetManyConversationsResponse;
+
+  getManyComplaints(
+    request: GetManyComplaintsRequest,
+  ): Promise<GetManyComplaintsResponse> | Observable<GetManyComplaintsResponse> | GetManyComplaintsResponse;
+
+  createComplaint(
+    request: CreateComplaintRequest,
+  ): Promise<GetComplaintResponse> | Observable<GetComplaintResponse> | GetComplaintResponse;
+
+  updateComplaintStatus(
+    request: UpdateComplaintStatusRequest,
+  ): Promise<GetComplaintResponse> | Observable<GetComplaintResponse> | GetComplaintResponse;
+
+  getManyComplaintMessages(
+    request: GetManyComplaintMessagesRequest,
+  ):
+    | Promise<GetManyComplaintMessagesResponse>
+    | Observable<GetManyComplaintMessagesResponse>
+    | GetManyComplaintMessagesResponse;
+
+  createComplaintMessage(
+    request: CreateComplaintMessageRequest,
+  ): Promise<ComplaintMessage> | Observable<ComplaintMessage> | ComplaintMessage;
 }
 
 export function ChatServiceControllerMethods() {
   return function (constructor: Function) {
-    const grpcMethods: string[] = ["getChats", "createChat", "getManyConversations"];
+    const grpcMethods: string[] = [
+      "getChats",
+      "createChat",
+      "getManyConversations",
+      "getManyComplaints",
+      "createComplaint",
+      "updateComplaintStatus",
+      "getManyComplaintMessages",
+      "createComplaintMessage",
+    ];
     for (const method of grpcMethods) {
       const descriptor: any = Reflect.getOwnPropertyDescriptor(constructor.prototype, method);
       GrpcMethod("ChatService", method)(constructor.prototype[method], method, descriptor);

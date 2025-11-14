@@ -60,4 +60,10 @@ export class ChatService implements OnModuleInit {
   ): Promise<ChatProto.GetManyConversationsResponse> {
     return lastValueFrom(this.chatService.getManyConversations(data));
   }
+
+  updateComplaintStatus(
+    data: ChatProto.UpdateComplaintStatusRequest
+  ): Promise<ChatProto.GetComplaintResponse> {
+    return lastValueFrom(this.chatService.updateComplaintStatus(data));
+  }
 }

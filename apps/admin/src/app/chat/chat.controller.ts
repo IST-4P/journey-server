@@ -2,9 +2,10 @@ import {
   CreateChatRequestDTO,
   GetChatsRequestDTO,
   GetManyConversationsRequestDTO,
+  UpdateComplaintStatusRequestDTO,
 } from '@domain/chat';
 import { ActiveUser } from '@hacmieu-journey/nestjs';
-import { Body, Controller, Get, Post, Query } from '@nestjs/common';
+import { Body, Controller, Get, Post, Put, Query } from '@nestjs/common';
 import { ChatService } from './chat.service';
 
 @Controller('chat')
@@ -32,5 +33,16 @@ export class ChatController {
   @Post()
   getChat(@Body() body: CreateChatRequestDTO) {
     return this.chatService.createChat(body);
+  }
+}
+
+@Controller('complaint')
+export class ComplaintController {
+  // private readonly logger = new Logger(ComplaintController.name);
+  constructor(private readonly chatService: ChatService) {}
+
+  @Put()
+  updateComplaintStatus(@Body() body: UpdateComplaintStatusRequestDTO) {
+    return this.chatService.updateComplaintStatus(body);
   }
 }

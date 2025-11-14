@@ -39,6 +39,10 @@ export interface GetManyNotificationsRequest {
 
 export interface GetManyNotificationsResponse {
   notifications: GetNotificationResponse[];
+  page: number;
+  limit: number;
+  totalItems: number;
+  totalPages: number;
 }
 
 /** CreateNotification */

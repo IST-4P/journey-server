@@ -4,6 +4,10 @@ import {
   GetManyConversationsRequest,
 } from '@domain/chat';
 import { Injectable } from '@nestjs/common';
+import {
+  ChatsNotFoundException,
+  ConversationsNotFoundException,
+} from './chat.error';
 import { ChatRepository } from './chat.repo';
 
 @Injectable()
@@ -11,7 +15,11 @@ export class ChatService {
   constructor(private readonly chatRepository: ChatRepository) {}
 
   async getChats(data: GetChatsRequest) {
-    return this.chatRepository.getChats(data);
+    const chats = await this.chatRepository.getChats(data);
+    if (chats.chats.length === 0) {
+      throw ChatsNotFoundException;
+    }
+    return chats;
   }
 
   createChat(data: CreateChatRequest) {
@@ -19,6 +27,10 @@ export class ChatService {
   }
 
   async getManyConversations(data: GetManyConversationsRequest) {
-    return this.chatRepository.getManyConversations(data);
+    const conversations = await this.chatRepository.getManyConversations(data);
+    if (conversations.conversations.length === 0) {
+      throw ConversationsNotFoundException;
+    }
+    return conversations;
   }
 }

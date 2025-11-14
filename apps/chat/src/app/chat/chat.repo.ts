@@ -127,8 +127,8 @@ export class ChatRepository {
             createdAt: 'desc',
           },
         },
-        skip: skip,
-        take: take,
+        skip,
+        take,
       }),
     ]);
 

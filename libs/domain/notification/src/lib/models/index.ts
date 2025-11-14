@@ -13,10 +13,15 @@ export const GetManyNotificationsResponseSchema = z.object({
       id: true,
       title: true,
       type: true,
+      content: true,
       read: true,
       createdAt: true,
     })
   ),
+  page: z.number(),
+  limit: z.number(),
+  totalItems: z.number(),
+  totalPages: z.number(),
 });
 
 export const GetNotificationRequestSchema = NotificationValidatorSchema.pick({

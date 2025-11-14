@@ -15,23 +15,37 @@ export class NotificationRepository {
     private readonly natsClient: NatsClient
   ) {}
 
-  getManyNotifications(data: GetManyNotificationsRequest) {
+  async getManyNotifications(data: GetManyNotificationsRequest) {
     const skip = (data.page - 1) * data.limit;
     const take = data.limit;
 
-    return this.prisma.notification.findMany({
-      where: { userId: data.userId },
-      select: {
-        id: true,
-        title: true,
-        type: true,
-        read: true,
-        createdAt: true,
-      },
-      orderBy: { createdAt: 'desc' },
-      skip,
-      take,
-    });
+    const [totalItems, notifications] = await Promise.all([
+      this.prisma.notification.count({
+        where: { userId: data.userId },
+      }),
+      this.prisma.notification.findMany({
+        where: { userId: data.userId },
+        select: {
+          id: true,
+          title: true,
+          type: true,
+          content: true,
+          read: true,
+          createdAt: true,
+        },
+        orderBy: { createdAt: 'desc' },
+        skip,
+        take,
+      }),
+    ]);
+
+    return {
+      notifications,
+      page: data.page,
+      limit: data.limit,
+      totalItems,
+      totalPages: Math.ceil(totalItems / data.limit),
+    };
   }
 
   getNotificationById({ id, userId }: Prisma.NotificationWhereUniqueInput) {

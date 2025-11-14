@@ -65,6 +65,19 @@ export interface DeleteNotificationRequest {
   userId: string;
 }
 
+/** BroadcastNotification */
+export interface BroadcastNotificationRequest {
+  userIds: string[];
+  type: string;
+  title: string;
+  content: string;
+}
+
+export interface BroadcastNotificationResponse {
+  totalCreated: number;
+  message: string;
+}
+
 export const NOTIFICATION_PACKAGE_NAME = "notification";
 
 export interface NotificationServiceClient {
@@ -77,6 +90,8 @@ export interface NotificationServiceClient {
   markAsReadNotifications(request: MarkAsReadRequest): Observable<MessageResponse>;
 
   deleteNotification(request: DeleteNotificationRequest): Observable<MessageResponse>;
+
+  broadcastNotification(request: BroadcastNotificationRequest): Observable<BroadcastNotificationResponse>;
 }
 
 export interface NotificationServiceController {
@@ -99,6 +114,10 @@ export interface NotificationServiceController {
   deleteNotification(
     request: DeleteNotificationRequest,
   ): Promise<MessageResponse> | Observable<MessageResponse> | MessageResponse;
+
+  broadcastNotification(
+    request: BroadcastNotificationRequest,
+  ): Promise<BroadcastNotificationResponse> | Observable<BroadcastNotificationResponse> | BroadcastNotificationResponse;
 }
 
 export function NotificationServiceControllerMethods() {
@@ -109,6 +128,7 @@ export function NotificationServiceControllerMethods() {
       "createNotification",
       "markAsReadNotifications",
       "deleteNotification",
+      "broadcastNotification",
     ];
     for (const method of grpcMethods) {
       const descriptor: any = Reflect.getOwnPropertyDescriptor(constructor.prototype, method);

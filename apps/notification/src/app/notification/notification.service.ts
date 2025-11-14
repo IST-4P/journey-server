@@ -1,4 +1,5 @@
 import {
+  BroadcastNotificationRequest,
   CreateNotificationRequest,
   DeleteNotificationRequest,
   GetManyNotificationsRequest,
@@ -81,5 +82,9 @@ export class NotificationService {
     return {
       message: 'Message.DeleteNotificationSuccessfully',
     };
+  }
+
+  broadcastNotification(data: BroadcastNotificationRequest) {
+    return this.notificationRepo.broadcastNotification(data);
   }
 }

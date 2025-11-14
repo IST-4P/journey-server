@@ -39,6 +39,10 @@ export const GetAllProfilesResponseSchema = z.object({
   totalPages: z.number().int(),
 });
 
+export const GetAllUserIdsResponseSchema = z.object({
+  userIds: z.array(z.string().uuid()),
+});
+
 export type GetProfileRequest = z.infer<typeof GetProfileRequestSchema>;
 export type GetProfileResponse = z.infer<typeof GetProfileResponseSchema>;
 export type UpdateProfileRequest = z.infer<typeof UpdateProfileRequestSchema>;
@@ -46,3 +50,4 @@ export type GetAllProfilesRequest = z.infer<typeof GetAllProfilesRequestSchema>;
 export type GetAllProfilesResponse = z.infer<
   typeof GetAllProfilesResponseSchema
 >;
+export type GetAllUserIdsResponse = z.infer<typeof GetAllUserIdsResponseSchema>;

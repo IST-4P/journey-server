@@ -7,10 +7,10 @@ import {
 import { Server, Socket } from 'socket.io';
 
 export interface NotificationType {
+  id: string;
   userId: string;
   title: string;
   type: string;
-  createdAt: string;
 }
 
 @WebSocketGateway({ namespace: 'notification' })

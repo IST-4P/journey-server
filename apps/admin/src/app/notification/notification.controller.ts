@@ -1,4 +1,5 @@
 import {
+  BroadcastNotificationDTO,
   CreateNotificationRequestDTO,
   DeleteNotificationRequestDTO,
   GetManyNotificationsRequestDTO,
@@ -21,6 +22,16 @@ export class NotificationController {
   @Get('list')
   getManyNotifications(@Query() query: GetManyNotificationsRequestDTO) {
     return this.notificationService.getManyNotifications(query);
+  }
+
+  @Post('broadcast')
+  broadcastNotification(
+    @Body() body: Omit<BroadcastNotificationDTO, 'userIds'>
+  ) {
+    return this.notificationService.broadcastNotification({
+      ...body,
+      userIds: [],
+    });
   }
 
   @Post()

@@ -8,6 +8,7 @@ service NotificationService {
   rpc CreateNotification(CreateNotificationRequest) returns (GetNotificationResponse);
   rpc MarkAsReadNotifications(MarkAsReadRequest) returns (MessageResponse);
   rpc DeleteNotification(DeleteNotificationRequest) returns (MessageResponse);
+  rpc BroadcastNotification(BroadcastNotificationRequest) returns (BroadcastNotificationResponse);
 }
 
 // GetNotification
@@ -63,4 +64,17 @@ message MessageResponse {
 message DeleteNotificationRequest {
   string id = 1;
   string userId = 2;
+}
+
+// BroadcastNotification
+message BroadcastNotificationRequest {
+  repeated string userIds = 1;
+  string type = 2;
+  string title = 3;
+  string content = 4;
+}
+
+message BroadcastNotificationResponse {
+  int32 totalCreated = 1;
+  string message = 2;
 }

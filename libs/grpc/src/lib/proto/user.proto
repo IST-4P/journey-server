@@ -6,6 +6,7 @@ service UserService {
   rpc GetProfile(GetProfileRequest) returns (GetProfileResponse);
   rpc FindAllProfiles(FindAllProfilesRequest) returns (FindAllProfilesResponse);
   rpc UpdateProfile(UpdateProfileRequest) returns (GetProfileResponse);
+  rpc GetAllUserIds(GetAllUserIdsRequest) returns (GetAllUserIdsResponse);
 
   rpc GetDriverLicense(GetDriverLicenseRequest) returns (GetDriverLicenseResponse);
   rpc CreateDriverLicense(CreateDriverLicenseRequest) returns (GetDriverLicenseResponse);
@@ -76,6 +77,12 @@ message UpdateProfileRequest {
   optional string birthDate = 7;
   optional string gender = 8;
   optional string email = 9;
+}
+
+message GetAllUserIdsRequest {}
+
+message GetAllUserIdsResponse {
+  repeated string userIds = 1;
 }
 
 // GetDriverLicense

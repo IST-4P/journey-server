@@ -8,7 +8,6 @@ interface DataEvent {
   userId: string;
   title: string;
   type: string;
-  createdAt: string;
 }
 
 @Injectable()

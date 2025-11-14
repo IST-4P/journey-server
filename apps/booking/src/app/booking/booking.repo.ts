@@ -20,9 +20,11 @@ import { ConfigService } from '@nestjs/config';
 import { ExtensionNotFoundException } from '../extension/extension.error';
 import { PrismaService } from '../prisma/prisma.service';
 import {
+  BookingAlreadyCancelledException,
   BookingCannotCancelLessThan5DaysException,
   BookingCannotCancelWithCheckInsException,
   BookingNotFoundException,
+  BookingNotPaidException,
 } from './booking.error';
 
 @Injectable()
@@ -179,6 +181,14 @@ export class BookingRepository {
       }
       if (booking.checkIns.length > 0) {
         throw BookingCannotCancelWithCheckInsException;
+      }
+
+      if (booking.status === BookingStatusValues.CANCELLED) {
+        throw BookingAlreadyCancelledException;
+      }
+
+      if (booking.status === BookingStatusValues.DEPOSIT_PAID) {
+        throw BookingNotPaidException;
       }
 
       const refundPercentage = calculateRefundPercentage(

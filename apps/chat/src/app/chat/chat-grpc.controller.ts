@@ -3,6 +3,8 @@ import {
   GetChatResponse,
   GetChatsRequest,
   GetChatsResponse,
+  GetManyConversationsRequest,
+  GetManyConversationsResponse,
 } from '@domain/chat';
 import { Controller } from '@nestjs/common';
 import { GrpcMethod } from '@nestjs/microservices';
@@ -20,5 +22,12 @@ export class ChatGrpcController {
   @GrpcMethod('ChatService', 'CreateChat')
   createChat(data: CreateChatRequest): Promise<GetChatResponse> {
     return this.chatService.createChat(data);
+  }
+
+  @GrpcMethod('ChatService', 'GetManyConversations')
+  getManyConversations(
+    data: GetManyConversationsRequest
+  ): Promise<GetManyConversationsResponse> {
+    return this.chatService.getManyConversations(data);
   }
 }

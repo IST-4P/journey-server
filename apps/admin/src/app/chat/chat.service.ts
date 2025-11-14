@@ -54,4 +54,10 @@ export class ChatService implements OnModuleInit {
     }
     return chat;
   }
+
+  getManyConversations(
+    data: ChatProto.GetManyConversationsRequest
+  ): Promise<ChatProto.GetManyConversationsResponse> {
+    return lastValueFrom(this.chatService.getManyConversations(data));
+  }
 }

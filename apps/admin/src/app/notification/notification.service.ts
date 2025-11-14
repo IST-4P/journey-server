@@ -28,18 +28,6 @@ export class NotificationService implements OnModuleInit {
     );
   }
 
-  getNotification(
-    data: NotificationProto.GetNotificationRequest
-  ): Promise<NotificationProto.GetNotificationResponse> {
-    return lastValueFrom(this.notificationService.getNotification(data));
-  }
-
-  getManyNotifications(
-    data: NotificationProto.GetManyNotificationsRequest
-  ): Promise<NotificationProto.GetManyNotificationsResponse> {
-    return lastValueFrom(this.notificationService.getManyNotifications(data));
-  }
-
   async createNotification(
     data: NotificationProto.CreateNotificationRequest
   ): Promise<NotificationProto.GetNotificationResponse> {
@@ -74,12 +62,6 @@ export class NotificationService implements OnModuleInit {
     }
 
     return notification;
-  }
-
-  deleteNotification(
-    data: NotificationProto.DeleteNotificationRequest
-  ): Promise<NotificationProto.MessageResponse> {
-    return lastValueFrom(this.notificationService.deleteNotification(data));
   }
 
   async broadcastNotification(

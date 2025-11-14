@@ -1,4 +1,8 @@
-import { CreateChatRequest, GetChatsRequest } from '@domain/chat';
+import {
+  CreateChatRequest,
+  GetChatsRequest,
+  GetManyConversationsRequest,
+} from '@domain/chat';
 import { Injectable } from '@nestjs/common';
 import { Prisma } from '@prisma-clients/chat';
 import { PrismaService } from '../prisma/prisma.service';
@@ -98,5 +102,42 @@ export class ChatRepository {
         toUserId: data.toUserId,
       },
     });
+  }
+
+  async getManyConversations(data: GetManyConversationsRequest) {
+    const skip = (data.page - 1) * data.limit;
+    const take = data.limit;
+
+    const [totalItems, conversations] = await Promise.all([
+      this.prismaService.chat.findMany({
+        where: { toUserId: data.adminId },
+        distinct: ['fromUserId'],
+        select: { fromUserId: true },
+      }),
+      this.prismaService.chat.groupBy({
+        by: ['fromUserId'],
+        where: {
+          toUserId: data.adminId,
+        },
+        _max: {
+          createdAt: true,
+        },
+        orderBy: {
+          _max: {
+            createdAt: 'desc',
+          },
+        },
+        skip: skip,
+        take: take,
+      }),
+    ]);
+
+    return {
+      conversations: conversations.map((user) => user.fromUserId),
+      page: data.page,
+      limit: data.limit,
+      totalItems: totalItems.length,
+      totalPages: Math.ceil(totalItems.length / data.limit),
+    };
   }
 }

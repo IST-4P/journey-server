@@ -1,4 +1,8 @@
-import { CreateChatRequest, GetChatsRequest } from '@domain/chat';
+import {
+  CreateChatRequest,
+  GetChatsRequest,
+  GetManyConversationsRequest,
+} from '@domain/chat';
 import { Injectable } from '@nestjs/common';
 import { ChatRepository } from './chat.repo';
 
@@ -12,5 +16,9 @@ export class ChatService {
 
   createChat(data: CreateChatRequest) {
     return this.chatRepository.createChat(data);
+  }
+
+  async getManyConversations(data: GetManyConversationsRequest) {
+    return this.chatRepository.getManyConversations(data);
   }
 }

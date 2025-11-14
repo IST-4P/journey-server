@@ -1,4 +1,9 @@
-import { CreateChatRequestDTO, GetChatsRequestDTO } from '@domain/chat';
+import {
+  CreateChatRequestDTO,
+  GetChatsRequestDTO,
+  GetManyConversationsRequestDTO,
+} from '@domain/chat';
+import { ActiveUser } from '@hacmieu-journey/nestjs';
 import { Body, Controller, Get, Post, Query } from '@nestjs/common';
 import { ChatService } from './chat.service';
 
@@ -8,9 +13,20 @@ export class ChatController {
 
   constructor(private readonly chatService: ChatService) {}
 
+  @Get('conversations')
+  getManyConversations(
+    @Query() query: Omit<GetManyConversationsRequestDTO, 'adminId'>,
+    @ActiveUser('userId') adminId: string
+  ) {
+    return this.chatService.getManyConversations({ ...query, adminId });
+  }
+
   @Get()
-  getManyChats(@Query() query: GetChatsRequestDTO) {
-    return this.chatService.getChats(query);
+  getManyChats(
+    @Query() query: GetChatsRequestDTO,
+    @ActiveUser('userId') adminId: string
+  ) {
+    return this.chatService.getChats({ ...query, fromUserId: adminId });
   }
 
   @Post()

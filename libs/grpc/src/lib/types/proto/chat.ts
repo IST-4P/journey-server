@@ -50,12 +50,29 @@ export interface CreateChatResponse {
   createdAt: string;
 }
 
+/** GetManyConversations */
+export interface GetManyConversationsRequest {
+  adminId: string;
+  page: number;
+  limit: number;
+}
+
+export interface GetManyConversationsResponse {
+  conversations: string[];
+  page: number;
+  limit: number;
+  totalItems: number;
+  totalPages: number;
+}
+
 export const CHAT_PACKAGE_NAME = "chat";
 
 export interface ChatServiceClient {
   getChats(request: GetChatsRequest): Observable<GetChatsResponse>;
 
   createChat(request: CreateChatRequest): Observable<CreateChatResponse>;
+
+  getManyConversations(request: GetManyConversationsRequest): Observable<GetManyConversationsResponse>;
 }
 
 export interface ChatServiceController {
@@ -64,11 +81,15 @@ export interface ChatServiceController {
   createChat(
     request: CreateChatRequest,
   ): Promise<CreateChatResponse> | Observable<CreateChatResponse> | CreateChatResponse;
+
+  getManyConversations(
+    request: GetManyConversationsRequest,
+  ): Promise<GetManyConversationsResponse> | Observable<GetManyConversationsResponse> | GetManyConversationsResponse;
 }
 
 export function ChatServiceControllerMethods() {
   return function (constructor: Function) {
-    const grpcMethods: string[] = ["getChats", "createChat"];
+    const grpcMethods: string[] = ["getChats", "createChat", "getManyConversations"];
     for (const method of grpcMethods) {
       const descriptor: any = Reflect.getOwnPropertyDescriptor(constructor.prototype, method);
       GrpcMethod("ChatService", method)(constructor.prototype[method], method, descriptor);

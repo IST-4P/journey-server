@@ -18,8 +18,17 @@ async function bootstrap() {
   const app = await NestFactory.create(AppModule);
   app.useGlobalFilters(new GrpcExceptionFilter(), new HttpExceptionFilter());
   app.enableCors({
-    origin: true,
+    origin: [
+      'http://localhost:3000',
+      'http://localhost:5500',
+      'http://127.0.0.1:5500',
+      'https://journey.hacmieu.xyz',
+      /^https?:\/\/.*\.hacmieu\.xyz$/, // Allow all subdomains
+    ],
     credentials: true,
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
+    allowedHeaders: ['Content-Type', 'Authorization', 'Cookie'],
+    exposedHeaders: ['Set-Cookie'],
   });
   patchNestJsSwagger();
   const config = new DocumentBuilder()

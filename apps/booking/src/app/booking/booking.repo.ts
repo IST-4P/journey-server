@@ -339,7 +339,7 @@ export class BookingRepository {
       const paymentFailed$ = this.natsClient.publish(
         'journey.events.payment-expired',
         {
-          id: booking.id,
+          id: data.id,
         }
       );
 

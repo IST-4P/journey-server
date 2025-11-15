@@ -18,7 +18,7 @@ export class PaymentQueue extends WorkerHost {
         await this.natsClient.publish('journey.events.booking-expired', {
           id: paymentId,
         });
-        // console.log('cancel: ', paymentId);
+        console.log('cancel: ', paymentId);
         return {};
       }
       default: {

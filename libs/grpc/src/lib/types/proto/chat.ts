@@ -78,6 +78,7 @@ export interface Complaint {
 /** GetManyComplaints */
 export interface GetManyComplaintsRequest {
   status?: string | undefined;
+  userId?: string | undefined;
   page: number;
   limit: number;
 }

@@ -29,6 +29,7 @@ export class PaymentExpiredConsumer
   }
 
   protected async onMessage(event: PaymentExpiredEvent): Promise<void> {
+    console.log('Payment Expired: ', event.id);
     return this.paymentRepository.updatePaymentStatus({
       id: event.id,
       status: PaymentStatusValues.FAILED,

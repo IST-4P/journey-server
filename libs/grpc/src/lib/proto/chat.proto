@@ -82,8 +82,9 @@ message Complaint {
 // GetManyComplaints
 message GetManyComplaintsRequest {
   optional string status = 1;
-  int32 page = 2;
-  int32 limit = 3;
+  optional string userId = 2;
+  int32 page = 3;
+  int32 limit = 4;
 }
 
 message GetManyComplaintsResponse {

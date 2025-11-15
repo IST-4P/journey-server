@@ -58,7 +58,13 @@ export class AuthController {
       maxAge: 24 * 60 * 60 * 1000, // 1 ngày
     });
 
-    return { message: 'Message.LoginSuccessfully' };
+    return {
+      message: 'Message.LoginSuccessfully',
+      data: {
+        accessToken: tokens.accessToken,
+        refreshToken: tokens.refreshToken,
+      },
+    };
   }
 
   @IsPublic()

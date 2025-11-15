@@ -33,6 +33,10 @@ namespace rental.Nats
                     "journey.events.rental.cancelled",
                     "journey.events.review.created",
                     "journey.events.payment-extension",
+                    "journey.events.rental-paid",
+                    "journey.events.rental-expired",
+                    "journey.events.rental-extension",
+                    "journey.events.rental-quantity-change",
                     "journey.events.debug.device",
                     "journey.events.debug.rental",
                     "journey.events.debug.review" }

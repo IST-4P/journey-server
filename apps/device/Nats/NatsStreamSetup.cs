@@ -32,6 +32,7 @@ namespace device.Nats
                     "journey.events.device.reserved",
                     "journey.events.device.active",
                     "journey.events.payment-extension",
+                    "journey.events.rental-quantity-change",
                     "journey.events.debug.device",
                     "journey.events.debug.rental",
                     "journey.events.debug.review" }

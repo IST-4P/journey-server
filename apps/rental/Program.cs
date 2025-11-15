@@ -2,6 +2,7 @@ using rental.Data;
 using rental.Repository;
 using rental.Service;
 using rental.Nats;
+using rental.Nats.Consumers;
 using Microsoft.EntityFrameworkCore;
 using System.Text.RegularExpressions;
 using Grpc.Net.Client;
@@ -36,6 +37,7 @@ builder.Services.AddSingleton(sp =>
 
 builder.Services.AddSingleton<NatsPublisher>();
 builder.Services.AddSingleton<NatsStreamSetup>();
+builder.Services.AddHostedService<PaymentRentalConsumer>();
 
 // Build database connection string by expanding placeholders from environment variables
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection") ?? string.Empty;

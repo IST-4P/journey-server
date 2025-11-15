@@ -32,17 +32,21 @@ namespace device.Nats.Consumers
             {
                 var js = new NatsJSContext(_natsConnection);
 
-                // Create consumer if not exists
-                var consumerConfig = new ConsumerConfig("device-review-consumer")
+                // Create consumer if not exists - updated to use JOURNEY_EVENTS stream
+                var consumerConfig = new ConsumerConfig("device-service-review-created")
                 {
-                    DurableName = "device-review-consumer",
+                    DurableName = "device-service-review-created",
                     AckPolicy = ConsumerConfigAckPolicy.Explicit,
-                    FilterSubject = "review.created"
+                    DeliverPolicy = ConsumerConfigDeliverPolicy.All,
+                    FilterSubject = "journey.events.review.created",
+                    MaxDeliver = 3,
+                    AckWait = TimeSpan.FromSeconds(30)
                 };
 
                 try
                 {
-                    await js.CreateOrUpdateConsumerAsync("REVIEW", consumerConfig, stoppingToken);
+                    await js.CreateOrUpdateConsumerAsync("JOURNEY_EVENTS", consumerConfig, stoppingToken);
+                    _logger.LogInformation("[Device] Consumer 'device-service-review-created' created/updated successfully");
                 }
                 catch (Exception ex)
                 {
@@ -50,7 +54,7 @@ namespace device.Nats.Consumers
                 }
 
                 // Get consumer and subscribe to messages
-                var consumer = await js.GetConsumerAsync("REVIEW", "device-review-consumer", stoppingToken);
+                var consumer = await js.GetConsumerAsync("JOURNEY_EVENTS", "device-service-review-created", stoppingToken);
 
                 await foreach (var msg in consumer.ConsumeAsync<string>(cancellationToken: stoppingToken))
                 {

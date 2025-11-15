@@ -21,10 +21,13 @@ namespace review.Nats
             {
                 var js = new NatsJSContext(_natsConnection);
 
-                // Create REVIEW stream
+                // Create JOURNEY_EVENTS stream with review subjects
                 var streamConfig = new StreamConfig(
-                    name: "REVIEW",
-                    subjects: new[] { "review.created", "review.updated", "review.deleted" }
+                    name: "JOURNEY_EVENTS",
+                    subjects: new[] {
+                    "journey.events.review.created",
+                    "journey.events.review.updated",
+                    "journey.events.review.deleted" }
                 )
                 {
                     Storage = StreamConfigStorage.File,
@@ -35,13 +38,13 @@ namespace review.Nats
                 try
                 {
                     await js.CreateStreamAsync(streamConfig);
-                    _logger.LogInformation("REVIEW stream created successfully");
+                    _logger.LogInformation("JOURNEY_EVENTS stream created successfully");
                 }
                 catch (NatsJSApiException ex) when (ex.Error.Code == 400)
                 {
                     // Stream already exists, update it
                     await js.UpdateStreamAsync(streamConfig);
-                    _logger.LogInformation("REVIEW stream updated successfully");
+                    _logger.LogInformation("JOURNEY_EVENTS stream updated successfully");
                 }
             }
             catch (Exception ex)

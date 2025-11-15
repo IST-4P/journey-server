@@ -21,10 +21,16 @@ namespace device.Nats
             {
                 var js = new NatsJSContext(_natsConnection);
 
-                // Create DEVICE stream
-                var deviceStreamConfig = new StreamConfig(
-                    name: "DEVICE",
-                    subjects: new[] { "device.created", "device.updated", "device.deleted" }
+                // Create JOURNEY_EVENTS stream with device subjects
+                var streamConfig = new StreamConfig(
+                    name: "JOURNEY_EVENTS",
+                    subjects: new[] {
+                    "journey.events.device.updated",
+                    "journey.events.device.created",
+                    "journey.events.device.deleted",
+                    "journey.events.combo.updated",
+                    "journey.events.combo.created",
+                    "journey.events.combo.deleted" }
                 )
                 {
                     Storage = StreamConfigStorage.File,
@@ -34,13 +40,13 @@ namespace device.Nats
 
                 try
                 {
-                    await js.CreateStreamAsync(deviceStreamConfig);
-                    _logger.LogInformation("[Device] DEVICE stream created successfully");
+                    await js.CreateStreamAsync(streamConfig);
+                    _logger.LogInformation("[Device] JOURNEY_EVENTS stream created successfully");
                 }
                 catch (NatsJSApiException ex) when (ex.Error.Code == 400)
                 {
-                    await js.UpdateStreamAsync(deviceStreamConfig);
-                    _logger.LogInformation("[Device] DEVICE stream updated successfully");
+                    await js.UpdateStreamAsync(streamConfig);
+                    _logger.LogInformation("[Device] JOURNEY_EVENTS stream updated successfully");
                 }
             }
             catch (Exception ex)

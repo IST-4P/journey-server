@@ -60,10 +60,6 @@ export class AuthController {
 
     return {
       message: 'Message.LoginSuccessfully',
-      data: {
-        accessToken: tokens.accessToken,
-        refreshToken: tokens.refreshToken,
-      },
     };
   }
 

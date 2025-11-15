@@ -3,6 +3,8 @@ import z from 'zod';
 import {
   GetAllProfilesRequestSchema,
   GetAllProfilesResponseSchema,
+  GetFullNameAndAvatarRequestSchema,
+  GetFullNameAndAvatarResponseSchema,
   GetProfileRequestSchema,
   GetProfileResponseSchema,
   UpdateProfileRequestSchema,
@@ -25,4 +27,10 @@ export class UpdateProfileRequestDTO extends createZodDto(
     facebookUrl: z.string().url().optional(),
     birthDate: z.string().datetime().optional(),
   })
+) {}
+export class GetFullNameAndAvatarRequestDTO extends createZodDto(
+  GetFullNameAndAvatarRequestSchema
+) {}
+export class GetFullNameAndAvatarResponseDTO extends createZodDto(
+  GetFullNameAndAvatarResponseSchema
 ) {}

@@ -5,7 +5,10 @@ import { Module } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { ClientsModule, Transport } from '@nestjs/microservices';
 import { join } from 'path';
-import { ComplaintController } from './complaint.controller';
+import {
+  ComplaintController,
+  ComplaintMessageController,
+} from './complaint.controller';
 import { ComplaintGateway } from './complaint.gateway';
 import { ComplaintService } from './complaint.service';
 
@@ -30,7 +33,7 @@ import { ComplaintService } from './complaint.service';
       },
     ]),
   ],
-  controllers: [ComplaintController],
+  controllers: [ComplaintController, ComplaintMessageController],
   providers: [
     ComplaintService,
     ComplaintGateway,

@@ -1,23 +1,26 @@
-import { ChatProto } from '@hacmieu-journey/grpc';
-import { NatsClient } from '@hacmieu-journey/nats';
-import { Inject, Injectable, Logger, OnModuleInit } from '@nestjs/common';
+import { ChatProto, UserProto } from '@hacmieu-journey/grpc';
+import { Inject, Injectable, OnModuleInit } from '@nestjs/common';
 import { ClientGrpc } from '@nestjs/microservices';
 import { lastValueFrom } from 'rxjs';
 
 @Injectable()
 export class ChatService implements OnModuleInit {
-  private readonly logger = new Logger(ChatService.name);
   private chatService!: ChatProto.ChatServiceClient;
+  private userService!: UserProto.UserServiceClient;
 
   constructor(
     @Inject(ChatProto.CHAT_PACKAGE_NAME)
-    private client: ClientGrpc,
-    private readonly natsClient: NatsClient
+    private chatClient: ClientGrpc,
+    @Inject(UserProto.USER_PACKAGE_NAME)
+    private userClient: ClientGrpc
   ) {}
 
   onModuleInit() {
-    this.chatService = this.client.getService<ChatProto.ChatServiceClient>(
+    this.chatService = this.chatClient.getService<ChatProto.ChatServiceClient>(
       ChatProto.CHAT_SERVICE_NAME
+    );
+    this.userService = this.userClient.getService<UserProto.UserServiceClient>(
+      UserProto.USER_SERVICE_NAME
     );
   }
 
@@ -27,43 +30,40 @@ export class ChatService implements OnModuleInit {
     return lastValueFrom(this.chatService.getChats(data));
   }
 
-  async createChat(
-    data: ChatProto.CreateChatRequest
-  ): Promise<ChatProto.CreateChatResponse> {
-    const chat = await lastValueFrom(this.chatService.createChat(data));
-
-    try {
-      const chatData = {
-        id: chat.id,
-        fromUserId: chat.fromUserId,
-        toUserId: chat.toUserId,
-        content: chat.content,
-        createdAt: chat.createdAt,
-      };
-
-      // this.logger.log(
-      //   `🚀 Publishing chat.created event: ${JSON.stringify(
-      //     chatData
-      //   )}`
-      // );
-
-      await this.natsClient.publish('journey.chats.chat-created', chatData);
-    } catch (natsError) {
-      // Log error but don't fail registration
-      this.logger.error(`❌ Failed to publish chat.created event:`, natsError);
-    }
-    return chat;
-  }
-
-  getManyConversations(
-    data: ChatProto.GetManyConversationsRequest
-  ): Promise<ChatProto.GetManyConversationsResponse> {
-    return lastValueFrom(this.chatService.getManyConversations(data));
+  async getManyConversations(data: ChatProto.GetManyConversationsRequest) {
+    const conversations = await lastValueFrom(
+      this.chatService.getManyConversations(data)
+    );
+    const usersResponse = await lastValueFrom(
+      this.userService.getFullNameAndAvatar({
+        userIds: conversations.conversations,
+      })
+    );
+    const result = {
+      conversations: usersResponse.users || [],
+      page: conversations.page,
+      limit: conversations.limit,
+      totalItems: conversations.totalItems,
+      totalPages: conversations.totalPages,
+    };
+    return result;
   }
 
   updateComplaintStatus(
     data: ChatProto.UpdateComplaintStatusRequest
   ): Promise<ChatProto.GetComplaintResponse> {
     return lastValueFrom(this.chatService.updateComplaintStatus(data));
+  }
+
+  getManyComplaints(
+    data: ChatProto.GetManyComplaintsRequest
+  ): Promise<ChatProto.GetManyComplaintsResponse> {
+    return lastValueFrom(this.chatService.getManyComplaints(data));
+  }
+
+  getManyComplaintMessages(
+    data: ChatProto.GetManyComplaintMessagesRequest
+  ): Promise<ChatProto.GetManyComplaintMessagesResponse> {
+    return lastValueFrom(this.chatService.getManyComplaintMessages(data));
   }
 }

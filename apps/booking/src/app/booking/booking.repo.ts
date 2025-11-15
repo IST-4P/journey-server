@@ -21,7 +21,6 @@ import { ExtensionNotFoundException } from '../extension/extension.error';
 import { PrismaService } from '../prisma/prisma.service';
 import {
   BookingAlreadyCancelledException,
-  BookingCannotCancelLessThan5DaysException,
   BookingCannotCancelWithCheckInsException,
   BookingNotFoundException,
   BookingNotPaidException,
@@ -179,12 +178,15 @@ export class BookingRepository {
       if (!booking) {
         throw BookingNotFoundException;
       }
+      if (booking.status === BookingStatusValues.PENDING) {
+        throw BookingAlreadyCancelledException;
+      }
       if (booking.checkIns.length > 0) {
         throw BookingCannotCancelWithCheckInsException;
       }
 
       if (booking.status === BookingStatusValues.CANCELLED) {
-        throw BookingAlreadyCancelledException;
+        throw BookingNotPaidException;
       }
 
       if (booking.status === BookingStatusValues.DEPOSIT_PAID) {
@@ -195,9 +197,6 @@ export class BookingRepository {
         new Date(),
         booking.startTime
       );
-      if (refundPercentage === 0) {
-        throw BookingCannotCancelLessThan5DaysException;
-      }
       const refundAmount = (booking.collateral * refundPercentage) / 100;
 
       const updateStatusBooking$ = tx.booking.update({
@@ -337,10 +336,18 @@ export class BookingRepository {
         }
       );
 
+      const paymentFailed$ = this.natsClient.publish(
+        'journey.events.payment-expired',
+        {
+          id: data.id,
+        }
+      );
+
       await Promise.all([
         updateStatusBooking$,
         createBookingHistory$,
         vehicleActive$,
+        paymentFailed$,
       ]);
     });
   }

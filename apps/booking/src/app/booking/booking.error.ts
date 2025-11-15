@@ -21,9 +21,9 @@ export const BookingCannotCancelWithCheckInsException = new RpcException({
   message: 'Error.BookingCannotCancelWithCheckIns',
 });
 
-export const BookingCannotCancelLessThan5DaysException = new RpcException({
+export const BookingCannotCancelException = new RpcException({
   code: status.FAILED_PRECONDITION,
-  message: 'Error.BookingCannotCancelLessThan5Days',
+  message: 'Error.BookingCannotCancel',
 });
 
 export const BookingNotPaidException = new RpcException({

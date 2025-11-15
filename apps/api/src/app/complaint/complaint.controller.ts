@@ -14,8 +14,11 @@ export class ComplaintController {
 
   constructor(private readonly complaintService: ComplaintService) {}
   @Get()
-  getManyComplaints(@Query() query: GetManyComplaintsRequestDTO) {
-    return this.complaintService.getManyComplaints(query);
+  getManyComplaints(
+    @Query() query: Omit<GetManyComplaintsRequestDTO, 'userId'>,
+    @ActiveUser('userId') userId: string
+  ) {
+    return this.complaintService.getManyComplaints({ ...query, userId });
   }
 
   @Post()

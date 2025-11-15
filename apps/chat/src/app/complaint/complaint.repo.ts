@@ -1,4 +1,5 @@
 import {
+  ComplaintMessageTypeValues,
   CreateComplaintMessageRequest,
   CreateComplaintRequest,
   GetManyComplaintMessagesRequest,
@@ -38,10 +39,19 @@ export class ComplaintRepository {
     };
   }
 
-  createComplaint(data: CreateComplaintRequest) {
-    return this.prismaService.complaint.create({
+  async createComplaint(data: CreateComplaintRequest) {
+    const complaint = await this.prismaService.complaint.create({
       data,
     });
+    await this.prismaService.complaintMessage.create({
+      data: {
+        complaintId: complaint.id,
+        senderId: data.userId,
+        content: 'Khách hàng đã tạo yêu cầu hỗ trợ',
+        messageType: ComplaintMessageTypeValues.TEXT,
+      },
+    });
+    return complaint;
   }
 
   async updateComplaintStatus(data: UpdateComplaintStatusRequest) {
@@ -67,7 +77,7 @@ export class ComplaintRepository {
       }),
       this.prismaService.complaintMessage.findMany({
         where: { complaintId: data.complaintId },
-        orderBy: { createdAt: 'asc' },
+        orderBy: { createdAt: 'desc' },
         skip,
         take,
       }),

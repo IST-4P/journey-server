@@ -1,5 +1,6 @@
 import {
   GetAllProfilesRequest,
+  GetFullNameAndAvatarRequest,
   GetProfileRequest,
   Role,
   UpdateProfileRequest,
@@ -77,5 +78,9 @@ export class ProfileService {
 
   async getAllUserIds() {
     return this.profileRepo.getAllUserIds();
+  }
+
+  async getFullNameAndAvatar(data: GetFullNameAndAvatarRequest) {
+    return this.profileRepo.getFullNameAndAvatar(data);
   }
 }

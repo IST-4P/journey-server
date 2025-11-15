@@ -66,7 +66,6 @@ export const CreatePaymentRequestSchema = PaymentValidator.pick({
 
 export const UpdateStatusPaymentRequestSchema = PaymentValidator.pick({
   id: true,
-  userId: true,
   status: true,
 });
 

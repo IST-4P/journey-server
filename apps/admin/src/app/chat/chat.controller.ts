@@ -1,11 +1,12 @@
 import {
-  CreateChatRequestDTO,
   GetChatsRequestDTO,
+  GetManyComplaintMessagesRequestDTO,
+  GetManyComplaintsRequestDTO,
   GetManyConversationsRequestDTO,
   UpdateComplaintStatusRequestDTO,
 } from '@domain/chat';
 import { ActiveUser } from '@hacmieu-journey/nestjs';
-import { Body, Controller, Get, Post, Put, Query } from '@nestjs/common';
+import { Body, Controller, Get, Put, Query } from '@nestjs/common';
 import { ChatService } from './chat.service';
 
 @Controller('chat')
@@ -24,15 +25,10 @@ export class ChatController {
 
   @Get()
   getManyChats(
-    @Query() query: GetChatsRequestDTO,
+    @Query() query: Omit<GetChatsRequestDTO, 'fromUserId'>,
     @ActiveUser('userId') adminId: string
   ) {
     return this.chatService.getChats({ ...query, fromUserId: adminId });
-  }
-
-  @Post()
-  getChat(@Body() body: CreateChatRequestDTO) {
-    return this.chatService.createChat(body);
   }
 }
 
@@ -41,8 +37,24 @@ export class ComplaintController {
   // private readonly logger = new Logger(ComplaintController.name);
   constructor(private readonly chatService: ChatService) {}
 
+  @Get()
+  getManyComplaints(@Query() query: GetManyComplaintsRequestDTO) {
+    return this.chatService.getManyComplaints(query);
+  }
+
   @Put()
   updateComplaintStatus(@Body() body: UpdateComplaintStatusRequestDTO) {
     return this.chatService.updateComplaintStatus(body);
+  }
+}
+
+@Controller('complaint-message')
+export class ComplaintMessageController {
+  // private readonly logger = new Logger(ComplaintMessageController.name);
+  constructor(private readonly chatService: ChatService) {}
+
+  @Get()
+  getManyComplaintMessages(@Query() query: GetManyComplaintMessagesRequestDTO) {
+    return this.chatService.getManyComplaintMessages(query);
   }
 }

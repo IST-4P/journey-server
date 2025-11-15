@@ -5,6 +5,7 @@ import { ExtensionValidatorSchema } from '../validators';
 export const GetManyExtensionsRequestSchema = ExtensionValidatorSchema.pick({
   status: true,
   requestedBy: true,
+  bookingId: true,
 })
   .partial()
   .extend(PaginationQuerySchema.shape);
@@ -17,9 +18,9 @@ export const GetManyExtensionsResponseSchema = z.object({
   totalPages: z.number().int(),
 });
 
-export const GetExtensionRequestSchema = ExtensionValidatorSchema.pick({
-  id: true,
-  requestedBy: true,
+export const GetExtensionRequestSchema = z.object({
+  id: ExtensionValidatorSchema.shape.id,
+  requestedBy: z.string().optional(),
 });
 
 export const GetExtensionResponseSchema = ExtensionValidatorSchema;
@@ -40,12 +41,10 @@ export const UpdateExtensionRequestSchema = ExtensionValidatorSchema.pick({
   notes: true,
 });
 
-export const UpdateStatusExtensionRequestSchema = ExtensionValidatorSchema.pick(
-  {
-    id: true,
-    rejectionReason: true,
-  }
-);
+export const UpdateStatusExtensionRequestSchema = z.object({
+  id: z.string().uuid(),
+  rejectionReason: z.string().optional(),
+});
 
 export type GetManyExtensionsRequest = z.infer<
   typeof GetManyExtensionsRequestSchema

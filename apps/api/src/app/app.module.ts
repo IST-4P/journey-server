@@ -5,6 +5,7 @@ import { AuthModule } from './auth/auth.module';
 import { BlogModule } from './blog/blog.module';
 import { BookingModule } from './booking/booking.module';
 import { ChatModule } from './chat/chat.module';
+import { ComplaintModule } from './complaint/complaint.module';
 import { DeviceModule } from './device/device.module';
 import { MediaModule } from './media/media.module';
 import { NotificationModule } from './notification/notification.module';
@@ -22,6 +23,7 @@ import { VehicleModule } from './vehicle/vehicle.module';
     UserModule,
     NotificationModule,
     ChatModule,
+    ComplaintModule,
     BlogModule,
     BookingModule,
     PaymentModule,

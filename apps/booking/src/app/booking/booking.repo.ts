@@ -1,4 +1,5 @@
 import {
+  BookingStatus,
   BookingStatusValues,
   CancelBookingRequest,
   CreateBookingRequest,
@@ -16,11 +17,14 @@ import {
 } from '@hacmieu-journey/nestjs';
 import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
+import { ExtensionNotFoundException } from '../extension/extension.error';
 import { PrismaService } from '../prisma/prisma.service';
 import {
+  BookingAlreadyCancelledException,
   BookingCannotCancelLessThan5DaysException,
   BookingCannotCancelWithCheckInsException,
   BookingNotFoundException,
+  BookingNotPaidException,
 } from './booking.error';
 
 @Injectable()
@@ -127,7 +131,7 @@ export class BookingRepository {
       });
 
       const createPayment$ = this.natsClient.publish(
-        'journey.events.payment-created',
+        'journey.events.payment-booking',
         {
           id: createBooking.id,
           userId: createBooking.userId,
@@ -177,6 +181,14 @@ export class BookingRepository {
       }
       if (booking.checkIns.length > 0) {
         throw BookingCannotCancelWithCheckInsException;
+      }
+
+      if (booking.status === BookingStatusValues.CANCELLED) {
+        throw BookingAlreadyCancelledException;
+      }
+
+      if (booking.status === BookingStatusValues.DEPOSIT_PAID) {
+        throw BookingNotPaidException;
       }
 
       const refundPercentage = calculateRefundPercentage(
@@ -236,6 +248,14 @@ export class BookingRepository {
   }
 
   async updateStatusBooking(data: UpdateStatusBookingRequest) {
+    const booking = await this.prismaService.booking.findUnique({
+      where: {
+        id: data.id,
+      },
+    });
+    if (!booking) {
+      throw BookingNotFoundException;
+    }
     return this.prismaService.booking
       .update({
         where: { id: data.id },
@@ -280,5 +300,94 @@ export class BookingRepository {
 
       await Promise.all([updateStatusBooking$, createBookingHistory$]);
     });
+  }
+
+  async bookingExpired(data: { id: string }) {
+    await this.prismaService.$transaction(async (tx) => {
+      const booking = await tx.booking.findUnique({
+        where: {
+          id: data.id,
+        },
+      });
+
+      if (!booking) {
+        throw BookingNotFoundException;
+      }
+
+      const updateStatusBooking$ = tx.booking.update({
+        where: { id: data.id },
+        data: {
+          status: BookingStatusValues.EXPIRED,
+          paymentStatus: PaymentStatusValues.FAILED,
+        },
+      });
+
+      const createBookingHistory$ = tx.bookingHistory.create({
+        data: {
+          bookingId: data.id,
+          action: HistoryActionValues.CANCELLED,
+          notes: 'Booking expired',
+        },
+      });
+
+      const vehicleActive$ = this.natsClient.publish(
+        'journey.events.vehicle-active',
+        {
+          id: booking.vehicleId,
+        }
+      );
+
+      await Promise.all([
+        updateStatusBooking$,
+        createBookingHistory$,
+        vehicleActive$,
+      ]);
+    });
+  }
+
+  async bookingExtension(data: { id: string }) {
+    await this.prismaService.$transaction(async (tx) => {
+      const extension = await tx.bookingExtension.findUnique({
+        where: {
+          id: data.id,
+        },
+      });
+
+      if (!extension) {
+        return ExtensionNotFoundException;
+      }
+      const newTime = new Date(extension.newEndTime);
+      await tx.booking.update({
+        where: { id: extension.bookingId },
+        data: {
+          endTime: newTime,
+        },
+      });
+    });
+  }
+
+  async getInformationBooking() {
+    const statusGroups = await this.prismaService.booking.groupBy({
+      by: ['status'],
+      _count: {
+        id: true,
+      },
+    });
+
+    const statusCounts = statusGroups.reduce((acc, item) => {
+      acc[item.status] = item._count.id;
+      return acc;
+    }, {} as Record<BookingStatus, number>);
+
+    return {
+      totalBookings: Object.values(statusCounts).reduce(
+        (sum, count) => sum + count,
+        0
+      ),
+      pendingBookings: statusCounts['PENDING'] || 0,
+      ongoingBookings: statusCounts['ONGOING'] || 0,
+      completedBookings: statusCounts['COMPLETED'] || 0,
+      cancelledBookings: statusCounts['CANCELLED'] || 0,
+    };
   }
 }

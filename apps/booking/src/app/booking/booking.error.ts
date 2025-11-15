@@ -25,3 +25,13 @@ export const BookingCannotCancelLessThan5DaysException = new RpcException({
   code: status.FAILED_PRECONDITION,
   message: 'Error.BookingCannotCancelLessThan5Days',
 });
+
+export const BookingNotPaidException = new RpcException({
+  code: status.FAILED_PRECONDITION,
+  message: 'Error.BookingNotPaid',
+});
+
+export const BookingAlreadyCancelledException = new RpcException({
+  code: status.FAILED_PRECONDITION,
+  message: 'Error.BookingAlreadyCancelled',
+});

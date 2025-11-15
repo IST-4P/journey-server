@@ -1,11 +1,16 @@
 import { PaginationQuerySchema } from '@domain/shared';
 import { z } from 'zod';
-import { PaymentValidator, RefundValidator } from '../validators';
+import {
+  PaymentValidator,
+  RefundValidator,
+  TransactionValidator,
+} from '../validators';
 
 export const GetManyPaymentsRequestSchema = PaymentValidator.pick({
   userId: true,
   type: true,
   status: true,
+  paymentCode: true,
 })
   .partial()
   .extend(PaginationQuerySchema.shape);
@@ -23,6 +28,10 @@ export const GetPaymentRequestSchema = PaymentValidator.pick({
   userId: true,
 });
 
+export const GetPaymentAdminRequestSchema = PaymentValidator.pick({
+  id: true,
+});
+
 export const GetPaymentResponseSchema = PaymentValidator;
 
 export const WebhookPaymentRequestSchema = z.object({
@@ -38,6 +47,12 @@ export const WebhookPaymentRequestSchema = z.object({
   subAccount: z.string().nullish(),
   referenceCode: z.string().nullish(),
   description: z.string(),
+});
+
+export const WebhookPaymentResponseSchema = z.object({
+  message: z.string(),
+  paymentCode: z.string(),
+  userId: z.string(),
 });
 
 export const CreatePaymentRequestSchema = PaymentValidator.pick({
@@ -64,6 +79,8 @@ export const GetRefundResponseSchema = RefundValidator;
 export const GetManyRefundsRequestSchema = RefundValidator.pick({
   status: true,
   userId: true,
+  bookingId: true,
+  rentalId: true,
 })
   .partial()
   .extend(PaginationQuerySchema.shape);
@@ -93,6 +110,48 @@ export const CreateRefundRequestSchema = RefundValidator.pick({
   overtimeAmount: true,
 });
 
+export const GetManyTransactionsRequestSchema = z
+  .object({
+    type: z.enum(['IN', 'OUT']),
+    code: z.string(),
+    startDate: z.coerce.date(),
+    endDate: z.coerce.date(),
+  })
+  .partial()
+  .extend(PaginationQuerySchema.shape);
+
+export const GetManyTransactionsResponseSchema = z.object({
+  transactions: z.array(
+    TransactionValidator.pick({
+      id: true,
+      code: true,
+      gateway: true,
+      transactionDate: true,
+      accountNumber: true,
+      amountIn: true,
+      amountOut: true,
+      transactionContent: true,
+    })
+  ),
+  page: z.number().int(),
+  limit: z.number().int(),
+  totalItems: z.number().int(),
+  totalPages: z.number().int(),
+});
+
+export const GetTransactionRequestSchema = TransactionValidator.pick({
+  id: true,
+});
+
+export const GetTransactionResponseSchema = TransactionValidator;
+
+export const GetInformationTransactionResponseSchema = z.object({
+  totalAmountIn: z.number(),
+  totalAmountOut: z.number(),
+  totalTransactions: z.number(),
+  difference: z.number(),
+});
+
 export type GetManyPaymentsRequest = z.infer<
   typeof GetManyPaymentsRequestSchema
 >;
@@ -101,11 +160,17 @@ export type GetManyPaymentsResponse = z.infer<
 >;
 export type GetPaymentRequest = z.infer<typeof GetPaymentRequestSchema>;
 export type GetPaymentResponse = z.infer<typeof GetPaymentResponseSchema>;
+export type GetPaymentAdminRequest = z.infer<
+  typeof GetPaymentAdminRequestSchema
+>;
 export type CreatePaymentRequest = z.infer<typeof CreatePaymentRequestSchema>;
 export type UpdateStatusPaymentRequest = z.infer<
   typeof UpdateStatusPaymentRequestSchema
 >;
 export type WebhookPaymentRequest = z.infer<typeof WebhookPaymentRequestSchema>;
+export type WebhookPaymentResponse = z.infer<
+  typeof WebhookPaymentResponseSchema
+>;
 export type GetRefundRequest = z.infer<typeof GetRefundRequestSchema>;
 export type GetRefundResponse = z.infer<typeof GetRefundResponseSchema>;
 export type GetManyRefundsRequest = z.infer<typeof GetManyRefundsRequestSchema>;
@@ -116,3 +181,16 @@ export type UpdateRefundStatusRequest = z.infer<
   typeof UpdateRefundStatusRequestSchema
 >;
 export type CreateRefundRequest = z.infer<typeof CreateRefundRequestSchema>;
+export type GetManyTransactionsRequest = z.infer<
+  typeof GetManyTransactionsRequestSchema
+>;
+export type GetManyTransactionsResponse = z.infer<
+  typeof GetManyTransactionsResponseSchema
+>;
+export type GetTransactionRequest = z.infer<typeof GetTransactionRequestSchema>;
+export type GetTransactionResponse = z.infer<
+  typeof GetTransactionResponseSchema
+>;
+export type GetInformationTransactionResponse = z.infer<
+  typeof GetInformationTransactionResponseSchema
+>;

@@ -4,7 +4,7 @@ import { Module } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { ClientsModule, Transport } from '@nestjs/microservices';
 import { join } from 'path';
-import { ChatController } from './chat.controller';
+import { ChatController, ComplaintController } from './chat.controller';
 import { ChatService } from './chat.service';
 
 @Module({
@@ -27,7 +27,7 @@ import { ChatService } from './chat.service';
       },
     ]),
   ],
-  controllers: [ChatController],
+  controllers: [ChatController, ComplaintController],
   providers: [
     ChatService,
     {

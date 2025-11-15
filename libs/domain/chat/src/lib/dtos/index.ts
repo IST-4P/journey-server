@@ -1,12 +1,3 @@
-import { createZodDto } from 'nestjs-zod';
-import {
-  CreateChatRequestSchema,
-  GetChatsRequestSchema,
-  GetChatsResponseSchema,
-} from '../models';
-
-export class GetChatsRequestDTO extends createZodDto(GetChatsRequestSchema) {}
-export class GetChatsResponseDTO extends createZodDto(GetChatsResponseSchema) {}
-export class CreateChatRequestDTO extends createZodDto(
-  CreateChatRequestSchema
-) {}
+export * from './chat.dto';
+export * from './complaint-message.dto';
+export * from './complaint.dto';

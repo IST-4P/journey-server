@@ -8,7 +8,7 @@ RUN dotnet restore apps/blog/Blog.csproj
 
 # Copy toàn bộ source code
 COPY apps/blog/ apps/blog/
-COPY libs/grpc/src/lib/proto/blog.proto apps/blog/Protos/
+COPY libs/grpc/ libs/grpc/
 
 # Build project
 WORKDIR /src/apps/blog

@@ -5,6 +5,7 @@ export const BookingValidatorSchema = z.object({
   id: z.string().uuid(),
   userId: z.string().uuid(),
   vehicleId: z.string().uuid(),
+  vehicleName: z.string(),
   status: BookingStatusEnum,
 
   startTime: z.coerce.date(),

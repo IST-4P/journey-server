@@ -1,4 +1,5 @@
 import {
+  BroadcastNotificationRequest,
   CreateNotificationRequest,
   DeleteNotificationRequest,
   GetManyNotificationsRequest,
@@ -47,10 +48,10 @@ export class NotificationService {
     const notifications = await this.notificationRepo.getManyNotifications(
       data
     );
-    if (notifications.length == 0) {
+    if (notifications.notifications.length == 0) {
       throw NotificationNotFoundException;
     }
-    return { notifications };
+    return notifications;
   }
 
   async getNotification(data: GetNotificationRequest) {
@@ -81,5 +82,9 @@ export class NotificationService {
     return {
       message: 'Message.DeleteNotificationSuccessfully',
     };
+  }
+
+  broadcastNotification(data: BroadcastNotificationRequest) {
+    return this.notificationRepo.broadcastNotification(data);
   }
 }

@@ -1,4 +1,3 @@
-import { PaginationQuerySchema } from '@domain/shared';
 import z from 'zod';
 import { CheckInOutValidatorSchema } from '../validators';
 
@@ -6,16 +5,11 @@ export const GetManyCheckInOutsRequestSchema = CheckInOutValidatorSchema.pick({
   bookingId: true,
   userId: true,
   type: true,
-})
-  .partial()
-  .extend(PaginationQuerySchema.shape);
+}).partial();
 
 export const GetManyCheckInOutsResponseSchema = z.object({
-  checkInOuts: z.array(CheckInOutValidatorSchema),
-  page: z.number().int(),
-  limit: z.number().int(),
-  totalItems: z.number().int(),
-  totalPages: z.number().int(),
+  checkIn: CheckInOutValidatorSchema.optional(),
+  checkOut: CheckInOutValidatorSchema.optional(),
 });
 
 export const GetCheckInOutRequestSchema = CheckInOutValidatorSchema.pick({
@@ -38,7 +32,7 @@ export const CreateCheckInOutRequestSchema = CheckInOutValidatorSchema.pick({
   damageNotes: true,
   damageImages: true,
 }).extend({
-  checkDate: z.coerce.date(),
+  checkDate: z.coerce.date().optional(),
 });
 
 export const UpdateCheckOutRequestSchema = CheckInOutValidatorSchema.pick({

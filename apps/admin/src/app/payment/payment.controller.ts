@@ -1,10 +1,15 @@
 import {
   GetManyPaymentsRequestDTO,
   GetManyRefundsRequestDTO,
+  GetManyTransactionsRequestDTO,
   GetPaymentRequestDTO,
   GetRefundRequestDTO,
+  GetTransactionRequestDTO,
+  RefundStatusValues,
+  UpdateRefundStatusRequestDTO,
 } from '@domain/payment';
-import { Controller, Get, Param, Query } from '@nestjs/common';
+import { Auth, AuthType } from '@hacmieu-journey/nestjs';
+import { Controller, Get, Param, Put, Query } from '@nestjs/common';
 import { PaymentService } from './payment.service';
 
 @Controller('payment')
@@ -38,5 +43,50 @@ export class RefundController {
   @Get(':id')
   getRefund(@Param() params: Omit<GetRefundRequestDTO, 'userId'>) {
     return this.paymentService.getRefund(params);
+  }
+
+  @Put('completed/:id')
+  completedRefund(
+    @Param() params: Omit<UpdateRefundStatusRequestDTO, 'status'>
+  ) {
+    return this.paymentService.updateRefundStatus({
+      ...params,
+      status: RefundStatusValues.COMPLETED,
+    });
+  }
+
+  @Put('cancelled/:id')
+  cancelledRefund(
+    @Param() params: Omit<UpdateRefundStatusRequestDTO, 'status'>
+  ) {
+    return this.paymentService.updateRefundStatus({
+      ...params,
+      status: RefundStatusValues.CANCELLED,
+    });
+  }
+}
+
+@Controller('transaction')
+export class TransactionController {
+  // private readonly logger = new Logger(TransactionController.name);
+
+  constructor(private readonly paymentService: PaymentService) {}
+
+  @Get()
+  @Auth([AuthType.Admin])
+  getManyTransactions(@Query() query: GetManyTransactionsRequestDTO) {
+    return this.paymentService.getManyTransactions(query);
+  }
+
+  @Get('information')
+  @Auth([AuthType.Admin])
+  getInformationTransaction() {
+    return this.paymentService.getInformationTransaction({});
+  }
+
+  @Get(':id')
+  @Auth([AuthType.Admin])
+  getTransaction(@Param() params: GetTransactionRequestDTO) {
+    return this.paymentService.getTransaction(params);
   }
 }

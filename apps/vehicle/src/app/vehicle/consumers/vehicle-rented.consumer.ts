@@ -5,7 +5,7 @@ import { AckPolicy, DeliverPolicy } from 'nats';
 import { VehicleRepository } from '../vehicle.repo';
 
 interface VehicleRentedEvent {
-  deviceId: string;
+  id: string;
 }
 
 @Injectable()
@@ -30,7 +30,7 @@ export class VehicleRentedConsumer
 
   protected async onMessage(event: VehicleRentedEvent): Promise<void> {
     return this.vehicleRepository.updateStatus({
-      id: event.deviceId,
+      id: event.id,
       status: VehicleStatusValues.RENTED,
     });
   }

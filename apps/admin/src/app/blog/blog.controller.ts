@@ -5,7 +5,7 @@ import {
   GetManyBlogsRequestDTO,
   UpdateBlogRequestDTO,
 } from '@domain/blog';
-import { Auth, AuthType } from '@hacmieu-journey/nestjs';
+import { ActiveUser, Auth, AuthType } from '@hacmieu-journey/nestjs';
 import {
   Body,
   Controller,
@@ -38,8 +38,11 @@ export class BlogController {
 
   @Post()
   @Auth([AuthType.Admin])
-  createBlog(@Body() body: CreateBlogRequestDTO) {
-    return this.blogService.createBlog(body);
+  createBlog(
+    @Body() body: Omit<CreateBlogRequestDTO, 'authorId'>,
+    @ActiveUser('userId') authorId: string
+  ) {
+    return this.blogService.createBlog({ ...body, authorId });
   }
 
   @Put(':id')

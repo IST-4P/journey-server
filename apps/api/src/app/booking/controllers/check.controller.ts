@@ -13,7 +13,7 @@ export class CheckInOutController {
 
   @Get()
   getManyCheckInOuts(
-    @Query() query: GetManyCheckInOutsRequestDTO,
+    @Query() query: Omit<GetManyCheckInOutsRequestDTO, 'userId'>,
     @ActiveUser('userId') userId: string
   ) {
     return this.bookingService.getManyCheckInOuts({ ...query, userId });
@@ -34,7 +34,7 @@ export class CheckInOutController {
   ) {
     return this.bookingService.checkIn({
       ...body,
-      checkDate: body.checkDate.toISOString(),
+      checkDate: String(new Date()),
       userId,
     });
   }
@@ -46,7 +46,7 @@ export class CheckInOutController {
   ) {
     return this.bookingService.checkOut({
       ...body,
-      checkDate: body.checkDate.toISOString(),
+      checkDate: String(new Date()),
       userId,
     });
   }

@@ -15,8 +15,8 @@ export const PaymentValidator = z.object({
   updatedAt: z.coerce.date().optional(),
 });
 
-export const PaymentTransactionValidator = z.object({
-  id: z.string().uuid(),
+export const TransactionValidator = z.object({
+  id: z.number(),
   gateway: z.string(),
   transactionDate: z.date(),
   accountNumber: z.string().nullable(),
@@ -47,5 +47,5 @@ export const RefundValidator = z.object({
 });
 
 export type Payment = z.infer<typeof PaymentValidator>;
-export type PaymentTransaction = z.infer<typeof PaymentTransactionValidator>;
+export type Transaction = z.infer<typeof TransactionValidator>;
 export type Refund = z.infer<typeof RefundValidator>;

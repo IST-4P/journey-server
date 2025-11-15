@@ -70,4 +70,12 @@ export class ProfileRepository {
       data,
     });
   }
+
+  async getAllUserIds() {
+    const profiles = await this.prisma.profile.findMany({
+      select: { id: true },
+    });
+    const userIds = profiles.map((profile) => profile.id);
+    return { userIds };
+  }
 }

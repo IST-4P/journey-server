@@ -6,3 +6,6 @@ export * from './lib/models';
 
 // DTOs
 export * from './lib/dtos';
+
+// Enums
+export * from './lib/enums';

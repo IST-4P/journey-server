@@ -10,19 +10,12 @@ datasource db {
 }
 
 enum NotificationType {
-    WELCOME // Chào mừng user mới
-    BOOKING_CREATED // Đơn thuê xe được tạo
-    BOOKING_CONFIRMED // Đơn thuê được xác nhận
-    BOOKING_CANCELLED // Đơn thuê bị hủy
-    PAYMENT_SUCCESS // Thanh toán thành công
-    PAYMENT_FAILED // Thanh toán thất bại
-    CHECK_IN_REMINDER // Nhắc nhở check-in
-    CHECK_OUT_REMINDER // Nhắc nhở check-out
-    REFUND_PROCESSED // Hoàn tiền đã xử lý
-    REVIEW_REQUEST // Yêu cầu đánh giá
-    PROMO_AVAILABLE // Có mã giảm giá mới
-    SYSTEM_ANNOUNCEMENT // Thông báo hệ thống
-    COMPLAINT_UPDATE // Cập nhật khiếu nại
+    WELCOME
+    BOOKING
+    RENTAL
+    SYSTEM
+    PROMOTION
+    COMPLAINT
 }
 
 model Notification {

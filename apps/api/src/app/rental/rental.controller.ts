@@ -34,7 +34,7 @@ export class RentalController {
 
   @Post()
   createRental(
-    @Body() body: CreateRentalRequestDTO,
+    @Body() body: Omit<CreateRentalRequestDTO, 'userId'>,
     @ActiveUser('userId') userId: string
   ) {
     return this.rentalService.createRental({
@@ -65,7 +65,7 @@ export class ExtensionController {
 
   @Post()
   createRentalExtension(
-    @Body() body: CreateRentalExtensionRequestDTO,
+    @Body() body: Omit<CreateRentalExtensionRequestDTO, 'requestedBy'>,
     @ActiveUser('userId') userId: string
   ) {
     return this.rentalService.createRentalExtension({

@@ -14,6 +14,7 @@ import { BookingNotFoundException } from '../booking/booking.error';
 import { PrismaService } from '../prisma/prisma.service';
 import {
   CheckInNotPaidException,
+  CheckInOutAlreadyExistsException,
   CheckInWrongTimeException,
   CheckOutWithoutCheckInException,
 } from './check-in-out.error';
@@ -26,32 +27,44 @@ export class CheckInOutRepository {
   ) {}
 
   async getManyCheckInOuts(data: GetManyCheckInOutsRequest) {
-    const skip = (data.page - 1) * data.limit;
-    const take = data.limit;
-    const [totalItems, checkInOuts] = await Promise.all([
-      this.prismaService.checkInOut.count({
-        where: data,
+    const [checkIn, checkOut] = await Promise.all([
+      this.prismaService.checkInOut.findFirst({
+        where: {
+          ...data,
+          type: CheckTypeEnumValues.CHECK_IN,
+        },
       }),
-      this.prismaService.checkInOut.findMany({
-        where: data,
-        skip,
-        take,
-        orderBy: {
-          createdAt: 'desc',
+      this.prismaService.checkInOut.findFirst({
+        where: {
+          ...data,
+          type: CheckTypeEnumValues.CHECK_OUT,
         },
       }),
     ]);
 
     return {
-      checkInOuts: checkInOuts.map((checkInOut) => ({
-        ...checkInOut,
-        latitude: checkInOut.latitude.toNumber(),
-        longitude: checkInOut.longitude.toNumber(),
-      })),
-      page: data.page,
-      limit: data.limit,
-      totalItems,
-      totalPages: Math.ceil(totalItems / data.limit),
+      checkIn: checkIn
+        ? {
+            ...checkIn,
+            latitude: checkIn.latitude.toNumber(),
+            longitude: checkIn.longitude.toNumber(),
+          }
+        : undefined,
+      checkOut: checkOut
+        ? {
+            ...checkOut,
+            latitude: checkOut.latitude.toNumber(),
+            longitude: checkOut.longitude.toNumber(),
+          }
+        : undefined,
+      message:
+        !checkIn && !checkOut
+          ? 'Error.CheckInOutNotFound'
+          : !checkIn
+          ? 'Message.CheckInNotFound'
+          : !checkOut
+          ? 'Message.CheckOutNotFound'
+          : 'Success',
     };
   }
 
@@ -79,6 +92,13 @@ export class CheckInOutRepository {
         where: {
           id: data.bookingId,
         },
+        include: {
+          checkIns: {
+            where: {
+              type: CheckTypeEnumValues.CHECK_IN,
+            },
+          },
+        },
       });
 
       if (!booking) {
@@ -89,15 +109,23 @@ export class CheckInOutRepository {
         throw CheckInNotPaidException;
       }
 
-      const checkDate = new Date(data.checkDate);
+      if (booking.checkIns.length > 0) {
+        throw CheckInOutAlreadyExistsException;
+      }
+
+      const checkDate = new Date(data.checkDate!);
+      console.log('checkDate: ', checkDate);
+      console.log('booking.startTime: ', booking.startTime);
 
       if (checkDate < booking.startTime) {
         throw CheckInWrongTimeException;
       }
 
+      const { checkDate: _, ...body } = data;
+
       const createCheckIn$ = tx.checkInOut.create({
         data: {
-          ...data,
+          ...body,
           verified: true,
           verifiedAt: new Date(),
         },
@@ -145,11 +173,7 @@ export class CheckInOutRepository {
           id: data.bookingId,
         },
         include: {
-          checkIns: {
-            where: {
-              type: CheckTypeEnumValues.CHECK_IN,
-            },
-          },
+          checkIns: true,
         },
       });
 
@@ -157,24 +181,35 @@ export class CheckInOutRepository {
         throw BookingNotFoundException;
       }
 
-      if (booking.checkIns.length === 0) {
+      const hasCheckIn = booking.checkIns.some(
+        (checkIn) => checkIn.type === CheckTypeEnumValues.CHECK_IN
+      );
+      const hasCheckOut = booking.checkIns.some(
+        (checkIn) => checkIn.type === CheckTypeEnumValues.CHECK_OUT
+      );
+
+      if (!hasCheckIn) {
         throw CheckOutWithoutCheckInException;
+      }
+
+      if (hasCheckOut) {
+        throw CheckInOutAlreadyExistsException;
       }
 
       let overtimeAmount = 0;
 
       // Nếu trả xe qua giờ, tính phí phạt
-      const checkDate = new Date(data.checkDate);
+      const checkDate = new Date(data.checkDate!);
       if (checkDate > booking.endTime) {
         const diffInHours =
           (checkDate.getTime() - booking.endTime.getTime()) / (1000 * 60 * 60);
         const formattedHours = Number(diffInHours.toFixed(1));
         overtimeAmount = formattedHours * booking.vehicleFeeHour * 1.5;
       }
-
+      const { checkDate: _, ...body } = data;
       const createCheckOut$ = tx.checkInOut.create({
         data: {
-          ...data,
+          ...body,
           verified: false,
         },
       });
@@ -185,6 +220,7 @@ export class CheckInOutRepository {
           overtimeAmount: {
             increment: overtimeAmount,
           },
+          status: BookingStatusValues.COMPLETED,
         },
       });
 
@@ -287,7 +323,7 @@ export class CheckInOutRepository {
       penaltyAmount: verified.booking.penaltyAmount,
       damageAmount: verified.booking.damageAmount,
       overtimeAmount: verified.booking.overtimeAmount,
-      collateral: verified.booking.collateral,
+      collateral: 0,
       deposit: verified.booking.deposit,
     });
     return verified;

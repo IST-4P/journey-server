@@ -119,16 +119,11 @@ export interface GetManyCheckInOutsRequest {
   bookingId?: string | undefined;
   userId?: string | undefined;
   type?: string | undefined;
-  page?: number | undefined;
-  limit?: number | undefined;
 }
 
 export interface GetManyCheckInOutsResponse {
-  checkInOuts: GetCheckInOutResponse[];
-  page: number;
-  limit: number;
-  totalItems: number;
-  totalPages: number;
+  checkIn: GetCheckInOutResponse | undefined;
+  checkOut: GetCheckInOutResponse | undefined;
 }
 
 /** GetCheckInOut */

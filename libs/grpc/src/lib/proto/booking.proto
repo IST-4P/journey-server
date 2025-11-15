@@ -141,16 +141,11 @@ message GetManyCheckInOutsRequest {
   optional string bookingId = 1;
   optional string userId = 2;
   optional string type = 3;
-  optional int32 page = 4;
-  optional int32 limit = 5;
 }
 
 message GetManyCheckInOutsResponse {
-  repeated GetCheckInOutResponse checkInOuts = 1;
-  int32 page = 2;
-  int32 limit = 3;
-  int32 totalItems = 4;
-  int32 totalPages = 5;
+  GetCheckInOutResponse checkIn = 1;
+  GetCheckInOutResponse checkOut = 2;
 }
 
 // GetCheckInOut

@@ -2,7 +2,7 @@ name: CI/CD
 
 on:
   push:
-    branches: 
+    branches:
       - renal
       - service
   pull_request:
@@ -393,3 +393,25 @@ jobs:
           kubectl rollout status deployment/device -n journey --timeout=3m
 
           echo "✅ All deployments verified successfully!"
+
+      - name: Cleanup old images on nodes
+        run: |
+          echo "=== Cleaning up unused Docker images on Kubernetes nodes ==="
+
+          # Lấy danh sách tất cả nodes
+          NODES=$(kubectl get nodes -o jsonpath='{.items[*].metadata.name}')
+
+          for NODE in $NODES; do
+            echo "Cleaning up node: $NODE"
+
+            # Tạo debug pod để chạy docker system prune trên node
+            kubectl debug node/$NODE -it --image=alpine -- sh -c '
+              # Cài đặt docker client (nếu cần)
+              apk add --no-cache docker 2>/dev/null || true
+
+              # Xóa images không được sử dụng (giữ lại images đang chạy)
+              docker system prune -a -f --filter "until=168h" || echo "Prune completed or skipped"
+            ' || echo "⚠️ Could not cleanup $NODE (may require additional permissions)"
+          done
+
+          echo "✅ Cleanup completed (kept images from last 7 days and currently running images)"

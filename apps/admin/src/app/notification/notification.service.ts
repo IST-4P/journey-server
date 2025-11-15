@@ -1,4 +1,4 @@
-import { NotificationProto } from '@hacmieu-journey/grpc';
+import { NotificationProto, UserProto } from '@hacmieu-journey/grpc';
 import { NatsClient } from '@hacmieu-journey/nats';
 import { Inject, Injectable, Logger, OnModuleInit } from '@nestjs/common';
 import { ClientGrpc } from '@nestjs/microservices';
@@ -8,30 +8,24 @@ import { lastValueFrom } from 'rxjs';
 export class NotificationService implements OnModuleInit {
   private readonly logger = new Logger(NotificationService.name);
   private notificationService!: NotificationProto.NotificationServiceClient;
+  private userService!: UserProto.UserServiceClient;
 
   constructor(
     @Inject(NotificationProto.NOTIFICATION_PACKAGE_NAME)
-    private client: ClientGrpc,
+    private notificationClient: ClientGrpc,
+    @Inject(UserProto.USER_PACKAGE_NAME)
+    private userClient: ClientGrpc,
     private readonly natsClient: NatsClient
   ) {}
 
   onModuleInit() {
     this.notificationService =
-      this.client.getService<NotificationProto.NotificationServiceClient>(
+      this.notificationClient.getService<NotificationProto.NotificationServiceClient>(
         NotificationProto.NOTIFICATION_SERVICE_NAME
       );
-  }
-
-  getNotification(
-    data: NotificationProto.GetNotificationRequest
-  ): Promise<NotificationProto.GetNotificationResponse> {
-    return lastValueFrom(this.notificationService.getNotification(data));
-  }
-
-  getManyNotifications(
-    data: NotificationProto.GetManyNotificationsRequest
-  ): Promise<NotificationProto.GetManyNotificationsResponse> {
-    return lastValueFrom(this.notificationService.getManyNotifications(data));
+    this.userService = this.userClient.getService<UserProto.UserServiceClient>(
+      UserProto.USER_SERVICE_NAME
+    );
   }
 
   async createNotification(
@@ -47,7 +41,6 @@ export class NotificationService implements OnModuleInit {
         userId: notification.userId,
         type: notification.type,
         title: notification.title,
-        createdAt: notification.createdAt,
       };
 
       // this.logger.log(
@@ -71,9 +64,11 @@ export class NotificationService implements OnModuleInit {
     return notification;
   }
 
-  deleteNotification(
-    data: NotificationProto.DeleteNotificationRequest
-  ): Promise<NotificationProto.MessageResponse> {
-    return lastValueFrom(this.notificationService.deleteNotification(data));
+  async broadcastNotification(
+    data: NotificationProto.BroadcastNotificationRequest
+  ): Promise<NotificationProto.BroadcastNotificationResponse> {
+    const userIds = await lastValueFrom(this.userService.getAllUserIds({}));
+    data.userIds = userIds.userIds;
+    return lastValueFrom(this.notificationService.broadcastNotification(data));
   }
 }

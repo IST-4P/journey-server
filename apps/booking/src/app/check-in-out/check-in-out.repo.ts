@@ -14,6 +14,7 @@ import { BookingNotFoundException } from '../booking/booking.error';
 import { PrismaService } from '../prisma/prisma.service';
 import {
   CheckInNotPaidException,
+  CheckInOutAlreadyExistsException,
   CheckInWrongTimeException,
   CheckOutWithoutCheckInException,
 } from './check-in-out.error';
@@ -25,37 +26,45 @@ export class CheckInOutRepository {
     private readonly natsClient: NatsClient
   ) {}
 
-  async getManyCheckInOuts({
-    page,
-    limit,
-    ...where
-  }: GetManyCheckInOutsRequest) {
-    const skip = (page - 1) * limit;
-    const take = limit;
-    const [totalItems, checkInOuts] = await Promise.all([
-      this.prismaService.checkInOut.count({
-        where,
+  async getManyCheckInOuts(data: GetManyCheckInOutsRequest) {
+    const [checkIn, checkOut] = await Promise.all([
+      this.prismaService.checkInOut.findFirst({
+        where: {
+          ...data,
+          type: CheckTypeEnumValues.CHECK_IN,
+        },
       }),
-      this.prismaService.checkInOut.findMany({
-        where,
-        skip,
-        take,
-        orderBy: {
-          createdAt: 'desc',
+      this.prismaService.checkInOut.findFirst({
+        where: {
+          ...data,
+          type: CheckTypeEnumValues.CHECK_OUT,
         },
       }),
     ]);
 
     return {
-      checkInOuts: checkInOuts.map((checkInOut) => ({
-        ...checkInOut,
-        latitude: checkInOut.latitude.toNumber(),
-        longitude: checkInOut.longitude.toNumber(),
-      })),
-      page,
-      limit,
-      totalItems,
-      totalPages: Math.ceil(totalItems / limit),
+      checkIn: checkIn
+        ? {
+            ...checkIn,
+            latitude: checkIn.latitude.toNumber(),
+            longitude: checkIn.longitude.toNumber(),
+          }
+        : undefined,
+      checkOut: checkOut
+        ? {
+            ...checkOut,
+            latitude: checkOut.latitude.toNumber(),
+            longitude: checkOut.longitude.toNumber(),
+          }
+        : undefined,
+      message:
+        !checkIn && !checkOut
+          ? 'Error.CheckInOutNotFound'
+          : !checkIn
+          ? 'Message.CheckInNotFound'
+          : !checkOut
+          ? 'Message.CheckOutNotFound'
+          : 'Success',
     };
   }
 
@@ -83,6 +92,13 @@ export class CheckInOutRepository {
         where: {
           id: data.bookingId,
         },
+        include: {
+          checkIns: {
+            where: {
+              type: CheckTypeEnumValues.CHECK_IN,
+            },
+          },
+        },
       });
 
       if (!booking) {
@@ -91,6 +107,10 @@ export class CheckInOutRepository {
 
       if (booking.status !== BookingStatusValues.FULLY_PAID) {
         throw CheckInNotPaidException;
+      }
+
+      if (booking.checkIns.length > 0) {
+        throw CheckInOutAlreadyExistsException;
       }
 
       const checkDate = new Date(data.checkDate!);
@@ -153,11 +173,7 @@ export class CheckInOutRepository {
           id: data.bookingId,
         },
         include: {
-          checkIns: {
-            where: {
-              type: CheckTypeEnumValues.CHECK_IN,
-            },
-          },
+          checkIns: true,
         },
       });
 
@@ -165,8 +181,19 @@ export class CheckInOutRepository {
         throw BookingNotFoundException;
       }
 
-      if (booking.checkIns.length === 0) {
+      const hasCheckIn = booking.checkIns.some(
+        (checkIn) => checkIn.type === CheckTypeEnumValues.CHECK_IN
+      );
+      const hasCheckOut = booking.checkIns.some(
+        (checkIn) => checkIn.type === CheckTypeEnumValues.CHECK_OUT
+      );
+
+      if (!hasCheckIn) {
         throw CheckOutWithoutCheckInException;
+      }
+
+      if (hasCheckOut) {
+        throw CheckInOutAlreadyExistsException;
       }
 
       let overtimeAmount = 0;

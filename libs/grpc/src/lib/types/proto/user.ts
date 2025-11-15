@@ -65,6 +65,13 @@ export interface UpdateProfileRequest {
   email?: string | undefined;
 }
 
+export interface GetAllUserIdsRequest {
+}
+
+export interface GetAllUserIdsResponse {
+  userIds: string[];
+}
+
 /** GetDriverLicense */
 export interface GetDriverLicenseRequest {
   userId: string;
@@ -231,6 +238,8 @@ export interface UserServiceClient {
 
   updateProfile(request: UpdateProfileRequest): Observable<GetProfileResponse>;
 
+  getAllUserIds(request: GetAllUserIdsRequest): Observable<GetAllUserIdsResponse>;
+
   getDriverLicense(request: GetDriverLicenseRequest): Observable<GetDriverLicenseResponse>;
 
   createDriverLicense(request: CreateDriverLicenseRequest): Observable<GetDriverLicenseResponse>;
@@ -268,6 +277,10 @@ export interface UserServiceController {
   updateProfile(
     request: UpdateProfileRequest,
   ): Promise<GetProfileResponse> | Observable<GetProfileResponse> | GetProfileResponse;
+
+  getAllUserIds(
+    request: GetAllUserIdsRequest,
+  ): Promise<GetAllUserIdsResponse> | Observable<GetAllUserIdsResponse> | GetAllUserIdsResponse;
 
   getDriverLicense(
     request: GetDriverLicenseRequest,
@@ -324,6 +337,7 @@ export function UserServiceControllerMethods() {
       "getProfile",
       "findAllProfiles",
       "updateProfile",
+      "getAllUserIds",
       "getDriverLicense",
       "createDriverLicense",
       "updateDriverLicense",

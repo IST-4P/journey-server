@@ -1,6 +1,7 @@
 import {
   GetAllProfilesRequest,
   GetAllProfilesResponse,
+  GetAllUserIdsResponse,
   GetProfileRequest,
   GetProfileResponse,
   UpdateProfileRequest,
@@ -28,5 +29,10 @@ export class ProfileGrpcController {
   @GrpcMethod('UserService', 'UpdateProfile')
   updateProfile(data: UpdateProfileRequest) {
     return this.profileService.updateProfile(data);
+  }
+
+  @GrpcMethod('UserService', 'GetAllUserIds')
+  getAllUserIds(): Promise<GetAllUserIdsResponse> {
+    return this.profileService.getAllUserIds();
   }
 }

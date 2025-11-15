@@ -18,9 +18,9 @@ export class PaymentGateway implements OnGatewayConnection {
   server!: Server;
 
   handleConnection(client: Socket) {
-    const paymentCode = client.handshake.query.paymentCode;
-    if (paymentCode) {
-      const room = generateRoomUserId(paymentCode as string);
+    const userId = client.data['userId'];
+    if (userId) {
+      const room = generateRoomUserId(userId);
       client.join(room);
     }
   }

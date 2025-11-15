@@ -13,10 +13,15 @@ export const GetManyNotificationsResponseSchema = z.object({
       id: true,
       title: true,
       type: true,
+      content: true,
       read: true,
       createdAt: true,
     })
   ),
+  page: z.number(),
+  limit: z.number(),
+  totalItems: z.number(),
+  totalPages: z.number(),
 });
 
 export const GetNotificationRequestSchema = NotificationValidatorSchema.pick({
@@ -49,6 +54,20 @@ export const MarkAsReadRequestSchema = z.object({
     .min(1, 'At least one notification ID is required'),
 });
 
+export const BroadcastNotificationRequestSchema =
+  NotificationValidatorSchema.pick({
+    type: true,
+    title: true,
+    content: true,
+  }).extend({
+    userIds: z.array(z.string().uuid()),
+  });
+
+export const BroadcastNotificationResponseSchema = z.object({
+  totalCreated: z.number(),
+  message: z.string(),
+});
+
 export type GetManyNotificationsRequest = z.infer<
   typeof GetManyNotificationsRequestSchema
 >;
@@ -68,3 +87,9 @@ export type DeleteNotificationRequest = z.infer<
   typeof DeleteNotificationRequestSchema
 >;
 export type MarkAsReadRequest = z.infer<typeof MarkAsReadRequestSchema>;
+export type BroadcastNotificationRequest = z.infer<
+  typeof BroadcastNotificationRequestSchema
+>;
+export type BroadcastNotificationResponse = z.infer<
+  typeof BroadcastNotificationResponseSchema
+>;

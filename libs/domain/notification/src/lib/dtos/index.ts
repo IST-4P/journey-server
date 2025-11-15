@@ -1,5 +1,6 @@
 import { createZodDto } from 'nestjs-zod';
 import {
+  BroadcastNotificationRequestSchema,
   CreateNotificationRequestSchema,
   DeleteNotificationRequestSchema,
   GetManyNotificationsRequestSchema,
@@ -35,4 +36,7 @@ export class DeleteNotificationRequestDTO extends createZodDto(
 
 export class MarkAsReadRequestDTO extends createZodDto(
   MarkAsReadRequestSchema
+) {}
+export class BroadcastNotificationDTO extends createZodDto(
+  BroadcastNotificationRequestSchema
 ) {}

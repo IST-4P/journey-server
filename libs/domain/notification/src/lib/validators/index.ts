@@ -1,10 +1,10 @@
 import { z } from 'zod';
-import { NotificationEnum } from '../enums';
+import { NotificationTypeEnum } from '../enums';
 
 export const NotificationValidatorSchema = z.object({
   id: z.string().uuid(),
   userId: z.string().uuid(),
-  type: NotificationEnum,
+  type: NotificationTypeEnum,
   title: z.string(),
   content: z.string(),
   read: z.boolean(),

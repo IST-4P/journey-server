@@ -4,11 +4,10 @@ import { AckPolicy, DeliverPolicy } from 'nats';
 import { NotificationGateway } from './notification.gateway';
 
 interface DataEvent {
-  id: string;
   userId: string;
   title: string;
   type: string;
-  createdAt: string;
+  content: string;
 }
 
 @Injectable()

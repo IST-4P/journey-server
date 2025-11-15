@@ -74,4 +74,8 @@ export class ProfileService {
     }
     return this.profileRepo.updateProfile(userId, data);
   }
+
+  async getAllUserIds() {
+    return this.profileRepo.getAllUserIds();
+  }
 }

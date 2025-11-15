@@ -1,4 +1,6 @@
 import {
+  BroadcastNotificationRequest,
+  BroadcastNotificationResponse,
   CreateNotificationRequest,
   DeleteNotificationRequest,
   GetManyNotificationsRequest,
@@ -47,5 +49,12 @@ export class NotificationGrpcController {
     data: DeleteNotificationRequest
   ): Promise<MessageResponse> {
     return this.notificationService.deleteNotification(data);
+  }
+
+  @GrpcMethod('NotificationService', 'BroadcastNotification')
+  broadcastNotification(
+    data: BroadcastNotificationRequest
+  ): Promise<BroadcastNotificationResponse> {
+    return this.notificationService.broadcastNotification(data);
   }
 }

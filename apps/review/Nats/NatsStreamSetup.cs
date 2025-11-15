@@ -51,11 +51,11 @@ namespace review.Nats
                 )
                 {
                     Storage = StreamConfigStorage.File,
-                    Retention = StreamConfigRetention.Workqueue,
+                    Retention = StreamConfigRetention.Limits,
                     MaxAge = TimeSpan.FromDays(30),
                     MaxMsgs = 1000000,
                     MaxBytes = 1073741824, // 1GB
-                    Replicas = 1
+                    NumReplicas = 2
                 };
 
                 try

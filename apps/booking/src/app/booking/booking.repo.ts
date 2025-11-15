@@ -337,10 +337,18 @@ export class BookingRepository {
         }
       );
 
+      const paymentFailed$ = this.natsClient.publish(
+        'journey.events.payment-expired',
+        {
+          id: booking.id,
+        }
+      );
+
       await Promise.all([
         updateStatusBooking$,
         createBookingHistory$,
         vehicleActive$,
+        paymentFailed$,
       ]);
     });
   }

@@ -1,5 +1,4 @@
 using Grpc.Core;
-using AutoMapper;
 using rental.Repository;
 using rental.Model.Dto;
 using Rental;
@@ -568,6 +567,32 @@ namespace rental.Service
                 // Update the rental's end date to reflect the extension
                 rental.EndDate = newEnd;
                 await _repository.UpdateAsync(rental.Id, new UpdateRentalRequestDto { EndDate = newEnd });
+
+                // Publish rental extension event to NATS for payment service
+                if (request.AdditionalFee > 0)
+                {
+                    try
+                    {
+                        var extensionEvent = new rental.Nats.Events.RentalExtensionCreatedEvent
+                        {
+                            Id = Guid.NewGuid().ToString(),
+                            UserId = rental.UserId.ToString(),
+                            Type = "EXTENSION",
+                            RentalId = rental.Id.ToString(),
+                            TotalAmount = request.AdditionalFee,
+                            AdditionalFee = request.AdditionalFee,
+                            AdditionalHours = (int)request.AdditionalHours,
+                            NewEndDate = newEnd,
+                            CreatedAt = DateTime.UtcNow
+                        };
+                        await _natsPublisher.PublishAsync("journey.events.payment-extension", extensionEvent);
+                        _logger.LogInformation("[Rental] Published payment-extension event for rental {RentalId}", rental.Id);
+                    }
+                    catch (Exception ex)
+                    {
+                        _logger.LogWarning(ex, "[Rental] Failed to publish payment-extension event for rental {RentalId}", rental.Id);
+                    }
+                }
 
                 // If additional fee applies, attempt payment for the extension
                 if (request.AdditionalFee > 0)
@@ -1212,6 +1237,30 @@ namespace rental.Service
             {
                 _logger.LogError(ex, "Error getting rental history for rental {RentalId}", request.RentalId);
                 throw new RpcException(new Status(StatusCode.Internal, "Failed to get rental history"));
+            }
+        }
+
+        // Debug: Publish debug event to NATS (deprecated - use standard events instead)
+        public override async Task<PublishDebugEventResponse> PublishDebugEvent(PublishDebugEventRequest request, ServerCallContext context)
+        {
+            try
+            {
+                _logger.LogWarning("[Rental] Debug events deprecated - use standard event publishing instead");
+
+                return new PublishDebugEventResponse
+                {
+                    Success = false,
+                    Message = "Debug events deprecated - use standard event publishing instead"
+                };
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error publishing debug event");
+                return new PublishDebugEventResponse
+                {
+                    Success = false,
+                    Message = $"Failed to publish debug event: {ex.Message}"
+                };
             }
         }
     }

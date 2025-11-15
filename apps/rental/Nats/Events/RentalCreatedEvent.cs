@@ -44,4 +44,17 @@ namespace rental.Nats.Events
         public double RemainingAmountPaid { get; set; }
         public DateTime ReceivedAt { get; set; }
     }
+
+    public class RentalExtensionCreatedEvent
+    {
+        public string Id { get; set; } = string.Empty;
+        public string UserId { get; set; } = string.Empty;
+        public string Type { get; set; } = "EXTENSION";
+        public string RentalId { get; set; } = string.Empty;
+        public double TotalAmount { get; set; }
+        public double AdditionalFee { get; set; }
+        public int AdditionalHours { get; set; }
+        public DateTime NewEndDate { get; set; }
+        public DateTime CreatedAt { get; set; }
+    }
 }

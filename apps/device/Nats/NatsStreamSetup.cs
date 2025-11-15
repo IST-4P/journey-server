@@ -24,17 +24,21 @@ namespace device.Nats
                 // Create JOURNEY_EVENTS stream with device subjects
                 var streamConfig = new StreamConfig(
                     name: "JOURNEY_EVENTS",
-                    subjects: new[] {
-                    "journey.events.device.updated",
+                subjects: new[] {
                     "journey.events.device.created",
+                    "journey.events.device.updated",
                     "journey.events.device.deleted",
-                    "journey.events.combo.updated",
-                    "journey.events.combo.created",
-                    "journey.events.combo.deleted" }
+                    "journey.events.device.rented",
+                    "journey.events.device.reserved",
+                    "journey.events.device.active",
+                    "journey.events.payment-extension",
+                    "journey.events.debug.device",
+                    "journey.events.debug.rental",
+                    "journey.events.debug.review" }
                 )
                 {
                     Storage = StreamConfigStorage.File,
-                    Retention = StreamConfigRetention.Workqueue,
+                    Retention = StreamConfigRetention.Limits,
                     MaxAge = TimeSpan.FromDays(30)
                 };
 

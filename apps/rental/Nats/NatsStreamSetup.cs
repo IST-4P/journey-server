@@ -27,16 +27,19 @@ namespace rental.Nats
                 subjects: new[] {
                     "journey.events.rental.created",
                     "journey.events.rental.updated",
-                    "journey.events.rental.received",
                     "journey.events.rental.completed",
+                    "journey.events.rental.expired",
+                    "journey.events.rental.paid",
                     "journey.events.rental.cancelled",
-                    "journey.events.payment-booking",
-                    "journey.events.rental-paid",
-                    "journey.events.review.created" }
+                    "journey.events.review.created",
+                    "journey.events.payment-extension",
+                    "journey.events.debug.device",
+                    "journey.events.debug.rental",
+                    "journey.events.debug.review" }
                 )
                 {
                     Storage = StreamConfigStorage.File,
-                    Retention = StreamConfigRetention.Workqueue,
+                    Retention = StreamConfigRetention.Limits,
                     MaxAge = TimeSpan.FromDays(30)
                 };
 

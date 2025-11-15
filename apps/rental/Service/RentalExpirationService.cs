@@ -8,7 +8,7 @@ namespace rental.Service
     {
         private readonly IServiceScopeFactory _scopeFactory;
         private readonly ILogger<RentalExpirationService> _logger;
-        private readonly TimeSpan _checkInterval = TimeSpan.FromMinutes(1); // Check every 1 minute
+        private readonly TimeSpan _checkInterval = TimeSpan.FromMinutes(5); // Check every 5 minutes
         private readonly TimeSpan _expirationTime = TimeSpan.FromMinutes(15); // Expire after 15 minutes
 
         public RentalExpirationService(
@@ -34,7 +34,7 @@ namespace rental.Service
                     _logger.LogError(ex, "[RentalExpirationService] Error checking expired rentals");
                 }
 
-                await Task.Delay(_checkInterval, stoppingToken);
+                await Task.Delay(TimeSpan.FromMinutes(1), stoppingToken); // Change to 5 minutes if needed   
             }
         }
 

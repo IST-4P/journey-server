@@ -23,7 +23,8 @@ service RentalService {
   rpc CreateRentalExtension(CreateRentalExtensionRequest) returns (RentalResponse);
   rpc GetRentalExtensions(GetRentalExtensionsRequest) returns (GetRentalExtensionsResponse);
 
-
+  // Debug: Test NATS connection
+  rpc PublishDebugEvent(PublishDebugEventRequest) returns (PublishDebugEventResponse);
 }
 
 
@@ -231,4 +232,15 @@ message GetHistoryRentalRequest {
 
 message GetHistoryRentalResponse {
   repeated RentalHistoryMessage histories = 1;
+}
+
+// Debug: Publish debug event to NATS
+message PublishDebugEventRequest {
+  string message = 1;
+  optional string rentalId = 2;
+}
+
+message PublishDebugEventResponse {
+  bool success = 1;
+  string message = 2;
 }

@@ -1,10 +1,8 @@
 using NATS.Client.Core;
-using NATS.Client.JetStream;
-using NATS.Client.JetStream.Models;
+using rental.Nats.Base;
 using rental.Nats.Events;
-using rental.Repository;
 using rental.Model.Entities;
-using System.Text.Json;
+using Microsoft.EntityFrameworkCore;
 
 namespace rental.Nats.Consumers
 {
@@ -13,127 +11,62 @@ namespace rental.Nats.Consumers
     /// Listens to journey.events.rental-paid subject (from payment service)
     /// Updates rental status when deposit payment is confirmed
     /// </summary>
-    public class PaymentRentalConsumer : BackgroundService
+    public class PaymentRentalConsumer : NatsConsumerBase<RentalCreatedEvent>
     {
-        private readonly NatsConnection _natsConnection;
-        private readonly IServiceProvider _serviceProvider;
-        private readonly ILogger<PaymentRentalConsumer> _logger;
+        protected override string ConsumerName => "rental-payment-confirmed";
+        protected override string FilterSubject => "journey.events.rental-paid";
 
         public PaymentRentalConsumer(
             NatsConnection natsConnection,
             IServiceProvider serviceProvider,
             ILogger<PaymentRentalConsumer> logger)
+            : base(natsConnection, serviceProvider, logger)
         {
-            _natsConnection = natsConnection;
-            _serviceProvider = serviceProvider;
-            _logger = logger;
         }
 
-        protected override async Task ExecuteAsync(CancellationToken stoppingToken)
+        protected override async Task HandleEventAsync(RentalCreatedEvent paymentEvent, CancellationToken cancellationToken)
         {
-            _logger.LogInformation("[Rental] Starting PaymentRentalConsumer...");
+            if (string.IsNullOrEmpty(paymentEvent.RentalId))
+            {
+                Logger.LogWarning("[Rental] Received rental-paid event without RentalId");
+                return;
+            }
+
+            Logger.LogInformation(
+                "[Rental] Received rental-paid event for RentalId: {RentalId}, Amount: {Amount}",
+                paymentEvent.RentalId, paymentEvent.Deposit);
+
+            using var scope = ServiceProvider.CreateScope();
+            var context = scope.ServiceProvider.GetRequiredService<rental.Data.RentalDbContext>();
+
+            if (!Guid.TryParse(paymentEvent.RentalId, out var rentalId))
+            {
+                Logger.LogWarning("[Rental] Invalid RentalId: {RentalId}", paymentEvent.RentalId);
+                return;
+            }
 
             try
             {
-                var js = new NatsJSContext(_natsConnection);
+                var rental = await context.Set<rental.Model.Entities.Rental>()
+                    .FirstOrDefaultAsync(r => r.Id == rentalId, cancellationToken);
 
-                // Create consumer configuration
-                var consumerConfig = new ConsumerConfig("rental-service-rental-paid")
+                if (rental == null)
                 {
-                    DurableName = "rental-service-rental-paid",
-                    AckPolicy = ConsumerConfigAckPolicy.Explicit,
-                    DeliverPolicy = ConsumerConfigDeliverPolicy.All,
-                    FilterSubject = "journey.events.rental-paid",
-                    MaxDeliver = 3,
-                    AckWait = TimeSpan.FromSeconds(30)
-                };
-
-                try
-                {
-                    await js.CreateOrUpdateConsumerAsync("JOURNEY_EVENTS", consumerConfig, stoppingToken);
-                    _logger.LogInformation("[Rental] Consumer 'rental-service-rental-paid' created/updated successfully");
-                }
-                catch (Exception ex)
-                {
-                    _logger.LogWarning(ex, "[Rental] Consumer might already exist or stream not ready");
+                    Logger.LogWarning("[Rental] Rental not found: {RentalId}", rentalId);
+                    return;
                 }
 
-                // Get consumer and subscribe to messages
-                var consumer = await js.GetConsumerAsync("JOURNEY_EVENTS", "rental-service-rental-paid", stoppingToken);
-
-                await foreach (var msg in consumer.ConsumeAsync<string>(cancellationToken: stoppingToken))
+                if (rental.Status == RentalStatus.PENDING)
                 {
-                    try
-                    {
-                        var json = msg.Data;
-                        if (string.IsNullOrEmpty(json))
-                        {
-                            await msg.AckAsync(cancellationToken: stoppingToken);
-                            continue;
-                        }
-
-                        var paymentEvent = JsonSerializer.Deserialize<RentalCreatedEvent>(json);
-
-                        if (paymentEvent != null && !string.IsNullOrEmpty(paymentEvent.RentalId))
-                        {
-                            _logger.LogInformation(
-                                "[Rental] Received rental-paid event for RentalId: {RentalId}, Amount: {Amount}",
-                                paymentEvent.RentalId, paymentEvent.Deposit);
-
-                            await HandlePaymentReceivedAsync(paymentEvent, stoppingToken);
-                        }
-
-                        await msg.AckAsync(cancellationToken: stoppingToken);
-                    }
-                    catch (Exception ex)
-                    {
-                        _logger.LogError(ex, "[Rental] Error processing rental-paid event");
-                        await msg.NakAsync(delay: TimeSpan.FromSeconds(5), cancellationToken: stoppingToken);
-                    }
+                    rental.Status = RentalStatus.DEPOSIT_PAID;
+                    await context.SaveChangesAsync(cancellationToken);
+                    Logger.LogInformation("[Rental] Updated status to DEPOSIT_PAID for Rental {RentalId}", rentalId);
                 }
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "[Rental] PaymentRentalConsumer failed");
-            }
-        }
-
-        private async Task HandlePaymentReceivedAsync(RentalCreatedEvent paymentEvent, CancellationToken cancellationToken)
-        {
-            using var scope = _serviceProvider.CreateScope();
-            var rentalRepository = scope.ServiceProvider.GetRequiredService<RentalRepository>();
-
-            if (!Guid.TryParse(paymentEvent.RentalId, out var rentalId))
-            {
-                _logger.LogWarning("[Rental] Invalid RentalId: {RentalId}", paymentEvent.RentalId);
-                return;
-            }
-
-            var rental = await rentalRepository.GetByIdAsync(rentalId);
-            if (rental == null)
-            {
-                _logger.LogWarning("[Rental] Rental not found: {RentalId}", rentalId);
-                return;
-            }
-
-            // Update rental status based on payment type
-            if (rental.Status == RentalStatus.PENDING)
-            {
-                // Deposit payment received
-                _logger.LogInformation(
-                    "[Rental] Updating rental {RentalId} status to DEPOSIT_PAID",
-                    rentalId);
-
-                await rentalRepository.UpdateAsync(rentalId, new Model.Dto.UpdateRentalRequestDto
-                {
-                    Status = RentalStatus.DEPOSIT_PAID.ToString()
-                });
-            }
-            else
-            {
-                _logger.LogInformation(
-                    "[Rental] Rental {RentalId} is already in status {Status}, skipping update",
-                    rentalId, rental.Status);
+                Logger.LogError(ex, "[Rental] Failed to handle payment for Rental {RentalId}", rentalId);
+                throw;
             }
         }
     }

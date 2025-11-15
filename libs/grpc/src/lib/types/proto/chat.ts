@@ -57,8 +57,22 @@ export interface GetManyConversationsRequest {
   limit: number;
 }
 
-export interface GetManyConversationsResponse {
+export interface UserFullNameAndAvatar {
+  id: string;
+  fullName: string;
+  avatarUrl: string;
+}
+
+export interface GetManyConversationsWithUserIds {
   conversations: string[];
+  page: number;
+  limit: number;
+  totalItems: number;
+  totalPages: number;
+}
+
+export interface GetManyConversationsResponse {
+  conversations: UserFullNameAndAvatar[];
   page: number;
   limit: number;
   totalItems: number;
@@ -78,6 +92,7 @@ export interface Complaint {
 /** GetManyComplaints */
 export interface GetManyComplaintsRequest {
   status?: string | undefined;
+  userId?: string | undefined;
   page: number;
   limit: number;
 }
@@ -151,7 +166,7 @@ export interface ChatServiceClient {
 
   createChat(request: CreateChatRequest): Observable<CreateChatResponse>;
 
-  getManyConversations(request: GetManyConversationsRequest): Observable<GetManyConversationsResponse>;
+  getManyConversations(request: GetManyConversationsRequest): Observable<GetManyConversationsWithUserIds>;
 
   getManyComplaints(request: GetManyComplaintsRequest): Observable<GetManyComplaintsResponse>;
 
@@ -173,7 +188,10 @@ export interface ChatServiceController {
 
   getManyConversations(
     request: GetManyConversationsRequest,
-  ): Promise<GetManyConversationsResponse> | Observable<GetManyConversationsResponse> | GetManyConversationsResponse;
+  ):
+    | Promise<GetManyConversationsWithUserIds>
+    | Observable<GetManyConversationsWithUserIds>
+    | GetManyConversationsWithUserIds;
 
   getManyComplaints(
     request: GetManyComplaintsRequest,

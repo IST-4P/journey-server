@@ -133,7 +133,7 @@ export class PaymentRepository {
   }
 
   async updatePaymentStatus(data: UpdateStatusPaymentRequest) {
-    return this.prismaService.payment.update({
+    await this.prismaService.payment.update({
       where: {
         id: data.id,
       },

@@ -7,6 +7,7 @@ service UserService {
   rpc FindAllProfiles(FindAllProfilesRequest) returns (FindAllProfilesResponse);
   rpc UpdateProfile(UpdateProfileRequest) returns (GetProfileResponse);
   rpc GetAllUserIds(GetAllUserIdsRequest) returns (GetAllUserIdsResponse);
+  rpc GetFullNameAndAvatar(GetFullNameAndAvatarRequest) returns (GetFullNameAndAvatarResponse);
 
   rpc GetDriverLicense(GetDriverLicenseRequest) returns (GetDriverLicenseResponse);
   rpc CreateDriverLicense(CreateDriverLicenseRequest) returns (GetDriverLicenseResponse);
@@ -240,4 +241,19 @@ message DeleteAddressRequest {
 
 message DeleteAddressResponse {
   string message = 1;
+}
+
+// GetFullNameAndAvatar
+message GetFullNameAndAvatarRequest {
+  repeated string userIds = 1;
+}
+
+message UserFullNameAndAvatar {
+  string id = 1;
+  string fullName = 2;
+  string avatarUrl = 3;
+}
+
+message GetFullNameAndAvatarResponse {
+  repeated UserFullNameAndAvatar users = 1;
 }

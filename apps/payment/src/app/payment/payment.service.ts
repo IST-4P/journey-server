@@ -2,7 +2,6 @@ import {
   CreatePaymentRequest,
   GetManyPaymentsRequest,
   GetPaymentRequest,
-  UpdateStatusPaymentRequest,
   WebhookPaymentRequest,
 } from '@domain/payment';
 import { Injectable } from '@nestjs/common';
@@ -56,17 +55,6 @@ export class PaymentService {
 
   async createPaymentForExtension(data: CreatePaymentRequest) {
     return this.paymentRepository.createPaymentForExtension(data);
-  }
-
-  async updateStatusPayment(data: UpdateStatusPaymentRequest) {
-    const payment = await this.paymentRepository.getPayment({
-      id: data.id,
-      userId: data.userId,
-    });
-    if (!payment) {
-      throw PaymentNotFoundException;
-    }
-    return this.paymentRepository.updatePaymentStatus(data);
   }
 
   async receiver(data: WebhookPaymentRequest) {

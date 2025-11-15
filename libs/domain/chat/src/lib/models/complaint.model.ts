@@ -10,6 +10,7 @@ export const GetComplaintResponseSchema = ComplaintValidatorSchema;
 
 export const GetManyComplaintsRequestSchema = ComplaintValidatorSchema.pick({
   status: true,
+  userId: true,
 })
   .partial()
   .extend(PaginationQuerySchema.shape);

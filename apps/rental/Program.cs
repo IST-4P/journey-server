@@ -38,6 +38,8 @@ builder.Services.AddSingleton(sp =>
 builder.Services.AddSingleton<NatsPublisher>();
 builder.Services.AddSingleton<NatsStreamSetup>();
 builder.Services.AddHostedService<PaymentRentalConsumer>();
+builder.Services.AddHostedService<RentalExpirationService>();
+builder.Services.AddHostedService<ReviewCreatedConsumer>();
 
 // Build database connection string by expanding placeholders from environment variables
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection") ?? string.Empty;

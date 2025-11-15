@@ -104,20 +104,25 @@ namespace rental.Service
                         // Reduce device quantity
                         try
                         {
+                            var newQuantity = Math.Max(0, device.Quantity - protoItem.Quantity);
+                            var newStatus = newQuantity == 0 ? "Unavailable" : device.Status;
+
                             var updateReq = new Device.UpdateDeviceRequest
                             {
                                 DeviceId = protoItem.TargetId,
                                 Name = device.Name,
                                 Price = device.Price,
                                 Description = device.Description,
-                                Status = device.Status,
-                                Quantity = Math.Max(0, device.Quantity - protoItem.Quantity),
+                                Status = newStatus, // Update status to Unavailable if quantity is 0
+                                Quantity = newQuantity,
                                 CategoryId = device.CategoryId
                             };
                             updateReq.Information.AddRange(device.Information);
                             updateReq.Images.AddRange(device.Images);
 
                             await _deviceClient.UpdateDeviceAsync(updateReq);
+                            _logger.LogInformation("Device {DeviceId} quantity updated: {OldQty} -> {NewQty}, Status: {Status}",
+                                protoItem.TargetId, device.Quantity, newQuantity, newStatus);
                         }
                         catch (Exception ex)
                         {
@@ -172,12 +177,21 @@ namespace rental.Service
                     UserId = rental.UserId,
                     StartDate = rental.StartDate,
                     EndDate = rental.EndDate,
-                    Items = rental.Items.ToString()! != null ?
-                        JsonSerializer.Deserialize<List<RentalItemData>>(rental.Items.ToString()!) ?? new List<RentalItemData>()
-                        : new List<RentalItemData>()
+                    Items = itemsDataList
                 };
 
                 var created = await _repository.CreateAsync(createDto);
+
+                // Update the created entity with calculated values
+                created.RentalFee = totalRentalFee;
+                created.DiscountPercent = request.DiscountPercent;
+                created.MaxDiscount = request.MaxDiscount;
+                created.Deposit = deposit;
+                created.RemainingAmount = remainingAmount;
+                created.TotalPrice = totalPrice;
+                created.TotalQuantity = totalQuantity;
+
+                await _repository.SaveChangesAsync();
 
                 // Record initial status in history
                 await RecordStatusChange(created.Id, RentalStatus.PENDING, RentalStatus.PENDING, "Initial rental creation");
@@ -242,8 +256,8 @@ namespace rental.Service
                     };
                     await _natsPublisher.PublishAsync("journey.events.rental.created", rentalCreatedEvent);
 
-                    // Publish to payment-created subject for payment service to create payment record
-                    await _natsPublisher.PublishAsync("journey.events.payment-created", rentalCreatedEvent);
+                    // Publish to payment-booking subject for payment service to create payment record
+                    await _natsPublisher.PublishAsync("journey.events.payment-booking", rentalCreatedEvent);
                 }
                 catch (Exception ex)
                 {
@@ -434,6 +448,12 @@ namespace rental.Service
                 foreach (var item in itemDetails)
                 {
                     response.Items.Add(item);
+                }
+
+                // Add ReviewId if exists
+                if (rental.ReviewId.HasValue)
+                {
+                    response.ReviewId = rental.ReviewId.Value.ToString();
                 }
 
                 return response;
@@ -825,20 +845,14 @@ namespace rental.Service
         // Map Entity to DTO
         private async Task<RentalResponseDto> MapToRentalResponseDto(RentalEntity rental)
         {
-            var items = DeserializeItemsSafe(rental.Items);
-            var itemDetails = await BuildItemDetailsDtos(items);
-
             return new RentalResponseDto
             {
                 Id = rental.Id,
                 UserId = rental.UserId,
-                Items = itemDetails,
                 Status = rental.Status.ToString(),
                 RentalFee = rental.RentalFee,
                 Deposit = rental.Deposit ?? 0,
                 RemainingAmount = rental.RemainingAmount ?? 0,
-                MaxDiscount = rental.MaxDiscount,
-                DiscountPercent = rental.DiscountPercent,
                 TotalPrice = rental.TotalPrice,
                 TotalQuantity = rental.TotalQuantity,
                 StartDate = rental.StartDate,
@@ -850,33 +864,26 @@ namespace rental.Service
 
         private async Task<UserRentalDto> MapToUserRentalDto(RentalEntity rental)
         {
-            var items = DeserializeItemsSafe(rental.Items);
-            var itemDetails = await BuildItemDetailsDtos(items);
-
             return new UserRentalDto
             {
                 Id = rental.Id,
-                Items = itemDetails,
                 TotalPrice = rental.TotalPrice,
-                MaxDiscount = rental.MaxDiscount,
-                DiscountPercent = rental.DiscountPercent,
                 Status = rental.Status.ToString(),
                 StartDate = rental.StartDate,
                 EndDate = rental.EndDate,
-                CreatedAt = rental.CreatedAt
+                CreatedAt = rental.CreatedAt,
+                ReviewId = rental.ReviewId
             };
         }
 
         private async Task<AdminRentalDto> MapToAdminRentalDto(RentalEntity rental)
         {
             var items = DeserializeItemsSafe(rental.Items);
-            var itemDetails = await BuildItemDetailsDtos(items);
 
             return new AdminRentalDto
             {
                 Id = rental.Id,
                 UserId = rental.UserId,
-                Items = itemDetails,
                 TotalPrice = rental.TotalPrice,
                 MaxDiscount = rental.MaxDiscount,
                 DiscountPercent = rental.DiscountPercent,
@@ -898,8 +905,6 @@ namespace rental.Service
                 RentalFee = dto.RentalFee,
                 Deposit = dto.Deposit,
                 RemainingAmount = dto.RemainingAmount,
-                MaxDiscount = dto.MaxDiscount,
-                DiscountPercent = dto.DiscountPercent,
                 TotalPrice = dto.TotalPrice,
                 TotalQuantity = dto.TotalQuantity,
                 StartDate = dto.StartDate.ToString("O"),
@@ -908,18 +913,6 @@ namespace rental.Service
                 ActualEndDate = dto.ActualEndDate?.ToString("O") ?? string.Empty
             };
 
-            foreach (var item in dto.Items)
-            {
-                response.Items.Add(new RentalItemDetail
-                {
-                    TargetId = item.TargetId,
-                    IsCombo = item.IsCombo,
-                    Quantity = item.Quantity,
-                    Name = item.Name,
-                    UnitPrice = item.UnitPrice,
-                    Subtotal = item.Subtotal
-                });
-            }
 
             return response;
         }
@@ -932,25 +925,17 @@ namespace rental.Service
             {
                 Id = dto.Id.ToString(),
                 TotalPrice = dto.TotalPrice,
-                MaxDiscount = dto.MaxDiscount,
-                DiscountPercent = dto.DiscountPercent,
                 Status = dto.Status,
                 StartDate = dto.StartDate.ToString("O"),
                 EndDate = dto.EndDate.ToString("O"),
-                CreatedAt = dto.CreatedAt.ToString("O")
+                CreatedAt = dto.CreatedAt.ToString("O"),
+                DiscountPercent = rental.DiscountPercent
             };
 
-            foreach (var item in dto.Items)
+            // Add ReviewId if exists
+            if (dto.ReviewId.HasValue)
             {
-                response.Items.Add(new RentalItemDetail
-                {
-                    TargetId = item.TargetId,
-                    IsCombo = item.IsCombo,
-                    Quantity = item.Quantity,
-                    Name = item.Name,
-                    UnitPrice = item.UnitPrice,
-                    Subtotal = item.Subtotal
-                });
+                response.ReviewId = dto.ReviewId.Value.ToString();
             }
 
             return response;
@@ -993,18 +978,6 @@ namespace rental.Service
                 CreatedAt = dto.CreatedAt.ToString("O")
             };
 
-            foreach (var item in dto.Items)
-            {
-                response.Items.Add(new RentalItemDetail
-                {
-                    TargetId = item.TargetId,
-                    IsCombo = item.IsCombo,
-                    Quantity = item.Quantity,
-                    Name = item.Name,
-                    UnitPrice = item.UnitPrice,
-                    Subtotal = item.Subtotal
-                });
-            }
 
             return response;
         }

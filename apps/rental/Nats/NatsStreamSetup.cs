@@ -24,14 +24,15 @@ namespace rental.Nats
                 // Create JOURNEY_EVENTS stream with rental subjects
                 var streamConfig = new StreamConfig(
                     name: "JOURNEY_EVENTS",
-                    subjects: new[] {
+                subjects: new[] {
                     "journey.events.rental.created",
                     "journey.events.rental.updated",
                     "journey.events.rental.received",
                     "journey.events.rental.completed",
                     "journey.events.rental.cancelled",
-                    "journey.events.payment-created",
-                    "journey.events.rental-paid" }
+                    "journey.events.payment-booking",
+                    "journey.events.rental-paid",
+                    "journey.events.review.created" }
                 )
                 {
                     Storage = StreamConfigStorage.File,

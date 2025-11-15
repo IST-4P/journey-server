@@ -84,6 +84,7 @@ message RentalResponse {
   string createdAt = 13;
   optional string actualEndDate = 14;
   double discountPercent = 15; // Discount percentage applied
+  optional string reviewId = 16; // Review ID if user has reviewed this rental
 }
 
 // User: Create Rental
@@ -106,14 +107,13 @@ message GetMyRentalsRequest {
 
 message UserRental {
   string id = 1;
-  repeated RentalItemDetail items = 2;
-  double totalPrice = 3;
-  double maxDiscount = 4; 
-  string status = 5;
-  string startDate = 6;
-  string endDate = 7;
-  string createdAt = 8;
-  double discountPercent = 9; 
+  double totalPrice = 2;
+  string status = 3;
+  string startDate = 4;
+  string endDate = 5;
+  string createdAt = 6;
+  double discountPercent = 7;
+  optional string reviewId = 8; // Review ID if user has reviewed this rental
 }
 
 message GetMyRentalsResponse {

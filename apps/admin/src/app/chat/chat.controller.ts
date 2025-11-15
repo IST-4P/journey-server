@@ -23,7 +23,7 @@ export class ChatController {
 
   @Get()
   getManyChats(
-    @Query() query: GetChatsRequestDTO,
+    @Query() query: Omit<GetChatsRequestDTO, 'fromUserId'>,
     @ActiveUser('userId') adminId: string
   ) {
     return this.chatService.getChats({ ...query, fromUserId: adminId });

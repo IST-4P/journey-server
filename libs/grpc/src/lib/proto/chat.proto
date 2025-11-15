@@ -5,7 +5,7 @@ package chat;
 service ChatService {
   rpc GetChats(GetChatsRequest) returns (GetChatsResponse);
   rpc CreateChat(CreateChatRequest) returns (CreateChatResponse);
-  rpc GetManyConversations(GetManyConversationsRequest) returns (GetManyConversationsResponse);
+  rpc GetManyConversations(GetManyConversationsRequest) returns (GetManyConversationsWithUserIds);
 
   rpc GetManyComplaints(GetManyComplaintsRequest) returns (GetManyComplaintsResponse);
   rpc CreateComplaint(CreateComplaintRequest) returns (GetComplaintResponse);
@@ -61,8 +61,22 @@ message GetManyConversationsRequest {
   int32 limit = 3;
 }
 
-message GetManyConversationsResponse {
+message UserFullNameAndAvatar {
+  string id = 1;
+  string fullName = 2;
+  string avatarUrl = 3;
+}
+
+message GetManyConversationsWithUserIds {
   repeated string conversations = 1;
+  int32 page = 2;
+  int32 limit = 3;
+  int32 totalItems = 4;
+  int32 totalPages = 5;
+}
+
+message GetManyConversationsResponse {
+  repeated UserFullNameAndAvatar conversations = 1;
   int32 page = 2;
   int32 limit = 3;
   int32 totalItems = 4;

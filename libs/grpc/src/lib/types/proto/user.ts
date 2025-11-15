@@ -229,6 +229,21 @@ export interface DeleteAddressResponse {
   message: string;
 }
 
+/** GetFullNameAndAvatar */
+export interface GetFullNameAndAvatarRequest {
+  userIds: string[];
+}
+
+export interface UserFullNameAndAvatar {
+  id: string;
+  fullName: string;
+  avatarUrl: string;
+}
+
+export interface GetFullNameAndAvatarResponse {
+  users: UserFullNameAndAvatar[];
+}
+
 export const USER_PACKAGE_NAME = "user";
 
 export interface UserServiceClient {
@@ -239,6 +254,8 @@ export interface UserServiceClient {
   updateProfile(request: UpdateProfileRequest): Observable<GetProfileResponse>;
 
   getAllUserIds(request: GetAllUserIdsRequest): Observable<GetAllUserIdsResponse>;
+
+  getFullNameAndAvatar(request: GetFullNameAndAvatarRequest): Observable<GetFullNameAndAvatarResponse>;
 
   getDriverLicense(request: GetDriverLicenseRequest): Observable<GetDriverLicenseResponse>;
 
@@ -281,6 +298,10 @@ export interface UserServiceController {
   getAllUserIds(
     request: GetAllUserIdsRequest,
   ): Promise<GetAllUserIdsResponse> | Observable<GetAllUserIdsResponse> | GetAllUserIdsResponse;
+
+  getFullNameAndAvatar(
+    request: GetFullNameAndAvatarRequest,
+  ): Promise<GetFullNameAndAvatarResponse> | Observable<GetFullNameAndAvatarResponse> | GetFullNameAndAvatarResponse;
 
   getDriverLicense(
     request: GetDriverLicenseRequest,
@@ -338,6 +359,7 @@ export function UserServiceControllerMethods() {
       "findAllProfiles",
       "updateProfile",
       "getAllUserIds",
+      "getFullNameAndAvatar",
       "getDriverLicense",
       "createDriverLicense",
       "updateDriverLicense",

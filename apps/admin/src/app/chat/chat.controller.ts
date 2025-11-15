@@ -1,11 +1,10 @@
 import {
-  CreateChatRequestDTO,
   GetChatsRequestDTO,
   GetManyConversationsRequestDTO,
   UpdateComplaintStatusRequestDTO,
 } from '@domain/chat';
 import { ActiveUser } from '@hacmieu-journey/nestjs';
-import { Body, Controller, Get, Post, Put, Query } from '@nestjs/common';
+import { Body, Controller, Get, Put, Query } from '@nestjs/common';
 import { ChatService } from './chat.service';
 
 @Controller('chat')
@@ -28,11 +27,6 @@ export class ChatController {
     @ActiveUser('userId') adminId: string
   ) {
     return this.chatService.getChats({ ...query, fromUserId: adminId });
-  }
-
-  @Post()
-  getChat(@Body() body: CreateChatRequestDTO) {
-    return this.chatService.createChat(body);
   }
 }
 

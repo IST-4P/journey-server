@@ -1,7 +1,7 @@
 import { NatsClient, NatsConsumer } from '@hacmieu-journey/nats';
 import { Injectable } from '@nestjs/common';
 import { AckPolicy, DeliverPolicy } from 'nats';
-import { NotificationService } from './notification.service';
+import { NotificationService } from '../notification.service';
 
 interface UserRegisteredEvent {
   userId: string;
@@ -13,7 +13,7 @@ interface UserRegisteredEvent {
 }
 
 @Injectable()
-export class NotificationConsumer extends NatsConsumer<UserRegisteredEvent> {
+export class NotificationRegisterConsumer extends NatsConsumer<UserRegisteredEvent> {
   constructor(
     natsClient: NatsClient,
     private readonly notificationService: NotificationService

@@ -1,5 +1,6 @@
 import {
   BroadcastNotificationRequest,
+  CreateNotificationRequest,
   GetManyNotificationsRequest,
   MarkAsReadRequest,
 } from '@domain/notification';
@@ -64,7 +65,7 @@ export class NotificationRepository {
     });
   }
 
-  createNotification(data: Prisma.NotificationCreateInput) {
+  createNotification(data: CreateNotificationRequest) {
     return this.prisma.notification.create({
       data,
     });
@@ -105,10 +106,12 @@ export class NotificationRepository {
       // Publish event cho mỗi notification được tạo (parallel để nhanh hơn)
       await Promise.all(
         notificationsData.map((notificationData) =>
-          this.natsClient.publish(
-            'journey.events.notification-created',
-            notificationData
-          )
+          this.natsClient.publish('journey.events.notification-announced', {
+            userId: notificationData.userId,
+            title: notificationData.title,
+            content: notificationData.content,
+            type: notificationData.type,
+          })
         )
       );
 

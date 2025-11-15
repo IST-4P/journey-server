@@ -1,5 +1,4 @@
 import { NotificationProto, UserProto } from '@hacmieu-journey/grpc';
-import { NatsClient } from '@hacmieu-journey/nats';
 import { Inject, Injectable, Logger, OnModuleInit } from '@nestjs/common';
 import { ClientGrpc } from '@nestjs/microservices';
 import { lastValueFrom } from 'rxjs';
@@ -14,8 +13,7 @@ export class NotificationService implements OnModuleInit {
     @Inject(NotificationProto.NOTIFICATION_PACKAGE_NAME)
     private notificationClient: ClientGrpc,
     @Inject(UserProto.USER_PACKAGE_NAME)
-    private userClient: ClientGrpc,
-    private readonly natsClient: NatsClient
+    private userClient: ClientGrpc
   ) {}
 
   onModuleInit() {
@@ -31,37 +29,7 @@ export class NotificationService implements OnModuleInit {
   async createNotification(
     data: NotificationProto.CreateNotificationRequest
   ): Promise<NotificationProto.GetNotificationResponse> {
-    const notification = await lastValueFrom(
-      this.notificationService.createNotification(data)
-    );
-
-    try {
-      const notificationData = {
-        id: notification.id,
-        userId: notification.userId,
-        type: notification.type,
-        title: notification.title,
-      };
-
-      // this.logger.log(
-      //   `🚀 Publishing notification.created event: ${JSON.stringify(
-      //     notificationData
-      //   )}`
-      // );
-
-      await this.natsClient.publish(
-        'journey.events.notification-created',
-        notificationData
-      );
-    } catch (natsError) {
-      // Log error but don't fail registration
-      this.logger.error(
-        `❌ Failed to publish notification.created event:`,
-        natsError
-      );
-    }
-
-    return notification;
+    return lastValueFrom(this.notificationService.createNotification(data));
   }
 
   async broadcastNotification(

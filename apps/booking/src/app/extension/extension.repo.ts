@@ -97,7 +97,7 @@ export class ExtensionRepository {
   }
 
   async approveExtension(data: UpdateStatusExtensionRequest) {
-    return this.prismaService.$transaction(async (tx) => {
+    const result = await this.prismaService.$transaction(async (tx) => {
       const extension = await tx.bookingExtension.findUnique({
         where: { id: data.id },
       });
@@ -135,6 +135,13 @@ export class ExtensionRepository {
       ]);
       return updatedExtension;
     });
+    await this.natsClient.publish('journey.events.notification-created', {
+      userId: result.requestedBy,
+      title: 'Extension Approved',
+      content: `Your extension request for booking ${result.bookingId} has been approved.`,
+      type: 'BOOKING' as const,
+    });
+    return result;
   }
 
   async rejectExtension(data: UpdateStatusExtensionRequest) {

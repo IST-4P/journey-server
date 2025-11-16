@@ -55,6 +55,7 @@ namespace review.Services
                         vehicleId = review.VehicleId?.ToString(),
                         deviceId = review.DeviceId?.ToString(),
                         comboId = review.ComboId?.ToString(),
+                        rating = review.Rating
                     };
                     await _natsPublisher.PublishAsync("journey.events.review.created", reviewCreatedEvent);
                 }

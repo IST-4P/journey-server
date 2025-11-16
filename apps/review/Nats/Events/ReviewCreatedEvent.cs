@@ -8,6 +8,7 @@ namespace review.Nats.Events
         public string? vehicleId { get; set; }
         public string? deviceId { get; set; }
         public string? comboId { get; set; }
+        public int rating { get; set; }
         
     }
 

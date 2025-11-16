@@ -14,11 +14,19 @@ namespace rental.Service
             return Math.Min(calculatedDiscount, maxDiscount);
         }
 
-        // TotalPrice = (RentalFee - Discount) × 1.1 (including VAT)
-        public static double CalculateTotalPrice(double rentalFee, double discountAmount)
+        // TotalPrice = (RentalFee - Discount) × RentalDays × 1.1 (including VAT)
+        // RentalFee is the daily rate per item
+        public static double CalculateTotalPrice(double rentalFee, double discountAmount, int rentalDays)
         {
             double amountAfterDiscount = rentalFee - discountAmount;
-            return amountAfterDiscount * (1 + VAT_PERCENT / 100.0);
+            return amountAfterDiscount * rentalDays * (1 + VAT_PERCENT / 100.0);
+        }
+
+        // Calculate rental days from start to end date
+        public static int CalculateRentalDays(DateTime startDate, DateTime endDate)
+        {
+            int days = (int)(endDate - startDate).TotalDays;
+            return Math.Max(1, days); // Minimum 1 day
         }
 
         // Calculate deposit: 20% of total price (paid upfront)

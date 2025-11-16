@@ -1,14 +1,12 @@
 using Grpc.Core;
-using AutoMapper;
 using rental.Repository;
 using rental.Model.Dto;
 using Rental;
 using RentalEntity = rental.Model.Entities.Rental;
-using RentalExtensionEntity = rental.Model.Entities.RentalExtension;
 using rental.Model.Entities;
 using System.Text.Json;
+using rental.Nats.Events;
 using rental.Nats;
-
 namespace rental.Service
 {
     public class RentalGrpcService : global::Rental.RentalService.RentalServiceBase
@@ -102,29 +100,8 @@ namespace rental.Service
                             throw new RpcException(new Status(StatusCode.FailedPrecondition, $"Not enough stock for device {protoItem.TargetId}. Available: {device.Quantity}, requested: {protoItem.Quantity}"));
                         }
 
-                        // Reduce device quantity
-                        try
-                        {
-                            var updateReq = new Device.UpdateDeviceRequest
-                            {
-                                DeviceId = protoItem.TargetId,
-                                Name = device.Name,
-                                Price = device.Price,
-                                Description = device.Description,
-                                Status = device.Status,
-                                Quantity = Math.Max(0, device.Quantity - protoItem.Quantity),
-                                CategoryId = device.CategoryId
-                            };
-                            updateReq.Information.AddRange(device.Information);
-                            updateReq.Images.AddRange(device.Images);
-
-                            await _deviceClient.UpdateDeviceAsync(updateReq);
-                        }
-                        catch (Exception ex)
-                        {
-                            _logger.LogError(ex, "Failed to reduce device quantity for {DeviceId}", protoItem.TargetId);
-                            throw new RpcException(new Status(StatusCode.Internal, "Failed to update device quantity"));
-                        }
+                        // NOTE: Quantity will be reduced by RentalPaidConsumer after payment is confirmed
+                        // This prevents duplicate reduction and ensures quantity is only decreased for paid rentals
                     }
 
                     double subtotal = unitPrice * protoItem.Quantity;
@@ -143,6 +120,9 @@ namespace rental.Service
                     itemDetailsList.Add(itemDetail);
                 }
 
+                // Calculate rental days
+                int rentalDays = RentalCalculationHelper.CalculateRentalDays(rental.StartDate, rental.EndDate);
+
                 // Calculate discount
                 double discountAmount = RentalCalculationHelper.CalculateDiscountAmount(
                     totalRentalFee,
@@ -150,8 +130,9 @@ namespace rental.Service
                     request.MaxDiscount
                 );
 
-                // Calculate total price: (RentalFee - Discount) × 1.1 (including VAT 10%)
-                double totalPrice = RentalCalculationHelper.CalculateTotalPrice(totalRentalFee, discountAmount);
+                // Calculate total price: (RentalFee - Discount) × RentalDays × 1.1 (including VAT 10%)
+                // totalRentalFee = sum of (unitPrice × quantity) for all items
+                double totalPrice = RentalCalculationHelper.CalculateTotalPrice(totalRentalFee, discountAmount, rentalDays);
 
                 // Calculate deposit: 20% of total price (paid upfront)
                 double deposit = RentalCalculationHelper.CalculateDeposit(totalPrice);
@@ -173,78 +154,52 @@ namespace rental.Service
                     UserId = rental.UserId,
                     StartDate = rental.StartDate,
                     EndDate = rental.EndDate,
-                    Items = rental.Items.ToString()! != null ?
-                        JsonSerializer.Deserialize<List<RentalItemData>>(rental.Items.ToString()!) ?? new List<RentalItemData>()
-                        : new List<RentalItemData>()
+                    Items = itemsDataList
                 };
 
                 var created = await _repository.CreateAsync(createDto);
 
+                // Update the created entity with calculated values
+                created.RentalFee = totalRentalFee;
+                created.DiscountPercent = request.DiscountPercent;
+                created.MaxDiscount = request.MaxDiscount;
+                created.Deposit = deposit;
+                created.RemainingAmount = remainingAmount;
+                created.TotalPrice = totalPrice;
+                created.TotalQuantity = totalQuantity;
+
+                await _repository.SaveChangesAsync();
+
                 // Record initial status in history
                 await RecordStatusChange(created.Id, RentalStatus.PENDING, RentalStatus.PENDING, "Initial rental creation");
 
-                // Payment integration - CLIENT ONLY PAYS DEPOSIT
-                string? paymentMessage = null;
+                // Publish NATS events for payment processing
+                // Payment service will handle payment creation and send back rental-paid or rental-expired events
                 try
                 {
-                    var demoMode = (Environment.GetEnvironmentVariable("PAYMENT_DEMO_MODE") ?? "false").Equals("true", StringComparison.OrdinalIgnoreCase);
-
-                    if (!demoMode)
+                    var rentalCreatedEvent = new rental.Nats.Events.RentalCreatedEvent
                     {
-                        var req = new Payment.WebhookPaymentRequest
-                        {
-                            Id = (int)(DateTimeOffset.UtcNow.ToUnixTimeSeconds() % int.MaxValue),
-                            Gateway = "internal",
-                            TransactionDate = DateTime.UtcNow.ToString("yyyy-MM-dd HH:mm:ss"),
-                            TransferType = "in",
-                            TransferAmount = deposit, // Only charge deposit
-                            Accumulated = deposit,
-                            Description = $"Deposit for rental:{created.Id} user:{created.UserId}",
-                        };
+                        id = Guid.NewGuid().ToString(),
+                        userId = created.UserId.ToString(),
+                        type = itemsDataList.Any(i => i.IsCombo) ? "COMBO" : "DEVICE",
+                        rentalId = created.Id.ToString(),
+                        totalAmount = created.Deposit.GetValueOrDefault()
+                    };
 
-                        var resp = await _paymentClient.ReceiverAsync(req);
-                        paymentMessage = resp.Message;
+                    // Publish rental.created event for notification/logging
+                    await _natsPublisher.PublishAsync("journey.events.rental.created", rentalCreatedEvent);
 
-                        // If payment succeeds, mark rental as DEPOSIT_PAID
-                        if (!string.IsNullOrWhiteSpace(paymentMessage))
-                        {
-                            await _repository.UpdateAsync(created.Id, new UpdateRentalRequestDto { Status = RentalStatus.DEPOSIT_PAID.ToString() });
-                            created.Status = RentalStatus.DEPOSIT_PAID;
-                            await RecordStatusChange(created.Id, RentalStatus.PENDING, RentalStatus.DEPOSIT_PAID, "Deposit payment successful");
-                        }
-                    }
-                    else
-                    {
-                        paymentMessage = "Payment.Success (demo)";
-                        await _repository.UpdateAsync(created.Id, new UpdateRentalRequestDto { Status = RentalStatus.DEPOSIT_PAID.ToString() });
-                        created.Status = RentalStatus.DEPOSIT_PAID;
-                        await RecordStatusChange(created.Id, RentalStatus.PENDING, RentalStatus.DEPOSIT_PAID, "Deposit payment successful (demo mode)");
-                    }
-                }
-                catch (RpcException ex)
-                {
-                    _logger.LogWarning(ex, "Payment integration failed for rental {RentalId}. Leaving status as {Status}", created.Id, created.Status);
-                }
+                    // Publish to payment-booking subject for payment service to create payment record
+                    await _natsPublisher.PublishAsync("journey.events.payment-booking", rentalCreatedEvent);
 
-                // Publish rental.created event to NATS
-                try
-                {
-                    await _natsPublisher.PublishAsync("rental.created", new
-                    {
-                        rentalId = created.Id,
-                        userId = created.UserId,
-                        items = itemsDataList,
-                        status = created.Status.ToString(),
-                        deposit = created.Deposit,
-                        totalPrice = created.TotalPrice,
-                        startDate = created.StartDate,
-                        endDate = created.EndDate,
-                        createdAt = created.CreatedAt
-                    });
+                    _logger.LogInformation("[Rental] Published payment-booking event for rental {RentalId} with deposit amount {Deposit}",
+                        created.Id, created.Deposit);
+                    await RecordStatusChange(created.Id, RentalStatus.PENDING, RentalStatus.PAID, "Initial rental creation");
+
                 }
                 catch (Exception ex)
                 {
-                    _logger.LogWarning(ex, "Failed to publish rental.created event for rental {RentalId}", created.Id);
+                    _logger.LogWarning(ex, "Failed to publish rental events for rental {RentalId}", created.Id);
                 }
 
                 var response = new RentalResponse
@@ -288,9 +243,9 @@ namespace rental.Service
                     throw new RpcException(new Status(StatusCode.NotFound, "Rental not found"));
                 }
 
-                if (rental.Status != RentalStatus.PENDING && rental.Status != RentalStatus.DEPOSIT_PAID)
+                if (rental.Status != RentalStatus.PENDING && rental.Status != RentalStatus.PAID)
                 {
-                    throw new RpcException(new Status(StatusCode.FailedPrecondition, "Only PENDING or DEPOSIT_PAID rentals can be cancelled"));
+                    throw new RpcException(new Status(StatusCode.FailedPrecondition, "Only PENDING or PAID rentals can be cancelled"));
                 }
 
                 // Calculate refund amount based on cancellation time
@@ -307,22 +262,72 @@ namespace rental.Service
 
                 _logger.LogInformation(
                     "Rental {RentalId} cancelled. Deposit: {Deposit} VND, Refund: {RefundPercent}% = {RefundAmount} VND",
-                    rentalId, rental.Deposit ?? 0, refundPercent, refundAmount);
+                    rentalId, rental.Deposit.GetValueOrDefault(), refundPercent, refundAmount);
+
+                // Restore device quantity if rental was PAID (quantity was already decreased)
+                if (rental.Status == RentalStatus.PAID && items != null && items.Count > 0)
+                {
+                    try
+                    {
+                        var quantityChangeEvent = new rental.Nats.Events.RentalQuantityChangeEvent
+                        {
+                            RentalId = rental.Id.ToString(),
+                            Action = "INCREASE",
+                            Items = items.Select(item => new rental.Nats.Events.QuantityChangeItem
+                            {
+                                TargetId = item.TargetId.ToString(),
+                                IsCombo = item.IsCombo,
+                                Quantity = item.Quantity
+                            }).ToList(),
+                            ChangedAt = DateTime.UtcNow
+                        };
+
+                        await _natsPublisher.PublishAsync("journey.events.rental-quantity-change", quantityChangeEvent);
+                        _logger.LogInformation("[Rental] Published quantity INCREASE event for cancelled rental {RentalId}", rental.Id);
+                    }
+                    catch (Exception ex)
+                    {
+                        _logger.LogWarning(ex, "Failed to publish quantity increase event for rental {RentalId}", rental.Id);
+                    }
+                }
+
+                // Publish refund-created event to Payment service
+                try
+                {
+                    var refundCreatedEvent = new
+                    {
+                        id = Guid.NewGuid().ToString(),
+                        rentalId = rental.Id.ToString(),
+                        userId = rental.UserId.ToString(),
+                        penaltyAmount = 0.0,
+                        damageAmount = 0.0,
+                        overtimeAmount = 0.0,
+                        collateral = 0.0,
+                        deposit = rental.Deposit.GetValueOrDefault()
+                    };
+                    await _natsPublisher.PublishAsync("journey.events.refund-created", refundCreatedEvent);
+                    _logger.LogInformation("[Rental] Published refund-created event for rental {RentalId}", rental.Id);
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogWarning(ex, "Failed to publish refund-created event for rental {RentalId}", rental.Id);
+                }
 
                 // TODO: Integrate with payment service to process refund
 
                 // Publish rental.cancelled event to NATS
                 try
                 {
-                    await _natsPublisher.PublishAsync("rental.cancelled", new
+                    var rentalCancelledEvent = new RentalCancelledEvent
                     {
-                        rentalId = rental.Id,
-                        userId = rental.UserId,
-                        items = items, // để device service biết cần hoàn lại bao nhiêu
+                        rentalId = rental.Id.ToString(),
+                        userId = rental.UserId.ToString(),
                         refundAmount = refundAmount,
-                        refundPercent = refundPercent,
+                        refundPercent = (int)refundPercent,
+                        reason = "User cancelled rental",
                         cancelledAt = DateTime.UtcNow
-                    });
+                    };
+                    await _natsPublisher.PublishAsync("journey.events.rental.cancelled", rentalCancelledEvent);
                 }
                 catch (Exception ex)
                 {
@@ -430,6 +435,12 @@ namespace rental.Service
                 foreach (var item in itemDetails)
                 {
                     response.Items.Add(item);
+                }
+
+                // Add ReviewId if exists
+                if (rental.ReviewId.HasValue)
+                {
+                    response.ReviewId = rental.ReviewId.Value.ToString();
                 }
 
                 return response;
@@ -544,6 +555,28 @@ namespace rental.Service
                 // Update the rental's end date to reflect the extension
                 rental.EndDate = newEnd;
                 await _repository.UpdateAsync(rental.Id, new UpdateRentalRequestDto { EndDate = newEnd });
+
+                // Publish rental extension event to NATS for payment service
+                if (request.AdditionalFee > 0)
+                {
+                    try
+                    {
+                        var extensionEvent = new RentalExtensionCreatedEvent
+                        {
+                            id = Guid.NewGuid().ToString(),
+                            userId = rental.UserId.ToString(),
+                            type = "EXTENSION",
+                            rentalId = rental.Id.ToString(),
+                            totalAmount = request.AdditionalFee
+                        };
+                        await _natsPublisher.PublishAsync("journey.events.payment-extension", extensionEvent);
+                        _logger.LogInformation("[Rental] Published payment-extension event for rental {RentalId}", rental.Id);
+                    }
+                    catch (Exception ex)
+                    {
+                        _logger.LogWarning(ex, "[Rental] Failed to publish payment-extension event for rental {RentalId}", rental.Id);
+                    }
+                }
 
                 // If additional fee applies, attempt payment for the extension
                 if (request.AdditionalFee > 0)
@@ -703,14 +736,26 @@ namespace rental.Service
                         // Publish rental.updated event to NATS
                         try
                         {
-                            await _natsPublisher.PublishAsync("rental.updated", new
+                            var rentalUpdatedEvent = new RentalUpdatedEvent
                             {
-                                rentalId = updated.Id,
-                                userId = updated.UserId,
-                                oldStatus = oldStatus.ToString(),
-                                newStatus = newStatus.ToString(),
+                                rentalId = updated.Id.ToString(),
+                                status = newStatus.ToString(),
                                 updatedAt = DateTime.UtcNow
-                            });
+                            };
+                            await _natsPublisher.PublishAsync("journey.events.rental.updated", rentalUpdatedEvent);
+
+                            // Publish rental.received event if status changed to RECEIVED
+                            if (newStatus == RentalStatus.RECEIVED)
+                            {
+                                var rentalReceivedEvent = new RentalReceivedEvent
+                                {
+                                    RentalId = updated.Id.ToString(),
+                                    UserId = updated.UserId.ToString(),
+                                    RemainingAmountPaid = updated.RemainingAmount ?? 0,
+                                    ReceivedAt = DateTime.UtcNow
+                                };
+                                await _natsPublisher.PublishAsync("journey.events.rental.received", rentalReceivedEvent);
+                            }
                         }
                         catch (Exception ex)
                         {
@@ -722,14 +767,13 @@ namespace rental.Service
                         {
                             try
                             {
-                                var items = DeserializeItemsSafe(updated.Items);
-                                await _natsPublisher.PublishAsync("rental.completed", new
+                                var rentalCompletedEvent = new RentalCompletedEvent
                                 {
-                                    rentalId = updated.Id,
-                                    userId = updated.UserId,
-                                    items = items,
+                                    rentalId = updated.Id.ToString(),
+                                    userId = updated.UserId.ToString(),
                                     completedAt = DateTime.UtcNow
-                                });
+                                };
+                                await _natsPublisher.PublishAsync("journey.events.rental.completed", rentalCompletedEvent);
                             }
                             catch (Exception ex)
                             {
@@ -807,27 +851,100 @@ namespace rental.Service
         }
 
         // Helper methods
-        private async Task<UserRental> MapToUserRental(RentalEntity rental)
+        // Map Entity to DTO
+        private async Task<RentalResponseDto> MapToRentalResponseDto(RentalEntity rental)
         {
-            // Defensive JSON parsing for rental items
-            var items = DeserializeItemsSafe(rental.Items);
-            var itemDetails = await BuildItemDetails(items);
-
-            var response = new UserRental
+            return new RentalResponseDto
             {
-                Id = rental.Id.ToString(),
+                Id = rental.Id,
+                UserId = rental.UserId,
+                Status = rental.Status.ToString(),
+                RentalFee = rental.RentalFee,
+                Deposit = rental.Deposit ?? 0,
+                RemainingAmount = rental.RemainingAmount ?? 0,
+                TotalPrice = rental.TotalPrice,
+                TotalQuantity = rental.TotalQuantity,
+                StartDate = rental.StartDate,
+                EndDate = rental.EndDate,
+                CreatedAt = rental.CreatedAt,
+                ActualEndDate = rental.ActualEndDate
+            };
+        }
+
+        private async Task<UserRentalDto> MapToUserRentalDto(RentalEntity rental)
+        {
+            return new UserRentalDto
+            {
+                Id = rental.Id,
+                TotalPrice = rental.TotalPrice,
+                Status = rental.Status.ToString(),
+                StartDate = rental.StartDate,
+                EndDate = rental.EndDate,
+                CreatedAt = rental.CreatedAt,
+                ReviewId = rental.ReviewId
+            };
+        }
+
+        private async Task<AdminRentalDto> MapToAdminRentalDto(RentalEntity rental)
+        {
+            var items = DeserializeItemsSafe(rental.Items);
+
+            return new AdminRentalDto
+            {
+                Id = rental.Id,
+                UserId = rental.UserId,
                 TotalPrice = rental.TotalPrice,
                 MaxDiscount = rental.MaxDiscount,
                 DiscountPercent = rental.DiscountPercent,
                 Status = rental.Status.ToString(),
-                StartDate = rental.StartDate.ToString("O"),
-                EndDate = rental.EndDate.ToString("O"),
-                CreatedAt = rental.CreatedAt.ToString("O")
+                StartDate = rental.StartDate,
+                EndDate = rental.EndDate,
+                CreatedAt = rental.CreatedAt
+            };
+        }
+
+        // Map DTO to Proto
+        private RentalResponse MapDtoToProtoResponse(RentalResponseDto dto)
+        {
+            var response = new RentalResponse
+            {
+                Id = dto.Id.ToString(),
+                UserId = dto.UserId.ToString(),
+                Status = dto.Status,
+                RentalFee = dto.RentalFee,
+                Deposit = dto.Deposit,
+                RemainingAmount = dto.RemainingAmount,
+                TotalPrice = dto.TotalPrice,
+                TotalQuantity = dto.TotalQuantity,
+                StartDate = dto.StartDate.ToString("O"),
+                EndDate = dto.EndDate.ToString("O"),
+                CreatedAt = dto.CreatedAt.ToString("O"),
+                ActualEndDate = dto.ActualEndDate?.ToString("O") ?? string.Empty
             };
 
-            foreach (var item in itemDetails)
+
+            return response;
+        }
+
+        private async Task<UserRental> MapToUserRental(RentalEntity rental)
+        {
+            var dto = await MapToUserRentalDto(rental);
+
+            var response = new UserRental
             {
-                response.Items.Add(item);
+                Id = dto.Id.ToString(),
+                TotalPrice = dto.TotalPrice,
+                Status = dto.Status,
+                StartDate = dto.StartDate.ToString("O"),
+                EndDate = dto.EndDate.ToString("O"),
+                CreatedAt = dto.CreatedAt.ToString("O"),
+                DiscountPercent = rental.DiscountPercent
+            };
+
+            // Add ReviewId if exists
+            if (dto.ReviewId.HasValue)
+            {
+                response.ReviewId = dto.ReviewId.Value.ToString();
             }
 
             return response;
@@ -835,6 +952,8 @@ namespace rental.Service
 
         private async Task<AdminRental> MapToAdminRental(RentalEntity rental)
         {
+            var dto = await MapToAdminRentalDto(rental);
+
             var userName = "Unknown";
             var userEmail = "";
 
@@ -853,34 +972,104 @@ namespace rental.Service
                 _logger.LogWarning(ex, "Failed to fetch user info for rental {RentalId}", rental.Id);
             }
 
-            // Defensive JSON parsing for rental items
-            var items = DeserializeItemsSafe(rental.Items);
-            var itemDetails = await BuildItemDetails(items);
-
             var response = new AdminRental
             {
-                Id = rental.Id.ToString(),
-                UserId = rental.UserId.ToString(),
+                Id = dto.Id.ToString(),
+                UserId = dto.UserId.ToString(),
                 UserName = userName,
                 UserEmail = userEmail,
-                TotalPrice = rental.TotalPrice,
-                MaxDiscount = rental.MaxDiscount,
-                DiscountPercent = rental.DiscountPercent,
-                Status = rental.Status.ToString(),
-                StartDate = rental.StartDate.ToString("O"),
-                EndDate = rental.EndDate.ToString("O"),
-                CreatedAt = rental.CreatedAt.ToString("O")
+                TotalPrice = dto.TotalPrice,
+                MaxDiscount = dto.MaxDiscount,
+                DiscountPercent = dto.DiscountPercent,
+                Status = dto.Status,
+                StartDate = dto.StartDate.ToString("O"),
+                EndDate = dto.EndDate.ToString("O"),
+                CreatedAt = dto.CreatedAt.ToString("O")
             };
 
-            foreach (var item in itemDetails)
-            {
-                response.Items.Add(item);
-            }
 
             return response;
         }
 
-        // Build item details helper
+        // Build item details helper - DTO version
+        private async Task<List<RentalItemDetailDto>> BuildItemDetailsDtos(List<RentalItemData> items)
+        {
+            var details = new List<RentalItemDetailDto>();
+
+            foreach (var item in items)
+            {
+                if (item.IsCombo)
+                {
+                    try
+                    {
+                        var combo = await _deviceClient.GetComboAsync(new Device.GetComboRequest
+                        {
+                            ComboId = item.TargetId.ToString()
+                        });
+
+                        details.Add(new RentalItemDetailDto
+                        {
+                            TargetId = item.TargetId.ToString(),
+                            IsCombo = true,
+                            Quantity = item.Quantity,
+                            Name = combo.Name,
+                            UnitPrice = combo.Price,
+                            Subtotal = combo.Price * item.Quantity
+                        });
+                    }
+                    catch (Exception ex)
+                    {
+                        _logger.LogWarning(ex, "Failed to fetch combo {ComboId}", item.TargetId);
+                        details.Add(new RentalItemDetailDto
+                        {
+                            TargetId = item.TargetId.ToString(),
+                            IsCombo = true,
+                            Quantity = item.Quantity,
+                            Name = "Unknown Combo",
+                            UnitPrice = 0,
+                            Subtotal = 0
+                        });
+                    }
+                }
+                else
+                {
+                    try
+                    {
+                        var device = await _deviceClient.GetDeviceAsync(new Device.GetDeviceRequest
+                        {
+                            DeviceId = item.TargetId.ToString()
+                        });
+
+                        details.Add(new RentalItemDetailDto
+                        {
+                            TargetId = item.TargetId.ToString(),
+                            IsCombo = false,
+                            Quantity = item.Quantity,
+                            Name = device.Name,
+                            UnitPrice = device.Price,
+                            Subtotal = device.Price * item.Quantity
+                        });
+                    }
+                    catch (Exception ex)
+                    {
+                        _logger.LogWarning(ex, "Failed to fetch device {DeviceId}", item.TargetId);
+                        details.Add(new RentalItemDetailDto
+                        {
+                            TargetId = item.TargetId.ToString(),
+                            IsCombo = false,
+                            Quantity = item.Quantity,
+                            Name = "Unknown Device",
+                            UnitPrice = 0,
+                            Subtotal = 0
+                        });
+                    }
+                }
+            }
+
+            return details;
+        }
+
+        // Build item details helper - Proto version
         private async Task<List<RentalItemDetail>> BuildItemDetails(List<RentalItemData> items)
         {
             var details = new List<RentalItemDetail>();
@@ -1034,5 +1223,7 @@ namespace rental.Service
                 throw new RpcException(new Status(StatusCode.Internal, "Failed to get rental history"));
             }
         }
+
+
     }
 }

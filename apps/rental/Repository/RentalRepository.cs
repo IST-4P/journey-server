@@ -22,7 +22,7 @@ namespace rental.Repository
             var entity = new RentalEntity
             {
                 UserId = rental.UserId,
-                Items = rental.Items.ToString()!,
+                Items = System.Text.Json.JsonSerializer.Serialize(rental.Items),
                 StartDate = rental.StartDate,
                 EndDate = rental.EndDate,
                 Status = RentalStatus.PENDING
@@ -230,6 +230,12 @@ namespace rental.Repository
                 .Where(h => h.RentalId == rentalId)
                 .OrderBy(h => h.ChangedAt)
                 .ToListAsync();
+        }
+
+        // Save changes to database (used by consumers)
+        public async Task SaveChangesAsync()
+        {
+            await _context.SaveChangesAsync();
         }
     }
 }

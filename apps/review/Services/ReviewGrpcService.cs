@@ -2,6 +2,7 @@ using AutoMapper;
 using Grpc.Core;
 using review.Interface;
 using review.Model.Dto;
+using review.Nats;
 using ReviewModel = review.Model.Review;
 using ReviewType = review.Model.ReviewType;
 using ProtoReviewType = Review.ReviewType;
@@ -13,13 +14,15 @@ namespace review.Services
         private readonly IReviewService _reviewService;
         private readonly IMapper _mapper;
         private readonly ILogger<ReviewGrpcService> _logger;
+        private readonly NatsPublisher _natsPublisher;
 
 
-        public ReviewGrpcService(IReviewService reviewService, IMapper mapper, ILogger<ReviewGrpcService> logger)
+        public ReviewGrpcService(IReviewService reviewService, IMapper mapper, ILogger<ReviewGrpcService> logger, NatsPublisher natsPublisher)
         {
             _reviewService = reviewService;
             _mapper = mapper;
             _logger = logger;
+            _natsPublisher = natsPublisher;
         }
 
         public override async Task<Review.ReviewResponse> CreateReview(Review.CreateReviewRequest request, ServerCallContext context)
@@ -40,6 +43,31 @@ namespace review.Services
 
                 var review = await _reviewService.CreateReviewAsync(dto);
                 var protoReview = _mapper.Map<Review.Review>(review);
+
+                // Publish review.created event to NATS
+                try
+                {
+                    var reviewCreatedEvent = new review.Nats.Events.ReviewCreatedEvent
+                    {
+                        ReviewId = review.Id.ToString(),
+                        BookingId = review.BookingId?.ToString(),
+                        RentalId = review.RentalId?.ToString(),
+                        VehicleId = review.VehicleId?.ToString(),
+                        DeviceId = review.DeviceId?.ToString(),
+                        ComboId = review.ComboId?.ToString(),
+                        UserId = review.UserId.ToString(),
+                        Rating = review.Rating,
+                        Type = review.Type.ToString(),
+                        Title = review.Title,
+                        Content = review.Content,
+                        CreatedAt = review.CreatedAt.ToString("O")
+                    };
+                    await _natsPublisher.PublishAsync("journey.events.review.created", reviewCreatedEvent);
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogWarning(ex, "Failed to publish review.created event for review {ReviewId}", review.Id);
+                }
 
                 return new Review.ReviewResponse
                 {
@@ -75,6 +103,24 @@ namespace review.Services
                 var review = await _reviewService.UpdateReviewAsync(dto);
                 var protoReview = _mapper.Map<Review.Review>(review);
 
+                // Publish review.updated event to NATS
+                try
+                {
+                    var reviewUpdatedEvent = new review.Nats.Events.ReviewUpdatedEvent
+                    {
+                        ReviewId = review.Id.ToString(),
+                        Rating = review.Rating,
+                        Title = review.Title,
+                        Content = review.Content,
+                        UpdatedAt = DateTime.UtcNow.ToString("O")
+                    };
+                    await _natsPublisher.PublishAsync("journey.events.review.updated", reviewUpdatedEvent);
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogWarning(ex, "Failed to publish review.updated event for review {ReviewId}", review.Id);
+                }
+
                 return new Review.ReviewResponse
                 {
                     Review = protoReview,
@@ -99,7 +145,31 @@ namespace review.Services
                 var reviewId = Guid.Parse(request.ReviewId);
                 var userId = Guid.Parse(request.UserId);
 
+                // Get review before deletion for event publishing
+                var review = await _reviewService.GetReviewByIdAsync(reviewId);
+
                 var success = await _reviewService.DeleteReviewAsync(reviewId, userId);
+
+                // Publish review.deleted event to NATS
+                if (success && review != null)
+                {
+                    try
+                    {
+                        var reviewDeletedEvent = new review.Nats.Events.ReviewDeletedEvent
+                        {
+                            ReviewId = reviewId.ToString(),
+                            DeviceId = review.DeviceId?.ToString(),
+                            VehicleId = review.VehicleId?.ToString(),
+                            ComboId = review.ComboId?.ToString(),
+                            DeletedAt = DateTime.UtcNow.ToString("O")
+                        };
+                        await _natsPublisher.PublishAsync("journey.events.review.deleted", reviewDeletedEvent);
+                    }
+                    catch (Exception ex)
+                    {
+                        _logger.LogWarning(ex, "Failed to publish review.deleted event for review {ReviewId}", reviewId);
+                    }
+                }
 
                 return new Review.DeleteReviewResponse
                 {

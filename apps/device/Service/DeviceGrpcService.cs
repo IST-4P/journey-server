@@ -28,6 +28,7 @@ namespace device.Service
             _comboRepository = comboRepository;
             _mapper = mapper;
             _logger = logger;
+            _categoryRepository = categoryRepository;
         }
 
         // DEVICE

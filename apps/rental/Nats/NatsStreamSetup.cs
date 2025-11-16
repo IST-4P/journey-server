@@ -21,26 +21,41 @@ namespace rental.Nats
             {
                 var js = new NatsJSContext(_natsConnection);
 
-                // Create RENTAL stream
-                var rentalStreamConfig = new StreamConfig(
-                    name: "RENTAL",
-                    subjects: new[] { "rental.created", "rental.updated", "rental.completed", "rental.cancelled" }
+                // Create JOURNEY_EVENTS stream with rental subjects
+                var streamConfig = new StreamConfig(
+                    name: "JOURNEY_EVENTS",
+                subjects: new[] {
+                    "journey.events.rental.created",
+                    "journey.events.rental.updated",
+                    "journey.events.rental.completed",
+                    "journey.events.rental.expired",
+                    "journey.events.rental.paid",
+                    "journey.events.rental.cancelled",
+                    "journey.events.review.created",
+                    "journey.events.payment-extension",
+                    "journey.events.rental-paid",
+                    "journey.events.rental-expired",
+                    "journey.events.rental-extension",
+                    "journey.events.rental-quantity-change",
+                    "journey.events.debug.device",
+                    "journey.events.debug.rental",
+                    "journey.events.debug.review" }
                 )
                 {
                     Storage = StreamConfigStorage.File,
-                    Retention = StreamConfigRetention.Workqueue,
+                    Retention = StreamConfigRetention.Limits,
                     MaxAge = TimeSpan.FromDays(30)
                 };
 
                 try
                 {
-                    await js.CreateStreamAsync(rentalStreamConfig);
-                    _logger.LogInformation("[Rental] RENTAL stream created successfully");
+                    await js.CreateStreamAsync(streamConfig);
+                    _logger.LogInformation("[Rental] JOURNEY_EVENTS stream created successfully");
                 }
                 catch (NatsJSApiException ex) when (ex.Error.Code == 400)
                 {
-                    await js.UpdateStreamAsync(rentalStreamConfig);
-                    _logger.LogInformation("[Rental] RENTAL stream updated successfully");
+                    await js.UpdateStreamAsync(streamConfig);
+                    _logger.LogInformation("[Rental] JOURNEY_EVENTS stream updated successfully");
                 }
             }
             catch (Exception ex)

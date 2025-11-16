@@ -81,6 +81,13 @@ namespace review.Services
                         RentalId = dto.RentalId.Value.ToString()
                     });
 
+                    // Validate rental status is COMPLETED
+                    if (rentalResp.Status != "COMPLETED")
+                    {
+                        throw new RpcException(new Status(StatusCode.FailedPrecondition,
+                            $"Rental must be COMPLETED before review. Current status: {rentalResp.Status}"));
+                    }
+
                     var firstItem = rentalResp.Items.FirstOrDefault();
                     if (firstItem != null && Guid.TryParse(firstItem.TargetId, out var targetId))
                     {
@@ -111,17 +118,24 @@ namespace review.Services
                         Id = dto.BookingId.Value.ToString()
                     });
 
+                    // Validate booking status is COMPLETED
+                    if (bookingResp.Status != "COMPLETED")
+                    {
+                        throw new RpcException(new Status(StatusCode.FailedPrecondition,
+                            $"Booking must be COMPLETED before review. Current status: {bookingResp.Status}"));
+                    }
+
                     var booking = bookingResp.Id != null ? bookingResp : null;
                     if (bookingResp?.Id != null && Guid.TryParse(bookingResp.Id, out var bookingId))
                     {
                         if (bookingResp.VehicleId != null &&
                             Guid.TryParse(bookingResp.VehicleId, out var vehicleId))
                         {
-                            review.VehicleId = vehicleId;  
+                            review.VehicleId = vehicleId;
                             review.Type = ReviewType.Vehicle;
                         }
                     }
-                }   
+                }
                 catch (Exception ex)
                 {
                     _logger.LogWarning(ex, "Failed to fetch booking details for BookingId {BookingId}", dto.BookingId);
@@ -156,8 +170,8 @@ namespace review.Services
                     VehicleId = review.VehicleId?.ToString()
                 };
 
-                await _natsPublisher.PublishAsync("review.created", reviewEvent);
-                _logger.LogInformation($"Published review.created event for review {review.Id}");
+                await _natsPublisher.PublishAsync("journey.events.review.created", reviewEvent);
+                _logger.LogInformation($"Published journey.events.review.created event for review {review.Id}");
             }
             catch (Exception ex)
             {

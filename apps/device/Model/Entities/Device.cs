@@ -69,4 +69,10 @@ namespace device.Model.Entities
         public int Quantity { get; set; } = 1;
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
     }
+
+    public enum DeviceStatus
+    {
+        Available,
+        Unavailable
+    }
 }

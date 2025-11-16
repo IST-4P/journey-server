@@ -1,5 +1,6 @@
 import {
   CalculateVehiclePriceRequestDTO,
+  GetAllBrandsRequestDTO,
   GetAllModelsRequestDTO,
   GetManyVehiclesRequestDTO,
   GetVehicleRequestDTO,
@@ -25,8 +26,8 @@ export class BrandController {
 
   @Get()
   @IsPublic()
-  getAllBrands() {
-    return this.vehicleService.getAllBrands({});
+  getAllBrands(@Query() query: GetAllBrandsRequestDTO) {
+    return this.vehicleService.getAllBrands(query);
   }
 }
 

@@ -1,6 +1,7 @@
 import {
   CreateBrandRequest,
   DeleteBrandRequest,
+  GetAllBrandsRequest,
   UpdateBrandRequest,
 } from '@domain/vehicle';
 import { Injectable } from '@nestjs/common';
@@ -15,8 +16,8 @@ export class BrandService {
 
   constructor(private readonly brandRepo: BrandRepository) {}
 
-  async getAllBrands() {
-    const brands = await this.brandRepo.getAllBrands();
+  async getAllBrands(data: GetAllBrandsRequest) {
+    const brands = await this.brandRepo.getAllBrands(data);
     if (brands.length == 0) {
       throw BrandNotFoundException;
     }

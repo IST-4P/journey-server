@@ -1,6 +1,10 @@
 import { z } from 'zod';
 import { BrandValidatorSchema } from '../validators';
 
+export const GetAllBrandsRequestSchema = BrandValidatorSchema.pick({
+  type: true,
+}).partial();
+
 export const GetAllBrandsResponseSchema = z.object({
   brands: z.array(
     BrandValidatorSchema.omit({ createdAt: true, updatedAt: true })
@@ -19,6 +23,7 @@ export const GetBrandResponseSchema = BrandValidatorSchema.omit({
 
 export const CreateBrandRequestSchema = BrandValidatorSchema.pick({
   name: true,
+  type: true,
 });
 
 export const UpdateBrandRequestSchema = BrandValidatorSchema.pick({
@@ -31,6 +36,7 @@ export const DeleteBrandRequestSchema = BrandValidatorSchema.pick({
   name: true,
 }).partial();
 
+export type GetAllBrandsRequest = z.infer<typeof GetAllBrandsRequestSchema>;
 export type GetAllBrandsResponse = z.infer<typeof GetAllBrandsResponseSchema>;
 export type GetBrandRequest = z.infer<typeof GetBrandRequestSchema>;
 export type GetBrandResponse = z.infer<typeof GetBrandResponseSchema>;

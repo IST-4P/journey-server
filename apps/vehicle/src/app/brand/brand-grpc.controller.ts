@@ -2,6 +2,7 @@ import { MessageResponse } from '@domain/shared';
 import {
   CreateBrandRequest,
   DeleteBrandRequest,
+  GetAllBrandsRequest,
   GetAllBrandsResponse,
   GetBrandResponse,
   UpdateBrandRequest,
@@ -15,8 +16,8 @@ export class BrandGrpcController {
   constructor(private readonly brandService: BrandService) {}
 
   @GrpcMethod('VehicleService', 'GetAllBrands')
-  getAllBrands(): Promise<GetAllBrandsResponse> {
-    return this.brandService.getAllBrands();
+  getAllBrands(data: GetAllBrandsRequest): Promise<GetAllBrandsResponse> {
+    return this.brandService.getAllBrands(data);
   }
 
   @GrpcMethod('VehicleService', 'CreateBrand')

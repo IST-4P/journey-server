@@ -25,37 +25,10 @@ namespace review.Nats
                 var streamConfig = new StreamConfig(
                     name: "JOURNEY_EVENTS",
                     subjects: new[] {
-                        // Device events
-                        "journey.events.device.updated",
-                        "journey.events.device.created",
-                        "journey.events.device.deleted",
-                        "journey.events.combo.updated",
-                        "journey.events.combo.created",
-                        "journey.events.combo.deleted",
-                        
-                        // Rental events
-                        "journey.events.rental.created",
-                        "journey.events.rental.updated",
-                        "journey.events.rental.received",
-                        "journey.events.rental.completed",
-                        "journey.events.rental.cancelled",
-                        "journey.events.rental-quantity-change",
-                        
-                        // Payment events
-                        "journey.events.payment-booking",
-                        "journey.events.payment-extension",
-                        "journey.events.rental-paid",
-                        "journey.events.rental-expired",
-                        "journey.events.rental-extension",
-                        "journey.events.booking-paid",
-                        "journey.events.booking-expired",
-                        "journey.events.booking-extension",
-                        
-                        // Refund events
-                        "journey.events.refund-created",
-                        
                         // Review events
-                        "journey.events.review.created"
+                        "journey.events.review.created",
+                        "journey.events.review.updated",
+                        "journey.events.review.deleted"
                     }
                 )
                 {

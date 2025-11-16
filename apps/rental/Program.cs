@@ -37,7 +37,6 @@ builder.Services.AddSingleton(sp =>
 
 builder.Services.AddSingleton<NatsPublisher>();
 builder.Services.AddSingleton<NatsStreamSetup>();
-builder.Services.AddHostedService<RentalExpirationService>();
 builder.Services.AddHostedService<ReviewCreatedConsumer>();
 builder.Services.AddHostedService<RentalPaidConsumer>();
 builder.Services.AddHostedService<RentalExpiredConsumer>();

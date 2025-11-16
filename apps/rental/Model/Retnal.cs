@@ -6,7 +6,9 @@ namespace rental.Model.Entities
     [Table("rentals")]
     public class Rental
     {
-        public Guid Id { get; set; } = Guid.NewGuid();
+    internal readonly object Model;
+
+    public Guid Id { get; set; } = Guid.NewGuid();
         public Guid UserId { get; set; }
 
         // [{ "targetId": "guid", "isCombo": bool, "quantity": int }]
@@ -90,7 +92,7 @@ namespace rental.Model.Entities
     public enum RentalStatus
     {
         PENDING, // Chờ thanh toán deposit
-        DEPOSIT_PAID, // Đã thanh toán deposit (20%), chờ nhận hàng
+        PAID, // Đã thanh toán deposit (20%), chờ nhận hàng
         RECEIVED, // Đã nhận hàng và thanh toán phần còn lại (80%), đang thuê
         ONGOING, // Đang thuê (alias for RECEIVED)
         COMPLETED, // Hoàn thành (đã trả hàng)

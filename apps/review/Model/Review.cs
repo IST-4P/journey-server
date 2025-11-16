@@ -43,8 +43,8 @@ namespace review.Model
 
     public enum ReviewType
     {
-        Device = 0,
-        Vehicle = 1,
-        Combo = 2
+        Device,
+        Vehicle,
+        Combo
     }
 }

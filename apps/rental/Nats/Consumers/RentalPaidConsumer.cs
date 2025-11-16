@@ -3,39 +3,61 @@ using rental.Nats.Base;
 using rental.Nats.Events;
 using Microsoft.EntityFrameworkCore;
 using RentalEntity = rental.Model.Entities.Rental;
+using Payment;
 
 namespace rental.Nats.Consumers
 {
     /// <summary>
     /// Consumer to handle rental-paid events from Payment service
     /// Updates rental status and publishes quantity change event for Device service
+    /// Receives payment.id from Payment service, queries to get rentalId
     /// </summary>
     public class RentalPaidConsumer : NatsConsumerBase<RentalPaidEvent>
     {
         protected override string ConsumerName => "rental-paid-consumer";
         protected override string FilterSubject => "journey.events.rental-paid";
 
+        private readonly Payment.PaymentService.PaymentServiceClient _paymentClient;
+
         public RentalPaidConsumer(
             NatsConnection natsConnection,
             IServiceProvider serviceProvider,
-            ILogger<RentalPaidConsumer> logger)
+            ILogger<RentalPaidConsumer> logger,
+            Payment.PaymentService.PaymentServiceClient paymentClient)
             : base(natsConnection, serviceProvider, logger)
         {
+            _paymentClient = paymentClient;
         }
 
         protected override async Task HandleEventAsync(RentalPaidEvent paidEvent, CancellationToken cancellationToken)
         {
-            Logger.LogInformation("[Rental] Received rental-paid event for RentalId: {RentalId}", paidEvent.Id);
+            Logger.LogInformation("[Rental] Received rental-paid event for PaymentId: {PaymentId}", paidEvent.Id);
 
             using var scope = ServiceProvider.CreateScope();
             var context = scope.ServiceProvider.GetRequiredService<rental.Data.RentalDbContext>();
 
             try
             {
-                // Parse rental ID from event (comes as string from TypeScript)
-                if (!Guid.TryParse(paidEvent.Id, out var rentalId))
+                // Parse payment ID from event
+                if (!Guid.TryParse(paidEvent.Id, out var paymentId))
                 {
-                    Logger.LogError("[Rental] Invalid rental ID format: {RentalId}", paidEvent.Id);
+                    Logger.LogError("[Rental] Invalid payment ID format: {PaymentId}", paidEvent.Id);
+                    return;
+                }
+
+                // Query Payment service to get rentalId
+                var paymentRequest = new GetPaymentAdminRequest { Id = paidEvent.Id };
+                var paymentResponse = await _paymentClient.GetPaymentAdminAsync(paymentRequest, cancellationToken: cancellationToken);
+
+                if (string.IsNullOrEmpty(paymentResponse.RentalId))
+                {
+                    Logger.LogWarning("[Rental] Payment {PaymentId} is not for a rental (no rentalId)", paymentId);
+                    return;
+                }
+
+                if (!Guid.TryParse(paymentResponse.RentalId, out var rentalId))
+                {
+                    Logger.LogError("[Rental] Invalid rental ID format from payment: {RentalId}", paymentResponse.RentalId);
                     return;
                 }
 
@@ -57,10 +79,10 @@ namespace rental.Nats.Consumers
                 }
 
                 // Update rental status to DEPOSIT_PAID
-                rentalEntity.Status = rental.Model.Entities.RentalStatus.DEPOSIT_PAID;
+                rentalEntity.Status = rental.Model.Entities.RentalStatus.PAID;
                 await context.SaveChangesAsync(cancellationToken);
 
-                Logger.LogInformation("[Rental] Updated rental {RentalId} status to DEPOSIT_PAID", rentalEntity.Id);
+                Logger.LogInformation("[Rental] Updated rental {RentalId} status to PAID", rentalEntity.Id);
 
                 // Publish event to Device service to decrease quantity
                 var items = System.Text.Json.JsonSerializer.Deserialize<List<RentalItemData>>(rentalEntity.Items);

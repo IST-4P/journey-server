@@ -6,7 +6,7 @@ namespace rental.Nats.Events
     public class RentalQuantityChangeEvent
     {
         public string RentalId { get; set; } = string.Empty;
-        public string Action { get; set; } = string.Empty; // "DECREASE" or "INCREASE"
+        public string Action { get; set; } = string.Empty;
         public List<QuantityChangeItem> Items { get; set; } = new();
         public DateTime ChangedAt { get; set; } = DateTime.UtcNow;
     }

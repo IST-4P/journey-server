@@ -39,11 +39,20 @@ namespace review.Nats
                         "journey.events.rental.received",
                         "journey.events.rental.completed",
                         "journey.events.rental.cancelled",
+                        "journey.events.rental-quantity-change",
                         
                         // Payment events
                         "journey.events.payment-booking",
                         "journey.events.payment-extension",
                         "journey.events.rental-paid",
+                        "journey.events.rental-expired",
+                        "journey.events.rental-extension",
+                        "journey.events.booking-paid",
+                        "journey.events.booking-expired",
+                        "journey.events.booking-extension",
+                        
+                        // Refund events
+                        "journey.events.refund-created",
                         
                         // Review events
                         "journey.events.review.created"

@@ -5,8 +5,8 @@ using Rental;
 using RentalEntity = rental.Model.Entities.Rental;
 using rental.Model.Entities;
 using System.Text.Json;
+using rental.Nats.Events;
 using rental.Nats;
-
 namespace rental.Service
 {
     public class RentalGrpcService : global::Rental.RentalService.RentalServiceBase
@@ -100,34 +100,8 @@ namespace rental.Service
                             throw new RpcException(new Status(StatusCode.FailedPrecondition, $"Not enough stock for device {protoItem.TargetId}. Available: {device.Quantity}, requested: {protoItem.Quantity}"));
                         }
 
-                        // Reduce device quantity
-                        try
-                        {
-                            var newQuantity = Math.Max(0, device.Quantity - protoItem.Quantity);
-                            var newStatus = newQuantity == 0 ? "Unavailable" : device.Status;
-
-                            var updateReq = new Device.UpdateDeviceRequest
-                            {
-                                DeviceId = protoItem.TargetId,
-                                Name = device.Name,
-                                Price = device.Price,
-                                Description = device.Description,
-                                Status = newStatus, // Update status to Unavailable if quantity is 0
-                                Quantity = newQuantity,
-                                CategoryId = device.CategoryId
-                            };
-                            updateReq.Information.AddRange(device.Information);
-                            updateReq.Images.AddRange(device.Images);
-
-                            await _deviceClient.UpdateDeviceAsync(updateReq);
-                            _logger.LogInformation("Device {DeviceId} quantity updated: {OldQty} -> {NewQty}, Status: {Status}",
-                                protoItem.TargetId, device.Quantity, newQuantity, newStatus);
-                        }
-                        catch (Exception ex)
-                        {
-                            _logger.LogError(ex, "Failed to reduce device quantity for {DeviceId}", protoItem.TargetId);
-                            throw new RpcException(new Status(StatusCode.Internal, "Failed to update device quantity"));
-                        }
+                        // NOTE: Quantity will be reduced by RentalPaidConsumer after payment is confirmed
+                        // This prevents duplicate reduction and ensures quantity is only decreased for paid rentals
                     }
 
                     double subtotal = unitPrice * protoItem.Quantity;
@@ -146,6 +120,9 @@ namespace rental.Service
                     itemDetailsList.Add(itemDetail);
                 }
 
+                // Calculate rental days
+                int rentalDays = RentalCalculationHelper.CalculateRentalDays(rental.StartDate, rental.EndDate);
+
                 // Calculate discount
                 double discountAmount = RentalCalculationHelper.CalculateDiscountAmount(
                     totalRentalFee,
@@ -153,8 +130,9 @@ namespace rental.Service
                     request.MaxDiscount
                 );
 
-                // Calculate total price: (RentalFee - Discount) × 1.1 (including VAT 10%)
-                double totalPrice = RentalCalculationHelper.CalculateTotalPrice(totalRentalFee, discountAmount);
+                // Calculate total price: (RentalFee - Discount) × RentalDays × 1.1 (including VAT 10%)
+                // totalRentalFee = sum of (unitPrice × quantity) for all items
+                double totalPrice = RentalCalculationHelper.CalculateTotalPrice(totalRentalFee, discountAmount, rentalDays);
 
                 // Calculate deposit: 20% of total price (paid upfront)
                 double deposit = RentalCalculationHelper.CalculateDeposit(totalPrice);
@@ -195,72 +173,33 @@ namespace rental.Service
                 // Record initial status in history
                 await RecordStatusChange(created.Id, RentalStatus.PENDING, RentalStatus.PENDING, "Initial rental creation");
 
-                // Payment integration - CLIENT ONLY PAYS DEPOSIT
-                string? paymentMessage = null;
-                try
-                {
-                    var demoMode = (Environment.GetEnvironmentVariable("PAYMENT_DEMO_MODE") ?? "false").Equals("true", StringComparison.OrdinalIgnoreCase);
-
-                    if (!demoMode)
-                    {
-                        var req = new Payment.WebhookPaymentRequest
-                        {
-                            Id = (int)(DateTimeOffset.UtcNow.ToUnixTimeSeconds() % int.MaxValue),
-                            Gateway = "internal",
-                            TransactionDate = DateTime.UtcNow.ToString("yyyy-MM-dd HH:mm:ss"),
-                            TransferType = "in",
-                            TransferAmount = deposit, // Only charge deposit
-                            Accumulated = deposit,
-                            Description = $"Deposit for rental:{created.Id} user:{created.UserId}",
-                        };
-
-                        var resp = await _paymentClient.ReceiverAsync(req);
-                        paymentMessage = resp.Message;
-
-                        // If payment succeeds, mark rental as DEPOSIT_PAID
-                        if (!string.IsNullOrWhiteSpace(paymentMessage))
-                        {
-                            await _repository.UpdateAsync(created.Id, new UpdateRentalRequestDto { Status = RentalStatus.DEPOSIT_PAID.ToString() });
-                            created.Status = RentalStatus.DEPOSIT_PAID;
-                            await RecordStatusChange(created.Id, RentalStatus.PENDING, RentalStatus.DEPOSIT_PAID, "Deposit payment successful");
-                        }
-                    }
-                    else
-                    {
-                        paymentMessage = "Payment.Success (demo)";
-                        await _repository.UpdateAsync(created.Id, new UpdateRentalRequestDto { Status = RentalStatus.DEPOSIT_PAID.ToString() });
-                        created.Status = RentalStatus.DEPOSIT_PAID;
-                        await RecordStatusChange(created.Id, RentalStatus.PENDING, RentalStatus.DEPOSIT_PAID, "Deposit payment successful (demo mode)");
-                    }
-                }
-                catch (RpcException ex)
-                {
-                    _logger.LogWarning(ex, "Payment integration failed for rental {RentalId}. Leaving status as {Status}", created.Id, created.Status);
-                }
-
-                // Publish rental.created event to NATS
+                // Publish NATS events for payment processing
+                // Payment service will handle payment creation and send back rental-paid or rental-expired events
                 try
                 {
                     var rentalCreatedEvent = new rental.Nats.Events.RentalCreatedEvent
                     {
-                        Id = Guid.NewGuid().ToString(),
-                        UserId = created.UserId.ToString(),
-                        Type = "DEVICE",
-                        RentalId = created.Id.ToString(),
-                        TotalAmount = created.Deposit.GetValueOrDefault(), // Payment amount = deposit only
-                        Deposit = created.Deposit.GetValueOrDefault(),
-                        RemainingAmount = created.RemainingAmount.GetValueOrDefault(),
-                        Status = created.Status.ToString(),
-                        CreatedAt = created.CreatedAt
+                        id = Guid.NewGuid().ToString(),
+                        userId = created.UserId.ToString(),
+                        type = itemsDataList.Any(i => i.IsCombo) ? "COMBO" : "DEVICE",
+                        rentalId = created.Id.ToString(),
+                        totalAmount = created.Deposit.GetValueOrDefault()
                     };
+
+                    // Publish rental.created event for notification/logging
                     await _natsPublisher.PublishAsync("journey.events.rental.created", rentalCreatedEvent);
 
                     // Publish to payment-booking subject for payment service to create payment record
                     await _natsPublisher.PublishAsync("journey.events.payment-booking", rentalCreatedEvent);
+
+                    _logger.LogInformation("[Rental] Published payment-booking event for rental {RentalId} with deposit amount {Deposit}",
+                        created.Id, created.Deposit);
+                    await RecordStatusChange(created.Id, RentalStatus.PENDING, RentalStatus.PAID, "Initial rental creation");
+
                 }
                 catch (Exception ex)
                 {
-                    _logger.LogWarning(ex, "Failed to publish rental.created event for rental {RentalId}", created.Id);
+                    _logger.LogWarning(ex, "Failed to publish rental events for rental {RentalId}", created.Id);
                 }
 
                 var response = new RentalResponse
@@ -304,9 +243,9 @@ namespace rental.Service
                     throw new RpcException(new Status(StatusCode.NotFound, "Rental not found"));
                 }
 
-                if (rental.Status != RentalStatus.PENDING && rental.Status != RentalStatus.DEPOSIT_PAID)
+                if (rental.Status != RentalStatus.PENDING && rental.Status != RentalStatus.PAID)
                 {
-                    throw new RpcException(new Status(StatusCode.FailedPrecondition, "Only PENDING or DEPOSIT_PAID rentals can be cancelled"));
+                    throw new RpcException(new Status(StatusCode.FailedPrecondition, "Only PENDING or PAID rentals can be cancelled"));
                 }
 
                 // Calculate refund amount based on cancellation time
@@ -325,19 +264,68 @@ namespace rental.Service
                     "Rental {RentalId} cancelled. Deposit: {Deposit} VND, Refund: {RefundPercent}% = {RefundAmount} VND",
                     rentalId, rental.Deposit.GetValueOrDefault(), refundPercent, refundAmount);
 
+                // Restore device quantity if rental was PAID (quantity was already decreased)
+                if (rental.Status == RentalStatus.PAID && items != null && items.Count > 0)
+                {
+                    try
+                    {
+                        var quantityChangeEvent = new rental.Nats.Events.RentalQuantityChangeEvent
+                        {
+                            RentalId = rental.Id.ToString(),
+                            Action = "INCREASE",
+                            Items = items.Select(item => new rental.Nats.Events.QuantityChangeItem
+                            {
+                                TargetId = item.TargetId.ToString(),
+                                IsCombo = item.IsCombo,
+                                Quantity = item.Quantity
+                            }).ToList(),
+                            ChangedAt = DateTime.UtcNow
+                        };
+
+                        await _natsPublisher.PublishAsync("journey.events.rental-quantity-change", quantityChangeEvent);
+                        _logger.LogInformation("[Rental] Published quantity INCREASE event for cancelled rental {RentalId}", rental.Id);
+                    }
+                    catch (Exception ex)
+                    {
+                        _logger.LogWarning(ex, "Failed to publish quantity increase event for rental {RentalId}", rental.Id);
+                    }
+                }
+
+                // Publish refund-created event to Payment service
+                try
+                {
+                    var refundCreatedEvent = new
+                    {
+                        id = Guid.NewGuid().ToString(),
+                        rentalId = rental.Id.ToString(),
+                        userId = rental.UserId.ToString(),
+                        penaltyAmount = 0.0,
+                        damageAmount = 0.0,
+                        overtimeAmount = 0.0,
+                        collateral = 0.0,
+                        deposit = rental.Deposit.GetValueOrDefault()
+                    };
+                    await _natsPublisher.PublishAsync("journey.events.refund-created", refundCreatedEvent);
+                    _logger.LogInformation("[Rental] Published refund-created event for rental {RentalId}", rental.Id);
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogWarning(ex, "Failed to publish refund-created event for rental {RentalId}", rental.Id);
+                }
+
                 // TODO: Integrate with payment service to process refund
 
                 // Publish rental.cancelled event to NATS
                 try
                 {
-                    var rentalCancelledEvent = new rental.Nats.Events.RentalCancelledEvent
+                    var rentalCancelledEvent = new RentalCancelledEvent
                     {
-                        RentalId = rental.Id.ToString(),
-                        UserId = rental.UserId.ToString(),
-                        RefundAmount = refundAmount,
-                        RefundPercent = (int)refundPercent,
-                        Reason = "User cancelled rental",
-                        CancelledAt = DateTime.UtcNow
+                        rentalId = rental.Id.ToString(),
+                        userId = rental.UserId.ToString(),
+                        refundAmount = refundAmount,
+                        refundPercent = (int)refundPercent,
+                        reason = "User cancelled rental",
+                        cancelledAt = DateTime.UtcNow
                     };
                     await _natsPublisher.PublishAsync("journey.events.rental.cancelled", rentalCancelledEvent);
                 }
@@ -573,17 +561,13 @@ namespace rental.Service
                 {
                     try
                     {
-                        var extensionEvent = new rental.Nats.Events.RentalExtensionCreatedEvent
+                        var extensionEvent = new RentalExtensionCreatedEvent
                         {
-                            Id = Guid.NewGuid().ToString(),
-                            UserId = rental.UserId.ToString(),
-                            Type = "EXTENSION",
-                            RentalId = rental.Id.ToString(),
-                            TotalAmount = request.AdditionalFee,
-                            AdditionalFee = request.AdditionalFee,
-                            AdditionalHours = (int)request.AdditionalHours,
-                            NewEndDate = newEnd,
-                            CreatedAt = DateTime.UtcNow
+                            id = Guid.NewGuid().ToString(),
+                            userId = rental.UserId.ToString(),
+                            type = "EXTENSION",
+                            rentalId = rental.Id.ToString(),
+                            totalAmount = request.AdditionalFee
                         };
                         await _natsPublisher.PublishAsync("journey.events.payment-extension", extensionEvent);
                         _logger.LogInformation("[Rental] Published payment-extension event for rental {RentalId}", rental.Id);
@@ -752,18 +736,18 @@ namespace rental.Service
                         // Publish rental.updated event to NATS
                         try
                         {
-                            var rentalUpdatedEvent = new rental.Nats.Events.RentalUpdatedEvent
+                            var rentalUpdatedEvent = new RentalUpdatedEvent
                             {
-                                RentalId = updated.Id.ToString(),
-                                Status = newStatus.ToString(),
-                                UpdatedAt = DateTime.UtcNow
+                                rentalId = updated.Id.ToString(),
+                                status = newStatus.ToString(),
+                                updatedAt = DateTime.UtcNow
                             };
                             await _natsPublisher.PublishAsync("journey.events.rental.updated", rentalUpdatedEvent);
 
                             // Publish rental.received event if status changed to RECEIVED
                             if (newStatus == RentalStatus.RECEIVED)
                             {
-                                var rentalReceivedEvent = new rental.Nats.Events.RentalReceivedEvent
+                                var rentalReceivedEvent = new RentalReceivedEvent
                                 {
                                     RentalId = updated.Id.ToString(),
                                     UserId = updated.UserId.ToString(),
@@ -783,11 +767,11 @@ namespace rental.Service
                         {
                             try
                             {
-                                var rentalCompletedEvent = new rental.Nats.Events.RentalCompletedEvent
+                                var rentalCompletedEvent = new RentalCompletedEvent
                                 {
-                                    RentalId = updated.Id.ToString(),
-                                    UserId = updated.UserId.ToString(),
-                                    CompletedAt = DateTime.UtcNow
+                                    rentalId = updated.Id.ToString(),
+                                    userId = updated.UserId.ToString(),
+                                    completedAt = DateTime.UtcNow
                                 };
                                 await _natsPublisher.PublishAsync("journey.events.rental.completed", rentalCompletedEvent);
                             }
@@ -1240,28 +1224,6 @@ namespace rental.Service
             }
         }
 
-        // Debug: Publish debug event to NATS (deprecated - use standard events instead)
-        public override async Task<PublishDebugEventResponse> PublishDebugEvent(PublishDebugEventRequest request, ServerCallContext context)
-        {
-            try
-            {
-                _logger.LogWarning("[Rental] Debug events deprecated - use standard event publishing instead");
 
-                return new PublishDebugEventResponse
-                {
-                    Success = false,
-                    Message = "Debug events deprecated - use standard event publishing instead"
-                };
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Error publishing debug event");
-                return new PublishDebugEventResponse
-                {
-                    Success = false,
-                    Message = $"Failed to publish debug event: {ex.Message}"
-                };
-            }
-        }
     }
 }

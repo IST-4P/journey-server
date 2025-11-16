@@ -78,6 +78,8 @@ export interface RentalResponse {
     | undefined;
   /** Discount percentage applied */
   discountPercent: number;
+  /** Review ID if user has reviewed this rental */
+  reviewId?: string | undefined;
 }
 
 /** User: Create Rental */
@@ -103,14 +105,14 @@ export interface GetMyRentalsRequest {
 
 export interface UserRental {
   id: string;
-  items: RentalItemDetail[];
   totalPrice: number;
-  maxDiscount: number;
   status: string;
   startDate: string;
   endDate: string;
   createdAt: string;
   discountPercent: number;
+  /** Review ID if user has reviewed this rental */
+  reviewId?: string | undefined;
 }
 
 export interface GetMyRentalsResponse {
@@ -228,6 +230,17 @@ export interface GetHistoryRentalResponse {
   histories: RentalHistoryMessage[];
 }
 
+/** Debug: Publish debug event to NATS */
+export interface PublishDebugEventRequest {
+  message: string;
+  rentalId?: string | undefined;
+}
+
+export interface PublishDebugEventResponse {
+  success: boolean;
+  message: string;
+}
+
 export const RENTAL_PACKAGE_NAME = "rental";
 
 export interface RentalServiceClient {
@@ -256,6 +269,10 @@ export interface RentalServiceClient {
   createRentalExtension(request: CreateRentalExtensionRequest): Observable<RentalResponse>;
 
   getRentalExtensions(request: GetRentalExtensionsRequest): Observable<GetRentalExtensionsResponse>;
+
+  /** Debug: Test NATS connection */
+
+  publishDebugEvent(request: PublishDebugEventRequest): Observable<PublishDebugEventResponse>;
 }
 
 export interface RentalServiceController {
@@ -298,6 +315,12 @@ export interface RentalServiceController {
   getRentalExtensions(
     request: GetRentalExtensionsRequest,
   ): Promise<GetRentalExtensionsResponse> | Observable<GetRentalExtensionsResponse> | GetRentalExtensionsResponse;
+
+  /** Debug: Test NATS connection */
+
+  publishDebugEvent(
+    request: PublishDebugEventRequest,
+  ): Promise<PublishDebugEventResponse> | Observable<PublishDebugEventResponse> | PublishDebugEventResponse;
 }
 
 export function RentalServiceControllerMethods() {
@@ -313,6 +336,7 @@ export function RentalServiceControllerMethods() {
       "getHistoryRental",
       "createRentalExtension",
       "getRentalExtensions",
+      "publishDebugEvent",
     ];
     for (const method of grpcMethods) {
       const descriptor: any = Reflect.getOwnPropertyDescriptor(constructor.prototype, method);

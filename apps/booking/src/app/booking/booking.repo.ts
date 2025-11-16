@@ -20,7 +20,6 @@ import { ConfigService } from '@nestjs/config';
 import { ExtensionNotFoundException } from '../extension/extension.error';
 import { PrismaService } from '../prisma/prisma.service';
 import {
-  BookingAlreadyCancelledException,
   BookingCannotCancelWithCheckInsException,
   BookingNotFoundException,
   BookingNotPaidException,
@@ -178,9 +177,6 @@ export class BookingRepository {
       if (!booking) {
         throw BookingNotFoundException;
       }
-      if (booking.status === BookingStatusValues.PENDING) {
-        throw BookingAlreadyCancelledException;
-      }
       if (booking.checkIns.length > 0) {
         throw BookingCannotCancelWithCheckInsException;
       }
@@ -235,7 +231,7 @@ export class BookingRepository {
       const [cancelBooking] = await Promise.all([
         updateStatusBooking$,
         createBookingHistory$,
-        createRefund$,
+        booking.status === BookingStatusValues.PENDING ? createRefund$ : null,
       ]);
 
       return {

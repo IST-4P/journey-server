@@ -108,37 +108,46 @@ export class ChatRepository {
     const skip = (data.page - 1) * data.limit;
     const take = data.limit;
 
-    const [totalItems, conversations] = await Promise.all([
-      this.prismaService.chat.findMany({
-        where: { toUserId: data.adminId },
-        distinct: ['fromUserId'],
-        select: { fromUserId: true },
-      }),
-      this.prismaService.chat.groupBy({
-        by: ['fromUserId'],
-        where: {
-          toUserId: data.adminId,
-        },
-        _max: {
-          createdAt: true,
-        },
-        orderBy: {
-          _max: {
-            createdAt: 'asc',
-          },
-        },
-        skip,
-        take,
-      }),
-    ]);
+    // Raw query để lấy conversations hai chiều
+    const conversations = await this.prismaService.$queryRaw<
+      Array<{ userId: string; lastMessageAt: Date }>
+    >`
+      SELECT 
+        CASE 
+          WHEN "fromUserId" = ${data.adminId} THEN "toUserId"
+          ELSE "fromUserId"
+        END as "userId",
+        MAX("createdAt") as "lastMessageAt"
+      FROM "Chat"
+      WHERE "fromUserId" = ${data.adminId} OR "toUserId" = ${data.adminId}
+      GROUP BY "userId"
+      ORDER BY "lastMessageAt" DESC
+      LIMIT ${take}
+      OFFSET ${skip}
+    `;
+
+    const totalCount = await this.prismaService.$queryRaw<
+      Array<{ count: bigint }>
+    >`
+      SELECT COUNT(DISTINCT 
+        CASE 
+          WHEN "fromUserId" = ${data.adminId} THEN "toUserId"
+          ELSE "fromUserId"
+        END
+      ) as count
+      FROM "Chat"
+      WHERE "fromUserId" = ${data.adminId} OR "toUserId" = ${data.adminId}
+    `;
+
+    const totalItems = Number(totalCount[0].count);
     console.log(conversations);
 
     return {
-      conversations: conversations.map((user) => user.fromUserId),
+      conversations: conversations.map((c) => c.userId),
       page: data.page,
       limit: data.limit,
-      totalItems: totalItems.length,
-      totalPages: Math.ceil(totalItems.length / data.limit),
+      totalItems,
+      totalPages: Math.ceil(totalItems / data.limit),
     };
   }
 }

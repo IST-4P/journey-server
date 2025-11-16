@@ -52,7 +52,7 @@ export class RentalController {
   }
 }
 
-@Controller('extension')
+@Controller('rental-extension')
 export class ExtensionController {
   // private readonly logger = new Logger(ExtensionController.name);
 

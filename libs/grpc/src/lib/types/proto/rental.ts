@@ -172,20 +172,21 @@ export interface RentalExtensionMessage {
   rentalId: string;
   /** ISO string */
   newEndDate: string;
-  additionalFee: number;
-  additionalHours: number;
+  additionalDays: number;
+  /** Extension total price */
+  totalPrice: number;
   /** userId */
   requestedBy: string;
   createdAt: string;
   notes: string;
+  /** PENDING, APPROVED, REJECTED */
+  status: string;
 }
 
 export interface CreateRentalExtensionRequest {
   rentalId: string;
-  requestedBy: string;
+  requestedBy?: string | undefined;
   newEndDate: string;
-  additionalFee: number;
-  additionalHours: number;
   notes?: string | undefined;
 }
 

@@ -206,6 +206,23 @@ export interface DeleteReviewResponse {
   message: string;
 }
 
+/** Rating statistics message */
+export interface RatingStats {
+  targetId: string;
+  type: ReviewType;
+  averageRating: number;
+  totalReviews: number;
+}
+
+export interface GetRatingStatsRequest {
+  targetId: string;
+}
+
+export interface RatingStatsResponse {
+  stats: RatingStats | undefined;
+  message: string;
+}
+
 export const REVIEW_PACKAGE_NAME = "review";
 
 export interface ReviewServiceClient {
@@ -228,6 +245,14 @@ export interface ReviewServiceClient {
   getReviewsByDevice(request: GetReviewsByDeviceRequest): Observable<GetReviewsResponse>;
 
   getReviewsByCombo(request: GetReviewsByComboRequest): Observable<GetReviewsResponse>;
+
+  /** Rating statistics */
+
+  getVehicleRatingStats(request: GetRatingStatsRequest): Observable<RatingStatsResponse>;
+
+  getDeviceRatingStats(request: GetRatingStatsRequest): Observable<RatingStatsResponse>;
+
+  getComboRatingStats(request: GetRatingStatsRequest): Observable<RatingStatsResponse>;
 
   /** Admin operations */
 
@@ -267,6 +292,20 @@ export interface ReviewServiceController {
     request: GetReviewsByComboRequest,
   ): Promise<GetReviewsResponse> | Observable<GetReviewsResponse> | GetReviewsResponse;
 
+  /** Rating statistics */
+
+  getVehicleRatingStats(
+    request: GetRatingStatsRequest,
+  ): Promise<RatingStatsResponse> | Observable<RatingStatsResponse> | RatingStatsResponse;
+
+  getDeviceRatingStats(
+    request: GetRatingStatsRequest,
+  ): Promise<RatingStatsResponse> | Observable<RatingStatsResponse> | RatingStatsResponse;
+
+  getComboRatingStats(
+    request: GetRatingStatsRequest,
+  ): Promise<RatingStatsResponse> | Observable<RatingStatsResponse> | RatingStatsResponse;
+
   /** Admin operations */
 
   getAllReviews(
@@ -289,6 +328,9 @@ export function ReviewServiceControllerMethods() {
       "getReviewsByVehicle",
       "getReviewsByDevice",
       "getReviewsByCombo",
+      "getVehicleRatingStats",
+      "getDeviceRatingStats",
+      "getComboRatingStats",
       "getAllReviews",
       "adminDeleteReview",
     ];

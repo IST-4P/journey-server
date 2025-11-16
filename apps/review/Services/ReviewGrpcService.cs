@@ -16,7 +16,6 @@ namespace review.Services
         private readonly ILogger<ReviewGrpcService> _logger;
         private readonly NatsPublisher _natsPublisher;
 
-
         public ReviewGrpcService(IReviewService reviewService, IMapper mapper, ILogger<ReviewGrpcService> logger, NatsPublisher natsPublisher)
         {
             _reviewService = reviewService;

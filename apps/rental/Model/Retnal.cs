@@ -6,12 +6,10 @@ namespace rental.Model.Entities
     [Table("rentals")]
     public class Rental
     {
-    internal readonly object Model;
 
     public Guid Id { get; set; } = Guid.NewGuid();
         public Guid UserId { get; set; }
 
-        // [{ "targetId": "guid", "isCombo": bool, "quantity": int }]
         // Multiple items allowed per rental
         public string Items { get; set; } = "[]";
 

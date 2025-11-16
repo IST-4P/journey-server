@@ -4,7 +4,7 @@ namespace rental.Nats.Events
     {
         public string id { get; set; } = string.Empty;
         public string userId { get; set; } = string.Empty;
-        public string type { get; set; } 
+        public  required string type { get; set; } 
         public string rentalId { get; set; } = string.Empty;
         public double totalAmount { get; set; }
     }

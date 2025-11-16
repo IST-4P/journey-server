@@ -159,7 +159,8 @@ namespace device.Service
                         Quantity = d.Quantity ?? 0,
                         Information = { d.Information ?? new List<string>() },
                         Images = { d.Images ?? new List<string>() },
-                        CategoryName = d.CategoryName ?? ""
+                        CategoryName = d.CategoryName ?? "",
+                        Brand = d.Brand ?? "",
                     });
                 }
 

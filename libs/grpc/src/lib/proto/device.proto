@@ -125,6 +125,7 @@ message GetDeviceResponse {
   string categoryName = 10;
   string createdAt = 11;
   string updatedAt = 12;
+  string brand = 13;
 }
 
 // GetManyDevices (User)
@@ -134,6 +135,7 @@ message GetManyDevicesRequest {
   optional string status = 3;
   optional string search = 4;
   optional string categoryId = 5;
+  optional string brand = 6;
 }
 
 message GetManyDevices {
@@ -146,6 +148,7 @@ message GetManyDevices {
   repeated string images = 7;
   string categoryName = 8;
   string id = 9;
+  string brand = 10;
 }
 
 message GetManyDevicesResponse {
@@ -170,6 +173,7 @@ message GetManyDevicesAdmin {
   string categoryName = 10;
   string createdAt = 11;
   string updatedAt = 12;
+  string brand = 13;
 }
 
 message GetManyDevicesAdminResponse {
@@ -190,6 +194,7 @@ message CreateDeviceRequest {
   repeated string information = 6;
   repeated string images = 7;
   string categoryId = 8;
+  string brand = 9;
 }
 
 // UpdateDevice
@@ -203,6 +208,7 @@ message UpdateDeviceRequest {
   repeated string information = 7;
   repeated string images = 8;
   optional string categoryId = 9;
+  optional string brand = 10;
 }
 
 // DeleteDevice

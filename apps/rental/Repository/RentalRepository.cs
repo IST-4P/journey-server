@@ -49,7 +49,8 @@ namespace rental.Repository
             await _context.SaveChangesAsync();
             return entity;
         }
-
+        
+        // Get rental extensions by rental ID
         public async Task<List<RentalExtensionEntity>> GetExtensionsByRentalIdAsync(Guid rentalId)
         {
             return await _context.Set<RentalExtensionEntity>()

@@ -89,12 +89,14 @@ export interface DeleteBrandRequest {
 /** GetAllModels */
 export interface GetAllModelsRequest {
   brandId?: string | undefined;
+  type?: string | undefined;
 }
 
 export interface GetModelResponse {
   id: string;
   name: string;
   brandId: string;
+  type: string;
 }
 
 export interface GetAllModelsResponse {

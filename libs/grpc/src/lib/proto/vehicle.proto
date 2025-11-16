@@ -102,12 +102,14 @@ message DeleteBrandRequest {
 // GetAllModels
 message GetAllModelsRequest {
   optional string brandId = 1;
+  optional string type = 2;
 }
 
 message GetModelResponse {
   string id = 1;
   string name = 2;
   string brandId = 3;
+  string type = 4;
 }
 
 message GetAllModelsResponse {

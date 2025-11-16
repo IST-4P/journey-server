@@ -473,6 +473,26 @@ namespace rental.Service
                 try { newEnd = DateTime.Parse(request.NewEndDate).ToUniversalTime(); }
                 catch { throw new RpcException(new Status(StatusCode.InvalidArgument, "Invalid newEndDate")); }
 
+                // Calculate additional days between current EndDate and new EndDate
+                int additionalDays = (int)(newEnd - rental.EndDate).TotalDays;
+                if (additionalDays <= 0)
+                {
+                    throw new RpcException(new Status(StatusCode.InvalidArgument, "New end date must be after current end date"));
+                }
+
+                // Calculate extension total price using same formula as rental
+                // TotalPrice = (RentalFee - Discount) × AdditionalDays × 1.1 (VAT)
+                double discountAmount = RentalCalculationHelper.CalculateDiscountAmount(
+                    rental.RentalFee,
+                    rental.DiscountPercent,
+                    rental.MaxDiscount
+                );
+                double extensionTotalPrice = RentalCalculationHelper.CalculateExtensionTotalPrice(
+                    rental.RentalFee,
+                    discountAmount,
+                    additionalDays
+                );
+
                 // Save current EndDate to ActualEndDate before extension
                 if (!rental.ActualEndDate.HasValue)
                 {
@@ -483,8 +503,8 @@ namespace rental.Service
                 {
                     RentalId = rental.Id,
                     NewEndDate = newEnd,
-                    AdditionalFee = request.AdditionalFee,
-                    AdditionalHours = request.AdditionalHours,
+                    AdditionalDays = additionalDays,
+                    TotalPrice = extensionTotalPrice,
                     RequestedBy = Guid.TryParse(request.RequestedBy, out var uid) ? uid : null,
                     Notes = string.IsNullOrWhiteSpace(request.Notes) ? null : request.Notes
                 };
@@ -496,7 +516,7 @@ namespace rental.Service
                 await _repository.UpdateAsync(rental.Id, new UpdateRentalRequestDto { EndDate = newEnd });
 
                 // Publish rental extension event to NATS for payment service
-                if (request.AdditionalFee > 0)
+                if (additionalDays > 0)
                 {
                     try
                     {
@@ -506,45 +526,14 @@ namespace rental.Service
                             userId = rental.UserId.ToString(),
                             type = "EXTENSION",
                             rentalId = rental.Id.ToString(),
-                            totalAmount = request.AdditionalFee
+                            totalAmount = extensionTotalPrice
                         };
                         await _natsPublisher.PublishAsync("journey.events.payment-extension", extensionEvent);
-                        _logger.LogInformation("[Rental] Published payment-extension event for rental {RentalId}", rental.Id);
+                        _logger.LogInformation("[Rental] Published payment-extension event for rental {RentalId} with totalPrice {ExtensionTotalPrice}", rental.Id, extensionTotalPrice);
                     }
                     catch (Exception ex)
                     {
                         _logger.LogWarning(ex, "[Rental] Failed to publish payment-extension event for rental {RentalId}", rental.Id);
-                    }
-                }
-
-                // If additional fee applies, attempt payment for the extension
-                if (request.AdditionalFee > 0)
-                {
-                    try
-                    {
-                        var demoMode = (Environment.GetEnvironmentVariable("PAYMENT_DEMO_MODE") ?? "false").Equals("true", StringComparison.OrdinalIgnoreCase);
-                        if (!demoMode)
-                        {
-                            var reqPay = new Payment.WebhookPaymentRequest
-                            {
-                                Id = (int)(DateTimeOffset.UtcNow.ToUnixTimeSeconds() % int.MaxValue),
-                                Gateway = "internal",
-                                TransactionDate = DateTime.UtcNow.ToString("yyyy-MM-dd HH:mm:ss"),
-                                TransferType = "in",
-                                TransferAmount = request.AdditionalFee,
-                                Accumulated = request.AdditionalFee,
-                                Description = $"rental-extension:{rental.Id}",
-                            };
-                            await _paymentClient.ReceiverAsync(reqPay);
-                        }
-                        else
-                        {
-                            _logger.LogInformation("[Payment DEMO] Extension fee for rental {RentalId} paid successfully.", rental.Id);
-                        }
-                    }
-                    catch (Exception ex)
-                    {
-                        _logger.LogWarning(ex, "Payment for rental extension failed for rental {RentalId}", rental.Id);
                     }
                 }
 
@@ -599,11 +588,11 @@ namespace rental.Service
                         Id = e.Id.ToString(),
                         RentalId = (e.RentalId?.ToString()) ?? string.Empty,
                         NewEndDate = e.NewEndDate?.ToString("O") ?? string.Empty,
-                        AdditionalFee = e.AdditionalFee ?? 0,
-                        AdditionalHours = e.AdditionalHours ?? 0,
+                        AdditionalDays = e.AdditionalDays ?? 0,
                         RequestedBy = e.RequestedBy?.ToString() ?? string.Empty,
                         CreatedAt = e.CreatedAt?.ToString("O") ?? string.Empty,
-                        Notes = e.Notes ?? string.Empty
+                        Notes = e.Notes ?? string.Empty,
+                        Status = e.Status.ToString()
                     });
                 }
                 return resp;
@@ -615,7 +604,7 @@ namespace rental.Service
             }
         }
 
-                // Get rental history
+        // Get rental history
         public override async Task<GetHistoryRentalResponse> GetHistoryRental(GetHistoryRentalRequest request, ServerCallContext context)
         {
             try
@@ -662,7 +651,7 @@ namespace rental.Service
             }
         }
 
-        
-  
+
+
     }
 }

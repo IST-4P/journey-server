@@ -42,5 +42,5 @@ export class PaymentExtensionConsumer
       rentalId: event.rentalId || null,
       amount: event.totalAmount,
     });
-  }
+  } 
 }

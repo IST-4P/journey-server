@@ -3,14 +3,12 @@ import z from 'zod';
 export const ComplaintStatusValues = {
   OPEN: 'OPEN',
   IN_PROGRESS: 'IN_PROGRESS',
-  RESOLVED: 'RESOLVED',
   CLOSED: 'CLOSED',
 } as const;
 
 export const ComplaintStatusEnum = z.enum([
   ComplaintStatusValues.OPEN,
   ComplaintStatusValues.IN_PROGRESS,
-  ComplaintStatusValues.RESOLVED,
   ComplaintStatusValues.CLOSED,
 ]);
 

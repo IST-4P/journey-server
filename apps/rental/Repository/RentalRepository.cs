@@ -39,8 +39,8 @@ namespace rental.Repository
             {
                 RentalId = extension.RentalId,
                 NewEndDate = extension.NewEndDate,
-                AdditionalFee = extension.AdditionalFee,
-                AdditionalHours = extension.AdditionalHours,
+                TotalPrice = extension.TotalPrice,
+                AdditionalDays = extension.AdditionalDays,
                 RequestedBy = extension.RequestedBy,
                 Notes = extension.Notes,
                 Status = ExtensionStatus.PENDING
@@ -127,9 +127,9 @@ namespace rental.Repository
             await _context.SaveChangesAsync();
             return rental;
         }
-        
-        
-        
+
+
+
         // Admin: Get all rentals
         public async Task<PagedResult<RentalEntity>> GetAllRentalsAsync(RentalQueryDto query)
         {

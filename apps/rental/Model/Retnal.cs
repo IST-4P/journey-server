@@ -7,7 +7,7 @@ namespace rental.Model.Entities
     public class Rental
     {
 
-    public Guid Id { get; set; } = Guid.NewGuid();
+        public Guid Id { get; set; } = Guid.NewGuid();
         public Guid UserId { get; set; }
 
         // Multiple items allowed per rental
@@ -49,8 +49,8 @@ namespace rental.Model.Entities
     {
         public Guid Id { get; set; } = Guid.NewGuid();
         public DateTime? NewEndDate { get; set; }
-        public double? AdditionalFee { get; set; }
-        public double? AdditionalHours { get; set; }
+        public double? TotalPrice { get; set; } // Extension total price (calculated like rental)
+        public int? AdditionalDays { get; set; }
         public Guid? RequestedBy { get; set; } // UserId người yêu cầu gia hạn
         public DateTime? CreatedAt { get; set; } = DateTime.UtcNow;
         public string? Notes { get; set; }

@@ -54,5 +54,13 @@ namespace rental.Service
         {
             return deposit * (refundPercent / 100.0);
         }
+
+        // Calculate extension fee based on additional days
+        // Extension total price = (RentalFee per day - Discount per day) × Additional Days × 1.1 (VAT)
+        // Same formula as rental: TotalPrice = (RentalFee - Discount) × Days × 1.1
+        public static double CalculateExtensionTotalPrice(double dailyRentalFee, double discountAmount, int additionalDays)
+        {
+            return CalculateTotalPrice(dailyRentalFee, discountAmount, additionalDays);
+        }
     }
 }

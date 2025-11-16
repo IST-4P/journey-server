@@ -28,8 +28,8 @@ namespace rental.Model.Dto
         [Required]
         public DateTime NewEndDate { get; set; }
 
-        public double? AdditionalFee { get; set; }
-        public double? AdditionalHours { get; set; }
+        public double? TotalPrice { get; set; }
+        public int? AdditionalDays { get; set; }
         public Guid? RequestedBy { get; set; } // UserId người yêu cầu gia hạn
         public string? Notes { get; set; }
     }

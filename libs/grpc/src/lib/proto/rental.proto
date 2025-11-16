@@ -171,20 +171,19 @@ message RentalExtensionMessage {
   string id = 1;
   string rentalId = 2;
   string newEndDate = 3; // ISO string
-  double additionalFee = 4;
-  double additionalHours = 5;
+  int32 additionalDays = 4;
+  double totalPrice = 5; // Extension total price 
   string requestedBy = 6; // userId
   string createdAt = 7;
   string notes = 8;
+  string status = 9; // PENDING, APPROVED, REJECTED
 }
 
 message CreateRentalExtensionRequest {
   string rentalId = 1;
-  string requestedBy = 2;
+  optional string requestedBy = 2;
   string newEndDate = 3;
-  double additionalFee = 4;
-  double additionalHours = 5;
-  optional string notes = 6;
+  optional string notes = 4;
 }
 
 message GetRentalExtensionsRequest {

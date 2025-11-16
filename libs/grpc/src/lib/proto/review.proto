@@ -1,11 +1,5 @@
 syntax = "proto3";
 
-import "user.proto";
-import "device.proto";
-import "rental.proto";
-import "booking.proto";
-import "vehicle.proto";
-
 package review;
 
 service ReviewService {

@@ -52,13 +52,13 @@ export class RentalController {
   }
 }
 
-@Controller('extension')
+@Controller('rental-extension')
 export class ExtensionController {
   // private readonly logger = new Logger(ExtensionController.name);
 
   constructor(private readonly rentalService: RentalService) {}
 
-  @Get(':id')
+  @Get(':rentalId')
   getRentalExtensions(@Param() params: GetRentalExtensionsRequestDTO) {
     return this.rentalService.getRentalExtensions(params);
   }

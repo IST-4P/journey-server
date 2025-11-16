@@ -77,4 +77,34 @@ export class DeviceService implements OnModuleInit {
   ): Promise<DeviceProto.DeleteComboResponse> {
     return lastValueFrom(this.deviceService.deleteCombo(data));
   }
+
+  getCategory(
+    data: DeviceProto.GetCategoryRequest
+  ): Promise<DeviceProto.GetCategoryResponse> {
+    return lastValueFrom(this.deviceService.getCategory(data));
+  }
+
+  getManyCategories(
+    data: DeviceProto.GetManyCategoriesRequest
+  ): Promise<DeviceProto.GetManyCategoriesResponse> {
+    return lastValueFrom(this.deviceService.getManyCategories(data));
+  }
+
+  createCategory(
+    data: DeviceProto.CreateCategoryRequest
+  ): Promise<DeviceProto.CreateCategoryResponse> {
+    return lastValueFrom(this.deviceService.createCategory(data));
+  }
+
+  updateCategory(
+    data: DeviceProto.UpdateCategoryRequest
+  ): Promise<DeviceProto.UpdateCategoryResponse> {
+    return lastValueFrom(this.deviceService.updateCategory(data));
+  }
+
+  deleteCategory(
+    data: DeviceProto.DeleteCategoryRequest
+  ): Promise<DeviceProto.DeleteCategoryResponse> {
+    return lastValueFrom(this.deviceService.deleteCategory(data));
+  }
 }

@@ -47,7 +47,7 @@ export class VehicleService {
 
   async updateVehicle(data: UpdateVehicleRequest) {
     const result = await this.vehicleRepo.getVehicle({
-      licensePlate: data.licensePlate,
+      id: data.id,
     });
     if (!result) {
       throw VehicleNotFoundException;

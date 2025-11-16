@@ -31,6 +31,7 @@ builder.Services.AddSingleton(sp =>
 builder.Services.AddSingleton<NatsPublisher>();
 builder.Services.AddSingleton<NatsStreamSetup>();
 builder.Services.AddHostedService<ReviewEventConsumer>();
+builder.Services.AddHostedService<RentalQuantityChangeConsumer>();
 
 // Load connection string
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
@@ -49,7 +50,7 @@ builder.Services.AddAutoMapper(typeof(Program));
 
 builder.Services.AddDbContext<DeviceDbContext>(options =>
     options.UseNpgsql(connectionString));
-    
+
 
 builder.Services.AddScoped<IDeviceRepository, DeviceRepository>();
 builder.Services.AddScoped<IComboRepository, ComboRepository>();

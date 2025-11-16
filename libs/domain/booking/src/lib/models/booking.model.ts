@@ -65,6 +65,14 @@ export const GetInformationBookingResponseSchema = z.object({
   cancelledBookings: z.number().int(),
 });
 
+export const GetVehicleNamesByBookingIdsRequestSchema = z.object({
+  bookingIds: z.array(z.string()),
+});
+
+export const GetVehicleNamesByBookingIdsResponseSchema = z.object({
+  vehicleNames: z.array(z.string()),
+});
+
 export type GetBookingRequest = z.infer<typeof GetBookingRequestSchema>;
 export type GetBookingResponse = z.infer<typeof GetBookingResponseSchema>;
 export type GetManyBookingsRequest = z.infer<
@@ -81,4 +89,10 @@ export type UpdateStatusBookingRequest = z.infer<
 >;
 export type GetInformationBookingResponse = z.infer<
   typeof GetInformationBookingResponseSchema
+>;
+export type GetVehicleNamesByBookingIdsRequest = z.infer<
+  typeof GetVehicleNamesByBookingIdsRequestSchema
+>;
+export type GetVehicleNamesByBookingIdsResponse = z.infer<
+  typeof GetVehicleNamesByBookingIdsResponseSchema
 >;

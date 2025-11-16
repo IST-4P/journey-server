@@ -95,6 +95,22 @@ export interface GetRefundResponse {
   updatedAt: string;
 }
 
+export interface GetRefundResponseWithVehicleName {
+  id: string;
+  userId: string;
+  bookingId?: string | undefined;
+  rentalId?: string | undefined;
+  vehicleName: string;
+  principal: number;
+  amount: number;
+  penaltyAmount: number;
+  damageAmount: number;
+  overtimeAmount: number;
+  status: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
 export interface GetManyRefundsRequest {
   userId?: string | undefined;
   status?: string | undefined;
@@ -106,6 +122,14 @@ export interface GetManyRefundsRequest {
 
 export interface GetManyRefundsResponse {
   refunds: GetRefundResponse[];
+  page: number;
+  limit: number;
+  totalItems: number;
+  totalPages: number;
+}
+
+export interface GetManyRefundsResponseWithVehicleName {
+  refunds: GetRefundResponseWithVehicleName[];
   page: number;
   limit: number;
   totalItems: number;

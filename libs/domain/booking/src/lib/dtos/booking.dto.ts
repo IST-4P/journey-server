@@ -9,6 +9,7 @@ import {
   GetInformationBookingResponseSchema,
   GetManyBookingsRequestSchema,
   GetManyBookingsResponseSchema,
+  GetVehicleNamesByBookingIdsRequestSchema,
   UpdateStatusBookingRequestSchema,
 } from '../models';
 
@@ -40,4 +41,7 @@ export class UpdateStatusBookingRequestDTO extends createZodDto(
 ) {}
 export class GetInformationBookingResponseDTO extends createZodDto(
   GetInformationBookingResponseSchema
+) {}
+export class GetVehicleNamesByBookingIdsRequestDTO extends createZodDto(
+  GetVehicleNamesByBookingIdsRequestSchema
 ) {}

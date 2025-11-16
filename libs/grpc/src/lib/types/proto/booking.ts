@@ -111,6 +111,15 @@ export interface GetInformationBookingResponse {
   cancelledBookings: number;
 }
 
+/** GetVehicleNamesByBookingIds */
+export interface GetVehicleNamesByBookingIdsRequest {
+  bookingIds: string[];
+}
+
+export interface GetVehicleNamesByBookingIdsResponse {
+  vehicleNames: string[];
+}
+
 /**
  * ======================================================== CheckInOut
  * GetManyCheckInOuts
@@ -303,6 +312,10 @@ export interface BookingServiceClient {
 
   getInformationBooking(request: GetInformationBookingRequest): Observable<GetInformationBookingResponse>;
 
+  getVehicleNamesByBookingIds(
+    request: GetVehicleNamesByBookingIdsRequest,
+  ): Observable<GetVehicleNamesByBookingIdsResponse>;
+
   getManyCheckInOuts(request: GetManyCheckInOutsRequest): Observable<GetManyCheckInOutsResponse>;
 
   getCheckInOut(request: GetCheckInOutRequest): Observable<GetCheckInOutResponse>;
@@ -358,6 +371,13 @@ export interface BookingServiceController {
   getInformationBooking(
     request: GetInformationBookingRequest,
   ): Promise<GetInformationBookingResponse> | Observable<GetInformationBookingResponse> | GetInformationBookingResponse;
+
+  getVehicleNamesByBookingIds(
+    request: GetVehicleNamesByBookingIdsRequest,
+  ):
+    | Promise<GetVehicleNamesByBookingIdsResponse>
+    | Observable<GetVehicleNamesByBookingIdsResponse>
+    | GetVehicleNamesByBookingIdsResponse;
 
   getManyCheckInOuts(
     request: GetManyCheckInOutsRequest,
@@ -429,6 +449,7 @@ export function BookingServiceControllerMethods() {
       "cancelBooking",
       "updateStatusBooking",
       "getInformationBooking",
+      "getVehicleNamesByBookingIds",
       "getManyCheckInOuts",
       "getCheckInOut",
       "checkIn",

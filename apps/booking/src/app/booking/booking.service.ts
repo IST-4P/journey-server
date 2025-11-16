@@ -3,6 +3,7 @@ import {
   CreateBookingRequest,
   GetBookingRequest,
   GetManyBookingsRequest,
+  GetVehicleNamesByBookingIdsRequest,
   UpdateStatusBookingRequest,
 } from '@domain/booking';
 import { Injectable, Logger } from '@nestjs/common';
@@ -44,5 +45,9 @@ export class BookingService {
 
   async getInformationBooking() {
     return this.bookingRepository.getInformationBooking();
+  }
+
+  async getVehicleNamesByBookingIds(data: GetVehicleNamesByBookingIdsRequest) {
+    return this.bookingRepository.getVehicleNamesByBookingIds(data);
   }
 }

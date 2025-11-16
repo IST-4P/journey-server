@@ -140,7 +140,6 @@ export class ChatRepository {
     `;
 
     const totalItems = Number(totalCount[0].count);
-    console.log(conversations);
 
     return {
       conversations: conversations.map((c) => c.userId),

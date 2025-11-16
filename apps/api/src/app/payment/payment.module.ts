@@ -1,4 +1,4 @@
-import { PaymentProto } from '@hacmieu-journey/grpc';
+import { BookingProto, PaymentProto } from '@hacmieu-journey/grpc';
 import { NatsModule } from '@hacmieu-journey/nats';
 import { Module } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
@@ -22,6 +22,20 @@ import { PaymentService } from './payment.service';
               'localhost:5009',
             package: PaymentProto.PAYMENT_PACKAGE_NAME,
             protoPath: join(__dirname, '../../libs/grpc/proto/payment.proto'),
+          },
+        }),
+        inject: [ConfigService],
+      },
+      {
+        name: BookingProto.BOOKING_PACKAGE_NAME,
+        useFactory: (configService: ConfigService) => ({
+          transport: Transport.GRPC,
+          options: {
+            url:
+              configService.getOrThrow('BOOKING_GRPC_SERVICE_URL') ||
+              'localhost:5008',
+            package: BookingProto.BOOKING_PACKAGE_NAME,
+            protoPath: join(__dirname, '../../libs/grpc/proto/booking.proto'),
           },
         }),
         inject: [ConfigService],

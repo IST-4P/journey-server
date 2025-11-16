@@ -5,6 +5,7 @@ import {
   CreateBookingRequest,
   GetBookingRequest,
   GetManyBookingsRequest,
+  GetVehicleNamesByBookingIdsRequest,
   HistoryActionValues,
   PaymentStatusValues,
   UpdateStatusBookingRequest,
@@ -392,5 +393,13 @@ export class BookingRepository {
       completedBookings: statusCounts['COMPLETED'] || 0,
       cancelledBookings: statusCounts['CANCELLED'] || 0,
     };
+  }
+
+  async getVehicleNamesByBookingIds(data: GetVehicleNamesByBookingIdsRequest) {
+    const vehicleNames = await this.prismaService.booking.findMany({
+      where: { id: { in: data.bookingIds } },
+      select: { vehicleName: true },
+    });
+    return { vehicleNames: vehicleNames.map((item) => item.vehicleName) };
   }
 }

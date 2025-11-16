@@ -24,8 +24,8 @@ const getCookieOptions = (req: Request): CookieOptions => {
 
   return {
     httpOnly: true,
-    secure: !isLocalhost,
-    sameSite: isLocalhost ? 'lax' : 'none',
+    secure: true,
+    sameSite: 'none',
     ...(!isLocalhost && { domain: '.hacmieu.xyz' }),
     path: '/',
   };

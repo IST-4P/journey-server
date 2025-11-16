@@ -236,4 +236,31 @@ export class VehicleRepository {
       },
     });
   }
+
+  async reviewVehicle(data: {
+    reviewId: string;
+    vehicleId: string;
+    rating: number;
+  }) {
+    const vehicle = await this.prisma.vehicle.findUnique({
+      where: { id: data.vehicleId },
+    });
+
+    if (!vehicle) {
+      throw VehicleNotFoundException;
+    }
+
+    const currentAvg = vehicle.averageRating?.toNumber() ?? 0;
+    const currentTotal = vehicle.totalReviewIds.length;
+    const newAverage =
+      (currentAvg * currentTotal + data.rating) / (currentTotal + 1);
+
+    await this.prisma.vehicle.update({
+      where: { id: data.vehicleId },
+      data: {
+        totalReviewIds: { push: data.reviewId },
+        averageRating: newAverage,
+      },
+    });
+  }
 }

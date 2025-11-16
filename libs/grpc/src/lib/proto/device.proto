@@ -49,11 +49,11 @@ message GetManyCategoriesRequest {
   int32 page = 1;
   int32 limit = 2;
   optional string search = 3;
-  optional string sortBy = 4;   
-  optional string sortDir = 5;   
+  optional string sortBy = 4;
+  optional string sortDir = 5;
 }
 
-message GetManyCategories {
+message ManyCategories {
   string id = 1;
   string name = 2;
   string logoUrl = 3;
@@ -62,7 +62,7 @@ message GetManyCategories {
 }
 
 message GetManyCategoriesResponse {
-  repeated GetManyCategories categories = 1;
+  repeated ManyCategories categories = 1;
   int32 page = 2;
   int32 limit = 3;
   int32 totalItems = 4;

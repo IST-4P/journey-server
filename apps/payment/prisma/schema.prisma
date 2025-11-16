@@ -19,6 +19,7 @@ enum PaymentType {
     DEVICE
     VEHICLE
     EXTENSION
+    COMBO
 }
 
 enum RefundStatus {

@@ -1,11 +1,11 @@
 // Validators
-export * from './lib/validators';
+export * from './lib/validators/';
 
 // Enums
-export * from './lib/enums';
+export * from './lib/enums/';
 
 // Models
-export * from './lib/models';
+export * from './lib/models/';
 
 // DTOs
-export * from './lib/dtos';
+export * from './lib/dtos/';

@@ -136,7 +136,7 @@ export class VehicleController {
 
   @Put(':id')
   updateVehicle(
-    @Body() body: UpdateVehicleRequestDTO,
+    @Body() body: Omit<UpdateVehicleRequestDTO, 'id'>,
     @Param('id') id: string
   ) {
     return this.vehicleService.updateVehicle({ ...body, id });

@@ -158,16 +158,12 @@ namespace review.Services
             {
                 var reviewEvent = new ReviewCreatedEvent
                 {
-                    ReviewId = review.Id.ToString(),
-                    BookingId = review.BookingId?.ToString(),
-                    RentalId = review.RentalId?.ToString(),
-                    UserId = review.UserId.ToString(),
-                    Rating = review.Rating,
-                    Type = review.Type.ToString(),
-                    CreatedAt = review.CreatedAt.ToString("o"),
-                    DeviceId = review.DeviceId?.ToString(),
-                    ComboId = review.ComboId?.ToString(),
-                    VehicleId = review.VehicleId?.ToString()
+                    reviewId = review.Id.ToString(),
+                    bookingId = review.BookingId?.ToString(),
+                    rentalId = review.RentalId?.ToString(),
+                    deviceId = review.DeviceId?.ToString(),
+                    comboId = review.ComboId?.ToString(),
+                    vehicleId = review.VehicleId?.ToString()
                 };
 
                 await _natsPublisher.PublishAsync("journey.events.review.created", reviewEvent);
@@ -309,6 +305,57 @@ namespace review.Services
             _logger.LogInformation($"Admin {adminId} is deleting review {reviewId}");
 
             return await _repository.DeleteReviewAsync(reviewId);
+        }
+
+        public async Task<RatingStatsDto> GetVehicleRatingStatsAsync(Guid vehicleId)
+        {
+            var reviews = await _repository.GetReviewsByVehicleIdAsync(vehicleId, new ReviewQueryDto
+            {
+                Page = 1,
+                Limit = int.MaxValue
+            });
+
+            return new RatingStatsDto
+            {
+                TargetId = vehicleId,
+                Type = ReviewType.Vehicle,
+                AverageRating = reviews.Any() ? Math.Round(reviews.Average(r => r.Rating), 2) : 0,
+                TotalReviews = reviews.Count
+            };
+        }
+
+        public async Task<RatingStatsDto> GetDeviceRatingStatsAsync(Guid deviceId)
+        {
+            var reviews = await _repository.GetReviewsByDeviceIdAsync(deviceId, new ReviewQueryDto
+            {
+                Page = 1,
+                Limit = int.MaxValue
+            });
+
+            return new RatingStatsDto
+            {
+                TargetId = deviceId,
+                Type = ReviewType.Device,
+                AverageRating = reviews.Any() ? Math.Round(reviews.Average(r => r.Rating), 2) : 0,
+                TotalReviews = reviews.Count
+            };
+        }
+
+        public async Task<RatingStatsDto> GetComboRatingStatsAsync(Guid comboId)
+        {
+            var reviews = await _repository.GetReviewsByComboIdAsync(comboId, new ReviewQueryDto
+            {
+                Page = 1,
+                Limit = int.MaxValue
+            });
+
+            return new RatingStatsDto
+            {
+                TargetId = comboId,
+                Type = ReviewType.Combo,
+                AverageRating = reviews.Any() ? Math.Round(reviews.Average(r => r.Rating), 2) : 0,
+                TotalReviews = reviews.Count
+            };
         }
 
         private void ValidatePagination(int page, int limit)

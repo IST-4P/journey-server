@@ -32,7 +32,7 @@ export interface GetManyCategoriesRequest {
   sortDir?: string | undefined;
 }
 
-export interface GetManyCategories {
+export interface ManyCategories {
   id: string;
   name: string;
   logoUrl: string;
@@ -41,7 +41,7 @@ export interface GetManyCategories {
 }
 
 export interface GetManyCategoriesResponse {
-  categories: GetManyCategories[];
+  categories: ManyCategories[];
   page: number;
   limit: number;
   totalItems: number;

@@ -441,6 +441,96 @@ namespace review.Services
             }
         }
 
+        public override async Task<Review.RatingStatsResponse> GetVehicleRatingStats(Review.GetRatingStatsRequest request, ServerCallContext context)
+        {
+            try
+            {
+                var vehicleId = Guid.Parse(request.TargetId);
+                var stats = await _reviewService.GetVehicleRatingStatsAsync(vehicleId);
+
+                return new Review.RatingStatsResponse
+                {
+                    Stats = new Review.RatingStats
+                    {
+                        TargetId = stats.TargetId.ToString(),
+                        Type = Review.ReviewType.Vehicle,
+                        AverageRating = stats.AverageRating,
+                        TotalReviews = stats.TotalReviews
+                    },
+                    Message = "Successfully retrieved vehicle rating statistics"
+                };
+            }
+            catch (RpcException)
+            {
+                throw;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error getting vehicle rating stats for {VehicleId}", request.TargetId);
+                throw new RpcException(new Status(StatusCode.Internal, "An error occurred while retrieving vehicle rating statistics"));
+            }
+        }
+
+        public override async Task<Review.RatingStatsResponse> GetDeviceRatingStats(Review.GetRatingStatsRequest request, ServerCallContext context)
+        {
+            try
+            {
+                var deviceId = Guid.Parse(request.TargetId);
+                var stats = await _reviewService.GetDeviceRatingStatsAsync(deviceId);
+
+                return new Review.RatingStatsResponse
+                {
+                    Stats = new Review.RatingStats
+                    {
+                        TargetId = stats.TargetId.ToString(),
+                        Type = Review.ReviewType.Device,
+                        AverageRating = stats.AverageRating,
+                        TotalReviews = stats.TotalReviews
+                    },
+                    Message = "Successfully retrieved device rating statistics"
+                };
+            }
+            catch (RpcException)
+            {
+                throw;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error getting device rating stats for {DeviceId}", request.TargetId);
+                throw new RpcException(new Status(StatusCode.Internal, "An error occurred while retrieving device rating statistics"));
+            }
+        }
+
+        public override async Task<Review.RatingStatsResponse> GetComboRatingStats(Review.GetRatingStatsRequest request, ServerCallContext context)
+        {
+            try
+            {
+                var comboId = Guid.Parse(request.TargetId);
+                var stats = await _reviewService.GetComboRatingStatsAsync(comboId);
+
+                return new Review.RatingStatsResponse
+                {
+                    Stats = new Review.RatingStats
+                    {
+                        TargetId = stats.TargetId.ToString(),
+                        Type = Review.ReviewType.Combo,
+                        AverageRating = stats.AverageRating,
+                        TotalReviews = stats.TotalReviews
+                    },
+                    Message = "Successfully retrieved combo rating statistics"
+                };
+            }
+            catch (RpcException)
+            {
+                throw;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error getting combo rating stats for {ComboId}", request.TargetId);
+                throw new RpcException(new Status(StatusCode.Internal, "An error occurred while retrieving combo rating statistics"));
+            }
+        }
+
         // Helper methods
         private ReviewQueryDto CreateQueryDto(int page, int limit, string searchText,
             int minRating, int maxRating, string startDate, string endDate,

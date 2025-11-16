@@ -39,16 +39,6 @@ namespace review.Services
                     "At least one of bookingId or rentalId must be specified"));
             }
 
-            // Check if booking has already been reviewed
-            var hasBeenReviewed = await _repository.HasBookingBeenReviewedAsync(dto.BookingId);
-            var hasRentalBeenReviewed = await _repository.HasRentalBeenReviewedAsync(dto.RentalId);
-
-            if (hasBeenReviewed || hasRentalBeenReviewed)
-            {
-                throw new RpcException(new Status(StatusCode.AlreadyExists,
-                    "This booking or rental has already been reviewed"));
-            }
-
             // Validate rating
             if (dto.Rating < 1 || dto.Rating > 5)
             {
@@ -71,78 +61,6 @@ namespace review.Services
                 UpdatedAt = DateTime.UtcNow,
                 UpdateCount = 0
             };
-
-            if (dto.RentalId.HasValue)
-            {
-                try
-                {
-                    var rentalResp = await _rentalClient.GetRentalByIdAsync(new Rental.GetRentalByIdRequest
-                    {
-                        RentalId = dto.RentalId.Value.ToString()
-                    });
-
-                    // Validate rental status is COMPLETED
-                    if (rentalResp.Status != "COMPLETED")
-                    {
-                        throw new RpcException(new Status(StatusCode.FailedPrecondition,
-                            $"Rental must be COMPLETED before review. Current status: {rentalResp.Status}"));
-                    }
-
-                    var firstItem = rentalResp.Items.FirstOrDefault();
-                    if (firstItem != null && Guid.TryParse(firstItem.TargetId, out var targetId))
-                    {
-                        if (firstItem.IsCombo)
-                        {
-                            review.ComboId = targetId;
-                            review.Type = ReviewType.Combo;
-                        }
-                        else
-                        {
-                            review.DeviceId = targetId;
-                            review.Type = ReviewType.Device;
-                        }
-                    }
-                }
-                catch (Exception ex)
-                {
-                    _logger.LogWarning(ex, "Failed to fetch rental details for RentalId {RentalId}", dto.RentalId);
-                }
-            }
-
-            if (dto.BookingId.HasValue)
-            {
-                try
-                {
-                    var bookingResp = await _bookingClient.GetBookingAsync(new Booking.GetBookingRequest
-                    {
-                        Id = dto.BookingId.Value.ToString()
-                    });
-
-                    // Validate booking status is COMPLETED
-                    if (bookingResp.Status != "COMPLETED")
-                    {
-                        throw new RpcException(new Status(StatusCode.FailedPrecondition,
-                            $"Booking must be COMPLETED before review. Current status: {bookingResp.Status}"));
-                    }
-
-                    var booking = bookingResp.Id != null ? bookingResp : null;
-                    if (bookingResp?.Id != null && Guid.TryParse(bookingResp.Id, out var bookingId))
-                    {
-                        if (bookingResp.VehicleId != null &&
-                            Guid.TryParse(bookingResp.VehicleId, out var vehicleId))
-                        {
-                            review.VehicleId = vehicleId;
-                            review.Type = ReviewType.Vehicle;
-                        }
-                    }
-                }
-                catch (Exception ex)
-                {
-                    _logger.LogWarning(ex, "Failed to fetch booking details for BookingId {BookingId}", dto.BookingId);
-                }
-            }
-
-
 
             var createdReview = await _repository.CreateReviewAsync(review);
 
@@ -356,21 +274,6 @@ namespace review.Services
                 AverageRating = reviews.Any() ? Math.Round(reviews.Average(r => r.Rating), 2) : 0,
                 TotalReviews = reviews.Count
             };
-        }
-
-        private void ValidatePagination(int page, int limit)
-        {
-            if (page < 1)
-            {
-                throw new RpcException(new Status(StatusCode.InvalidArgument,
-                    "Page must be greater than 0"));
-            }
-
-            if (limit < 1 || limit > 100)
-            {
-                throw new RpcException(new Status(StatusCode.InvalidArgument,
-                    "Limit must be between 1 and 100"));
-            }
         }
     }
 }

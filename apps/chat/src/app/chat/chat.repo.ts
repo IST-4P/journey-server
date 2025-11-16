@@ -124,13 +124,14 @@ export class ChatRepository {
         },
         orderBy: {
           _max: {
-            createdAt: 'desc',
+            createdAt: 'asc',
           },
         },
         skip,
         take,
       }),
     ]);
+    console.log(conversations);
 
     return {
       conversations: conversations.map((user) => user.fromUserId),

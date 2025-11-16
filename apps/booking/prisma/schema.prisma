@@ -13,6 +13,7 @@ datasource db {
 
 enum BookingStatus {
     PENDING // Chờ thanh toán
+    PENDING_REFUND // Chờ hoàn tiền
     DEPOSIT_PAID // Đã thanh toán giữ chỗ, chờ đến ngày nhận xe
     // READY_FOR_CHECKIN Đến thời gian nhận xe, chờ thanh toán phần còn lại
     FULLY_PAID // Đã thanh toán đủ, chờ check-in

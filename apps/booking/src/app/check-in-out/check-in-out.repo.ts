@@ -220,7 +220,7 @@ export class CheckInOutRepository {
           overtimeAmount: {
             increment: overtimeAmount,
           },
-          status: BookingStatusValues.PENDING,
+          status: BookingStatusValues.PENDING_REFUND,
         },
       });
 
@@ -317,7 +317,7 @@ export class CheckInOutRepository {
           longitude: checkInOut.longitude.toNumber(),
         };
       });
-    const updateStatusBooking = await this.prismaService.booking.update({
+    await this.prismaService.booking.update({
       where: { id: verified.booking.id },
       data: { status: BookingStatusValues.COMPLETED },
     });

@@ -1,10 +1,14 @@
-import { ChatProto } from '@hacmieu-journey/grpc';
+import { ChatProto, UserProto } from '@hacmieu-journey/grpc';
 import { NatsModule } from '@hacmieu-journey/nats';
 import { Module } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { ClientsModule, Transport } from '@nestjs/microservices';
 import { join } from 'path';
-import { ChatController } from './chat.controller';
+import {
+  ChatController,
+  ComplaintController,
+  ComplaintMessageController,
+} from './chat.controller';
 import { ChatService } from './chat.service';
 
 @Module({
@@ -25,9 +29,27 @@ import { ChatService } from './chat.service';
         }),
         inject: [ConfigService],
       },
+      {
+        name: UserProto.USER_PACKAGE_NAME,
+        useFactory: (configService: ConfigService) => ({
+          transport: Transport.GRPC,
+          options: {
+            url:
+              configService.getOrThrow('USER_GRPC_SERVICE_URL') ||
+              'localhost:5001',
+            package: UserProto.USER_PACKAGE_NAME,
+            protoPath: join(__dirname, '../../libs/grpc/proto/user.proto'),
+          },
+        }),
+        inject: [ConfigService],
+      },
     ]),
   ],
-  controllers: [ChatController],
+  controllers: [
+    ChatController,
+    ComplaintController,
+    ComplaintMessageController,
+  ],
   providers: [
     ChatService,
     {

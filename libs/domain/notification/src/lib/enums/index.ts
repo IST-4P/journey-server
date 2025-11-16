@@ -1,19 +1,21 @@
 import { z } from 'zod';
 
-export const NotificationEnum = z.enum([
-  'WELCOME',
-  'BOOKING_CREATED',
-  'BOOKING_CONFIRMED',
-  'BOOKING_CANCELLED',
-  'PAYMENT_SUCCESS',
-  'PAYMENT_FAILED',
-  'CHECK_IN_REMINDER',
-  'CHECK_OUT_REMINDER',
-  'REFUND_PROCESSED',
-  'REVIEW_REQUEST',
-  'PROMO_AVAILABLE',
-  'SYSTEM_ANNOUNCEMENT',
-  'COMPLAINT_UPDATE',
+export const NotificationTypeValues = {
+  WELCOME: 'WELCOME',
+  BOOKING: 'BOOKING',
+  RENTAL: 'RENTAL',
+  SYSTEM: 'SYSTEM',
+  PROMOTION: 'PROMOTION',
+  COMPLAINT: 'COMPLAINT',
+} as const;
+
+export const NotificationTypeEnum = z.enum([
+  NotificationTypeValues.WELCOME,
+  NotificationTypeValues.BOOKING,
+  NotificationTypeValues.RENTAL,
+  NotificationTypeValues.SYSTEM,
+  NotificationTypeValues.PROMOTION,
+  NotificationTypeValues.COMPLAINT,
 ]);
 
-export type NotificationEnumType = z.infer<typeof NotificationEnum>;
+export type NotificationType = z.infer<typeof NotificationTypeEnum>;

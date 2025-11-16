@@ -1,0 +1,1299 @@
+<!DOCTYPE html>
+<html lang="vi">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Complaint Testing Application</title>
+    <script src="https://cdn.socket.io/4.5.4/socket.io.min.js"></script>
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      body {
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+        min-height: 100vh;
+        padding: 20px;
+      }
+
+      .container {
+        max-width: 1400px;
+        margin: 0 auto;
+        background: white;
+        border-radius: 12px;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+        overflow: hidden;
+      }
+
+      .header {
+        background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+        color: white;
+        padding: 20px;
+        text-align: center;
+      }
+
+      .content {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 20px;
+        padding: 20px;
+      }
+
+      .section {
+        background: #f8f9fa;
+        padding: 20px;
+        border-radius: 8px;
+        border: 1px solid #e0e0e0;
+      }
+
+      .section h2 {
+        color: #f5576c;
+        margin-bottom: 15px;
+        font-size: 18px;
+        border-bottom: 2px solid #f5576c;
+        padding-bottom: 10px;
+      }
+
+      .form-group {
+        margin-bottom: 15px;
+      }
+
+      label {
+        display: block;
+        margin-bottom: 5px;
+        color: #333;
+        font-weight: 500;
+        font-size: 14px;
+      }
+
+      input[type='text'],
+      input[type='password'],
+      textarea,
+      select {
+        width: 100%;
+        padding: 10px;
+        border: 1px solid #ddd;
+        border-radius: 6px;
+        font-size: 14px;
+        transition: border-color 0.3s;
+      }
+
+      input:focus,
+      textarea:focus,
+      select:focus {
+        outline: none;
+        border-color: #f5576c;
+      }
+
+      button {
+        background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+        color: white;
+        border: none;
+        padding: 10px 20px;
+        border-radius: 6px;
+        cursor: pointer;
+        font-size: 14px;
+        font-weight: 500;
+        transition: transform 0.2s;
+        width: 100%;
+      }
+
+      button:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 5px 15px rgba(245, 87, 108, 0.4);
+      }
+
+      button:active {
+        transform: translateY(0);
+      }
+
+      button.secondary {
+        background: linear-gradient(135deg, #84fab0 0%, #8fd3f4 100%);
+      }
+
+      button.danger {
+        background: #dc3545;
+      }
+
+      .status {
+        padding: 10px;
+        border-radius: 6px;
+        margin-top: 10px;
+        font-size: 13px;
+        display: none;
+      }
+
+      .status.success {
+        background: #d4edda;
+        color: #155724;
+        border: 1px solid #c3e6cb;
+        display: block;
+      }
+
+      .status.error {
+        background: #f8d7da;
+        color: #721c24;
+        border: 1px solid #f5c6cb;
+        display: block;
+      }
+
+      .status.info {
+        background: #d1ecf1;
+        color: #0c5460;
+        border: 1px solid #bee5eb;
+        display: block;
+      }
+
+      .complaint-list {
+        max-height: 400px;
+        overflow-y: auto;
+        border: 1px solid #ddd;
+        border-radius: 6px;
+        padding: 10px;
+        background: white;
+      }
+
+      .complaint-item {
+        padding: 15px;
+        border: 2px solid #e0e0e0;
+        border-radius: 8px;
+        margin-bottom: 10px;
+        cursor: pointer;
+        transition: all 0.3s;
+        background: white;
+      }
+
+      .complaint-item:hover {
+        border-color: #f5576c;
+        transform: translateX(5px);
+        box-shadow: 0 3px 10px rgba(245, 87, 108, 0.2);
+      }
+
+      .complaint-item.active {
+        border-color: #f5576c;
+        background: linear-gradient(135deg, #f093fb10 0%, #f5576c10 100%);
+      }
+
+      .complaint-title {
+        font-weight: bold;
+        color: #333;
+        margin-bottom: 5px;
+      }
+
+      .complaint-meta {
+        font-size: 12px;
+        color: #666;
+      }
+
+      .complaint-status {
+        display: inline-block;
+        padding: 3px 10px;
+        border-radius: 12px;
+        font-size: 11px;
+        font-weight: 600;
+        margin-left: 10px;
+      }
+
+      .complaint-status.OPEN {
+        background: #d1ecf1;
+        color: #0c5460;
+      }
+
+      .complaint-status.IN_PROGRESS {
+        background: #fff3cd;
+        color: #856404;
+      }
+
+      .complaint-status.RESOLVED {
+        background: #d4edda;
+        color: #155724;
+      }
+
+      .complaint-status.CLOSED {
+        background: #e0e0e0;
+        color: #666;
+      }
+
+      .chat-container {
+        grid-column: 1 / -1;
+        display: grid;
+        grid-template-columns: 1fr 2fr;
+        gap: 20px;
+        margin-top: 20px;
+      }
+
+      .chat-messages {
+        height: 450px;
+        overflow-y: auto;
+        border: 1px solid #ddd;
+        border-radius: 6px;
+        padding: 15px;
+        background: white;
+      }
+
+      .message {
+        margin-bottom: 15px;
+        padding: 10px;
+        border-radius: 8px;
+        max-width: 80%;
+        word-wrap: break-word;
+      }
+
+      .message.sent {
+        background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+        color: white;
+        margin-left: auto;
+        text-align: right;
+      }
+
+      .message.received {
+        background: #e9ecef;
+        color: #333;
+      }
+
+      .message-content {
+        margin-bottom: 5px;
+      }
+
+      .message-image {
+        max-width: 100%;
+        max-height: 300px;
+        border-radius: 6px;
+        margin-top: 5px;
+        cursor: pointer;
+      }
+
+      .message-time {
+        font-size: 11px;
+        opacity: 0.7;
+        margin-top: 5px;
+      }
+
+      .message-type-badge {
+        display: inline-block;
+        padding: 2px 6px;
+        border-radius: 4px;
+        font-size: 10px;
+        font-weight: 600;
+        margin-right: 5px;
+        background: rgba(255, 255, 255, 0.3);
+      }
+
+      .chat-input-container {
+        margin-top: 10px;
+      }
+
+      .message-type-selector {
+        display: flex;
+        gap: 10px;
+        margin-bottom: 10px;
+      }
+
+      .message-type-btn {
+        flex: 1;
+        padding: 8px;
+        border: 2px solid #ddd;
+        background: white;
+        color: #333;
+        border-radius: 6px;
+        cursor: pointer;
+        font-size: 13px;
+        font-weight: 500;
+        transition: all 0.3s;
+      }
+
+      .message-type-btn.active {
+        border-color: #f5576c;
+        background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+        color: white;
+      }
+
+      .chat-input {
+        display: flex;
+        gap: 10px;
+      }
+
+      .chat-input input {
+        flex: 1;
+      }
+
+      .chat-input button {
+        width: auto;
+        padding: 10px 30px;
+      }
+
+      .image-url-input-container {
+        display: none;
+        margin-top: 10px;
+        padding: 15px;
+        background: #fff3cd;
+        border: 1px solid #ffc107;
+        border-radius: 6px;
+      }
+
+      .image-url-input-container.active {
+        display: block;
+      }
+
+      .image-url-input-container input {
+        width: 100%;
+        margin-bottom: 10px;
+      }
+
+      .image-url-actions {
+        display: flex;
+        gap: 10px;
+      }
+
+      .image-url-actions button {
+        flex: 1;
+      }
+
+      .api-response {
+        background: #f8f9fa;
+        border: 1px solid #ddd;
+        border-radius: 6px;
+        padding: 15px;
+        max-height: 300px;
+        overflow-y: auto;
+        margin-top: 10px;
+        font-family: 'Courier New', monospace;
+        font-size: 12px;
+        white-space: pre-wrap;
+        word-wrap: break-word;
+      }
+
+      .cookie-info {
+        background: #fff3cd;
+        border: 1px solid #ffc107;
+        padding: 10px;
+        border-radius: 6px;
+        margin-top: 10px;
+        font-size: 13px;
+      }
+
+      .full-width {
+        grid-column: 1 / -1;
+      }
+
+      .connection-status {
+        display: inline-block;
+        width: 10px;
+        height: 10px;
+        border-radius: 50%;
+        margin-right: 5px;
+      }
+
+      .connection-status.connected {
+        background: #28a745;
+        box-shadow: 0 0 10px #28a745;
+      }
+
+      .connection-status.disconnected {
+        background: #dc3545;
+      }
+
+      .image-preview {
+        margin-top: 10px;
+        max-width: 100%;
+        border-radius: 6px;
+      }
+
+      .image-preview img {
+        max-width: 100%;
+        max-height: 200px;
+        border-radius: 6px;
+      }
+
+      .no-complaint-selected {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        height: 100%;
+        color: #999;
+        font-size: 16px;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <div class="header">
+        <h1>🎫 Complaint Testing Application</h1>
+        <p>Test WebSocket Complaint Chat với Authentication</p>
+      </div>
+
+      <div class="content">
+        <!-- Login Section -->
+        <div class="section">
+          <h2>🔐 Login & Authentication</h2>
+          <div class="form-group">
+            <label>API Base URL:</label>
+            <input
+              type="text"
+              id="apiBaseUrl"
+              value="http://localhost:3000"
+              placeholder="http://localhost:3000"
+            />
+          </div>
+          <div class="form-group">
+            <label>Email:</label>
+            <input type="text" id="email" placeholder="user@example.com" />
+          </div>
+          <div class="form-group">
+            <label>Password:</label>
+            <input type="password" id="password" placeholder="password" />
+          </div>
+          <button onclick="login()">🔑 Login</button>
+          <div id="loginStatus" class="status"></div>
+          <div id="cookieInfo" class="cookie-info" style="display: none"></div>
+        </div>
+
+        <!-- Create Complaint Section -->
+        <div class="section">
+          <h2>➕ Tạo Complaint Mới</h2>
+          <div class="form-group">
+            <label>Title:</label>
+            <input
+              type="text"
+              id="newComplaintTitle"
+              placeholder="Nhập tiêu đề complaint..."
+            />
+          </div>
+          <button onclick="createComplaint()">➕ Tạo Complaint</button>
+          <div id="createComplaintStatus" class="status"></div>
+        </div>
+
+        <!-- Complaint List Section -->
+        <div class="section">
+          <h2>📋 Danh Sách Complaints</h2>
+          <div class="form-group">
+            <label>User ID (optional - lấy tất cả nếu để trống):</label>
+            <input
+              type="text"
+              id="filterUserId"
+              placeholder="User ID để filter"
+            />
+          </div>
+          <div class="form-group">
+            <label>Status Filter:</label>
+            <select id="filterStatus">
+              <option value="">Tất cả</option>
+              <option value="OPEN">OPEN</option>
+              <option value="IN_PROGRESS">IN_PROGRESS</option>
+              <option value="RESOLVED">RESOLVED</option>
+              <option value="CLOSED">CLOSED</option>
+            </select>
+          </div>
+          <button onclick="loadComplaints()">🔄 Load Complaints</button>
+          <div id="complaintListStatus" class="status"></div>
+          <div id="complaintList" class="complaint-list"></div>
+        </div>
+
+        <!-- WebSocket Chat Section -->
+        <div class="section full-width chat-container">
+          <div class="section">
+            <h2>
+              <span id="wsStatus" class="connection-status disconnected"></span>
+              WebSocket Connection
+            </h2>
+            <div class="form-group">
+              <label>WebSocket URL:</label>
+              <input
+                type="text"
+                id="wsUrl"
+                value="http://localhost:3000"
+                placeholder="http://localhost:3000"
+              />
+            </div>
+            <div class="form-group">
+              <label>Selected Complaint ID:</label>
+              <input
+                type="text"
+                id="selectedComplaintId"
+                placeholder="Chọn complaint từ danh sách hoặc nhập ID"
+              />
+            </div>
+            <button onclick="connectWebSocket()" class="secondary">
+              🔌 Connect WebSocket
+            </button>
+            <button
+              onclick="disconnectWebSocket()"
+              class="danger"
+              style="margin-top: 10px"
+            >
+              ❌ Disconnect WebSocket
+            </button>
+            <div id="wsConnectionStatus" class="status"></div>
+          </div>
+
+          <div class="section">
+            <h2>💬 Messages</h2>
+            <div id="chatMessages" class="chat-messages">
+              <div class="no-complaint-selected">
+                👆 Chọn một complaint để bắt đầu chat
+              </div>
+            </div>
+            <div class="chat-input-container">
+              <!-- Message Type Selector -->
+              <div class="message-type-selector">
+                <button
+                  class="message-type-btn active"
+                  onclick="selectMessageType('TEXT')"
+                  id="btnTypeText"
+                >
+                  📝 TEXT
+                </button>
+                <button
+                  class="message-type-btn"
+                  onclick="selectMessageType('IMAGE')"
+                  id="btnTypeImage"
+                >
+                  🖼️ IMAGE
+                </button>
+              </div>
+
+              <!-- Text Input -->
+              <div class="chat-input" id="textInputContainer">
+                <input
+                  type="text"
+                  id="messageInput"
+                  placeholder="Nhập tin nhắn..."
+                  onkeypress="handleKeyPress(event)"
+                />
+                <button onclick="sendMessage()">📤 Gửi</button>
+              </div>
+
+              <!-- Image URL Input -->
+              <div class="image-url-input-container" id="imageUrlContainer">
+                <label>🖼️ Nhập URL hình ảnh:</label>
+                <input
+                  type="text"
+                  id="imageUrlInput"
+                  placeholder="https://example.com/image.jpg"
+                  onkeypress="handleImageUrlKeyPress(event)"
+                />
+                <div class="image-preview" id="imagePreview"></div>
+                <div class="image-url-actions">
+                  <button onclick="previewImage()" class="secondary">
+                    👁️ Preview
+                  </button>
+                  <button onclick="sendImageMessage()">📤 Gửi Hình</button>
+                  <button onclick="cancelImageInput()" class="danger">
+                    ❌ Hủy
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      let socket = null;
+      let accessToken = null;
+      let currentUserId = null; // Store current user's ID from JWT
+      let currentComplaintId = null;
+      let currentMessageType = 'TEXT';
+      let complaints = [];
+      let currentPage = 1;
+      let isLoadingMessages = false;
+      let hasMoreMessages = true;
+
+      // Helper function to decode JWT token
+      function parseJwt(token) {
+        try {
+          const base64Url = token.split('.')[1];
+          const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+          const jsonPayload = decodeURIComponent(
+            atob(base64)
+              .split('')
+              .map(function (c) {
+                return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
+              })
+              .join('')
+          );
+          return JSON.parse(jsonPayload);
+        } catch (e) {
+          console.error('Error parsing JWT:', e);
+          return null;
+        }
+      }
+
+      // Login function
+      async function login() {
+        const baseUrl = document.getElementById('apiBaseUrl').value;
+        const email = document.getElementById('email').value;
+        const password = document.getElementById('password').value;
+        const statusEl = document.getElementById('loginStatus');
+
+        if (!email || !password) {
+          showStatus(statusEl, 'error', 'Vui lòng nhập email và password');
+          return;
+        }
+
+        try {
+          const response = await fetch(`${baseUrl}/api/auth/login`, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ email, password }),
+            credentials: 'include',
+          });
+
+          const data = await response.json();
+
+          if (response.ok) {
+            // Backend đã set cookie, đọc từ cookie
+            const cookies = parseCookies();
+            accessToken = cookies.accessToken; // Lưu để dùng cho Authorization header
+
+            // Decode JWT để lấy userId
+            const decoded = parseJwt(accessToken);
+            if (decoded && decoded.userId) {
+              currentUserId = decoded.userId;
+              console.log('✅ Current User ID:', currentUserId);
+            }
+
+            showStatus(
+              statusEl,
+              'success',
+              `✅ Login thành công! User: ${email}`
+            );
+
+            // Show cookie info
+            const cookieInfoEl = document.getElementById('cookieInfo');
+            cookieInfoEl.style.display = 'block';
+            cookieInfoEl.innerHTML = `
+              <strong>🍪 Authentication Info:</strong><br/>
+              User ID: ${currentUserId || 'Unknown'}<br/>
+              Access Token: ${
+                accessToken ? accessToken.substring(0, 20) + '...' : 'N/A'
+              }<br/>
+              Cookies: ✅ Set (httpOnly)<br/>
+              Login Time: ${new Date().toLocaleString()}<br/>
+              <em>Token sẽ được dùng cho Authorization header</em>
+            `;
+
+            // Auto load complaints after login
+            setTimeout(() => loadComplaints(), 500);
+          } else {
+            showStatus(
+              statusEl,
+              'error',
+              `❌ Login thất bại: ${data.message || 'Unknown error'}`
+            );
+          }
+        } catch (error) {
+          showStatus(statusEl, 'error', `❌ Lỗi kết nối: ${error.message}`);
+        }
+      }
+
+      // Helper function to parse cookies
+      function parseCookies() {
+        const cookies = {};
+        document.cookie.split(';').forEach((cookie) => {
+          const [name, value] = cookie.trim().split('=');
+          if (name && value) {
+            cookies[name] = value;
+          }
+        });
+        return cookies;
+      }
+
+      // Create complaint
+      async function createComplaint() {
+        const baseUrl = document.getElementById('apiBaseUrl').value;
+        const title = document.getElementById('newComplaintTitle').value.trim();
+        const statusEl = document.getElementById('createComplaintStatus');
+
+        // Lấy accessToken từ cookie nếu null
+        if (!accessToken) {
+          const cookies = parseCookies();
+          accessToken = cookies.accessToken;
+
+          if (accessToken) {
+            // Decode JWT để lấy userId
+            const decoded = parseJwt(accessToken);
+            if (decoded && decoded.userId) {
+              currentUserId = decoded.userId;
+            }
+          }
+        }
+
+        if (!title) {
+          showStatus(statusEl, 'error', '❌ Vui lòng nhập tiêu đề complaint!');
+          return;
+        }
+
+        try {
+          const response = await fetch(`${baseUrl}/api/complaint`, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              Authorization: `Bearer ${accessToken}`,
+            },
+            body: JSON.stringify({ title }),
+            credentials: 'include',
+          });
+
+          const result = await response.json();
+
+          if (response.ok) {
+            showStatus(
+              statusEl,
+              'success',
+              `✅ Đã tạo complaint: ${result.data?.title || title}`
+            );
+
+            // Clear input
+            document.getElementById('newComplaintTitle').value = '';
+
+            // Reload complaints list
+            setTimeout(() => loadComplaints(), 500);
+          } else {
+            showStatus(
+              statusEl,
+              'error',
+              `❌ Lỗi: ${result.message || 'Unknown error'}`
+            );
+          }
+        } catch (error) {
+          showStatus(statusEl, 'error', `❌ Lỗi: ${error.message}`);
+        }
+      }
+
+      // Load complaints
+      async function loadComplaints() {
+        const baseUrl = document.getElementById('apiBaseUrl').value;
+        const userId = document.getElementById('filterUserId').value;
+        const status = document.getElementById('filterStatus').value;
+        const statusEl = document.getElementById('complaintListStatus');
+        const listEl = document.getElementById('complaintList');
+
+        // Lấy accessToken từ cookie nếu null
+        if (!accessToken) {
+          const cookies = parseCookies();
+          accessToken = cookies.accessToken;
+
+          if (accessToken) {
+            // Decode JWT để lấy userId
+            const decoded = parseJwt(accessToken);
+            if (decoded && decoded.userId) {
+              currentUserId = decoded.userId;
+            }
+          }
+        }
+
+        try {
+          let endpoint = '/api/complaint?page=1&limit=50';
+          if (userId) endpoint += `&userId=${userId}`;
+          if (status) endpoint += `&status=${status}`;
+
+          const response = await fetch(`${baseUrl}${endpoint}`, {
+            method: 'GET',
+            headers: {
+              'Content-Type': 'application/json',
+              Authorization: `Bearer ${accessToken}`,
+            },
+            credentials: 'include',
+          });
+
+          const result = await response.json();
+
+          if (response.ok && result.data?.complaints) {
+            complaints = result.data.complaints;
+            showStatus(
+              statusEl,
+              'success',
+              `✅ Đã tải ${complaints.length} complaints`
+            );
+
+            // Render complaint list
+            listEl.innerHTML = '';
+            if (complaints.length === 0) {
+              listEl.innerHTML =
+                '<div style="text-align: center; color: #999; padding: 20px;">Không có complaint nào</div>';
+            } else {
+              complaints.forEach((complaint) => {
+                const itemEl = document.createElement('div');
+                itemEl.className = 'complaint-item';
+                if (currentComplaintId === complaint.id) {
+                  itemEl.classList.add('active');
+                }
+                itemEl.onclick = () => selectComplaint(complaint);
+                itemEl.innerHTML = `
+                  <div class="complaint-title">
+                    ${complaint.title}
+                    <span class="complaint-status ${complaint.status}">${
+                  complaint.status
+                }</span>
+                  </div>
+                  <div class="complaint-meta">
+                    ID: ${complaint.id}<br/>
+                    Created: ${new Date(complaint.createdAt).toLocaleString()}
+                  </div>
+                `;
+                listEl.appendChild(itemEl);
+              });
+            }
+          } else {
+            showStatus(
+              statusEl,
+              'error',
+              `❌ Lỗi: ${result.message || 'Unknown error'}`
+            );
+            listEl.innerHTML = '';
+          }
+        } catch (error) {
+          showStatus(statusEl, 'error', `❌ Lỗi: ${error.message}`);
+          listEl.innerHTML = '';
+        }
+      }
+
+      // Select complaint
+      function selectComplaint(complaint) {
+        currentComplaintId = complaint.id;
+        document.getElementById('selectedComplaintId').value = complaint.id;
+
+        // Update UI
+        document.querySelectorAll('.complaint-item').forEach((item) => {
+          item.classList.remove('active');
+        });
+        event.currentTarget.classList.add('active');
+
+        // Disconnect old socket and clear messages
+        if (socket && socket.connected) {
+          disconnectWebSocket();
+        }
+
+        // Clear messages
+        document.getElementById('chatMessages').innerHTML = '';
+        currentPage = 1;
+        hasMoreMessages = true;
+
+        showStatus(
+          document.getElementById('wsConnectionStatus'),
+          'info',
+          `📋 Đã chọn complaint: ${complaint.title}. Click "Connect WebSocket" để bắt đầu chat.`
+        );
+      }
+
+      // WebSocket Connection
+      function connectWebSocket() {
+        const wsUrl = document.getElementById('wsUrl').value;
+        const complaintId = document.getElementById(
+          'selectedComplaintId'
+        ).value;
+        const statusEl = document.getElementById('wsConnectionStatus');
+        const wsStatusEl = document.getElementById('wsStatus');
+
+        if (!complaintId) {
+          showStatus(
+            statusEl,
+            'error',
+            '❌ Vui lòng chọn một complaint trước!'
+          );
+          return;
+        }
+
+        if (socket && socket.connected) {
+          showStatus(statusEl, 'info', '⚠️ WebSocket đã được kết nối!');
+          return;
+        }
+
+        // Cập nhật currentComplaintId từ input
+        currentComplaintId = complaintId;
+
+        try {
+          const socketOptions = {
+            transports: ['websocket', 'polling'],
+            withCredentials: true,
+            query: {
+              complaintId: complaintId,
+            },
+          };
+
+          if (accessToken) {
+            socketOptions.auth = {
+              token: accessToken,
+            };
+          }
+
+          socket = io(`${wsUrl}/complaint`, socketOptions);
+
+          socket.on('connect', async () => {
+            showStatus(
+              statusEl,
+              'success',
+              `✅ Đã kết nối WebSocket! Socket ID: ${socket.id}`
+            );
+            wsStatusEl.className = 'connection-status connected';
+
+            // Reset pagination
+            currentPage = 1;
+            hasMoreMessages = true;
+
+            // Load messages
+            await loadComplaintMessages(true);
+          });
+
+          socket.on('disconnect', (reason) => {
+            showStatus(statusEl, 'error', `❌ Mất kết nối: ${reason}`);
+            wsStatusEl.className = 'connection-status disconnected';
+          });
+
+          socket.on('connect_error', (error) => {
+            showStatus(statusEl, 'error', `❌ Lỗi kết nối: ${error.message}`);
+            wsStatusEl.className = 'connection-status disconnected';
+          });
+
+          socket.on('newComplaintMessage', (data) => {
+            console.log('📩 Received new message:', data);
+            handleNewMessage(data);
+          });
+        } catch (error) {
+          showStatus(statusEl, 'error', `❌ Lỗi: ${error.message}`);
+        }
+      }
+
+      // Load complaint messages from API
+      async function loadComplaintMessages(clearMessages = false) {
+        if (isLoadingMessages || !hasMoreMessages) return;
+
+        const baseUrl = document.getElementById('apiBaseUrl').value;
+        const complaintId = currentComplaintId;
+        const messagesContainer = document.getElementById('chatMessages');
+
+        if (!complaintId) {
+          console.error('❌ Complaint ID is required');
+          return;
+        }
+
+        isLoadingMessages = true;
+
+        try {
+          const endpoint = `/api/complaint-message?complaintId=${complaintId}&page=${currentPage}&limit=20`;
+          const response = await fetch(`${baseUrl}${endpoint}`, {
+            method: 'GET',
+            headers: {
+              'Content-Type': 'application/json',
+              Authorization: `Bearer ${accessToken}`,
+            },
+            credentials: 'include',
+          });
+
+          const result = await response.json();
+
+          if (response.ok && result.data?.complaintMessages) {
+            const messages = result.data.complaintMessages;
+
+            if (clearMessages) {
+              messagesContainer.innerHTML = '';
+            }
+
+            if (messages.length === 0) {
+              hasMoreMessages = false;
+              if (currentPage === 1) {
+                messagesContainer.innerHTML =
+                  '<div style="text-align: center; color: #999; padding: 20px;">Chưa có tin nhắn nào</div>';
+              }
+            } else {
+              // Reverse to show oldest first (API returns newest first)
+              messages.reverse().forEach((message) => {
+                if (clearMessages) {
+                  appendMessage(message);
+                } else {
+                  prependMessage(message);
+                }
+              });
+
+              // Scroll to bottom on first load
+              if (clearMessages) {
+                messagesContainer.scrollTop = messagesContainer.scrollHeight;
+              }
+
+              // Check if there are more messages
+              if (messages.length < 20) {
+                hasMoreMessages = false;
+              } else {
+                currentPage++;
+              }
+            }
+          } else {
+            console.error('❌ Error loading messages:', result.message);
+          }
+        } catch (error) {
+          console.error('❌ Error loading messages:', error);
+        } finally {
+          isLoadingMessages = false;
+        }
+      }
+
+      function disconnectWebSocket() {
+        if (socket) {
+          socket.disconnect();
+          socket = null;
+          document.getElementById('wsStatus').className =
+            'connection-status disconnected';
+          showStatus(
+            document.getElementById('wsConnectionStatus'),
+            'info',
+            '🔌 Đã ngắt kết nối WebSocket'
+          );
+
+          // Reset state
+          currentPage = 1;
+          hasMoreMessages = true;
+        }
+      }
+
+      // Message Type Selection
+      function selectMessageType(type) {
+        currentMessageType = type;
+
+        // Update button styles
+        document.getElementById('btnTypeText').classList.remove('active');
+        document.getElementById('btnTypeImage').classList.remove('active');
+
+        if (type === 'TEXT') {
+          document.getElementById('btnTypeText').classList.add('active');
+          document.getElementById('textInputContainer').style.display = 'flex';
+          document
+            .getElementById('imageUrlContainer')
+            .classList.remove('active');
+        } else if (type === 'IMAGE') {
+          document.getElementById('btnTypeImage').classList.add('active');
+          document.getElementById('textInputContainer').style.display = 'none';
+          document.getElementById('imageUrlContainer').classList.add('active');
+        }
+      }
+
+      // Send Text Message
+      function sendMessage() {
+        const messageInput = document.getElementById('messageInput');
+        const content = messageInput.value.trim();
+
+        if (!socket || !socket.connected) {
+          alert('❌ Vui lòng kết nối WebSocket trước!');
+          return;
+        }
+
+        if (!content) {
+          alert('❌ Vui lòng nhập nội dung tin nhắn!');
+          return;
+        }
+
+        if (!currentComplaintId) {
+          alert('❌ Vui lòng chọn complaint!');
+          return;
+        }
+
+        const message = {
+          complaintId: currentComplaintId,
+          messageType: 'TEXT',
+          content: content,
+        };
+
+        console.log('📤 Sending message:', message);
+        socket.emit('sendComplaintMessage', message);
+        messageInput.value = '';
+      }
+
+      // Preview Image
+      function previewImage() {
+        const imageUrl = document.getElementById('imageUrlInput').value.trim();
+        const previewEl = document.getElementById('imagePreview');
+
+        if (!imageUrl) {
+          alert('❌ Vui lòng nhập URL hình ảnh!');
+          return;
+        }
+
+        previewEl.innerHTML = `<img src="${imageUrl}" alt="Preview" onerror="this.parentElement.innerHTML='<div style=color:red>❌ Không thể load hình ảnh</div>'" />`;
+      }
+
+      // Send Image Message
+      function sendImageMessage() {
+        const imageUrl = document.getElementById('imageUrlInput').value.trim();
+
+        if (!socket || !socket.connected) {
+          alert('❌ Vui lòng kết nối WebSocket trước!');
+          return;
+        }
+
+        if (!imageUrl) {
+          alert('❌ Vui lòng nhập URL hình ảnh!');
+          return;
+        }
+
+        if (!currentComplaintId) {
+          alert('❌ Vui lòng chọn complaint!');
+          return;
+        }
+
+        const message = {
+          complaintId: currentComplaintId,
+          messageType: 'IMAGE',
+          content: imageUrl,
+        };
+
+        console.log('📤 Sending image message:', message);
+        socket.emit('sendComplaintMessage', message);
+
+        // Clear input
+        document.getElementById('imageUrlInput').value = '';
+        document.getElementById('imagePreview').innerHTML = '';
+      }
+
+      // Cancel Image Input
+      function cancelImageInput() {
+        document.getElementById('imageUrlInput').value = '';
+        document.getElementById('imagePreview').innerHTML = '';
+        selectMessageType('TEXT');
+      }
+
+      function handleKeyPress(event) {
+        if (event.key === 'Enter') {
+          sendMessage();
+        }
+      }
+
+      function handleImageUrlKeyPress(event) {
+        if (event.key === 'Enter') {
+          sendImageMessage();
+        }
+      }
+
+      // Display Message - Append to bottom (for new messages)
+      function appendMessage(message) {
+        const messagesContainer = document.getElementById('chatMessages');
+        const messageDiv = createMessageElement(message);
+        messagesContainer.appendChild(messageDiv);
+      }
+
+      // Display Message - Prepend to top (for loading old messages)
+      function prependMessage(message) {
+        const messagesContainer = document.getElementById('chatMessages');
+        const messageDiv = createMessageElement(message);
+        messagesContainer.insertBefore(
+          messageDiv,
+          messagesContainer.firstChild
+        );
+      }
+
+      // Create message element
+      function createMessageElement(message) {
+        // Determine if message is sent by current user or received from others
+        const isSent = message.senderId === currentUserId;
+
+        const messageDiv = document.createElement('div');
+        messageDiv.className = `message ${isSent ? 'sent' : 'received'}`;
+
+        let contentHtml = '';
+        if (message.messageType === 'IMAGE') {
+          contentHtml = `
+            <div class="message-content">
+              <span class="message-type-badge">🖼️ IMAGE</span>
+              <img src="${message.content}" class="message-image" alt="Image" onclick="window.open('${message.content}', '_blank')" onerror="this.src=''; this.alt='❌ Error loading image'; this.style.cursor='default';" />
+            </div>
+          `;
+        } else {
+          contentHtml = `
+            <div class="message-content">
+              <span class="message-type-badge">📝 TEXT</span>
+              ${message.content}
+            </div>
+          `;
+        }
+
+        messageDiv.innerHTML = `
+          ${contentHtml}
+          <div class="message-time">
+            ${
+              isSent
+                ? 'You'
+                : 'Sender ' + message.senderId.substring(0, 8) + '...'
+            } • ${new Date(message.createdAt || Date.now()).toLocaleString()}
+          </div>
+        `;
+        return messageDiv;
+      }
+
+      // Handle new message from WebSocket
+      function handleNewMessage(message) {
+        appendMessage(message);
+        const messagesContainer = document.getElementById('chatMessages');
+        messagesContainer.scrollTop = messagesContainer.scrollHeight;
+      }
+
+      // Setup scroll event listener for infinite scroll
+      function setupScrollListener() {
+        const messagesContainer = document.getElementById('chatMessages');
+        messagesContainer.addEventListener('scroll', function () {
+          if (
+            messagesContainer.scrollTop === 0 &&
+            hasMoreMessages &&
+            !isLoadingMessages
+          ) {
+            const oldScrollHeight = messagesContainer.scrollHeight;
+            loadComplaintMessages(false).then(() => {
+              // Maintain scroll position
+              messagesContainer.scrollTop =
+                messagesContainer.scrollHeight - oldScrollHeight;
+            });
+          }
+        });
+      }
+
+      // Call this when page loads
+      setupScrollListener();
+
+      // Helper function to show status
+      function showStatus(element, type, message) {
+        element.className = `status ${type}`;
+        element.textContent = message;
+        element.style.display = 'block';
+      }
+
+      // Check for existing cookie on page load
+      window.onload = function () {
+        const cookies = parseCookies();
+        if (cookies.accessToken) {
+          accessToken = cookies.accessToken;
+
+          // Decode JWT để lấy userId
+          const decoded = parseJwt(accessToken);
+          if (decoded && decoded.userId) {
+            currentUserId = decoded.userId;
+            console.log('✅ Restored User ID from cookie:', currentUserId);
+          }
+
+          const cookieInfoEl = document.getElementById('cookieInfo');
+          cookieInfoEl.style.display = 'block';
+          cookieInfoEl.innerHTML = `
+            <strong>🍪 Đã đăng nhập từ session trước:</strong><br/>
+            User ID: ${currentUserId || 'Unknown'}<br/>
+            Access Token: ${
+              accessToken ? accessToken.substring(0, 20) + '...' : 'N/A'
+            }<br/>
+            <em>Đã tự động khôi phục phiên đăng nhập</em>
+          `;
+
+          showStatus(
+            document.getElementById('loginStatus'),
+            'info',
+            '✅ Đã tự động đăng nhập từ session trước'
+          );
+
+          // Auto load complaints
+          setTimeout(() => loadComplaints(), 500);
+        }
+      };
+    </script>
+  </body>
+</html>

@@ -2,6 +2,7 @@ using rental.Data;
 using rental.Repository;
 using rental.Service;
 using rental.Nats;
+using rental.Nats.Consumers;
 using Microsoft.EntityFrameworkCore;
 using System.Text.RegularExpressions;
 using Grpc.Net.Client;
@@ -36,6 +37,10 @@ builder.Services.AddSingleton(sp =>
 
 builder.Services.AddSingleton<NatsPublisher>();
 builder.Services.AddSingleton<NatsStreamSetup>();
+builder.Services.AddHostedService<ReviewCreatedConsumer>();
+builder.Services.AddHostedService<RentalPaidConsumer>();
+builder.Services.AddHostedService<RentalExpiredConsumer>();
+builder.Services.AddHostedService<RentalExtensionConsumer>();
 
 // Build database connection string by expanding placeholders from environment variables
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection") ?? string.Empty;
@@ -54,9 +59,9 @@ builder.Services.AddDbContext<RentalDbContext>(options =>
     options.UseNpgsql(connectionString));
 
 // Configure gRPC clients (prefer environment variables, fall back to sensible defaults)
-var userServiceUrl = Environment.GetEnvironmentVariable("USER_GRPC_URL") ?? "http://localhost:5002";
-var deviceServiceUrl = Environment.GetEnvironmentVariable("DEVICE_GRPC_URL") ?? "http://localhost:5006";
-var paymentServiceUrl = Environment.GetEnvironmentVariable("PAYMENT_GRPC_URL") ?? "http://localhost:5009";
+var userServiceUrl = Environment.GetEnvironmentVariable("USER_GRPC_SERVICE_URL_NET") ?? "http://localhost:5002";
+var deviceServiceUrl = Environment.GetEnvironmentVariable("DEVICE_GRPC_SERVICE_URL_NET") ?? "http://localhost:5006";
+var paymentServiceUrl = Environment.GetEnvironmentVariable("PAYMENT_GRPC_SERVICE_URL_NET") ?? "http://localhost:5009";
 
 builder.Services.AddGrpcClient<User.UserService.UserServiceClient>(options =>
 {

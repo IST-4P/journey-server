@@ -100,10 +100,11 @@ model Vehicle {
 }
 
 model VehicleBrand {
-    id        String   @id @default(uuid())
-    name      String   @unique // VD: "Toyota", "Honda", "Mercedes"
-    createdAt DateTime @default(now()) @map("created_at")
-    updatedAt DateTime @updatedAt @map("updated_at")
+    id        String      @id @default(uuid())
+    name      String      @unique // VD: "Toyota", "Honda", "Mercedes"
+    createdAt DateTime    @default(now()) @map("created_at")
+    updatedAt DateTime    @updatedAt @map("updated_at")
+    type      VehicleType
 
     // Relations
     models   VehicleModel[]
@@ -113,11 +114,12 @@ model VehicleBrand {
 }
 
 model VehicleModel {
-    id        String   @id @default(uuid())
+    id        String      @id @default(uuid())
     name      String // VD: "Vios", "City", "C-Class"
-    brandId   String   @map("brand_id")
-    createdAt DateTime @default(now()) @map("created_at")
-    updatedAt DateTime @updatedAt @map("updated_at")
+    brandId   String      @map("brand_id")
+    type      VehicleType
+    createdAt DateTime    @default(now()) @map("created_at")
+    updatedAt DateTime    @updatedAt @map("updated_at")
 
     // Relations
     brand    VehicleBrand @relation(fields: [brandId], references: [id], onDelete: Cascade)

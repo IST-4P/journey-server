@@ -17,7 +17,7 @@ export class CheckInOutService {
     const checkInOuts = await this.checkInOutRepository.getManyCheckInOuts(
       data
     );
-    if (checkInOuts.checkInOuts.length === 0) {
+    if (!checkInOuts.checkIn && !checkInOuts.checkOut) {
       throw CheckInOutNotFoundException;
     }
     return checkInOuts;

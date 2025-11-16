@@ -6,10 +6,13 @@ service UserService {
   rpc GetProfile(GetProfileRequest) returns (GetProfileResponse);
   rpc FindAllProfiles(FindAllProfilesRequest) returns (FindAllProfilesResponse);
   rpc UpdateProfile(UpdateProfileRequest) returns (GetProfileResponse);
+  rpc GetAllUserIds(GetAllUserIdsRequest) returns (GetAllUserIdsResponse);
+  rpc GetFullNameAndAvatar(GetFullNameAndAvatarRequest) returns (GetFullNameAndAvatarResponse);
 
   rpc GetDriverLicense(GetDriverLicenseRequest) returns (GetDriverLicenseResponse);
   rpc CreateDriverLicense(CreateDriverLicenseRequest) returns (GetDriverLicenseResponse);
   rpc UpdateDriverLicense(UpdateDriverLicenseRequest) returns (GetDriverLicenseResponse);
+  rpc VerifyDriverLicense(VerifyDriverLicenseRequest) returns (GetDriverLicenseResponse);
 
   rpc GetBankAccount(GetBankAccountRequest) returns (GetBankAccountResponse);
   rpc CreateBankAccount(CreateBankAccountRequest) returns (GetBankAccountResponse);
@@ -77,6 +80,12 @@ message UpdateProfileRequest {
   optional string email = 9;
 }
 
+message GetAllUserIdsRequest {}
+
+message GetAllUserIdsResponse {
+  repeated string userIds = 1;
+}
+
 // GetDriverLicense
 message GetDriverLicenseRequest {
   string userId = 1;
@@ -130,6 +139,13 @@ message UpdateDriverLicenseRequest {
   optional string frontImageUrl = 9;
   optional string backImageUrl = 10;
   optional string selfieImageUrl = 11;
+}
+
+// VerifyDriverLicense
+message VerifyDriverLicenseRequest {
+  string userId = 1;
+  bool isVerified = 2;
+  optional string rejectedReason = 3;
 }
 
 // GetBankAccount
@@ -225,4 +241,19 @@ message DeleteAddressRequest {
 
 message DeleteAddressResponse {
   string message = 1;
+}
+
+// GetFullNameAndAvatar
+message GetFullNameAndAvatarRequest {
+  repeated string userIds = 1;
+}
+
+message UserFullNameAndAvatar {
+  string id = 1;
+  string fullName = 2;
+  string avatarUrl = 3;
+}
+
+message GetFullNameAndAvatarResponse {
+  repeated UserFullNameAndAvatar users = 1;
 }

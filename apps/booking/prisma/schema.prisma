@@ -13,6 +13,7 @@ datasource db {
 
 enum BookingStatus {
     PENDING // Chờ thanh toán
+    PENDING_REFUND // Chờ hoàn tiền
     DEPOSIT_PAID // Đã thanh toán giữ chỗ, chờ đến ngày nhận xe
     // READY_FOR_CHECKIN Đến thời gian nhận xe, chờ thanh toán phần còn lại
     FULLY_PAID // Đã thanh toán đủ, chờ check-in
@@ -56,10 +57,11 @@ enum ExtensionStatus {
 // ==================== MAIN MODELS ====================
 
 model Booking {
-    id        String        @id @default(uuid())
-    userId    String        @map("user_id") // Reference to User Service
-    vehicleId String        @map("vehicle_id") // Reference to Vehicle Service
-    status    BookingStatus @default(PENDING)
+    id          String        @id @default(uuid())
+    userId      String        @map("user_id") // Reference to User Service
+    vehicleId   String        @map("vehicle_id") // Reference to Vehicle Service
+    vehicleName String        @map("vehicle_name") // Tên xe tại thời điểm booking
+    status      BookingStatus @default(PENDING)
 
     // Thời gian thuê
     startTime DateTime @map("start_time")
@@ -72,7 +74,8 @@ model Booking {
     pickupLng     Decimal @map("pickup_lng") @db.Decimal(11, 8)
 
     // Chi phí
-    vehicleFeeHour Int @map("vehicle_fee_hour") // Phí sử dụng xe (theo giờ hoặc ngày)
+    vehicleFeeHour Int @map("vehicle_fee_hour") // Phí sử dụng xe (theo giờ)
+    vehicleFeeDay  Int @map("vehicle_fee_day") // Phí sử dụng xe (theo ngày)
     rentalFee      Int @map("rental_fee") // Phí thuê xe
     insuranceFee   Int @map("insurance_fee") // Phí bảo hiểm
     vat            Int @map("vat") // VAT (10%)
@@ -102,7 +105,7 @@ model Booking {
     updatedAt   DateTime  @updatedAt @map("updated_at")
     cancelledAt DateTime? @map("cancelled_at")
     expiredAt   DateTime? @map("expired_at")
- 
+
     // Relations
     history  BookingHistory[]
     checkIns CheckInOut[]

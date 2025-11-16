@@ -2,10 +2,10 @@ import {
   CreatePaymentRequest,
   GetManyPaymentsRequest,
   GetPaymentRequest,
-  UpdateStatusPaymentRequest,
   WebhookPaymentRequest,
 } from '@domain/payment';
 import { Injectable } from '@nestjs/common';
+import { GetPaymentAdminRequest } from 'libs/grpc/src/lib/types/proto/payment';
 import { PaymentNotFoundException } from './payment.error';
 import { PaymentRepository } from './payment.repo';
 
@@ -38,25 +38,26 @@ export class PaymentService {
     };
   }
 
+  async getPaymentAdmin(data: GetPaymentAdminRequest) {
+    const payment = await this.paymentRepository.getPaymentAdmin(data);
+    if (!payment) {
+      throw PaymentNotFoundException;
+    }
+    return {
+      ...payment,
+      paymentCode: payment.paymentCode ?? '',
+    };
+  }
+
   async createPayment(data: CreatePaymentRequest) {
     return this.paymentRepository.createPayment(data);
   }
 
-  async updateStatusPayment(data: UpdateStatusPaymentRequest) {
-    const payment = await this.paymentRepository.getPayment({
-      id: data.id,
-      userId: data.userId,
-    });
-    if (!payment) {
-      throw PaymentNotFoundException;
-    }
-    return this.paymentRepository.updatePaymentStatus(data);
+  async createPaymentForExtension(data: CreatePaymentRequest) {
+    return this.paymentRepository.createPaymentForExtension(data);
   }
 
   async receiver(data: WebhookPaymentRequest) {
-    await this.paymentRepository.receiver(data);
-    return {
-      message: 'Message.ReceivedSuccessfully',
-    };
+    return await this.paymentRepository.receiver(data);
   }
 }

@@ -1,6 +1,7 @@
 import {
   CreatePaymentRequest,
   GetManyPaymentsRequest,
+  GetPaymentAdminRequest,
   GetPaymentRequest,
   PaymentStatusValues,
   UpdateStatusPaymentRequest,
@@ -8,6 +9,7 @@ import {
 } from '@domain/payment';
 import { NatsClient } from '@hacmieu-journey/nats';
 import { Injectable } from '@nestjs/common';
+import { Prisma } from '@prisma-clients/payment';
 import { parse } from 'date-fns';
 import { PrismaService } from '../prisma/prisma.service';
 import {
@@ -15,12 +17,14 @@ import {
   PaymentNotFoundException,
   PaymentTransactionExistsException,
 } from './payment.error';
+import { PaymentProducer } from './payment.producer';
 
 @Injectable()
 export class PaymentRepository {
   constructor(
     private readonly prismaService: PrismaService,
-    private readonly natsClient: NatsClient
+    private readonly natsClient: NatsClient,
+    private readonly paymentProducer: PaymentProducer
   ) {}
 
   generatePaymentCode(sequenceNumber: number, type: string): string {
@@ -39,12 +43,21 @@ export class PaymentRepository {
     const skip = (page - 1) * limit;
     const take = limit;
 
+    let query: Prisma.PaymentWhereInput = where;
+
+    if (where.paymentCode) {
+      query.paymentCode = {
+        contains: where.paymentCode,
+        mode: 'insensitive',
+      };
+    }
+
     const [totalItems, payments] = await Promise.all([
       this.prismaService.payment.count({
-        where,
+        where: query,
       }),
       this.prismaService.payment.findMany({
-        where,
+        where: query,
         skip,
         take,
       }),
@@ -65,6 +78,12 @@ export class PaymentRepository {
     });
   }
 
+  async getPaymentAdmin(data: GetPaymentAdminRequest) {
+    return this.prismaService.payment.findUnique({
+      where: data,
+    });
+  }
+
   async createPayment(data: CreatePaymentRequest) {
     return await this.prismaService.$transaction(async (tx) => {
       // Tạo payment với sequenceNumber tự động tăng
@@ -79,15 +98,42 @@ export class PaymentRepository {
       );
 
       // Update payment code
-      await tx.payment.update({
+      const updatedPayment$ = tx.payment.update({
         where: { id: payment.id },
         data: { paymentCode },
       });
+
+      const addCancelPaymentJob$ = this.paymentProducer.cancelPaymentJob(
+        payment.id
+      );
+      await Promise.all([updatedPayment$, addCancelPaymentJob$]);
+    });
+  }
+
+  async createPaymentForExtension(data: CreatePaymentRequest) {
+    return await this.prismaService.$transaction(async (tx) => {
+      // Tạo payment với sequenceNumber tự động tăng
+      const payment = await tx.payment.create({
+        data,
+      });
+
+      // Generate payment code
+      const paymentCode = this.generatePaymentCode(
+        payment.sequenceNumber,
+        payment.type
+      );
+
+      // Update payment code
+      const updatedPayment$ = tx.payment.update({
+        where: { id: payment.id },
+        data: { paymentCode },
+      });
+      await Promise.all([updatedPayment$]);
     });
   }
 
   async updatePaymentStatus(data: UpdateStatusPaymentRequest) {
-    return this.prismaService.payment.update({
+    await this.prismaService.payment.update({
       where: {
         id: data.id,
       },
@@ -141,11 +187,13 @@ export class PaymentRepository {
 
       // Kiểm tra nội dung chuyển tiền và tổng số tiền có khớp không
       const paymentCode = data.code ? String(data.code) : String(data.content);
+      console.log(paymentCode);
       const payment = await tx.payment.findUnique({
         where: {
           paymentCode,
         },
       });
+      console.log(payment);
       if (!payment) {
         throw PaymentNotFoundException;
       }
@@ -155,22 +203,55 @@ export class PaymentRepository {
       }
 
       const eventData = {
-        id: bookingId || rentalId,
+        id: payment.id,
       };
 
-      await Promise.all([
-        tx.payment.update({
-          where: {
-            paymentCode,
-          },
-          data: {
-            status: PaymentStatusValues.PAID,
-          },
-        }),
-        bookingId
-          ? this.natsClient.publish('journey.events.booking-paid', eventData)
-          : this.natsClient.publish('journey.events.rental-paid', eventData),
-      ]);
+      if (paymentCode.startsWith('EX')) {
+        await Promise.all([
+          tx.payment.update({
+            where: {
+              paymentCode,
+            },
+            data: {
+              status: PaymentStatusValues.PAID,
+            },
+          }),
+          bookingId
+            ? this.natsClient.publish(
+                'journey.events.booking-extension',
+                eventData
+              )
+            : rentalId
+            ? this.natsClient.publish(
+                'journey.events.rental-extension',
+                eventData
+              )
+            : undefined,
+        ]);
+      } else {
+        await Promise.all([
+          tx.payment.update({
+            where: {
+              paymentCode,
+            },
+            data: {
+              status: PaymentStatusValues.PAID,
+            },
+          }),
+          bookingId
+            ? this.natsClient.publish('journey.events.booking-paid', eventData)
+            : rentalId
+            ? this.natsClient.publish('journey.events.rental-paid', eventData)
+            : undefined,
+          this.paymentProducer.removeJob(payment.id),
+        ]);
+      }
+
+      return {
+        paymentCode,
+        userId: payment.userId,
+        message: 'Message.ReceivedSuccessfully',
+      };
     });
 
     return result;

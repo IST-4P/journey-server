@@ -6,6 +6,7 @@ import {
   UpdateBankAccountRequestDTO,
   UpdateDriverLicenseRequestDTO,
   UpdateProfileRequestDTO,
+  VerifyDriverLicenseRequestDTO,
 } from '@domain/user';
 import {
   Body,
@@ -44,15 +45,14 @@ export class UserController {
     return this.userService.getDriverLicense({ userId });
   }
 
-  @Put('driver-license/:userId')
-  updateDriverLicense(
-    @Param('userId') userId: string,
-    @Body() body: UpdateDriverLicenseRequestDTO
-  ) {
-    return this.userService.updateDriverLicense({
-      ...body,
-      userId,
-    });
+  @Put('driver-license')
+  updateDriverLicense(@Body() body: UpdateDriverLicenseRequestDTO) {
+    return this.userService.updateDriverLicense(body);
+  }
+
+  @Put('driver-license/verify')
+  verifyDriverLicense(@Body() body: VerifyDriverLicenseRequestDTO) {
+    return this.userService.verifyDriverLicense(body);
   }
 
   @Get('bank-account/:userId')

@@ -1,4 +1,5 @@
 import {
+  CalculateVehiclePriceRequest,
   CreateVehicleRequest,
   DeleteVehicleRequest,
   GetManyVehiclesRequest,
@@ -6,12 +7,19 @@ import {
   UpdateVehicleRequest,
   VehicleStatus,
 } from '@domain/vehicle';
+import { calculateVehiclePrice } from '@hacmieu-journey/nestjs';
 import { Injectable } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
+import { Prisma } from '@prisma-clients/vehicle';
 import { PrismaService } from '../prisma/prisma.service';
+import { VehicleNotFoundException } from './vehicle.error';
 
 @Injectable()
 export class VehicleRepository {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly configService: ConfigService
+  ) {}
 
   async getVehicle(data: GetVehicleRequest) {
     return this.prisma.vehicle
@@ -45,13 +53,42 @@ export class VehicleRepository {
       });
   }
 
-  async getManyVehicles({ page, limit, ...where }: GetManyVehiclesRequest) {
+  async getManyVehicles({ page, limit, ...query }: GetManyVehiclesRequest) {
     const skip = (page - 1) * limit;
     const take = limit;
+
+    let where: Prisma.VehicleWhereInput = {};
+    if (query.name) {
+      where.name = { contains: query.name, mode: 'insensitive' };
+    }
+    if (query.licensePlate) {
+      where.licensePlate = {
+        contains: query.licensePlate,
+        mode: 'insensitive',
+      };
+    }
+    if (query.city) {
+      where.city = { contains: query.city, mode: 'insensitive' };
+    }
+    if (query.ward) {
+      where.ward = {
+        contains: query.ward,
+        mode: 'insensitive',
+      };
+    }
+
     const [totalItems, vehicles] = await Promise.all([
-      this.prisma.vehicle.count({ where }),
+      this.prisma.vehicle.count({
+        where: {
+          ...query,
+          ...where,
+        },
+      }),
       this.prisma.vehicle.findMany({
-        where,
+        where: {
+          ...query,
+          ...where,
+        },
         skip,
         take,
       }),
@@ -149,6 +186,45 @@ export class VehicleRepository {
     });
   }
 
+  async calculatePrice(data: CalculateVehiclePriceRequest) {
+    const vehicle = await this.prisma.vehicle.findUnique({
+      where: { id: data.vehicleId },
+    });
+
+    if (!vehicle) {
+      throw VehicleNotFoundException;
+    }
+
+    const vehicleFeeDay = vehicle.pricePerDay;
+    const vehicleFeeHour = vehicle.pricePerHour;
+
+    const vatPercent =
+      this.configService.getOrThrow<number>('BOOKING_VAT') || 0;
+
+    const deposit =
+      this.configService.getOrThrow<number>('BOOKING_DEPOSIT') || 0;
+
+    const insuranceFeePercent =
+      this.configService.getOrThrow<number>('BOOKING_INSURANCE_FEE') || 0;
+
+    const allPrices = calculateVehiclePrice({
+      vehicleFeeDay,
+      vehicleFeeHour,
+      insuranceFeePercent,
+      vatPercent,
+      deposit,
+      hours: data.hours,
+    });
+
+    return {
+      rentalFee: allPrices.rentalFee,
+      insuranceFee: allPrices.insuranceFee,
+      totalAmount: allPrices.totalAmount,
+      vat: allPrices.vat,
+      deposit,
+    };
+  }
+
   async updateStatus(data: { id: string; status: VehicleStatus }) {
     console.log(JSON.stringify(data));
     await this.prisma.vehicle.update({
@@ -157,6 +233,33 @@ export class VehicleRepository {
       },
       data: {
         status: data.status,
+      },
+    });
+  }
+
+  async reviewVehicle(data: {
+    reviewId: string;
+    vehicleId: string;
+    rating: number;
+  }) {
+    const vehicle = await this.prisma.vehicle.findUnique({
+      where: { id: data.vehicleId },
+    });
+
+    if (!vehicle) {
+      throw VehicleNotFoundException;
+    }
+
+    const currentAvg = vehicle.averageRating?.toNumber() ?? 0;
+    const currentTotal = vehicle.totalReviewIds.length;
+    const newAverage =
+      (currentAvg * currentTotal + data.rating) / (currentTotal + 1);
+
+    await this.prisma.vehicle.update({
+      where: { id: data.vehicleId },
+      data: {
+        totalReviewIds: { push: data.reviewId },
+        averageRating: newAverage,
       },
     });
   }

@@ -1,4 +1,5 @@
 import { z } from 'zod';
+import { VehicleTypeEnum } from '../enums';
 
 export const ModelValidatorSchema = z.object({
   id: z.string().uuid(),
@@ -8,6 +9,7 @@ export const ModelValidatorSchema = z.object({
   brandId: z
     .string({ message: 'Error.InvalidBrandId' })
     .uuid({ message: 'Error.InvalidBrandId' }),
+  type: VehicleTypeEnum,
   createdAt: z.coerce.date(),
   updatedAt: z.coerce.date(),
 });

@@ -5,6 +5,13 @@ package chat;
 service ChatService {
   rpc GetChats(GetChatsRequest) returns (GetChatsResponse);
   rpc CreateChat(CreateChatRequest) returns (CreateChatResponse);
+  rpc GetManyConversations(GetManyConversationsRequest) returns (GetManyConversationsWithUserIds);
+
+  rpc GetManyComplaints(GetManyComplaintsRequest) returns (GetManyComplaintsResponse);
+  rpc CreateComplaint(CreateComplaintRequest) returns (GetComplaintResponse);
+  rpc UpdateComplaintStatus(UpdateComplaintStatusRequest) returns (GetComplaintResponse);
+  rpc GetManyComplaintMessages(GetManyComplaintMessagesRequest) returns (GetManyComplaintMessagesResponse);
+  rpc CreateComplaintMessage(CreateComplaintMessageRequest) returns (ComplaintMessage);
 }
 
 // Chat
@@ -26,6 +33,10 @@ message GetChatsRequest {
 
 message GetChatsResponse {
   repeated Chat chats = 1;
+  int32 page = 2;
+  int32 limit = 3;
+  int32 totalItems = 4;
+  int32 totalPages = 5;
 }
 
 // CreateChat
@@ -41,4 +52,113 @@ message CreateChatResponse {
   string toUserId = 3;
   string content = 4;
   string createdAt = 5;
+}
+
+// GetManyConversations
+message GetManyConversationsRequest {
+  string adminId = 1;
+  int32 page = 2;
+  int32 limit = 3;
+}
+
+message UserFullNameAndAvatar {
+  string id = 1;
+  string fullName = 2;
+  string avatarUrl = 3;
+}
+
+message GetManyConversationsWithUserIds {
+  repeated string conversations = 1;
+  int32 page = 2;
+  int32 limit = 3;
+  int32 totalItems = 4;
+  int32 totalPages = 5;
+}
+
+message GetManyConversationsResponse {
+  repeated UserFullNameAndAvatar conversations = 1;
+  int32 page = 2;
+  int32 limit = 3;
+  int32 totalItems = 4;
+  int32 totalPages = 5;
+}
+
+// Complaint
+message Complaint {
+  string id = 1;
+  string userId = 2;
+  string title = 3;
+  string status = 4;
+  string createdAt = 5;
+  string updatedAt = 6;
+}
+
+// GetManyComplaints
+message GetManyComplaintsRequest {
+  optional string status = 1;
+  optional string userId = 2;
+  int32 page = 3;
+  int32 limit = 4;
+}
+
+message GetManyComplaintsResponse {
+  repeated Complaint complaints = 1;
+  int32 page = 2;
+  int32 limit = 3;
+  int32 totalItems = 4;
+  int32 totalPages = 5;
+}
+
+// CreateComplaint
+message CreateComplaintRequest {
+  string userId = 1;
+  string title = 2;
+}
+
+message GetComplaintResponse {
+  string id = 1;
+  string userId = 2;
+  string title = 3;
+  string status = 4;
+  string createdAt = 5;
+  string updatedAt = 6;
+}
+
+// UpdateComplaintStatus
+message UpdateComplaintStatusRequest {
+  string id = 1;
+  string status = 2;
+}
+
+// ComplaintMessage
+message ComplaintMessage {
+  string id = 1;
+  string complaintId = 2;
+  string senderId = 3;
+  string messageType = 4;
+  string content = 5;
+  string createdAt = 6;
+}
+
+// GetManyComplaintMessages
+message GetManyComplaintMessagesRequest {
+  string complaintId = 1;
+  int32 page = 2;
+  int32 limit = 3;
+}
+
+message GetManyComplaintMessagesResponse {
+  repeated ComplaintMessage complaintMessages = 1;
+  int32 page = 2;
+  int32 limit = 3;
+  int32 totalItems = 4;
+  int32 totalPages = 5;
+}
+
+// CreateComplaintMessage
+message CreateComplaintMessageRequest {
+  string complaintId = 1;
+  string senderId = 2;
+  string messageType = 3;
+  string content = 4;
 }

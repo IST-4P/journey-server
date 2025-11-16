@@ -1,117 +1,62 @@
 using NATS.Client.Core;
-using NATS.Client.JetStream;
-using NATS.Client.JetStream.Models;
 using device.Nats.Events;
-using device.Repository;
-using System.Text.Json;
 using device.Interface;
+using device.Nats.Base;
 
 namespace device.Nats.Consumers
 {
-    public class ReviewEventConsumer : BackgroundService
+    /// <summary>
+    /// Consumer to handle review.created events from Review service
+    /// Updates device with ReviewId when a review is created
+    /// </summary>
+    public class ReviewEventConsumer : NatsConsumerBase<ReviewCreatedEvent>
     {
-        private readonly NatsConnection _natsConnection;
-        private readonly IServiceProvider _serviceProvider;
-        private readonly ILogger<ReviewEventConsumer> _logger;
+        protected override string ConsumerName => "device-review-created";
+        protected override string FilterSubject => "journey.events.review.created";
 
         public ReviewEventConsumer(
             NatsConnection natsConnection,
             IServiceProvider serviceProvider,
             ILogger<ReviewEventConsumer> logger)
+            : base(natsConnection, serviceProvider, logger)
         {
-            _natsConnection = natsConnection;
-            _serviceProvider = serviceProvider;
-            _logger = logger;
         }
 
-        protected override async Task ExecuteAsync(CancellationToken stoppingToken)
+        protected override async Task HandleEventAsync(ReviewCreatedEvent reviewEvent, CancellationToken cancellationToken)
         {
-            _logger.LogInformation("[Device] Starting ReviewEventConsumer...");
-
-            try
+            if (string.IsNullOrEmpty(reviewEvent.DeviceId))
             {
-                var js = new NatsJSContext(_natsConnection);
-
-                // Create consumer if not exists
-                var consumerConfig = new ConsumerConfig("device-review-consumer")
-                {
-                    DurableName = "device-review-consumer",
-                    AckPolicy = ConsumerConfigAckPolicy.Explicit,
-                    FilterSubject = "review.created"
-                };
-
-                try
-                {
-                    await js.CreateOrUpdateConsumerAsync("REVIEW", consumerConfig, stoppingToken);
-                }
-                catch (Exception ex)
-                {
-                    _logger.LogWarning(ex, "[Device] Consumer might already exist or stream not ready");
-                }
-
-                // Get consumer and subscribe to messages
-                var consumer = await js.GetConsumerAsync("REVIEW", "device-review-consumer", stoppingToken);
-
-                await foreach (var msg in consumer.ConsumeAsync<string>(cancellationToken: stoppingToken))
-                {
-                    try
-                    {
-                        var json = msg.Data;
-                        if (string.IsNullOrEmpty(json))
-                        {
-                            await msg.AckAsync(cancellationToken: stoppingToken);
-                            continue;
-                        }
-
-                        var reviewEvent = JsonSerializer.Deserialize<ReviewCreatedEvent>(json);
-
-                        if (reviewEvent != null && !string.IsNullOrEmpty(reviewEvent.DeviceId))
-                        {
-                            _logger.LogInformation($"[Device] Received review.created for DeviceId: {reviewEvent.DeviceId}, ReviewId: {reviewEvent.ReviewId}");
-
-                            await HandleReviewCreatedAsync(reviewEvent);
-                        }
-
-                        await msg.AckAsync(cancellationToken: stoppingToken);
-                    }
-                    catch (Exception ex)
-                    {
-                        _logger.LogError(ex, "[Device] Error processing review.created event");
-                        await msg.NakAsync(delay: TimeSpan.FromSeconds(5), cancellationToken: stoppingToken);
-                    }
-                }
+                Logger.LogInformation("[Device] Skipping review event - no DeviceId");
+                return;
             }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "[Device] ReviewEventConsumer failed");
-            }
-        }
 
-        private async Task HandleReviewCreatedAsync(ReviewCreatedEvent reviewEvent)
-        {
-            using var scope = _serviceProvider.CreateScope();
+            Logger.LogInformation(
+                "[Device] Received review.created for DeviceId: {DeviceId}, ReviewId: {ReviewId}",
+                reviewEvent.DeviceId, reviewEvent.ReviewId);
+
+            using var scope = ServiceProvider.CreateScope();
             var deviceRepository = scope.ServiceProvider.GetRequiredService<IDeviceRepository>();
 
             if (!Guid.TryParse(reviewEvent.DeviceId, out var deviceId))
             {
-                _logger.LogWarning($"[Device] Invalid DeviceId: {reviewEvent.DeviceId}");
+                Logger.LogWarning("[Device] Invalid DeviceId: {DeviceId}", reviewEvent.DeviceId);
                 return;
             }
 
             if (!Guid.TryParse(reviewEvent.ReviewId, out var reviewId))
             {
-                _logger.LogWarning($"[Device] Invalid ReviewId: {reviewEvent.ReviewId}");
+                Logger.LogWarning("[Device] Invalid ReviewId: {ReviewId}", reviewEvent.ReviewId);
                 return;
             }
 
             try
             {
                 await deviceRepository.AddReviewIdAsync(deviceId, reviewId);
-                _logger.LogInformation($"[Device] Added ReviewId {reviewId} to Device {deviceId}");
+                Logger.LogInformation("[Device] Added ReviewId {ReviewId} to Device {DeviceId}", reviewId, deviceId);
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, $"[Device] Failed to add ReviewId to Device {deviceId}");
+                Logger.LogError(ex, "[Device] Failed to add ReviewId to Device {DeviceId}", deviceId);
                 throw;
             }
         }

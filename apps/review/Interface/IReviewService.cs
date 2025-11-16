@@ -18,6 +18,11 @@ namespace review.Interface
         Task<PagedResultDto<ReviewModel>> GetReviewsByDeviceIdAsync(Guid deviceId, ReviewQueryDto query);
         Task<PagedResultDto<ReviewModel>> GetReviewsByComboIdAsync(Guid comboId, ReviewQueryDto query);
 
+        // Rating statistics
+        Task<RatingStatsDto> GetVehicleRatingStatsAsync(Guid vehicleId);
+        Task<RatingStatsDto> GetDeviceRatingStatsAsync(Guid deviceId);
+        Task<RatingStatsDto> GetComboRatingStatsAsync(Guid comboId);
+
         // Admin operations
         Task<PagedResultDto<ReviewModel>> GetAllReviewsAsync(ReviewQueryDto query, ReviewType? type = null);
         Task<bool> AdminDeleteReviewAsync(Guid reviewId, Guid adminId);

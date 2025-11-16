@@ -8,6 +8,10 @@ import {
   UpdateStatusExtensionRequest,
 } from '@domain/booking';
 import { NatsClient } from '@hacmieu-journey/nats';
+import {
+  calculateDuration,
+  convertHoursToDaysAndHours,
+} from '@hacmieu-journey/nestjs';
 import { Injectable } from '@nestjs/common';
 import { BookingNotFoundException } from '../booking/booking.error';
 import { PrismaService } from '../prisma/prisma.service';
@@ -20,15 +24,15 @@ export class ExtensionRepository {
     private readonly natsClient: NatsClient
   ) {}
 
-  async getManyExtensions(data: GetManyExtensionsRequest) {
-    const skip = (data.page - 1) * data.limit;
-    const take = data.limit;
+  async getManyExtensions({ page, limit, ...where }: GetManyExtensionsRequest) {
+    const skip = (page - 1) * limit;
+    const take = limit;
     const [totalItems, extensions] = await Promise.all([
       this.prismaService.bookingExtension.count({
-        where: data,
+        where,
       }),
       this.prismaService.bookingExtension.findMany({
-        where: data,
+        where,
         skip,
         take,
         orderBy: {
@@ -39,25 +43,23 @@ export class ExtensionRepository {
 
     return {
       extensions,
-      page: data.page,
-      limit: data.limit,
+      page,
+      limit,
       totalItems,
-      totalPages: Math.ceil(totalItems / data.limit),
+      totalPages: Math.ceil(totalItems / limit),
     };
   }
 
   async getExtension(data: GetExtensionRequest) {
     return this.prismaService.bookingExtension.findUnique({
-      where: {
-        id: data.id,
-      },
+      where: data,
     });
   }
 
   async createExtension(data: CreateExtensionRequest) {
     return this.prismaService.$transaction(async (tx) => {
-      const diffMs = data.newEndTime.getTime() - data.originalEndTime.getTime();
-      const diffHours = diffMs / (1000 * 60 * 60);
+      const diffMs = calculateDuration(data.originalEndTime, data.newEndTime);
+      const diffHours = convertHoursToDaysAndHours(diffMs);
       const booking = await tx.booking.findUnique({
         where: { id: data.bookingId },
       });
@@ -67,9 +69,13 @@ export class ExtensionRepository {
       const createExtension$ = tx.bookingExtension.create({
         data: {
           ...data,
-          additionalHours: Math.ceil(diffHours),
+          originalEndTime: new Date(data.originalEndTime).toISOString(),
+          newEndTime: new Date(data.newEndTime).toISOString(),
+          additionalHours: diffHours.days * 24 + diffHours.hours,
           additionalAmount: booking
-            ? Math.ceil(booking.vehicleFeeHour * diffHours)
+            ? Math.ceil(
+                booking.vehicleFeeHour * (diffHours.days * 24 + diffHours.hours)
+              )
             : 0,
         },
       });
@@ -91,7 +97,7 @@ export class ExtensionRepository {
   }
 
   async approveExtension(data: UpdateStatusExtensionRequest) {
-    return this.prismaService.$transaction(async (tx) => {
+    const result = await this.prismaService.$transaction(async (tx) => {
       const extension = await tx.bookingExtension.findUnique({
         where: { id: data.id },
       });
@@ -103,11 +109,6 @@ export class ExtensionRepository {
         data: { status: ExtensionStatusEnumValues.APPROVED },
       });
 
-      const updateBooking$ = tx.booking.update({
-        where: { id: extension.bookingId },
-        data: { endTime: extension.newEndTime },
-      });
-
       const createBookingHistory$ = tx.bookingHistory.create({
         data: {
           bookingId: extension.bookingId,
@@ -117,11 +118,11 @@ export class ExtensionRepository {
       });
 
       const createPayment$ = this.natsClient.publish(
-        'journey.events.payment-created',
+        'journey.events.payment-extension',
         {
           id: extension.id,
           userId: extension.requestedBy,
-          type: 'VEHICLE',
+          type: 'EXTENSION',
           bookingId: extension.bookingId,
           totalAmount: extension.additionalAmount,
         }
@@ -129,12 +130,18 @@ export class ExtensionRepository {
 
       const [updatedExtension] = await Promise.all([
         updateExtension$,
-        updateBooking$,
         createBookingHistory$,
         createPayment$,
       ]);
       return updatedExtension;
     });
+    await this.natsClient.publish('journey.events.notification-created', {
+      userId: result.requestedBy,
+      title: 'Extension Approved',
+      content: `Your extension request for booking ${result.bookingId} has been approved.`,
+      type: 'BOOKING' as const,
+    });
+    return result;
   }
 
   async rejectExtension(data: UpdateStatusExtensionRequest) {

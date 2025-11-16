@@ -1,12 +1,9 @@
-using rental.Model.Entities;
-using System.Text.Json;
-
 namespace rental.Service
 {
     public static class RentalCalculationHelper
     {
-        public const double VAT_PERCENT = 10.0;
-        public const double DEPOSIT_PERCENT = 20.0; // 20% of item price * quantity
+        public const double VAT_PERCENT = 10.0; // VAT 10%
+        public const double DEPOSIT_PERCENT = 20.0; // 20% of total price (paid upfront)
 
         public static double CalculateDiscountAmount(double rentalFee, double discountPercent, double maxDiscount)
         {
@@ -14,21 +11,31 @@ namespace rental.Service
             return Math.Min(calculatedDiscount, maxDiscount);
         }
 
-        // Calculate deposit based on individual item prices and quantities
-        public static double CalculateDepositForItems(List<(double unitPrice, int quantity)> items)
+        // TotalPrice = (RentalFee - Discount) × RentalDays × 1.1 (including VAT)
+        // RentalFee is the daily rate per item
+        public static double CalculateTotalPrice(double rentalFee, double discountAmount, int rentalDays)
         {
-            double totalItemValue = 0;
-            foreach (var item in items)
-            {
-                totalItemValue += item.unitPrice * item.quantity;
-            }
-            return totalItemValue * (DEPOSIT_PERCENT / 100.0);
+            double amountAfterDiscount = rentalFee - discountAmount;
+            return amountAfterDiscount * rentalDays * (1 + VAT_PERCENT / 100.0);
         }
-        public static double CalculateTotalPrice(double rentalFee, double discountAmount, double deposit)
+
+        // Calculate rental days from start to end date
+        public static int CalculateRentalDays(DateTime startDate, DateTime endDate)
         {
-            double subtotal = rentalFee - discountAmount + deposit;
-            double totalWithVAT = subtotal * (1 + VAT_PERCENT / 100.0);
-            return totalWithVAT;
+            int days = (int)(endDate - startDate).TotalDays;
+            return Math.Max(1, days); // Minimum 1 day
+        }
+
+        // Calculate deposit: 20% of total price (paid upfront)
+        public static double CalculateDeposit(double totalPrice)
+        {
+            return totalPrice * (DEPOSIT_PERCENT / 100.0);
+        }
+
+        // Calculate remaining amount: 80% of total price (paid on pickup)
+        public static double CalculateRemainingAmount(double totalPrice)
+        {
+            return totalPrice * ((100.0 - DEPOSIT_PERCENT) / 100.0);
         }
 
         public static double CalculateRefundPercent(DateTime startDate, DateTime cancelDate)
@@ -38,14 +45,22 @@ namespace rental.Service
             if (daysBefore >= 7)
                 return 100;
             else if (daysBefore >= 3)
-                return 50; 
+                return 50;
             else
-                return 0;  
+                return 0;
         }
 
         public static double CalculateRefundAmount(double deposit, double refundPercent)
         {
             return deposit * (refundPercent / 100.0);
+        }
+
+        // Calculate extension fee based on additional days
+        // Extension total price = (RentalFee per day - Discount per day) × Additional Days × 1.1 (VAT)
+        // Same formula as rental: TotalPrice = (RentalFee - Discount) × Days × 1.1
+        public static double CalculateExtensionTotalPrice(double dailyRentalFee, double discountAmount, int additionalDays)
+        {
+            return CalculateTotalPrice(dailyRentalFee, discountAmount, additionalDays);
         }
     }
 }

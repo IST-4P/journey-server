@@ -39,16 +39,6 @@ namespace review.Services
                     "At least one of bookingId or rentalId must be specified"));
             }
 
-            // Check if booking has already been reviewed
-            var hasBeenReviewed = await _repository.HasBookingBeenReviewedAsync(dto.BookingId);
-            var hasRentalBeenReviewed = await _repository.HasRentalBeenReviewedAsync(dto.RentalId);
-
-            if (hasBeenReviewed || hasRentalBeenReviewed)
-            {
-                throw new RpcException(new Status(StatusCode.AlreadyExists,
-                    "This booking or rental has already been reviewed"));
-            }
-
             // Validate rating
             if (dto.Rating < 1 || dto.Rating > 5)
             {
@@ -72,64 +62,6 @@ namespace review.Services
                 UpdateCount = 0
             };
 
-            if (dto.RentalId.HasValue)
-            {
-                try
-                {
-                    var rentalResp = await _rentalClient.GetRentalByIdAsync(new Rental.GetRentalByIdRequest
-                    {
-                        RentalId = dto.RentalId.Value.ToString()
-                    });
-
-                    var firstItem = rentalResp.Items.FirstOrDefault();
-                    if (firstItem != null && Guid.TryParse(firstItem.TargetId, out var targetId))
-                    {
-                        if (firstItem.IsCombo)
-                        {
-                            review.ComboId = targetId;
-                            review.Type = ReviewType.Combo;
-                        }
-                        else
-                        {
-                            review.DeviceId = targetId;
-                            review.Type = ReviewType.Device;
-                        }
-                    }
-                }
-                catch (Exception ex)
-                {
-                    _logger.LogWarning(ex, "Failed to fetch rental details for RentalId {RentalId}", dto.RentalId);
-                }
-            }
-
-            if (dto.BookingId.HasValue)
-            {
-                try
-                {
-                    var bookingResp = await _bookingClient.GetBookingAsync(new Booking.GetBookingRequest
-                    {
-                        Id = dto.BookingId.Value.ToString()
-                    });
-
-                    var booking = bookingResp.Id != null ? bookingResp : null;
-                    if (bookingResp?.Id != null && Guid.TryParse(bookingResp.Id, out var bookingId))
-                    {
-                        if (bookingResp.VehicleId != null &&
-                            Guid.TryParse(bookingResp.VehicleId, out var vehicleId))
-                        {
-                            review.VehicleId = vehicleId;  
-                            review.Type = ReviewType.Vehicle;
-                        }
-                    }
-                }   
-                catch (Exception ex)
-                {
-                    _logger.LogWarning(ex, "Failed to fetch booking details for BookingId {BookingId}", dto.BookingId);
-                }
-            }
-
-
-
             var createdReview = await _repository.CreateReviewAsync(review);
 
             // Publish event to NATS
@@ -144,20 +76,17 @@ namespace review.Services
             {
                 var reviewEvent = new ReviewCreatedEvent
                 {
-                    ReviewId = review.Id.ToString(),
-                    BookingId = review.BookingId?.ToString(),
-                    RentalId = review.RentalId?.ToString(),
-                    UserId = review.UserId.ToString(),
-                    Rating = review.Rating,
-                    Type = review.Type.ToString(),
-                    CreatedAt = review.CreatedAt.ToString("o"),
-                    DeviceId = review.DeviceId?.ToString(),
-                    ComboId = review.ComboId?.ToString(),
-                    VehicleId = review.VehicleId?.ToString()
+                    reviewId = review.Id.ToString(),
+                    bookingId = review.BookingId?.ToString(),
+                    rentalId = review.RentalId?.ToString(),
+                    deviceId = review.DeviceId?.ToString(),
+                    comboId = review.ComboId?.ToString(),
+                    vehicleId = review.VehicleId?.ToString(),
+                    rating = review.Rating
                 };
 
-                await _natsPublisher.PublishAsync("review.created", reviewEvent);
-                _logger.LogInformation($"Published review.created event for review {review.Id}");
+                await _natsPublisher.PublishAsync("journey.events.review.created", reviewEvent);
+                _logger.LogInformation($"Published journey.events.review.created event for review {review.Id}");
             }
             catch (Exception ex)
             {
@@ -297,19 +226,55 @@ namespace review.Services
             return await _repository.DeleteReviewAsync(reviewId);
         }
 
-        private void ValidatePagination(int page, int limit)
+        public async Task<RatingStatsDto> GetVehicleRatingStatsAsync(Guid vehicleId)
         {
-            if (page < 1)
+            var reviews = await _repository.GetReviewsByVehicleIdAsync(vehicleId, new ReviewQueryDto
             {
-                throw new RpcException(new Status(StatusCode.InvalidArgument,
-                    "Page must be greater than 0"));
-            }
+                Page = 1,
+                Limit = int.MaxValue
+            });
 
-            if (limit < 1 || limit > 100)
+            return new RatingStatsDto
             {
-                throw new RpcException(new Status(StatusCode.InvalidArgument,
-                    "Limit must be between 1 and 100"));
-            }
+                TargetId = vehicleId,
+                Type = ReviewType.Vehicle,
+                AverageRating = reviews.Any() ? Math.Round(reviews.Average(r => r.Rating), 2) : 0,
+                TotalReviews = reviews.Count
+            };
+        }
+
+        public async Task<RatingStatsDto> GetDeviceRatingStatsAsync(Guid deviceId)
+        {
+            var reviews = await _repository.GetReviewsByDeviceIdAsync(deviceId, new ReviewQueryDto
+            {
+                Page = 1,
+                Limit = int.MaxValue
+            });
+
+            return new RatingStatsDto
+            {
+                TargetId = deviceId,
+                Type = ReviewType.Device,
+                AverageRating = reviews.Any() ? Math.Round(reviews.Average(r => r.Rating), 2) : 0,
+                TotalReviews = reviews.Count
+            };
+        }
+
+        public async Task<RatingStatsDto> GetComboRatingStatsAsync(Guid comboId)
+        {
+            var reviews = await _repository.GetReviewsByComboIdAsync(comboId, new ReviewQueryDto
+            {
+                Page = 1,
+                Limit = int.MaxValue
+            });
+
+            return new RatingStatsDto
+            {
+                TargetId = comboId,
+                Type = ReviewType.Combo,
+                AverageRating = reviews.Any() ? Math.Round(reviews.Average(r => r.Rating), 2) : 0,
+                TotalReviews = reviews.Count
+            };
         }
     }
 }

@@ -39,6 +39,7 @@ namespace Blog.Repository
                     Thumbnail = b.Thumbnail,
                     Tag = b.Tag,
                     Summary = b.Summary,
+                    AuthorId = b.AuthorId,
                     CreatedAt = b.CreateAt,
                     UpdatedAt = b.UpdateAt
                 })
@@ -60,7 +61,9 @@ namespace Blog.Repository
             {
                 query = query.Where(b =>
                     b.Title.ToLower().Contains(filter.SearchTerm.ToLower()) ||
-                    b.Content.ToLower().Contains(filter.SearchTerm.ToLower()));
+                    b.Content.ToLower().Contains(filter.SearchTerm.ToLower()) ||
+                    b.Tag.ToLower().Contains(filter.SearchTerm.ToLower()) ||
+                    b.Type.ToLower().Contains(filter.SearchTerm.ToLower()));
             }
 
             if (filter.FromDate.HasValue)
@@ -106,6 +109,7 @@ namespace Blog.Repository
                     Content = b.Content,
                     Region = b.Region,
                     Tag = b.Tag,
+                    AuthorId = b.AuthorId,
                     Thumbnail = b.Thumbnail,
                     Summary = b.Summary,
                     CreatedAt = b.CreateAt,
@@ -133,6 +137,7 @@ namespace Blog.Repository
                     Type = b.Type,
                     Content = b.Content,
                     Region = b.Region,
+                    AuthorId = b.AuthorId,
                     Tag = b.Tag,
                     Thumbnail = b.Thumbnail,
                     CreatedAt = b.CreateAt,
@@ -152,6 +157,7 @@ namespace Blog.Repository
                 Content = blog.Content,
                 Region = blog.Region,
                 Tag = blog.Tag,
+                AuthorId = blog.AuthorId,
                 Summary = blog.Summary,
                 Thumbnail = blog.Thumbnail
             };
@@ -175,6 +181,7 @@ namespace Blog.Repository
             existingBlog.Region = blog.Region ?? existingBlog.Region;
             existingBlog.Thumbnail = blog.Thumbnail ?? existingBlog.Thumbnail;
             existingBlog.Tag = blog.Tag ?? existingBlog.Tag;
+            existingBlog.AuthorId = blog.AuthorId ?? existingBlog.AuthorId;
             existingBlog.Summary = blog.Summary ?? existingBlog.Summary;
             existingBlog.UpdateAt = DateTime.UtcNow;
 

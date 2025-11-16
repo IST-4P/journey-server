@@ -1,12 +1,7 @@
-using System;
-using System.Collections.Generic;
 
 namespace device.Model.Dto
 {
-    // ============================================
     // ADMIN COMBO DTOs
-    // ============================================
-
     public class AdminComboDto
     {
         public Guid Id { get; set; }
@@ -43,9 +38,7 @@ namespace device.Model.Dto
         public List<ComboDeviceInputDto>? DeviceItems { get; set; }
     }
 
-    // ============================================
     // SHARED COMBO DTOs
-    // ============================================
 
     public class ComboDeviceItemDto
     {
@@ -60,9 +53,4 @@ namespace device.Model.Dto
         public Guid DeviceId { get; set; }
         public int Quantity { get; set; } = 1;
     }
-
-    // ============================================
-    // USER COMBO DTO (already exists in UserDeviceDto.cs)
-    // ============================================
-    // Keep ComboUserDto in UserDeviceDto.cs for user-facing responses
 }

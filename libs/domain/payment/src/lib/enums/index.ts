@@ -14,12 +14,16 @@ export const PaymentStatusEnum = z.enum([
 
 export const PaymentTypeValues = {
   DEVICE: 'DEVICE', // Thiết bị
+  COMBO: 'COMBO', // Combo
   VEHICLE: 'VEHICLE', // Phương tiện
+  EXTENSION: 'EXTENSION', // Gia hạn
 } as const;
 
 export const PaymentTypeEnum = z.enum([
   PaymentTypeValues.DEVICE,
   PaymentTypeValues.VEHICLE,
+  PaymentTypeValues.COMBO,
+  PaymentTypeValues.EXTENSION,
 ]);
 
 export const RefundStatusValues = {

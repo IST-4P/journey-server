@@ -1,6 +1,8 @@
+import { VerifyDriverLicenseRequest } from '@domain/user';
 import { Injectable } from '@nestjs/common';
 import { Prisma } from '@prisma-clients/user';
 import { PrismaService } from '../prisma/prisma.service';
+import { LicenseNumberInvalidException } from './driver-license.error';
 
 @Injectable()
 export class DriverLicenseRepository {
@@ -17,6 +19,14 @@ export class DriverLicenseRepository {
   }
 
   async createDriverLicense(data: Prisma.DriverLicenseUncheckedCreateInput) {
+    const driverLicense = await this.prisma.driverLicense.findUnique({
+      where: {
+        licenseNumber: data.licenseNumber,
+      },
+    });
+    if (driverLicense) {
+      throw LicenseNumberInvalidException;
+    }
     return this.prisma.driverLicense.create({
       data,
     });
@@ -29,6 +39,20 @@ export class DriverLicenseRepository {
     return this.prisma.driverLicense.update({
       where: { userId },
       data,
+    });
+  }
+
+  async verifyDriverLicense({
+    userId,
+    isVerified,
+    rejectedReason,
+  }: VerifyDriverLicenseRequest) {
+    return this.prisma.driverLicense.update({
+      where: { userId },
+      data: {
+        isVerified,
+        rejectedReason,
+      },
     });
   }
 }

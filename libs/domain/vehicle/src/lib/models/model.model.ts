@@ -3,6 +3,7 @@ import { ModelValidatorSchema } from '../validators';
 
 export const GetAllModelsRequestSchema = ModelValidatorSchema.pick({
   brandId: true,
+  type: true,
 }).partial();
 
 export const GetAllModelsResponseSchema = z.object({
@@ -18,6 +19,7 @@ export const GetModelRequestSchema = ModelValidatorSchema.pick({
   id: true,
   name: true,
   brandId: true,
+  type: true,
 }).partial();
 
 export const GetModelResponseSchema = ModelValidatorSchema.omit({
@@ -28,6 +30,7 @@ export const GetModelResponseSchema = ModelValidatorSchema.omit({
 export const CreateModelRequestSchema = ModelValidatorSchema.pick({
   name: true,
   brandId: true,
+  type: true,
 });
 
 export const UpdateModelRequestSchema =

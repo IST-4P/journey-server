@@ -1,11 +1,5 @@
 syntax = "proto3";
 
-import "user.proto";
-import "device.proto";
-import "rental.proto";
-import "booking.proto";
-import "vehicle.proto";
-
 package review;
 
 service ReviewService {
@@ -20,6 +14,11 @@ service ReviewService {
   rpc GetReviewsByVehicle (GetReviewsByVehicleRequest) returns (GetReviewsResponse);
   rpc GetReviewsByDevice (GetReviewsByDeviceRequest) returns (GetReviewsResponse);
   rpc GetReviewsByCombo (GetReviewsByComboRequest) returns (GetReviewsResponse);
+  
+  // Rating statistics
+  rpc GetVehicleRatingStats (GetRatingStatsRequest) returns (RatingStatsResponse);
+  rpc GetDeviceRatingStats (GetRatingStatsRequest) returns (RatingStatsResponse);
+  rpc GetComboRatingStats (GetRatingStatsRequest) returns (RatingStatsResponse);
   
   // Admin operations
   rpc GetAllReviews (GetAllReviewsRequest) returns (GetReviewsResponse);
@@ -222,5 +221,22 @@ message GetMyReviewsResponse {
 
 message DeleteReviewResponse {
   bool success = 1;
+  string message = 2;
+}
+
+// Rating statistics message
+message RatingStats {
+  string targetId = 1;
+  ReviewType type = 2;
+  double averageRating = 3;
+  int32 totalReviews = 4;
+}
+
+message GetRatingStatsRequest {
+  string targetId = 1;
+}
+
+message RatingStatsResponse {
+  RatingStats stats = 1;
   string message = 2;
 }

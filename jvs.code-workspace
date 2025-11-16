@@ -12,10 +12,6 @@
             "path": "apps/rental"
         },
         {
-            "name": "complaint",
-            "path": "apps/complaint"
-        },
-        {
             "name": "review",
             "path": "apps/review"
         }

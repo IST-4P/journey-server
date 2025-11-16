@@ -18,6 +18,8 @@ enum PaymentStatus {
 enum PaymentType {
     DEVICE
     VEHICLE
+    EXTENSION
+    COMBO
 }
 
 enum RefundStatus {
@@ -72,10 +74,10 @@ model PaymentTransaction {
 model Refund {
     id             String       @id @default(uuid())
     userId         String
-    paymentId      String // Liên kết với Payment
     bookingId      String?
     rentalId       String?
-    amount         Int // Số tiền hoà
+    principal      Int
+    amount         Int // Số tiền hoàn trả
     penaltyAmount  Int          @default(0) // Số tiền phạt (nếu có)
     damageAmount   Int          @default(0) // Số tiền thiệt hại (nếu có)
     overtimeAmount Int          @default(0) // Số tiền trả thêm (nếu có)
@@ -84,7 +86,6 @@ model Refund {
     updatedAt      DateTime     @updatedAt
 
     @@index([userId])
-    @@index([paymentId])
     @@index([bookingId])
     @@index([rentalId])
     @@index([status])

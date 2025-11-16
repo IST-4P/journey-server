@@ -1,4 +1,5 @@
 import {
+  CalculateVehiclePriceRequest,
   CreateVehicleRequest,
   DeleteVehicleRequest,
   GetManyVehiclesRequest,
@@ -46,7 +47,7 @@ export class VehicleService {
 
   async updateVehicle(data: UpdateVehicleRequest) {
     const result = await this.vehicleRepo.getVehicle({
-      licensePlate: data.licensePlate,
+      id: data.id,
     });
     if (!result) {
       throw VehicleNotFoundException;
@@ -63,5 +64,9 @@ export class VehicleService {
     return {
       message: 'Message.VehicleDeletedSuccessfully',
     };
+  }
+
+  async calculatePrice(data: CalculateVehiclePriceRequest) {
+    return this.vehicleRepo.calculatePrice(data);
   }
 }

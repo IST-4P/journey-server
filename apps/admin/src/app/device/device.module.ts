@@ -3,6 +3,7 @@ import { Module } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { ClientsModule, Transport } from '@nestjs/microservices';
 import { join } from 'path';
+import { CategoryController } from './category.controller';
 import { ComboController, DeviceController } from './device.controller';
 import { DeviceService } from './device.service';
 
@@ -25,7 +26,7 @@ import { DeviceService } from './device.service';
       },
     ]),
   ],
-  controllers: [DeviceController, ComboController],
+  controllers: [DeviceController, ComboController, CategoryController],
   providers: [
     DeviceService,
     {

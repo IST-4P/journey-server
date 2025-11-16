@@ -15,8 +15,8 @@ export const PaymentValidator = z.object({
   updatedAt: z.coerce.date().optional(),
 });
 
-export const PaymentTransactionValidator = z.object({
-  id: z.string().uuid(),
+export const TransactionValidator = z.object({
+  id: z.number(),
   gateway: z.string(),
   transactionDate: z.date(),
   accountNumber: z.string().nullable(),
@@ -34,16 +34,18 @@ export const PaymentTransactionValidator = z.object({
 export const RefundValidator = z.object({
   id: z.string().uuid(),
   userId: z.string().uuid(),
-  paymentId: z.string().uuid(),
   bookingId: z.string().uuid().nullable(),
   rentalId: z.string().uuid().nullable(),
+  principal: z.number().min(0),
   amount: z.number().min(0),
-  penaltyAmount: z.number().min(0).optional(),
+  penaltyAmount: z.number().min(0),
+  damageAmount: z.number().min(0),
+  overtimeAmount: z.number().min(0),
   status: RefundStatusEnum,
   createdAt: z.coerce.date(),
   updatedAt: z.coerce.date().optional(),
 });
 
 export type Payment = z.infer<typeof PaymentValidator>;
-export type PaymentTransaction = z.infer<typeof PaymentTransactionValidator>;
+export type Transaction = z.infer<typeof TransactionValidator>;
 export type Refund = z.infer<typeof RefundValidator>;

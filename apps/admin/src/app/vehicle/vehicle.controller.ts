@@ -5,6 +5,7 @@ import {
   CreateVehicleRequestDTO,
   DeleteBrandRequestDTO,
   DeleteModelRequestDTO,
+  GetAllModelsRequestDTO,
   GetFeatureRequestDTO,
   GetManyVehiclesRequestDTO,
   GetVehicleRequestDTO,
@@ -13,6 +14,7 @@ import {
   UpdateModelRequestDTO,
   UpdateVehicleRequestDTO,
 } from '@domain/vehicle';
+import { IsPublic } from '@hacmieu-journey/nestjs';
 import {
   Body,
   Controller,
@@ -63,11 +65,13 @@ export class BrandController {
   constructor(private readonly vehicleService: VehicleService) {}
 
   @Get()
+  @IsPublic()
   getAllBrands() {
     return this.vehicleService.getAllBrands({});
   }
 
   @Post()
+  @IsPublic()
   createBrand(@Body() body: CreateBrandRequestDTO) {
     return this.vehicleService.createBrand(body);
   }
@@ -87,11 +91,13 @@ export class BrandController {
 export class ModelController {
   constructor(private readonly vehicleService: VehicleService) {}
   @Get()
-  getAllModels() {
-    return this.vehicleService.getAllModels({});
+  @IsPublic()
+  getAllModels(@Query() query: GetAllModelsRequestDTO) {
+    return this.vehicleService.getAllModels(query);
   }
 
   @Post()
+  @IsPublic()
   createModel(@Body() body: CreateModelRequestDTO) {
     return this.vehicleService.createModel(body);
   }
@@ -112,6 +118,7 @@ export class VehicleController {
   // private readonly logger = new Logger(VehicleController.name);
   constructor(private readonly vehicleService: VehicleService) {}
   @Get()
+  @IsPublic()
   getManyVehicles(@Query() query: GetManyVehiclesRequestDTO) {
     return this.vehicleService.getManyVehicles(query);
   }
@@ -122,13 +129,14 @@ export class VehicleController {
   }
 
   @Post()
+  @IsPublic()
   createVehicle(@Body() body: CreateVehicleRequestDTO) {
     return this.vehicleService.createVehicle(body);
   }
 
   @Put(':id')
   updateVehicle(
-    @Body() body: UpdateVehicleRequestDTO,
+    @Body() body: Omit<UpdateVehicleRequestDTO, 'id'>,
     @Param('id') id: string
   ) {
     return this.vehicleService.updateVehicle({ ...body, id });

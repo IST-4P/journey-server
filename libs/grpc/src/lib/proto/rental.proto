@@ -1,6 +1,5 @@
 syntax = "proto3";
 
-import "user.proto";
 import "device.proto";
 
 package rental;
@@ -17,12 +16,14 @@ service RentalService {
   rpc GetAllRentals(GetAllRentalsRequest) returns (GetAllRentalsAdminResponse);
   rpc UpdateRental(UpdateRentalRequest) returns (RentalResponse);
   rpc DeleteRental(DeleteRentalRequest) returns (DeleteRentalResponse);
+  rpc GetHistoryRental(GetHistoryRentalRequest) returns (GetHistoryRentalResponse);
 
   // Extensions: Rental time extension
   rpc CreateRentalExtension(CreateRentalExtensionRequest) returns (RentalResponse);
   rpc GetRentalExtensions(GetRentalExtensionsRequest) returns (GetRentalExtensionsResponse);
 
-
+  // Debug: Test NATS connection
+  rpc PublishDebugEvent(PublishDebugEventRequest) returns (PublishDebugEventResponse);
 }
 
 
@@ -72,17 +73,18 @@ message RentalResponse {
   string userId = 2;
   repeated RentalItemDetail items = 3;
   string status = 4;
-  double rentalFee = 5;
-  double deposit = 6;
+  double rentalFee = 5; // Total item value (sum of all items before discount)
+  double deposit = 6; // 20% of total price (paid upfront)
   double maxDiscount = 7; // Max discount amount in VND that can be deducted
-  double totalPrice = 8; 
+  double totalPrice = 8; // (RentalFee - Discount) × 1.1 (including VAT 10%)
   int32 totalQuantity = 9; 
-  double VAT = 10; // VAT percentage (e.g., 10 for 10%)
+  double remainingAmount = 10; // 80% of total price (paid on pickup)
   string startDate = 11;
   string endDate = 12;
   string createdAt = 13;
   optional string actualEndDate = 14;
   double discountPercent = 15; // Discount percentage applied
+  optional string reviewId = 16; // Review ID if user has reviewed this rental
 }
 
 // User: Create Rental
@@ -91,8 +93,8 @@ message CreateRentalRequest {
   repeated RentalItem items = 2; // Multiple items allowed (devices and/or combos)
   string startDate = 3;
   string endDate = 4;
-  double discountPercent = 5; // Discount percentage (e.g., 10 for 10%)
-  double maxDiscount = 6; // Maximum discount amount in VND
+  optional double discountPercent = 5; // Discount percentage (e.g., 10 for 10%)
+  optional double maxDiscount = 6; // Maximum discount amount in VND
 }
 
 // User: Get My Rentals
@@ -105,14 +107,13 @@ message GetMyRentalsRequest {
 
 message UserRental {
   string id = 1;
-  repeated RentalItemDetail items = 2;
-  double totalPrice = 3;
-  double maxDiscount = 4; 
-  string status = 5;
-  string startDate = 6;
-  string endDate = 7;
-  string createdAt = 8;
-  double discountPercent = 9; 
+  double totalPrice = 2;
+  string status = 3;
+  string startDate = 4;
+  string endDate = 5;
+  string createdAt = 6;
+  double discountPercent = 7;
+  optional string reviewId = 8; // Review ID if user has reviewed this rental
 }
 
 message GetMyRentalsResponse {
@@ -170,20 +171,19 @@ message RentalExtensionMessage {
   string id = 1;
   string rentalId = 2;
   string newEndDate = 3; // ISO string
-  double additionalFee = 4;
-  double additionalHours = 5;
+  int32 additionalDays = 4;
+  double totalPrice = 5; // Extension total price 
   string requestedBy = 6; // userId
   string createdAt = 7;
   string notes = 8;
+  string status = 9; // PENDING, APPROVED, REJECTED
 }
 
 message CreateRentalExtensionRequest {
   string rentalId = 1;
-  string requestedBy = 2;
+  optional string requestedBy = 2;
   string newEndDate = 3;
-  double additionalFee = 4;
-  double additionalHours = 5;
-  optional string notes = 6;
+  optional string notes = 4;
 }
 
 message GetRentalExtensionsRequest {
@@ -209,4 +209,36 @@ message DeleteRentalRequest {
 
 message DeleteRentalResponse {
   string message = 1;
+}
+
+// =============================
+// Rental History messages
+// =============================
+
+message RentalHistoryMessage {
+  string id = 1;
+  string rentalId = 2;
+  string oldStatus = 3;
+  string newStatus = 4;
+  string changedAt = 5; // ISO string
+  optional string notes = 6;
+}
+
+message GetHistoryRentalRequest {
+  string rentalId = 1;
+}
+
+message GetHistoryRentalResponse {
+  repeated RentalHistoryMessage histories = 1;
+}
+
+// Debug: Publish debug event to NATS
+message PublishDebugEventRequest {
+  string message = 1;
+  optional string rentalId = 2;
+}
+
+message PublishDebugEventResponse {
+  bool success = 1;
+  string message = 2;
 }

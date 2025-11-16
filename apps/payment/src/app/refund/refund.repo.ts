@@ -4,27 +4,24 @@ import {
   GetRefundRequest,
   UpdateRefundStatusRequest,
 } from '@domain/payment';
-import { NatsClient } from '@hacmieu-journey/nats';
 import { Injectable } from '@nestjs/common';
+import { GetRefundAdminRequest } from 'libs/grpc/src/lib/types/proto/payment';
 import { PrismaService } from '../prisma/prisma.service';
 
 @Injectable()
 export class RefundRepository {
-  constructor(
-    private readonly prismaService: PrismaService,
-    private readonly natsClient: NatsClient
-  ) {}
+  constructor(private readonly prismaService: PrismaService) {}
 
-  async getManyRefunds(data: GetManyRefundsRequest) {
-    const skip = (data.page - 1) * data.limit;
-    const take = data.limit;
+  async getManyRefunds({ page, limit, ...where }: GetManyRefundsRequest) {
+    const skip = (page - 1) * limit;
+    const take = limit;
 
     const [totalItems, refunds] = await Promise.all([
       this.prismaService.refund.count({
-        where: data,
+        where,
       }),
       this.prismaService.refund.findMany({
-        where: data,
+        where,
         skip,
         take,
       }),
@@ -32,14 +29,20 @@ export class RefundRepository {
 
     return {
       refunds,
-      page: data.page,
-      limit: data.limit,
+      page,
+      limit,
       totalItems,
-      totalPages: Math.ceil(totalItems / take),
+      totalPages: Math.ceil(totalItems / limit),
     };
   }
 
   async getRefund(data: GetRefundRequest) {
+    return this.prismaService.refund.findUnique({
+      where: data,
+    });
+  }
+
+  async getRefundAdmin(data: GetRefundAdminRequest) {
     return this.prismaService.refund.findUnique({
       where: data,
     });

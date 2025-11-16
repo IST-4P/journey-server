@@ -1,4 +1,7 @@
-import { GetAllProfilesRequest } from '@domain/user';
+import {
+  GetAllProfilesRequest,
+  GetFullNameAndAvatarRequest,
+} from '@domain/user';
 import { Injectable } from '@nestjs/common';
 import { Prisma } from '@prisma-clients/user';
 import { PrismaService } from '../prisma/prisma.service';
@@ -69,5 +72,21 @@ export class ProfileRepository {
       where: { id: userId },
       data,
     });
+  }
+
+  async getAllUserIds() {
+    const profiles = await this.prisma.profile.findMany({
+      select: { id: true },
+    });
+    const userIds = profiles.map((profile) => profile.id);
+    return { userIds };
+  }
+
+  async getFullNameAndAvatar(data: GetFullNameAndAvatarRequest) {
+    const users = await this.prisma.profile.findMany({
+      where: { id: { in: data.userIds } },
+      select: { id: true, fullName: true, avatarUrl: true },
+    });
+    return { users };
   }
 }

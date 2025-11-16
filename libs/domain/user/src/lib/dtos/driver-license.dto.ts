@@ -5,6 +5,7 @@ import {
   GetDriverLicenseRequestSchema,
   GetDriverLicenseResponseSchema,
   UpdateDriverLicenseRequestSchema,
+  VerifyDriverLicenseRequestSchema,
 } from '../models';
 
 export class GetDriverLicenseRequestDTO extends createZodDto(
@@ -25,5 +26,10 @@ export class UpdateDriverLicenseRequestDTO extends createZodDto(
     dateOfBirth: z.string().datetime().optional(),
     issueDate: z.string().datetime().optional(),
     expiryDate: z.string().datetime().optional(),
+  })
+) {}
+export class VerifyDriverLicenseRequestDTO extends createZodDto(
+  VerifyDriverLicenseRequestSchema.extend({
+    rejectedReason: z.string().optional(),
   })
 ) {}

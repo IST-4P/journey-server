@@ -2,10 +2,14 @@ import { createZodDto } from 'nestjs-zod';
 import {
   CreateBrandRequestSchema,
   DeleteBrandRequestSchema,
+  GetAllBrandsRequestSchema,
   GetAllBrandsResponseSchema,
   UpdateBrandRequestSchema,
 } from '../models';
 
+export class GetAllBrandsRequestDTO extends createZodDto(
+  GetAllBrandsRequestSchema
+) {}
 export class GetAllBrandsResponseDTO extends createZodDto(
   GetAllBrandsResponseSchema
 ) {}

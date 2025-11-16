@@ -34,7 +34,7 @@ export class RentalController {
 
   @Post()
   createRental(
-    @Body() body: CreateRentalRequestDTO,
+    @Body() body: Omit<CreateRentalRequestDTO, 'userId'>,
     @ActiveUser('userId') userId: string
   ) {
     return this.rentalService.createRental({
@@ -52,20 +52,20 @@ export class RentalController {
   }
 }
 
-@Controller('extension')
+@Controller('rental-extension')
 export class ExtensionController {
   // private readonly logger = new Logger(ExtensionController.name);
 
   constructor(private readonly rentalService: RentalService) {}
 
-  @Get(':id')
+  @Get(':rentalId')
   getRentalExtensions(@Param() params: GetRentalExtensionsRequestDTO) {
     return this.rentalService.getRentalExtensions(params);
   }
 
   @Post()
   createRentalExtension(
-    @Body() body: CreateRentalExtensionRequestDTO,
+    @Body() body: Omit<CreateRentalExtensionRequestDTO, 'requestedBy'>,
     @ActiveUser('userId') userId: string
   ) {
     return this.rentalService.createRentalExtension({

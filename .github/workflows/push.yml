@@ -2,7 +2,9 @@ name: CI/CD
 
 on:
   push:
-    branches: [service]
+    branches:
+      - rental
+      - service
   pull_request:
 
 permissions:

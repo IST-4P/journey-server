@@ -17,6 +17,94 @@ service DeviceService {
   rpc CreateCombo(CreateComboRequest) returns (GetComboResponse);
   rpc UpdateCombo(UpdateComboRequest) returns (GetComboResponse);
   rpc DeleteCombo(DeleteComboRequest) returns (DeleteComboResponse);
+
+  // Category
+  rpc GetCategory(GetCategoryRequest) returns (GetCategoryResponse);
+  rpc GetManyCategories(GetManyCategoriesRequest) returns (GetManyCategoriesResponse);
+  rpc CreateCategory(CreateCategoryRequest) returns (CreateCategoryResponse);
+  rpc UpdateCategory(UpdateCategoryRequest) returns (UpdateCategoryResponse);
+  rpc DeleteCategory(DeleteCategoryRequest) returns (DeleteCategoryResponse);
+  
+}
+// ============================================
+// CATEGORY MESSAGES
+// ============================================
+
+
+// GetCategory
+message GetCategoryRequest {
+  string categoryId = 1;
+}
+
+message GetCategoryResponse {
+  string id = 1;
+  string name = 2;
+  string logoUrl = 3;
+  string createdAt = 4;
+  string updatedAt = 5;
+}
+
+// GetManyCategories
+message GetManyCategoriesRequest {
+  int32 page = 1;
+  int32 limit = 2;
+  optional string search = 3;
+  optional string sortBy = 4;
+  optional string sortDir = 5;
+}
+
+message ManyCategories {
+  string id = 1;
+  string name = 2;
+  string logoUrl = 3;
+  string createdAt = 4;
+  string updatedAt = 5;
+}
+
+message GetManyCategoriesResponse {
+  repeated ManyCategories categories = 1;
+  int32 page = 2;
+  int32 limit = 3;
+  int32 totalItems = 4;
+  int32 totalPages = 5;
+}
+
+// CreateCategory
+message CreateCategoryRequest {
+  string name = 1;
+  string logoUrl = 2;
+}
+
+message CreateCategoryResponse {
+  string id = 1;
+  string name = 2;
+  string logoUrl = 3;
+  string createdAt = 4;
+  string updatedAt = 5;
+}
+
+// UpdateCategory
+message UpdateCategoryRequest {
+  string categoryId = 1;
+  optional string name = 2;
+  optional string logoUrl = 3;
+}
+
+message UpdateCategoryResponse {
+  string id = 1;
+  string name = 2;
+  string logoUrl = 3;
+  string createdAt = 4;
+  string updatedAt = 5;
+}
+
+// DeleteCategory
+message DeleteCategoryRequest {
+  string categoryId = 1;
+}
+
+message DeleteCategoryResponse {
+  string message = 1;
 }
 
 // GetDevice
@@ -37,6 +125,7 @@ message GetDeviceResponse {
   string categoryName = 10;
   string createdAt = 11;
   string updatedAt = 12;
+  string brand = 13;
 }
 
 // GetManyDevices (User)
@@ -46,6 +135,7 @@ message GetManyDevicesRequest {
   optional string status = 3;
   optional string search = 4;
   optional string categoryId = 5;
+  optional string brand = 6;
 }
 
 message GetManyDevices {
@@ -58,6 +148,7 @@ message GetManyDevices {
   repeated string images = 7;
   string categoryName = 8;
   string id = 9;
+  string brand = 10;
 }
 
 message GetManyDevicesResponse {
@@ -82,6 +173,7 @@ message GetManyDevicesAdmin {
   string categoryName = 10;
   string createdAt = 11;
   string updatedAt = 12;
+  string brand = 13;
 }
 
 message GetManyDevicesAdminResponse {
@@ -102,6 +194,7 @@ message CreateDeviceRequest {
   repeated string information = 6;
   repeated string images = 7;
   string categoryId = 8;
+  string brand = 9;
 }
 
 // UpdateDevice
@@ -115,6 +208,7 @@ message UpdateDeviceRequest {
   repeated string information = 7;
   repeated string images = 8;
   optional string categoryId = 9;
+  optional string brand = 10;
 }
 
 // DeleteDevice

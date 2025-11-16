@@ -1,7 +1,10 @@
 import { NatsModule } from '@hacmieu-journey/nats';
 import { Module } from '@nestjs/common';
+import {
+  NotificationCreatedConsumer,
+  NotificationRegisterConsumer,
+} from './consumer';
 import { NotificationGrpcController } from './notification-grpc.controller';
-import { NotificationConsumer } from './notification.consumer';
 import { NotificationRepository } from './notification.repo';
 import { NotificationService } from './notification.service';
 
@@ -10,7 +13,8 @@ import { NotificationService } from './notification.service';
   providers: [
     NotificationService,
     NotificationRepository,
-    NotificationConsumer,
+    NotificationRegisterConsumer,
+    NotificationCreatedConsumer,
   ],
   controllers: [NotificationGrpcController],
 })

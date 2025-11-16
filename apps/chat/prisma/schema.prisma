@@ -9,10 +9,47 @@ datasource db {
     url      = env("DATABASE_URL")
 }
 
+enum ComplaintStatus {
+    OPEN
+    IN_PROGRESS
+    CLOSED
+}
+
+enum ComplaintMessageType {
+    TEXT
+    IMAGE
+}
+
 model Chat {
     id         String   @id @default(uuid())
     fromUserId String
     toUserId   String
     content    String
     createdAt  DateTime @default(now())
+}
+
+model Complaint {
+    id        String             @id @default(uuid())
+    userId    String
+    title     String
+    status    ComplaintStatus    @default(OPEN)
+    createdAt DateTime           @default(now())
+    updatedAt DateTime           @updatedAt
+    messages  ComplaintMessage[]
+
+    @@index([userId])
+    @@index([status])
+}
+
+model ComplaintMessage {
+    id          String               @id @default(uuid())
+    complaintId String
+    senderId    String
+    messageType ComplaintMessageType
+    content     String // Text content hoặc image URL
+    createdAt   DateTime             @default(now())
+    complaint   Complaint            @relation(fields: [complaintId], references: [id], onDelete: Cascade)
+
+    @@index([complaintId])
+    @@index([senderId])
 }

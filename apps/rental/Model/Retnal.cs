@@ -6,20 +6,21 @@ namespace rental.Model.Entities
     [Table("rentals")]
     public class Rental
     {
+
         public Guid Id { get; set; } = Guid.NewGuid();
         public Guid UserId { get; set; }
 
-        // [{ "targetId": "guid", "isCombo": bool, "quantity": int }]
         // Multiple items allowed per rental
         public string Items { get; set; } = "[]";
 
         //chi phí
-        public double RentalFee { get; set; }
-        public double? Deposit { get; set; } // Deposit based on device/combo prices and quantities
-        public double DiscountPercent { get; set; } = 0; // Discount percentage (e.g., 10 for 10%)
+        public double RentalFee { get; set; } // Tổng giá trị thuê (sum of all items)
+        public double? Deposit { get; set; } // 20% of RentalFee
+        public double? RemainingAmount { get; set; } // 80% of RentalFee (paid on pickup)
+        public double DiscountPercent { get; set; } = 0; // Discount percentage 
         public double MaxDiscount { get; set; } = 0; // Maximum discount amount in VND
 
-        public double TotalPrice { get; set; } // Total price (for reference only)
+        public double TotalPrice { get; set; } // = RentalFee (total amount to pay)
         public int TotalQuantity { get; set; }
 
         //trạng thái
@@ -44,16 +45,17 @@ namespace rental.Model.Entities
         public ICollection<RentalHistory>? History { get; set; }
     }
 
-    public class RentalExtension //      gia hạn
+    public class RentalExtension //gia hạn
     {
         public Guid Id { get; set; } = Guid.NewGuid();
         public DateTime? NewEndDate { get; set; }
-        public double? AdditionalFee { get; set; }
-        public double? AdditionalHours { get; set; }
+        public double? TotalPrice { get; set; } // Extension total price (calculated like rental)
+        public int? AdditionalDays { get; set; }
         public Guid? RequestedBy { get; set; } // UserId người yêu cầu gia hạn
         public DateTime? CreatedAt { get; set; } = DateTime.UtcNow;
         public string? Notes { get; set; }
         public Guid? RentalId { get; set; }
+        public ExtensionStatus Status { get; set; }
     }
 
     // Helper class for JSON serialization of rental items
@@ -78,13 +80,20 @@ namespace rental.Model.Entities
         public Rental? Rental { get; set; }
     }
 
+    public enum ExtensionStatus
+    {
+        PENDING,  // Chờ duyệt
+        APPROVED, // Đã duyệt
+        REJECTED // Đã từ chối
+    }
 
     public enum RentalStatus
     {
         PENDING, // Chờ thanh toán deposit
-        PAID, // Đã thanh toán deposit, chờ nhận hàng
-        ONGOING, // Đang thuê 
-        COMPLETED, // Hoàn thành (đã trả)
+        PAID, // Đã thanh toán deposit (20%), chờ nhận hàng
+        RECEIVED, // Đã nhận hàng và thanh toán phần còn lại (80%), đang thuê
+        ONGOING, // Đang thuê (alias for RECEIVED)
+        COMPLETED, // Hoàn thành (đã trả hàng)
         CANCELLED, // Đã hủy (có thể hoàn deposit)
         EXPIRED // Hết hạn (quá thời gian không thanh toán)
     }

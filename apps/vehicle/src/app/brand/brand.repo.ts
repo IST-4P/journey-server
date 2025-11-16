@@ -1,6 +1,7 @@
 import {
   CreateBrandRequest,
   DeleteBrandRequest,
+  GetAllBrandsRequest,
   GetBrandRequest,
   UpdateBrandRequest,
 } from '@domain/vehicle';
@@ -11,8 +12,10 @@ import { PrismaService } from '../prisma/prisma.service';
 export class BrandRepository {
   constructor(private readonly prisma: PrismaService) {}
 
-  getAllBrands() {
-    return this.prisma.vehicleBrand.findMany();
+  getAllBrands(data: GetAllBrandsRequest) {
+    return this.prisma.vehicleBrand.findMany({
+      where: data,
+    });
   }
 
   getBrandByName(data: GetBrandRequest) {

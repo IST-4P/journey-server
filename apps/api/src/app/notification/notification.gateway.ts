@@ -10,7 +10,7 @@ export interface NotificationType {
   userId: string;
   title: string;
   type: string;
-  createdAt: string;
+  content: string;
 }
 
 @WebSocketGateway({ namespace: 'notification' })

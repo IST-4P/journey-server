@@ -17,21 +17,40 @@ namespace rental.Repository
         }
 
         // User: Create rental
-        public async Task<RentalEntity> CreateAsync(RentalEntity rental)
+        public async Task<RentalEntity> CreateAsync(CreateRentalRequestDto rental)
         {
-            _context.Set<RentalEntity>().Add(rental);
+            var entity = new RentalEntity
+            {
+                UserId = rental.UserId,
+                Items = System.Text.Json.JsonSerializer.Serialize(rental.Items),
+                StartDate = rental.StartDate,
+                EndDate = rental.EndDate,
+                Status = RentalStatus.PENDING
+            };
+            _context.Set<RentalEntity>().Add(entity);
             await _context.SaveChangesAsync();
-            return rental;
+            return entity;
         }
 
         // User: Create rental extention
-        public async Task<RentalExtensionEntity> CreateExtensionAsync(RentalExtensionEntity extension)
+        public async Task<RentalExtensionEntity> CreateExtensionAsync(CreateRentalExtensionRequestDto extension)
         {
-            _context.Set<RentalExtensionEntity>().Add(extension);
+            var entity = new RentalExtensionEntity
+            {
+                RentalId = extension.RentalId,
+                NewEndDate = extension.NewEndDate,
+                TotalPrice = extension.TotalPrice,
+                AdditionalDays = extension.AdditionalDays,
+                RequestedBy = extension.RequestedBy,
+                Notes = extension.Notes,
+                Status = ExtensionStatus.PENDING
+            };
+            _context.Set<RentalExtensionEntity>().Add(entity);
             await _context.SaveChangesAsync();
-            return extension;
+            return entity;
         }
 
+        // Get rental extensions by rental ID
         public async Task<List<RentalExtensionEntity>> GetExtensionsByRentalIdAsync(Guid rentalId)
         {
             return await _context.Set<RentalExtensionEntity>()
@@ -98,6 +117,19 @@ namespace rental.Repository
             return await _context.Set<RentalEntity>().FindAsync(id);
         }
 
+        // User: Cancel rental
+        public async Task<RentalEntity?> CancelRentalAsync(Guid id)
+        {
+            var rental = await _context.Set<RentalEntity>().FindAsync(id);
+            if (rental == null) return null;
+
+            rental.Status = RentalStatus.CANCELLED;
+            await _context.SaveChangesAsync();
+            return rental;
+        }
+
+
+
         // Admin: Get all rentals
         public async Task<PagedResult<RentalEntity>> GetAllRentalsAsync(RentalQueryDto query)
         {
@@ -152,17 +184,6 @@ namespace rental.Repository
             };
         }
 
-        // User: Cancel rental
-        public async Task<RentalEntity?> CancelRentalAsync(Guid id)
-        {
-            var rental = await _context.Set<RentalEntity>().FindAsync(id);
-            if (rental == null) return null;
-
-            rental.Status = RentalStatus.CANCELLED;
-            await _context.SaveChangesAsync();
-            return rental;
-        }
-
         // Admin: Update rental
         public async Task<RentalEntity?> UpdateAsync(Guid id, UpdateRentalRequestDto updateDto)
         {
@@ -212,6 +233,12 @@ namespace rental.Repository
                 .Where(h => h.RentalId == rentalId)
                 .OrderBy(h => h.ChangedAt)
                 .ToListAsync();
+        }
+
+        // Save changes to database (used by consumers)
+        public async Task SaveChangesAsync()
+        {
+            await _context.SaveChangesAsync();
         }
     }
 }

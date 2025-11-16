@@ -6,7 +6,7 @@ import {
   GetBlogResponseSchema,
   GetManyBlogsRequestSchema,
   GetManyBlogsResponseSchema,
-  UpdateBlogResponseSchema,
+  UpdateBlogRequestSchema,
 } from '../models';
 
 export class GetManyBlogsRequestDTO extends createZodDto(
@@ -21,7 +21,7 @@ export class CreateBlogRequestDTO extends createZodDto(
   CreateBlogRequestSchema
 ) {}
 export class UpdateBlogRequestDTO extends createZodDto(
-  UpdateBlogResponseSchema.omit({ id: true })
+  UpdateBlogRequestSchema.omit({ id: true })
 ) {}
 export class DeleteBlogRequestDTO extends createZodDto(
   DeleteBlogRequestSchema

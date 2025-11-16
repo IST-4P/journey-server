@@ -6,6 +6,6 @@ export const generateRoomProductId = (productId: string) => {
   return `productId-${productId}`;
 };
 
-export const generateRoomPaymentId = (paymentId: string) => {
-  return `paymentId-${paymentId}`;
+export const generateRoomComplaintId = (complaintId: string) => {
+  return `complaintId-${complaintId}`;
 };

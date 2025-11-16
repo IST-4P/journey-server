@@ -24,6 +24,7 @@ service VehicleService {
   rpc CreateVehicle(CreateVehicleRequest) returns (GetVehicleResponse);
   rpc UpdateVehicle(UpdateVehicleRequest) returns (GetVehicleResponse);
   rpc DeleteVehicle(GetVehicleRequest) returns (MessageResponse);
+  rpc CalculateVehiclePrice(CalculateVehiclePriceRequest) returns (CalculateVehiclePriceResponse);
 }
 // ======================================================== Feature
 // GetFeature
@@ -65,11 +66,14 @@ message UpdateFeatureRequest {
 
 // ======================================================== Brand
 // GetAllBrands
-message GetAllBrandsRequest {}
+message GetAllBrandsRequest {
+  optional string type = 1;
+}
 
 message GetBrandResponse {
   string id = 1;
   string name = 2;
+  string type = 3;
 }
 
 message GetAllBrandsResponse {
@@ -98,12 +102,14 @@ message DeleteBrandRequest {
 // GetAllModels
 message GetAllModelsRequest {
   optional string brandId = 1;
+  optional string type = 2;
 }
 
 message GetModelResponse {
   string id = 1;
   string name = 2;
   string brandId = 3;
+  string type = 4;
 }
 
 message GetAllModelsResponse {
@@ -275,4 +281,17 @@ message UpdateVehicleRequest {
 
 message MessageResponse {
   string message = 1;
+}
+
+message CalculateVehiclePriceRequest {
+  string vehicleId = 1;
+  int32 hours = 2;
+}
+
+message CalculateVehiclePriceResponse {
+  int32 rentalFee = 1;
+  int32 insuranceFee = 2;
+  int32 vat = 3;
+  int32 totalAmount = 4;
+  int32 deposit = 5;
 }

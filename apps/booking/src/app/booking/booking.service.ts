@@ -3,6 +3,7 @@ import {
   CreateBookingRequest,
   GetBookingRequest,
   GetManyBookingsRequest,
+  GetVehicleNamesByBookingIdsRequest,
   UpdateStatusBookingRequest,
 } from '@domain/booking';
 import { Injectable, Logger } from '@nestjs/common';
@@ -39,13 +40,14 @@ export class BookingService {
   }
 
   async updateStatusBooking(data: UpdateStatusBookingRequest) {
-    const booking = await this.bookingRepository.getBooking({
-      id: data.id,
-      userId: data.userId,
-    });
-    if (!booking) {
-      throw BookingNotFoundException;
-    }
     return this.bookingRepository.updateStatusBooking(data);
+  }
+
+  async getInformationBooking() {
+    return this.bookingRepository.getInformationBooking();
+  }
+
+  async getVehicleNamesByBookingIds(data: GetVehicleNamesByBookingIdsRequest) {
+    return this.bookingRepository.getVehicleNamesByBookingIds(data);
   }
 }

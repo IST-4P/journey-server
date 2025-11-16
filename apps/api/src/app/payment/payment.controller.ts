@@ -1,6 +1,8 @@
 import {
   GetManyPaymentsRequestDTO,
+  GetManyRefundsRequestDTO,
   GetPaymentRequestDTO,
+  GetRefundRequestDTO,
   WebhookPaymentRequestDTO,
 } from '@domain/payment';
 import { ActiveUser, Auth, AuthType } from '@hacmieu-journey/nestjs';
@@ -29,9 +31,32 @@ export class PaymentController {
 
   @Get(':id')
   getPayment(
-    @Param() params: GetPaymentRequestDTO,
+    @Param() params: Omit<GetPaymentRequestDTO, 'userId'>,
     @ActiveUser('userId') userId: string
   ) {
     return this.paymentService.getPayment({ ...params, userId });
+  }
+}
+
+@Controller('refund')
+export class RefundController {
+  // private readonly logger = new Logger(RefundController.name);
+
+  constructor(private readonly paymentService: PaymentService) {}
+
+  @Get()
+  getManyRefunds(
+    @Query() query: GetManyRefundsRequestDTO,
+    @ActiveUser('userId') userId: string
+  ) {
+    return this.paymentService.getManyRefunds({ ...query, userId });
+  }
+
+  @Get(':id')
+  getRefund(
+    @Param() params: Omit<GetRefundRequestDTO, 'userId'>,
+    @ActiveUser('userId') userId: string
+  ) {
+    return this.paymentService.getRefund({ ...params, userId });
   }
 }

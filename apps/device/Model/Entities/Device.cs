@@ -7,7 +7,7 @@ namespace device.Model.Entities
     {
         public Guid Id { get; set; }
         public required string Name { get; set; }
-        public string? Brand {get;set;}
+        public string? Brand { get; set; }
         public string? Description { get; set; }
         public required double Price { get; set; }
         public List<string>? Information { get; set; }
@@ -30,7 +30,7 @@ namespace device.Model.Entities
     {
         public Guid Id { get; set; }
         public required string Name { get; set; }
-        public string? LogoUrl { get; set; }
+        public required string LogoUrl { get; set; }
 
         public DateTime CreateAt { get; set; } = DateTime.UtcNow;
         public DateTime UpdateAt { get; set; } = DateTime.UtcNow;
@@ -68,5 +68,11 @@ namespace device.Model.Entities
 
         public int Quantity { get; set; } = 1;
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
+    }
+
+    public enum DeviceStatus
+    {
+        Available,
+        Unavailable
     }
 }

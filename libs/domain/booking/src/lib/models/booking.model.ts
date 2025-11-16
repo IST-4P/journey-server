@@ -13,6 +13,7 @@ export const GetManyBookingsRequestSchema = BookingValidatorSchema.pick({
   userId: true,
   vehicleId: true,
   status: true,
+  vehicleName: true,
 })
   .partial()
   .extend(PaginationQuerySchema.shape);
@@ -28,6 +29,7 @@ export const GetManyBookingsResponseSchema = z.object({
 export const CreateBookingRequestSchema = BookingValidatorSchema.pick({
   userId: true,
   vehicleId: true,
+  vehicleName: true,
   startTime: true,
   endTime: true,
 
@@ -35,30 +37,40 @@ export const CreateBookingRequestSchema = BookingValidatorSchema.pick({
   pickupLat: true,
   pickupLng: true,
 
-  vehicleFeeHour: true,
-  rentalFee: true,
-  insuranceFee: true,
-  vat: true,
-  discount: true,
-  deposit: true,
-
   notes: true,
+}).extend({
+  vehicleFeeHour: z.number().min(0),
+  vehicleFeeDay: z.number().min(0),
 });
 
 export const CancelBookingRequestSchema = BookingValidatorSchema.pick({
   id: true,
-  cancelReason: true,
   userId: true,
 }).extend({
-  cancelDate: z.coerce.date(),
+  cancelReason: z.string(),
 });
 
 export const CancelBookingResponseSchema = GetBookingResponseSchema;
 
 export const UpdateStatusBookingRequestSchema = BookingValidatorSchema.pick({
   id: true,
-  userId: true,
   status: true,
+});
+
+export const GetInformationBookingResponseSchema = z.object({
+  totalBookings: z.number().int(),
+  pendingBookings: z.number().int(),
+  ongoingBookings: z.number().int(),
+  completedBookings: z.number().int(),
+  cancelledBookings: z.number().int(),
+});
+
+export const GetVehicleNamesByBookingIdsRequestSchema = z.object({
+  bookingIds: z.array(z.string()),
+});
+
+export const GetVehicleNamesByBookingIdsResponseSchema = z.object({
+  vehicleNames: z.array(z.string()),
 });
 
 export type GetBookingRequest = z.infer<typeof GetBookingRequestSchema>;
@@ -74,4 +86,13 @@ export type CancelBookingRequest = z.infer<typeof CancelBookingRequestSchema>;
 export type CancelBookingResponse = z.infer<typeof CancelBookingResponseSchema>;
 export type UpdateStatusBookingRequest = z.infer<
   typeof UpdateStatusBookingRequestSchema
+>;
+export type GetInformationBookingResponse = z.infer<
+  typeof GetInformationBookingResponseSchema
+>;
+export type GetVehicleNamesByBookingIdsRequest = z.infer<
+  typeof GetVehicleNamesByBookingIdsRequestSchema
+>;
+export type GetVehicleNamesByBookingIdsResponse = z.infer<
+  typeof GetVehicleNamesByBookingIdsResponseSchema
 >;

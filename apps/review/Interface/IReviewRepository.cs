@@ -31,8 +31,5 @@ namespace review.Interface
         Task<ReviewModel?> GetReviewByBookingIdAsync(Guid bookingId);
         Task<ReviewModel?> GetReviewByRentalIdAsync(Guid rentalId);
 
-        // Check if booking has already been reviewed  
-        Task<bool> HasBookingBeenReviewedAsync(Guid? bookingId);
-        Task<bool> HasRentalBeenReviewedAsync(Guid? rentalId);
     }
 }

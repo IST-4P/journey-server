@@ -1,5 +1,6 @@
 import {
   GetAllProfilesRequest,
+  GetFullNameAndAvatarRequest,
   GetProfileRequest,
   Role,
   UpdateProfileRequest,
@@ -73,5 +74,13 @@ export class ProfileService {
       throw ProfileNotFoundException;
     }
     return this.profileRepo.updateProfile(userId, data);
+  }
+
+  async getAllUserIds() {
+    return this.profileRepo.getAllUserIds();
+  }
+
+  async getFullNameAndAvatar(data: GetFullNameAndAvatarRequest) {
+    return this.profileRepo.getFullNameAndAvatar(data);
   }
 }

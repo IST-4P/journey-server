@@ -10,6 +10,7 @@ import {
   UpdateComboRequestDTO,
   UpdateDeviceRequestDTO,
 } from '@domain/device';
+import { IsPublic } from '@hacmieu-journey/nestjs';
 import {
   Body,
   Controller,
@@ -29,6 +30,7 @@ export class DeviceController {
   constructor(private readonly deviceService: DeviceService) {}
 
   @Get()
+  @IsPublic()
   getManyDevices(@Query() query: GetManyDevicesRequestDTO) {
     return this.deviceService.getManyDevicesAdmin(query);
   }
@@ -39,6 +41,7 @@ export class DeviceController {
   }
 
   @Post()
+  @IsPublic()
   createDevice(@Body() body: CreateDeviceRequestDTO) {
     return this.deviceService.createDevice(body);
   }
@@ -61,16 +64,19 @@ export class ComboController {
   constructor(private readonly deviceService: DeviceService) {}
 
   @Get()
+  @IsPublic()
   getManyCombo(@Query() query: GetManyCombosRequestDTO) {
     return this.deviceService.getManyCombos(query);
   }
 
   @Get(':id')
+  @IsPublic()
   getCombo(@Param() query: GetComboRequestDTO) {
     return this.deviceService.getCombo(query);
   }
 
   @Post()
+  @IsPublic()
   createCombo(@Body() body: CreateComboRequestDTO) {
     return this.deviceService.createCombo(body);
   }

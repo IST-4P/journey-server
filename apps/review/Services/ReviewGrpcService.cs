@@ -2,6 +2,7 @@ using AutoMapper;
 using Grpc.Core;
 using review.Interface;
 using review.Model.Dto;
+using review.Nats;
 using ReviewModel = review.Model.Review;
 using ReviewType = review.Model.ReviewType;
 using ProtoReviewType = Review.ReviewType;
@@ -13,13 +14,14 @@ namespace review.Services
         private readonly IReviewService _reviewService;
         private readonly IMapper _mapper;
         private readonly ILogger<ReviewGrpcService> _logger;
+        private readonly NatsPublisher _natsPublisher;
 
-
-        public ReviewGrpcService(IReviewService reviewService, IMapper mapper, ILogger<ReviewGrpcService> logger)
+        public ReviewGrpcService(IReviewService reviewService, IMapper mapper, ILogger<ReviewGrpcService> logger, NatsPublisher natsPublisher)
         {
             _reviewService = reviewService;
             _mapper = mapper;
             _logger = logger;
+            _natsPublisher = natsPublisher;
         }
 
         public override async Task<Review.ReviewResponse> CreateReview(Review.CreateReviewRequest request, ServerCallContext context)
@@ -40,6 +42,26 @@ namespace review.Services
 
                 var review = await _reviewService.CreateReviewAsync(dto);
                 var protoReview = _mapper.Map<Review.Review>(review);
+
+                // Publish review.created event to NATS
+                try
+                {
+                    var reviewCreatedEvent = new review.Nats.Events.ReviewCreatedEvent
+                    {
+                        reviewId = review.Id.ToString(),
+                        bookingId = review.BookingId?.ToString(),
+                        rentalId = review.RentalId?.ToString(),
+                        vehicleId = review.VehicleId?.ToString(),
+                        deviceId = review.DeviceId?.ToString(),
+                        comboId = review.ComboId?.ToString(),
+                        rating = review.Rating
+                    };
+                    await _natsPublisher.PublishAsync("journey.events.review.created", reviewCreatedEvent);
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogWarning(ex, "Failed to publish review.created event for review {ReviewId}", review.Id);
+                }
 
                 return new Review.ReviewResponse
                 {
@@ -75,6 +97,24 @@ namespace review.Services
                 var review = await _reviewService.UpdateReviewAsync(dto);
                 var protoReview = _mapper.Map<Review.Review>(review);
 
+                // Publish review.updated event to NATS
+                try
+                {
+                    var reviewUpdatedEvent = new review.Nats.Events.ReviewUpdatedEvent
+                    {
+                        ReviewId = review.Id.ToString(),
+                        Rating = review.Rating,
+                        Title = review.Title,
+                        Content = review.Content,
+                        UpdatedAt = DateTime.UtcNow.ToString("O")
+                    };
+                    await _natsPublisher.PublishAsync("journey.events.review.updated", reviewUpdatedEvent);
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogWarning(ex, "Failed to publish review.updated event for review {ReviewId}", review.Id);
+                }
+
                 return new Review.ReviewResponse
                 {
                     Review = protoReview,
@@ -99,7 +139,31 @@ namespace review.Services
                 var reviewId = Guid.Parse(request.ReviewId);
                 var userId = Guid.Parse(request.UserId);
 
+                // Get review before deletion for event publishing
+                var review = await _reviewService.GetReviewByIdAsync(reviewId);
+
                 var success = await _reviewService.DeleteReviewAsync(reviewId, userId);
+
+                // Publish review.deleted event to NATS
+                if (success && review != null)
+                {
+                    try
+                    {
+                        var reviewDeletedEvent = new review.Nats.Events.ReviewDeletedEvent
+                        {
+                            ReviewId = reviewId.ToString(),
+                            DeviceId = review.DeviceId?.ToString(),
+                            VehicleId = review.VehicleId?.ToString(),
+                            ComboId = review.ComboId?.ToString(),
+                            DeletedAt = DateTime.UtcNow.ToString("O")
+                        };
+                        await _natsPublisher.PublishAsync("journey.events.review.deleted", reviewDeletedEvent);
+                    }
+                    catch (Exception ex)
+                    {
+                        _logger.LogWarning(ex, "Failed to publish review.deleted event for review {ReviewId}", reviewId);
+                    }
+                }
 
                 return new Review.DeleteReviewResponse
                 {
@@ -161,7 +225,7 @@ namespace review.Services
                 var pagedResult = await _reviewService.GetMyReviewsAsync(userId, query);
                 if (pagedResult == null)
                 {
-                    throw new RpcException(new Status(StatusCode.NotFound, "Not found"));
+                    throw new RpcException(new Status(StatusCode.NotFound, "GetMyReviews not found"));
                 }
                 var response = new Review.GetMyReviewsResponse
                 {
@@ -201,7 +265,7 @@ namespace review.Services
                 var pagedResult = await _reviewService.GetReviewsByVehicleIdAsync(vehicleId, query);
                 if (pagedResult == null)
                 {
-                    throw new RpcException(new Status(StatusCode.NotFound, "Not found"));
+                    throw new RpcException(new Status(StatusCode.NotFound, "VehicleReviews not found"));
                 }
                 var response = new Review.GetReviewsResponse
                 {
@@ -242,7 +306,7 @@ namespace review.Services
 
                 if (pagedResult == null)
                 {
-                    throw new RpcException(new Status(StatusCode.NotFound, "Not found"));
+                    throw new RpcException(new Status(StatusCode.NotFound, "DeviceReviews not found"));
                 }
                 var response = new Review.GetReviewsResponse
                 {
@@ -282,7 +346,7 @@ namespace review.Services
                 var pagedResult = await _reviewService.GetReviewsByComboIdAsync(comboId, query);
                 if (pagedResult == null)
                 {
-                    throw new RpcException(new Status(StatusCode.NotFound, "Not found"));
+                    throw new RpcException(new Status(StatusCode.NotFound, "ComboReviews not found"));
                 }
                 var response = new Review.GetReviewsResponse
                 {
@@ -324,7 +388,10 @@ namespace review.Services
                     request.SortBy, request.SortOrder, type);
 
                 var pagedResult = await _reviewService.GetAllReviewsAsync(query, type);
-
+                if (pagedResult == null)
+                {
+                    throw new RpcException(new Status(StatusCode.NotFound, "AllReviews not found"));
+                }
                 var response = new Review.GetReviewsResponse
                 {
                     Page = pagedResult.Page,
@@ -374,6 +441,105 @@ namespace review.Services
             {
                 _logger.LogError(ex, "Error.AdminDeletingReview");
                 throw new RpcException(new Status(StatusCode.Internal, "An error occurred while deleting the review"));
+            }
+        }
+
+        public override async Task<Review.RatingStatsResponse> GetVehicleRatingStats(Review.GetRatingStatsRequest request, ServerCallContext context)
+        {
+            try
+            {
+                var vehicleId = Guid.Parse(request.TargetId);
+                var stats = await _reviewService.GetVehicleRatingStatsAsync(vehicleId);
+                if (stats == null)
+                {
+                    throw new RpcException(new Status(StatusCode.NotFound, " VehicleRating not found"));
+                }
+                return new Review.RatingStatsResponse
+                {
+                    Stats = new Review.RatingStats
+                    {
+                        TargetId = stats.TargetId.ToString(),
+                        Type = Review.ReviewType.Vehicle,
+                        AverageRating = stats.AverageRating,
+                        TotalReviews = stats.TotalReviews
+                    },
+                    Message = "Successfully retrieved vehicle rating statistics"
+                };
+            }
+            catch (RpcException)
+            {
+                throw;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error getting vehicle rating stats for {VehicleId}", request.TargetId);
+                throw new RpcException(new Status(StatusCode.Internal, "An error occurred while retrieving vehicle rating statistics"));
+            }
+        }
+
+        public override async Task<Review.RatingStatsResponse> GetDeviceRatingStats(Review.GetRatingStatsRequest request, ServerCallContext context)
+        {
+            try
+            {
+                var deviceId = Guid.Parse(request.TargetId);
+                var stats = await _reviewService.GetDeviceRatingStatsAsync(deviceId);
+                if (stats == null)
+                {
+                    throw new RpcException(new Status(StatusCode.NotFound, " DeviceRating not found"));
+                }
+                return new Review.RatingStatsResponse
+                {
+                    Stats = new Review.RatingStats
+                    {
+                        TargetId = stats.TargetId.ToString(),
+                        Type = Review.ReviewType.Device,
+                        AverageRating = stats.AverageRating,
+                        TotalReviews = stats.TotalReviews
+                    },
+                    Message = "Successfully retrieved device rating statistics"
+                };
+            }
+            catch (RpcException)
+            {
+                throw;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error getting device rating stats for {DeviceId}", request.TargetId);
+                throw new RpcException(new Status(StatusCode.Internal, "An error occurred while retrieving device rating statistics"));
+            }
+        }
+
+        public override async Task<Review.RatingStatsResponse> GetComboRatingStats(Review.GetRatingStatsRequest request, ServerCallContext context)
+        {
+            try
+            {
+                var comboId = Guid.Parse(request.TargetId);
+                var stats = await _reviewService.GetComboRatingStatsAsync(comboId);
+                if (stats == null)
+                {
+                    throw new RpcException(new Status(StatusCode.NotFound, " ComboRating not found"));
+                }
+                return new Review.RatingStatsResponse
+                {
+                    Stats = new Review.RatingStats
+                    {
+                        TargetId = stats.TargetId.ToString(),
+                        Type = Review.ReviewType.Combo,
+                        AverageRating = stats.AverageRating,
+                        TotalReviews = stats.TotalReviews
+                    },
+                    Message = "Successfully retrieved combo rating statistics"
+                };
+            }
+            catch (RpcException)
+            {
+                throw;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error getting combo rating stats for {ComboId}", request.TargetId);
+                throw new RpcException(new Status(StatusCode.Internal, "An error occurred while retrieving combo rating statistics"));
             }
         }
 

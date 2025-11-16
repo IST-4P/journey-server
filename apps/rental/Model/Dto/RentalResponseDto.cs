@@ -1,37 +1,32 @@
 using System;
+using System.Collections.Generic;
 
 namespace rental.Model.Dto
 {
-    // Response for User - basic info with enriched data
+    // Response for User - matches UserRental from Proto
     public class UserRentalDto
     {
         public Guid Id { get; set; }
-        public Guid TargetId { get; set; }
-        public bool IsCombo { get; set; }
-        public string TargetName { get; set; } = string.Empty; // Device or Combo name
-        public double TargetPrice { get; set; }
+        public double TotalPrice { get; set; }
         public string Status { get; set; } = string.Empty;
         public DateTime StartDate { get; set; }
         public DateTime EndDate { get; set; }
         public DateTime CreatedAt { get; set; }
-        public ReviewSummaryDto? Review { get; set; } // Optional - rental may not have review
+        public Guid? ReviewId { get; set; } // Review ID if user has reviewed this rental
     }
 
-    // Response for Admin - full info including UserId with enriched data
+    // Response for Admin - matches AdminRental from Proto
     public class AdminRentalDto
     {
         public Guid Id { get; set; }
         public Guid UserId { get; set; }
-        public string UserName { get; set; } = string.Empty; // User full name
-        public string UserEmail { get; set; } = string.Empty;
-        public Guid TargetId { get; set; }
-        public bool IsCombo { get; set; }
-        public string TargetName { get; set; } = string.Empty; // Device or Combo name
-        public double TargetPrice { get; set; }
+        public double TotalPrice { get; set; }
+        public double MaxDiscount { get; set; }
+        public double DiscountPercent { get; set; }
         public string Status { get; set; } = string.Empty;
         public DateTime StartDate { get; set; }
         public DateTime EndDate { get; set; }
         public DateTime CreatedAt { get; set; }
-        public ReviewSummaryDto? Review { get; set; } // Optional - rental may not have review
     }
+
 }

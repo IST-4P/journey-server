@@ -44,6 +44,7 @@ namespace Blog.Services
                     Type = blog.Type,
                     Region = blog.Region,
                     Tag = blog.Tag,
+                    AuthorId = blog.AuthorId,
                     Thumbnail = blog.Thumbnail,
                     CreatedAt = blog.CreatedAt.ToString("O"),
                     UpdatedAt = blog.UpdatedAt.ToString("O")
@@ -76,7 +77,10 @@ namespace Blog.Services
                 };
 
                 var pagedResult = await _blogRepository.GetBlogsWithFilterAsync(filter);
-
+                if (pagedResult == null)
+                {
+                    throw new RpcException(new Status(StatusCode.NotFound, "Error.NoBlogsFound"));
+                }
                 var response = new GetManyBlogsResponse
                 {
                     Page = pagedResult.Page,
@@ -93,6 +97,7 @@ namespace Blog.Services
                         Title = blog.Title,
                         Type = blog.Type,
                         Region = blog.Region,
+                        AuthorId = blog.AuthorId,
                         Thumbnail = blog.Thumbnail,
                         CreatedAt = blog.CreatedAt.ToString("O"),
                         UpdatedAt = blog.UpdatedAt.ToString("O")
@@ -100,6 +105,10 @@ namespace Blog.Services
                 }
 
                 return response;
+            }
+            catch (RpcException)
+            {
+                throw;
             }
             catch (Exception ex)
             {
@@ -123,6 +132,7 @@ namespace Blog.Services
                     Content = request.Content,
                     Region = request.Region,
                     Tag = request.Tag,
+                    AuthorId = request.AuthorId,
                     Thumbnail = request.Thumbnail,
                     Summary = request.Summary
                 };
@@ -137,6 +147,7 @@ namespace Blog.Services
                     Type = createdBlog.Type,
                     Region = createdBlog.Region,
                     Thumbnail = createdBlog.Thumbnail,
+                    AuthorId = createdBlog.AuthorId,
                     CreatedAt = createdBlog.CreateAt.ToString("O"),
                     UpdatedAt = createdBlog.UpdateAt.ToString("O"),
                     Summary = createdBlog.Summary
@@ -174,6 +185,8 @@ namespace Blog.Services
                     Content = string.IsNullOrEmpty(request.Content) ? null : request.Content,
                     Type = string.IsNullOrEmpty(request.Type) ? null : request.Type,
                     Region = string.IsNullOrEmpty(request.Region) ? null : request.Region,
+                    Tag = string.IsNullOrEmpty(request.Tag) ? null : request.Tag,
+                    AuthorId = string.IsNullOrEmpty(request.AuthorId) ? null : request.AuthorId,
                     Thumbnail = string.IsNullOrEmpty(request.Thumbnail) ? null : request.Thumbnail,
                     Summary = string.IsNullOrEmpty(request.Summary) ? null : request.Summary
                 };
@@ -193,6 +206,8 @@ namespace Blog.Services
                     Type = updatedBlog.Type,
                     Region = updatedBlog.Region,
                     Thumbnail = updatedBlog.Thumbnail,
+                    AuthorId = updatedBlog.AuthorId,
+                    Tag = updatedBlog.Tag,
                     CreatedAt = updatedBlog.CreateAt.ToString("O"),
                     UpdatedAt = updatedBlog.UpdateAt.ToString("O"),
                     Summary = updatedBlog.Summary

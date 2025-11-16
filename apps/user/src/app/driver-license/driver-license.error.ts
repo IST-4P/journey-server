@@ -10,3 +10,8 @@ export const DriverLicenseAlreadyExistsException = new RpcException({
   code: status.ALREADY_EXISTS,
   message: 'Error.DriverLicenseAlreadyExists',
 });
+
+export const LicenseNumberInvalidException = new RpcException({
+  code: status.ALREADY_EXISTS,
+  message: 'Error.LicenseNumberInvalid',
+});

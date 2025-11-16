@@ -1,4 +1,6 @@
 import {
+  CalculateVehiclePriceRequestDTO,
+  GetAllBrandsRequestDTO,
   GetAllModelsRequestDTO,
   GetManyVehiclesRequestDTO,
   GetVehicleRequestDTO,
@@ -24,8 +26,8 @@ export class BrandController {
 
   @Get()
   @IsPublic()
-  getAllBrands() {
-    return this.vehicleService.getAllBrands({});
+  getAllBrands(@Query() query: GetAllBrandsRequestDTO) {
+    return this.vehicleService.getAllBrands(query);
   }
 }
 
@@ -49,9 +51,27 @@ export class VehicleController {
     return this.vehicleService.getManyVehicles(query);
   }
 
+  @Get('price')
+  @IsPublic()
+  calculateVehiclePrice(@Query() query: CalculateVehiclePriceRequestDTO) {
+    return this.vehicleService.calculateVehiclePrice(query);
+  }
+
   @Get(':id')
   @IsPublic()
   getVehicle(@Param() params: GetVehicleRequestDTO) {
     return this.vehicleService.getVehicle(params);
+  }
+}
+
+@Controller('vehicle-price')
+export class VehiclePriceController {
+  // private readonly logger = new Logger(VehiclePriceController.name);
+  constructor(private readonly vehicleService: VehicleService) {}
+
+  @Get()
+  @IsPublic()
+  calculateVehiclePrice(@Query() query: CalculateVehiclePriceRequestDTO) {
+    return this.vehicleService.calculateVehiclePrice(query);
   }
 }

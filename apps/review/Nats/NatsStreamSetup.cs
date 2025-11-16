@@ -21,32 +21,40 @@ namespace review.Nats
             {
                 var js = new NatsJSContext(_natsConnection);
 
-                // Create REVIEW stream
+                // Create JOURNEY_EVENTS stream with all subjects from all services
                 var streamConfig = new StreamConfig(
-                    name: "REVIEW",
-                    subjects: new[] { "review.created", "review.updated", "review.deleted" }
+                    name: "JOURNEY_EVENTS",
+                    subjects: new[] {
+                        // Review events
+                        "journey.events.review.created",
+                        "journey.events.review.updated",
+                        "journey.events.review.deleted"
+                    }
                 )
                 {
                     Storage = StreamConfigStorage.File,
-                    Retention = StreamConfigRetention.Workqueue,
-                    MaxAge = TimeSpan.FromDays(30)
+                    Retention = StreamConfigRetention.Limits,
+                    MaxAge = TimeSpan.FromDays(30),
+                    MaxMsgs = 1000000,
+                    MaxBytes = 1073741824, // 1GB
+                    NumReplicas = 2
                 };
 
                 try
                 {
                     await js.CreateStreamAsync(streamConfig);
-                    _logger.LogInformation("REVIEW stream created successfully");
+                    _logger.LogInformation("[Review] JOURNEY_EVENTS stream created successfully");
                 }
                 catch (NatsJSApiException ex) when (ex.Error.Code == 400)
                 {
                     // Stream already exists, update it
                     await js.UpdateStreamAsync(streamConfig);
-                    _logger.LogInformation("REVIEW stream updated successfully");
+                    _logger.LogInformation("[Review] JOURNEY_EVENTS stream updated successfully");
                 }
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Failed to setup NATS streams");
+                _logger.LogError(ex, "[Review] Failed to setup NATS streams");
                 throw;
             }
         }

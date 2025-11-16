@@ -40,6 +40,11 @@ namespace device.Repository
             {
                 queryable = queryable.Where(d => d.Price <= query.MaxPrice.Value);
             }
+            if (!string.IsNullOrWhiteSpace(query.Brand))
+            {
+                var brand = query.Brand.Trim().ToLower();
+                queryable = queryable.Where(d => d.Brand != null && d.Brand.ToLower() == brand);
+            }
             return queryable;
         }
 
@@ -53,6 +58,8 @@ namespace device.Repository
                 "price" => desc ? queryable.OrderByDescending(d => d.Price) : queryable.OrderBy(d => d.Price),
                 "updateat" => desc ? queryable.OrderByDescending(d => d.UpdateAt) : queryable.OrderBy(d => d.UpdateAt),
                 "category" => desc ? queryable.OrderByDescending(d => d.CategoryId) : queryable.OrderBy(d => d.CategoryId),
+                "quantity" => desc ? queryable.OrderByDescending(d => d.Quantity) : queryable.OrderBy(d => d.Quantity),
+                "brand" => desc ? queryable.OrderByDescending(d => d.Brand) : queryable.OrderBy(d => d.Brand),
                 _ => desc ? queryable.OrderByDescending(d => d.CreateAt) : queryable.OrderBy(d => d.CreateAt),
             };
         }

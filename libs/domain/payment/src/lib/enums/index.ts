@@ -22,6 +22,7 @@ export const PaymentTypeValues = {
 export const PaymentTypeEnum = z.enum([
   PaymentTypeValues.DEVICE,
   PaymentTypeValues.VEHICLE,
+  PaymentTypeValues.COMBO,
   PaymentTypeValues.EXTENSION,
 ]);
 

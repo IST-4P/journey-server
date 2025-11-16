@@ -10,6 +10,7 @@ namespace device.Model.Dto
         public string? Status { get; set; }
         public double? MinPrice { get; set; }
         public double? MaxPrice { get; set; }
+        public string? Brand { get; set; }
 
         // Sorting
         public string? SortBy { get; set; } // name, price, createAt, updateAt

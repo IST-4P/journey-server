@@ -104,6 +104,7 @@ export interface GetDeviceResponse {
   categoryName: string;
   createdAt: string;
   updatedAt: string;
+  brand: string;
 }
 
 /** GetManyDevices (User) */
@@ -113,6 +114,7 @@ export interface GetManyDevicesRequest {
   status?: string | undefined;
   search?: string | undefined;
   categoryId?: string | undefined;
+  brand?: string | undefined;
 }
 
 export interface GetManyDevices {
@@ -125,6 +127,7 @@ export interface GetManyDevices {
   images: string[];
   categoryName: string;
   id: string;
+  brand: string;
 }
 
 export interface GetManyDevicesResponse {
@@ -149,6 +152,7 @@ export interface GetManyDevicesAdmin {
   categoryName: string;
   createdAt: string;
   updatedAt: string;
+  brand: string;
 }
 
 export interface GetManyDevicesAdminResponse {
@@ -169,6 +173,7 @@ export interface CreateDeviceRequest {
   information: string[];
   images: string[];
   categoryId: string;
+  brand: string;
 }
 
 /** UpdateDevice */
@@ -182,6 +187,7 @@ export interface UpdateDeviceRequest {
   information: string[];
   images: string[];
   categoryId?: string | undefined;
+  brand?: string | undefined;
 }
 
 /** DeleteDevice */

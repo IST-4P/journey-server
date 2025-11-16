@@ -1,6 +1,3 @@
-using rental.Model.Entities;
-using System.Text.Json;
-
 namespace rental.Service
 {
     public static class RentalCalculationHelper

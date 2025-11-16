@@ -1,6 +1,5 @@
 syntax = "proto3";
 
-import "user.proto";
 import "device.proto";
 
 package rental;
@@ -94,8 +93,8 @@ message CreateRentalRequest {
   repeated RentalItem items = 2; // Multiple items allowed (devices and/or combos)
   string startDate = 3;
   string endDate = 4;
-  double discountPercent = 5; // Discount percentage (e.g., 10 for 10%)
-  double maxDiscount = 6; // Maximum discount amount in VND
+  optional double discountPercent = 5; // Discount percentage (e.g., 10 for 10%)
+  optional double maxDiscount = 6; // Maximum discount amount in VND
 }
 
 // User: Get My Rentals

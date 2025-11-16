@@ -14,6 +14,7 @@ export const DeviceValidatorSchema = z.object({
   categoryName: z.string(),
   createdAt: z.string(),
   updatedAt: z.string(),
+  brand: z.string(),
 });
 
 export const ComboDeviceItemValidatorSchema = z.object({

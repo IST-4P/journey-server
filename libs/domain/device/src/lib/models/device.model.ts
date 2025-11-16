@@ -18,6 +18,7 @@ export const GetManyDevicesRequestSchema = z
     status: z.string(),
     search: z.string(),
     categoryId: z.string().uuid(),
+    brand: z.string(),
   })
   .partial()
   .extend(PaginationQuerySchema.shape);
@@ -44,6 +45,7 @@ export const CreateDeviceRequestSchema = DeviceValidatorSchema.omit({
   id: true,
   createdAt: true,
   updatedAt: true,
+  categoryName: true,
 });
 
 export const UpdateDeviceRequestSchema = DeviceValidatorSchema.omit({

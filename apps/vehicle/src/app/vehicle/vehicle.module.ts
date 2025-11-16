@@ -1,6 +1,7 @@
 import { NatsModule } from '@hacmieu-journey/nats';
 import { Module } from '@nestjs/common';
 import {
+  ReviewCreatedConsumer,
   VehicleActiveConsumer,
   VehicleRentedConsumer,
   VehicleReservedConsumer,
@@ -17,6 +18,7 @@ import { VehicleService } from './vehicle.service';
     VehicleReservedConsumer,
     VehicleRentedConsumer,
     VehicleActiveConsumer,
+    ReviewCreatedConsumer,
   ],
   controllers: [VehicleGrpcController],
 })

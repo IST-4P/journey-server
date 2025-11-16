@@ -513,8 +513,7 @@
               <input
                 type="text"
                 id="selectedComplaintId"
-                placeholder="Chọn complaint từ danh sách"
-                readonly
+                placeholder="Chọn complaint từ danh sách hoặc nhập ID"
               />
             </div>
             <button onclick="connectWebSocket()" class="secondary">
@@ -649,8 +648,9 @@
           const data = await response.json();
 
           if (response.ok) {
-            // Lấy accessToken từ response body (vì cookie httpOnly không đọc được từ JS)
-            accessToken = data.data?.accessToken;
+            // Backend đã set cookie, đọc từ cookie
+            const cookies = parseCookies();
+            accessToken = cookies.accessToken; // Lưu để dùng cho Authorization header
 
             // Decode JWT để lấy userId
             const decoded = parseJwt(accessToken);
@@ -662,7 +662,7 @@
             showStatus(
               statusEl,
               'success',
-              `✅ Login thành công! User: ${data.data?.email || email}`
+              `✅ Login thành công! User: ${email}`
             );
 
             // Show cookie info
@@ -711,9 +711,18 @@
         const title = document.getElementById('newComplaintTitle').value.trim();
         const statusEl = document.getElementById('createComplaintStatus');
 
+        // Lấy accessToken từ cookie nếu null
         if (!accessToken) {
-          showStatus(statusEl, 'error', '❌ Vui lòng login trước!');
-          return;
+          const cookies = parseCookies();
+          accessToken = cookies.accessToken;
+
+          if (accessToken) {
+            // Decode JWT để lấy userId
+            const decoded = parseJwt(accessToken);
+            if (decoded && decoded.userId) {
+              currentUserId = decoded.userId;
+            }
+          }
         }
 
         if (!title) {
@@ -766,9 +775,18 @@
         const statusEl = document.getElementById('complaintListStatus');
         const listEl = document.getElementById('complaintList');
 
+        // Lấy accessToken từ cookie nếu null
         if (!accessToken) {
-          showStatus(statusEl, 'error', '❌ Vui lòng login trước!');
-          return;
+          const cookies = parseCookies();
+          accessToken = cookies.accessToken;
+
+          if (accessToken) {
+            // Decode JWT để lấy userId
+            const decoded = parseJwt(accessToken);
+            if (decoded && decoded.userId) {
+              currentUserId = decoded.userId;
+            }
+          }
         }
 
         try {
@@ -888,6 +906,9 @@
           return;
         }
 
+        // Cập nhật currentComplaintId từ input
+        currentComplaintId = complaintId;
+
         try {
           const socketOptions = {
             transports: ['websocket', 'polling'],
@@ -912,6 +933,10 @@
               `✅ Đã kết nối WebSocket! Socket ID: ${socket.id}`
             );
             wsStatusEl.className = 'connection-status connected';
+
+            // Reset pagination
+            currentPage = 1;
+            hasMoreMessages = true;
 
             // Load messages
             await loadComplaintMessages(true);
@@ -1237,16 +1262,36 @@
 
       // Check for existing cookie on page load
       window.onload = function () {
-        // Note: Do cookie httpOnly nên không thể đọc từ JS
-        // User cần login lại để lấy accessToken
         const cookies = parseCookies();
-        // Chỉ hiển thị thông báo nếu có cookie (nhưng không dùng được)
-        if (document.cookie.includes('accessToken')) {
+        if (cookies.accessToken) {
+          accessToken = cookies.accessToken;
+
+          // Decode JWT để lấy userId
+          const decoded = parseJwt(accessToken);
+          if (decoded && decoded.userId) {
+            currentUserId = decoded.userId;
+            console.log('✅ Restored User ID from cookie:', currentUserId);
+          }
+
+          const cookieInfoEl = document.getElementById('cookieInfo');
+          cookieInfoEl.style.display = 'block';
+          cookieInfoEl.innerHTML = `
+            <strong>🍪 Đã đăng nhập từ session trước:</strong><br/>
+            User ID: ${currentUserId || 'Unknown'}<br/>
+            Access Token: ${
+              accessToken ? accessToken.substring(0, 20) + '...' : 'N/A'
+            }<br/>
+            <em>Đã tự động khôi phục phiên đăng nhập</em>
+          `;
+
           showStatus(
             document.getElementById('loginStatus'),
             'info',
-            'ℹ️ Vui lòng login để sử dụng ứng dụng'
+            '✅ Đã tự động đăng nhập từ session trước'
           );
+
+          // Auto load complaints
+          setTimeout(() => loadComplaints(), 500);
         }
       };
     </script>

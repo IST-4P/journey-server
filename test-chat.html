@@ -462,9 +462,10 @@
         const statusEl = document.getElementById('apiStatus');
         const responseEl = document.getElementById('apiResponse');
 
+        // Lấy accessToken từ cookie nếu null
         if (!accessToken) {
-          showStatus(statusEl, 'error', '❌ Vui lòng login trước!');
-          return;
+          const cookies = parseCookies();
+          accessToken = cookies.accessToken;
         }
 
         try {

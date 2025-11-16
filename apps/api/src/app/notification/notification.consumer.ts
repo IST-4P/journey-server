@@ -18,8 +18,8 @@ export class NotificationConsumer extends NatsConsumer<DataEvent> {
   ) {
     super(natsClient, {
       streamName: 'JOURNEY_EVENTS',
-      consumerName: 'api-service-notification-created',
-      filterSubject: 'journey.events.notification-created',
+      consumerName: 'api-service-notification-announced',
+      filterSubject: 'journey.events.notification-announced',
       ackPolicy: AckPolicy.Explicit, // Phải ack thủ công
       deliverPolicy: DeliverPolicy.All, // Nhận tất cả message (kể cả cũ)
       maxDeliver: 3, // Retry tối đa 3 lần

@@ -231,7 +231,7 @@ export class BookingRepository {
       const [cancelBooking] = await Promise.all([
         updateStatusBooking$,
         createBookingHistory$,
-        booking.status === BookingStatusValues.PENDING ? createRefund$ : null,
+        booking.status === BookingStatusValues.PENDING ? null : createRefund$,
       ]);
 
       return {

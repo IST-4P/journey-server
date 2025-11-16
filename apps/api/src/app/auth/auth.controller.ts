@@ -21,7 +21,7 @@ const cookieOptions: CookieOptions = {
   httpOnly: true,
   secure: true,
   sameSite: 'none',
-  // domain: '.hacmieu.xyz',
+  domain: '.hacmieu.xyz',
   path: '/',
 };
 

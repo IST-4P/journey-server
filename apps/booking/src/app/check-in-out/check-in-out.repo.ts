@@ -220,7 +220,7 @@ export class CheckInOutRepository {
           overtimeAmount: {
             increment: overtimeAmount,
           },
-          status: BookingStatusValues.COMPLETED,
+          status: BookingStatusValues.PENDING,
         },
       });
 
@@ -317,6 +317,10 @@ export class CheckInOutRepository {
           longitude: checkInOut.longitude.toNumber(),
         };
       });
+    const updateStatusBooking = await this.prismaService.booking.update({
+      where: { id: verified.booking.id },
+      data: { status: BookingStatusValues.COMPLETED },
+    });
     await this.natsClient.publish('journey.events.refund-created', {
       bookingId: verified.booking.id,
       userId: verified.booking.userId,

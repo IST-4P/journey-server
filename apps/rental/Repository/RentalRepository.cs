@@ -49,7 +49,7 @@ namespace rental.Repository
             await _context.SaveChangesAsync();
             return entity;
         }
-        
+
         // Get rental extensions by rental ID
         public async Task<List<RentalExtensionEntity>> GetExtensionsByRentalIdAsync(Guid rentalId)
         {
@@ -117,6 +117,19 @@ namespace rental.Repository
             return await _context.Set<RentalEntity>().FindAsync(id);
         }
 
+        // User: Cancel rental
+        public async Task<RentalEntity?> CancelRentalAsync(Guid id)
+        {
+            var rental = await _context.Set<RentalEntity>().FindAsync(id);
+            if (rental == null) return null;
+
+            rental.Status = RentalStatus.CANCELLED;
+            await _context.SaveChangesAsync();
+            return rental;
+        }
+        
+        
+        
         // Admin: Get all rentals
         public async Task<PagedResult<RentalEntity>> GetAllRentalsAsync(RentalQueryDto query)
         {
@@ -169,17 +182,6 @@ namespace rental.Repository
                 Page = query.Page,
                 PageSize = query.PageSize
             };
-        }
-
-        // User: Cancel rental
-        public async Task<RentalEntity?> CancelRentalAsync(Guid id)
-        {
-            var rental = await _context.Set<RentalEntity>().FindAsync(id);
-            if (rental == null) return null;
-
-            rental.Status = RentalStatus.CANCELLED;
-            await _context.SaveChangesAsync();
-            return rental;
         }
 
         // Admin: Update rental

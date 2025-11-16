@@ -586,7 +586,7 @@ namespace device.Service
 
                 foreach (var d in dtos)
                 {
-                    res.Categories.Add(new GetManyCategories
+                    res.Categories.Add(new ManyCategories
                     {
                         Id = d.Id.ToString(),
                         Name = d.Name,

@@ -68,4 +68,15 @@ namespace review.Model.Dto
         public DateTime UpdatedAt { get; set; }
         public int UpdateCount { get; set; }
     }
+
+    /// <summary>
+    /// DTO for aggregated rating statistics of a target (Vehicle/Device/Combo)
+    /// </summary>
+    public class RatingStatsDto
+    {
+        public Guid TargetId { get; set; }
+        public ReviewType Type { get; set; }
+        public double AverageRating { get; set; }
+        public int TotalReviews { get; set; }
+    }
 }

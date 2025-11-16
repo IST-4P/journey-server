@@ -49,18 +49,12 @@ namespace review.Services
                 {
                     var reviewCreatedEvent = new review.Nats.Events.ReviewCreatedEvent
                     {
-                        ReviewId = review.Id.ToString(),
-                        BookingId = review.BookingId?.ToString(),
-                        RentalId = review.RentalId?.ToString(),
-                        VehicleId = review.VehicleId?.ToString(),
-                        DeviceId = review.DeviceId?.ToString(),
-                        ComboId = review.ComboId?.ToString(),
-                        UserId = review.UserId.ToString(),
-                        Rating = review.Rating,
-                        Type = review.Type.ToString(),
-                        Title = review.Title,
-                        Content = review.Content,
-                        CreatedAt = review.CreatedAt.ToString("O")
+                        reviewId = review.Id.ToString(),
+                        bookingId = review.BookingId?.ToString(),
+                        rentalId = review.RentalId?.ToString(),
+                        vehicleId = review.VehicleId?.ToString(),
+                        deviceId = review.DeviceId?.ToString(),
+                        comboId = review.ComboId?.ToString(),
                     };
                     await _natsPublisher.PublishAsync("journey.events.review.created", reviewCreatedEvent);
                 }

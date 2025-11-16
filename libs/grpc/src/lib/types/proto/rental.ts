@@ -90,9 +90,11 @@ export interface CreateRentalRequest {
   startDate: string;
   endDate: string;
   /** Discount percentage (e.g., 10 for 10%) */
-  discountPercent: number;
+  discountPercent?:
+    | number
+    | undefined;
   /** Maximum discount amount in VND */
-  maxDiscount: number;
+  maxDiscount?: number | undefined;
 }
 
 /** User: Get My Rentals */

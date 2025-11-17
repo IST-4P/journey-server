@@ -1,4 +1,5 @@
 import {
+  BookingStatusValues,
   CreateExtensionRequest,
   ExtensionStatusEnumValues,
   GetExtensionRequest,
@@ -15,7 +16,10 @@ import {
 import { Injectable } from '@nestjs/common';
 import { BookingNotFoundException } from '../booking/booking.error';
 import { PrismaService } from '../prisma/prisma.service';
-import { ExtensionNotFoundException } from './extension.error';
+import {
+  CannotCreateExtensionException,
+  ExtensionNotFoundException,
+} from './extension.error';
 
 @Injectable()
 export class ExtensionRepository {
@@ -65,6 +69,10 @@ export class ExtensionRepository {
       });
       if (!booking) {
         throw BookingNotFoundException;
+      }
+
+      if (booking.status !== BookingStatusValues.ONGOING) {
+        throw CannotCreateExtensionException;
       }
       const createExtension$ = tx.bookingExtension.create({
         data: {

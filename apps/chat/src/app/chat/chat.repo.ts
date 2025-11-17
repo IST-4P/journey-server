@@ -140,13 +140,13 @@ export class ChatRepository {
     `;
 
     const totalItems = Number(totalCount[0].count);
-
-    return {
+    const result = {
       conversations: conversations.map((c) => c.userId),
       page: data.page,
       limit: data.limit,
       totalItems,
       totalPages: Math.ceil(totalItems / data.limit),
     };
+    return result;
   }
 }

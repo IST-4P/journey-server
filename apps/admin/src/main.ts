@@ -8,6 +8,7 @@ import {
   HttpExceptionFilter,
   init,
 } from '@hacmieu-journey/nestjs';
+import { WebsocketAdapter } from '@hacmieu-journey/websocket';
 import { NestFactory } from '@nestjs/core';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { patchNestJsSwagger } from 'nestjs-zod';
@@ -29,6 +30,11 @@ async function bootstrap() {
     .build();
   const documentFactory = () => SwaggerModule.createDocument(app, config);
   SwaggerModule.setup('api', app, documentFactory);
+
+  const websocketAdapter = new WebsocketAdapter(app);
+  await websocketAdapter.connectToRedis();
+  app.useWebSocketAdapter(websocketAdapter);
+
   await init(app);
 }
 

@@ -1,5 +1,6 @@
 import { ChatProto, UserProto } from '@hacmieu-journey/grpc';
 import { NatsModule } from '@hacmieu-journey/nats';
+import { WebSocketModule } from '@hacmieu-journey/websocket';
 import { Module } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { ClientsModule, Transport } from '@nestjs/microservices';
@@ -10,10 +11,12 @@ import {
   ComplaintMessageController,
 } from './chat.controller';
 import { ChatService } from './chat.service';
+import { ChatListGateway } from './websocket';
 
 @Module({
   imports: [
     NatsModule,
+    WebSocketModule,
     ClientsModule.registerAsync([
       {
         name: ChatProto.CHAT_PACKAGE_NAME,
@@ -52,6 +55,7 @@ import { ChatService } from './chat.service';
   ],
   providers: [
     ChatService,
+    ChatListGateway,
     {
       provide: 'CHAT_SERVICE',
       useExisting: ChatService,

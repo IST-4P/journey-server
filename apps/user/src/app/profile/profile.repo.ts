@@ -87,6 +87,11 @@ export class ProfileRepository {
       where: { id: { in: data.userIds } },
       select: { id: true, fullName: true, avatarUrl: true },
     });
-    return { users };
+
+    // Sort theo thứ tự của userIds input
+    const sortedUsers = data.userIds
+      .map((id) => users.find((user) => user.id === id))
+      .filter((user) => user !== undefined);
+    return { users: sortedUsers };
   }
 }

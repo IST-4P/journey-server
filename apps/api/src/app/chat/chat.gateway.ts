@@ -1,6 +1,6 @@
 import { CreateChatRequestDTO } from '@domain/chat';
-import { ChatProto } from '@hacmieu-journey/grpc';
 import { generateRoomUserId } from '@hacmieu-journey/websocket';
+import { ConfigService } from '@nestjs/config';
 import {
   ConnectedSocket,
   MessageBody,
@@ -9,22 +9,38 @@ import {
   WebSocketGateway,
   WebSocketServer,
 } from '@nestjs/websockets';
-import { Server, Socket } from 'socket.io';
+import { createClient, RedisClientType } from 'redis';
+import { Namespace, Socket } from 'socket.io';
 import { ChatService } from './chat.service';
-
-export interface ChatType {
-  fromUserId: string;
-  toUserId: string;
-  content: string;
-  createdAt: string;
-}
 
 @WebSocketGateway({ namespace: 'chat' })
 export class ChatGateway implements OnGatewayConnection {
-  constructor(private readonly chatService: ChatService) {}
+  private redisPublisher?: RedisClientType;
+
+  constructor(
+    private readonly chatService: ChatService,
+    private readonly configService: ConfigService
+  ) {
+    this.initRedis();
+  }
 
   @WebSocketServer()
-  server!: Server;
+  server!: Namespace;
+
+  private async initRedis() {
+    try {
+      const redisUrl = this.configService.getOrThrow<string>('REDIS_URL');
+      if (!redisUrl) {
+        console.warn('⚠️  REDIS_URL not configured for ChatGateway');
+        return;
+      }
+
+      this.redisPublisher = createClient({ url: redisUrl });
+      await this.redisPublisher.connect();
+    } catch (error) {
+      console.error('❌ Failed to connect Redis publisher:', error);
+    }
+  }
 
   handleConnection(client: Socket) {
     const userId = client.data['userId'];
@@ -43,11 +59,20 @@ export class ChatGateway implements OnGatewayConnection {
     const newMessage = await this.chatService.createChat({
       ...message,
       fromUserId,
-    } as ChatProto.CreateChatRequest);
+    });
     const recipientRoom = generateRoomUserId(message.toUserId);
     this.server.to(recipientRoom).emit('newChat', newMessage);
 
-    // 3. Gửi lại tin nhắn cho chính người gửi để cập nhật UI của họ.
+    // Gửi lại tin nhắn cho chính người gửi để cập nhật UI của họ.
     client.emit('newChat', newMessage);
+
+    // Broadcast qua Redis để notify admin app
+    if (this.redisPublisher) {
+      try {
+        await this.redisPublisher.publish('chat:conversationUpdated', '');
+      } catch (error) {
+        console.error('❌ Error publishing to Redis:', error);
+      }
+    }
   }
 }

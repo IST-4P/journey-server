@@ -16,12 +16,18 @@ import { parse } from 'cookie';
 import { CookieOptions, Request, Response } from 'express';
 import { AuthService } from './auth.service';
 
-const cookieOptions: CookieOptions = {
-  httpOnly: true,
-  secure: true,
-  sameSite: 'none',
-  domain: '.hacmieu.xyz',
-  path: '/',
+const getCookieOptions = (req: Request): CookieOptions => {
+  const origin = req.get('origin') || req.get('host') || '';
+  const isLocalhost =
+    origin.includes('localhost') || origin.includes('127.0.0.1');
+
+  return {
+    httpOnly: true,
+    secure: true,
+    sameSite: 'none',
+    ...(!isLocalhost && { domain: '.hacmieu.xyz' }),
+    path: '/',
+  };
 };
 
 @Controller('auth')
@@ -32,9 +38,11 @@ export class AuthController {
   @Post('login')
   async login(
     @Body() body: LoginRequestDTO,
+    @Req() req: Request,
     @Res({ passthrough: true }) res: Response
   ) {
     const tokens = await this.authService.login(body);
+    const cookieOptions = getCookieOptions(req);
 
     res.cookie('accessToken', tokens.accessToken, {
       ...cookieOptions,
@@ -67,6 +75,7 @@ export class AuthController {
     const tokens = await this.authService.refreshToken({
       refreshToken,
     });
+    const cookieOptions = getCookieOptions(req);
 
     res.cookie('accessToken', tokens.accessToken, {
       ...cookieOptions,
@@ -84,6 +93,7 @@ export class AuthController {
   @IsPublic()
   @Post('logout')
   logout(@Req() req: Request, @Res({ passthrough: true }) res: Response) {
+    const cookieOptions = getCookieOptions(req);
     res.clearCookie('accessToken', cookieOptions);
     res.clearCookie('refreshToken', cookieOptions);
 

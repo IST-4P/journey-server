@@ -10,3 +10,8 @@ export const ExtensionAlreadyExistsException = new RpcException({
   code: status.ALREADY_EXISTS,
   message: 'Error.ExtensionAlreadyExists',
 });
+
+export const CannotCreateExtensionException = new RpcException({
+  code: status.FAILED_PRECONDITION,
+  message: 'Error.CannotCreateExtension',
+});

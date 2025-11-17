@@ -72,6 +72,15 @@ export class WebsocketAdapter extends IoAdapter {
       void this.authMiddleware(socket, next);
     });
 
+    // Apply admin role middleware to specific namespaces
+    server.of('/chat-list').use((socket, next) => {
+      void this.adminRoleMiddleware(socket, next);
+    });
+
+    server.of('/complaint-list').use((socket, next) => {
+      void this.adminRoleMiddleware(socket, next);
+    });
+
     return server;
   }
 
@@ -138,5 +147,34 @@ export class WebsocketAdapter extends IoAdapter {
       console.error('❌ WebSocket authentication failed:', error);
       next(new Error('Invalid or expired token'));
     }
+  }
+
+  /**
+   * WebSocket Admin Role Middleware
+   * Kiểm tra role ADMIN sau khi đã authenticate
+   * Phải được gọi sau authMiddleware
+   */
+  async adminRoleMiddleware(socket: Socket, next: (err?: any) => void) {
+    const role = socket.data['role'];
+
+    if (!role) {
+      return next(new Error('Missing role information'));
+    }
+
+    // Kiểm tra role ADMIN (support cả uppercase và lowercase)
+    const isAdmin = role === 'ADMIN' || role === 'admin';
+
+    if (!isAdmin) {
+      console.warn(
+        `⚠️  Access denied: userId=${socket.data['userId']}, role=${role}`
+      );
+      return next(new Error('Insufficient permissions. Admin role required'));
+    }
+
+    console.log(
+      `✅ Admin role verified: userId=${socket.data['userId']}, role=${role}`
+    );
+
+    next();
   }
 }

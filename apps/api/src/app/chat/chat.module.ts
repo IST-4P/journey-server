@@ -5,7 +5,6 @@ import { Module } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { ClientsModule, Transport } from '@nestjs/microservices';
 import { join } from 'path';
-import { ChatConsumer } from './chat.consumer';
 import { ChatController } from './chat.controller';
 import { ChatGateway } from './chat.gateway';
 import { ChatService } from './chat.service';
@@ -34,7 +33,6 @@ import { ChatService } from './chat.service';
   controllers: [ChatController],
   providers: [
     ChatService,
-    ChatConsumer,
     ChatGateway,
     {
       provide: 'CHAT_SERVICE',

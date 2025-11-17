@@ -96,11 +96,6 @@ namespace rental.Service
 
                 var updated = await _repository.UpdateAsync(rentalId, updateDto);
 
-                if (updated is null)
-                {
-                    throw new RpcException(new Status(StatusCode.NotFound, "Rental not found"));
-                }
-
                 // Record status change if status was updated
                 if (!string.IsNullOrEmpty(request.Status) && Enum.TryParse<RentalStatus>(request.Status, true, out var newStatus))
                 {

@@ -92,7 +92,6 @@ namespace rental.Model.Entities
         PENDING, // Chờ thanh toán deposit
         PAID, // Đã thanh toán deposit (20%), chờ nhận hàng
         RECEIVED, // Đã nhận hàng và thanh toán phần còn lại (80%), đang thuê
-        ONGOING, // Đang thuê (alias for RECEIVED)
         COMPLETED, // Hoàn thành (đã trả hàng)
         CANCELLED, // Đã hủy (có thể hoàn deposit)
         EXPIRED // Hết hạn (quá thời gian không thanh toán)

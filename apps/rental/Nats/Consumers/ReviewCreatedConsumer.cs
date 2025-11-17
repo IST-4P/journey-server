@@ -58,16 +58,8 @@ namespace rental.Nats.Consumers
                 {
                     Logger.LogWarning("[Rental] Rental not found: {RentalId}", rentalId);
                     return;
-                }
-
-                // Validate rental is COMPLETED
-                if (rental.Status != Model.Entities.RentalStatus.COMPLETED)
-                {
-                    Logger.LogWarning("[Rental] Rental {RentalId} is not COMPLETED (status: {Status}), cannot attach review",
-                        rentalId, rental.Status);
-                    return;
-                }
-
+                } 
+                
                 // Check if rental already has a review
                 if (rental.ReviewId.HasValue)
                 {
@@ -98,7 +90,6 @@ namespace rental.Nats.Consumers
         public string? VehicleId { get; set; }
         public string UserId { get; set; } = string.Empty;
         public int Rating { get; set; }
-        public string Type { get; set; } = string.Empty;
         public string CreatedAt { get; set; } = string.Empty;
     }
 }

@@ -7,13 +7,15 @@ using RentalEntity = rental.Model.Entities.Rental;
 namespace rental.Nats.Consumers
 {
     /// <summary>
-    /// Consumer to handle rental-expired events from Payment service
-    /// Cancels rental when payment expires after 15 minutes
+    /// Consumer to handle payment-expired events from Payment service
+    /// When payment expires after 15 minutes without being paid:
+    /// - Payment service sends booking-expired event with id = rentalId (for rental payments)
+    /// - This consumer receives the event and updates rental status to EXPIRED
     /// </summary>
     public class RentalExpiredConsumer : NatsConsumerBase<RentalExpiredEvent>
     {
-        protected override string ConsumerName => "rental-expired-consumer";
-        protected override string FilterSubject => "journey.events.rental-expired";
+        protected override string ConsumerName => "rental-service-payment-expired";
+        protected override string FilterSubject => "journey.events.booking-expired";
 
         public RentalExpiredConsumer(
             NatsConnection natsConnection,
@@ -25,19 +27,22 @@ namespace rental.Nats.Consumers
 
         protected override async Task HandleEventAsync(RentalExpiredEvent expiredEvent, CancellationToken cancellationToken)
         {
-            Logger.LogInformation("[Rental] Received rental-expired event for RentalId: {RentalId}", expiredEvent.Id);
+            Logger.LogInformation("[Rental] Received payment-expired event with Id: {Id}", expiredEvent.Id);
 
             using var scope = ServiceProvider.CreateScope();
             var context = scope.ServiceProvider.GetRequiredService<rental.Data.RentalDbContext>();
 
             try
             {
-                // Parse rental ID from event (comes as string from TypeScript)
+                // The Id in the event is the rentalId (payment sends bookingId or rentalId as id)
                 if (!Guid.TryParse(expiredEvent.Id, out var rentalId))
                 {
-                    Logger.LogError("[Rental] Invalid rental ID format: {RentalId}", expiredEvent.Id);
+                    // Not a valid GUID, this is probably a booking (integer ID), skip
+                    Logger.LogDebug("[Rental] Event Id '{Id}' is not a valid Guid, likely a booking, skipping", expiredEvent.Id);
                     return;
                 }
+
+                Logger.LogInformation("[Rental] Processing rental expiration for RentalId: {RentalId}", rentalId);
 
                 // Find rental by ID
                 var rentalEntity = await context.Set<RentalEntity>()
@@ -45,7 +50,7 @@ namespace rental.Nats.Consumers
 
                 if (rentalEntity == null)
                 {
-                    Logger.LogWarning("[Rental] Rental not found for ID {RentalId}", rentalId);
+                    Logger.LogDebug("[Rental] Rental not found for ID {RentalId}, likely a booking, skipping", rentalId);
                     return;
                 }
 
@@ -60,14 +65,14 @@ namespace rental.Nats.Consumers
                 rentalEntity.Status = rental.Model.Entities.RentalStatus.EXPIRED;
                 await context.SaveChangesAsync(cancellationToken);
 
-                Logger.LogInformation("[Rental] Successfully expired rental {RentalId}", rentalId);
+                Logger.LogInformation("[Rental] Successfully expired rental {RentalId} due to payment timeout", rentalId);
 
                 // Note: Quantity was never decreased for pending rentals, so no need to restore
                 // Devices/combos remain available for other users
             }
             catch (Exception ex)
             {
-                Logger.LogError(ex, "[Rental] Failed to handle rental-expired event for rental {RentalId}", expiredEvent.Id);
+                Logger.LogError(ex, "[Rental] Failed to handle payment-expired event for Id {Id}", expiredEvent.Id);
                 throw;
             }
         }

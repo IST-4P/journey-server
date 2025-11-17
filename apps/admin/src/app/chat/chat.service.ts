@@ -45,21 +45,12 @@ export class ChatService implements OnModuleInit {
     );
     const result = {
       conversations: usersResponse.users.map((item, index) => {
-        const lastMessageDate = new Date(
-          conversations.conversations[index].lastMessageAt
-        );
         return {
           id: item.id,
           fullName: item.fullName,
           avatarUrl: item.avatarUrl,
           lastMessage: conversations.conversations[index].lastMessage,
-          lastMessageAt: `${lastMessageDate
-            .getHours()
-            .toString()
-            .padStart(2, '0')}:${lastMessageDate
-            .getMinutes()
-            .toString()
-            .padStart(2, '0')}`,
+          lastMessageAt: conversations.conversations[index].lastMessageAt,
         };
       }),
       page: conversations.page,

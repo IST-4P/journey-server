@@ -30,17 +30,38 @@ export class ChatService implements OnModuleInit {
     return lastValueFrom(this.chatService.getChats(data));
   }
 
-  async getManyConversations(data: ChatProto.GetManyConversationsRequest) {
+  async getManyConversations(
+    data: ChatProto.GetManyConversationsRequest
+  ): Promise<ChatProto.GetManyConversationsWithUserIds> {
     const conversations = await lastValueFrom(
       this.chatService.getManyConversations(data)
     );
+
+    const userIds = conversations.conversations.map((c) => c.id);
     const usersResponse = await lastValueFrom(
       this.userService.getFullNameAndAvatar({
-        userIds: conversations.conversations,
+        userIds,
       })
     );
     const result = {
-      conversations: usersResponse.users || [],
+      conversations: usersResponse.users.map((item, index) => {
+        const lastMessageDate = new Date(
+          conversations.conversations[index].lastMessageAt
+        );
+        return {
+          id: item.id,
+          fullName: item.fullName,
+          avatarUrl: item.avatarUrl,
+          lastMessage: conversations.conversations[index].lastMessage,
+          lastMessageAt: `${lastMessageDate
+            .getHours()
+            .toString()
+            .padStart(2, '0')}:${lastMessageDate
+            .getMinutes()
+            .toString()
+            .padStart(2, '0')}`,
+        };
+      }),
       page: conversations.page,
       limit: conversations.limit,
       totalItems: conversations.totalItems,

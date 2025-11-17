@@ -30,7 +30,13 @@ export const GetManyConversationsRequestSchema = z
   .extend(PaginationQuerySchema.shape);
 
 export const GetManyConversationsResponseSchema = z.object({
-  conversations: z.array(z.string().uuid()),
+  conversations: z.array(
+    z.object({
+      id: z.string().uuid(),
+      lastMessage: z.string(),
+      lastMessageAt: z.coerce.date(),
+    })
+  ),
   page: z.number().int(),
   limit: z.number().int(),
   totalItems: z.number().int(),

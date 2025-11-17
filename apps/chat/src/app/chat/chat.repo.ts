@@ -108,20 +108,32 @@ export class ChatRepository {
     const skip = (data.page - 1) * data.limit;
     const take = data.limit;
 
-    // Raw query để lấy conversations hai chiều
+    // Raw query để lấy conversations hai chiều với lastMessage
     const conversations = await this.prismaService.$queryRaw<
-      Array<{ userId: string; lastMessageAt: Date }>
+      Array<{ userId: string; lastMessageAt: Date; lastMessage: string }>
     >`
+      WITH ConversationUsers AS (
+        SELECT 
+          CASE 
+            WHEN "fromUserId" = ${data.adminId} THEN "toUserId"
+            ELSE "fromUserId"
+          END as "userId",
+          MAX("createdAt") as "lastMessageAt"
+        FROM "Chat"
+        WHERE "fromUserId" = ${data.adminId} OR "toUserId" = ${data.adminId}
+        GROUP BY "userId"
+      )
       SELECT 
-        CASE 
-          WHEN "fromUserId" = ${data.adminId} THEN "toUserId"
-          ELSE "fromUserId"
-        END as "userId",
-        MAX("createdAt") as "lastMessageAt"
-      FROM "Chat"
-      WHERE "fromUserId" = ${data.adminId} OR "toUserId" = ${data.adminId}
-      GROUP BY "userId"
-      ORDER BY "lastMessageAt" DESC
+        cu."userId",
+        cu."lastMessageAt",
+        c."content" as "lastMessage"
+      FROM ConversationUsers cu
+      INNER JOIN "Chat" c ON c."createdAt" = cu."lastMessageAt"
+        AND (
+          (c."fromUserId" = ${data.adminId} AND c."toUserId" = cu."userId") OR
+          (c."fromUserId" = cu."userId" AND c."toUserId" = ${data.adminId})
+        )
+      ORDER BY cu."lastMessageAt" DESC
       LIMIT ${take}
       OFFSET ${skip}
     `;
@@ -141,7 +153,11 @@ export class ChatRepository {
 
     const totalItems = Number(totalCount[0].count);
     const result = {
-      conversations: conversations.map((c) => c.userId),
+      conversations: conversations.map((c) => ({
+        id: c.userId,
+        lastMessage: c.lastMessage,
+        lastMessageAt: c.lastMessageAt,
+      })),
       page: data.page,
       limit: data.limit,
       totalItems,

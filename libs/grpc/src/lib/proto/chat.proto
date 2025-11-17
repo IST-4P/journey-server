@@ -67,8 +67,14 @@ message UserFullNameAndAvatar {
   string avatarUrl = 3;
 }
 
+message ManyConversationsWithUserIds{
+  string id = 1;
+  string lastMessage = 2;
+  string lastMessageAt = 3;
+}
+
 message GetManyConversationsWithUserIds {
-  repeated string conversations = 1;
+  repeated ManyConversationsWithUserIds conversations = 1;
   int32 page = 2;
   int32 limit = 3;
   int32 totalItems = 4;

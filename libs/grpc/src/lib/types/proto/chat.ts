@@ -63,8 +63,14 @@ export interface UserFullNameAndAvatar {
   avatarUrl: string;
 }
 
+export interface ManyConversationsWithUserIds {
+  id: string;
+  lastMessage: string;
+  lastMessageAt: string;
+}
+
 export interface GetManyConversationsWithUserIds {
-  conversations: string[];
+  conversations: ManyConversationsWithUserIds[];
   page: number;
   limit: number;
   totalItems: number;

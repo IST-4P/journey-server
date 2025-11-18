@@ -3,6 +3,7 @@ import {
   CreateComplaintRequest,
   GetComplaintResponse,
   GetManyComplaintMessagesRequest,
+  GetManyComplaintMessagesResponse,
   GetManyComplaintsRequest,
   GetManyComplaintsResponse,
   UpdateComplaintStatusRequest,
@@ -35,7 +36,9 @@ export class ComplaintGrpcController {
   }
 
   @GrpcMethod('ChatService', 'GetManyComplaintMessages')
-  getManyComplaintMessages(data: GetManyComplaintMessagesRequest) {
+  getManyComplaintMessages(
+    data: GetManyComplaintMessagesRequest
+  ): Promise<GetManyComplaintMessagesResponse> {
     return this.complaintService.getManyComplaintMessages(data);
   }
 

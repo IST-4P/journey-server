@@ -7,6 +7,7 @@ import {
   UpdateComplaintStatusRequest,
 } from '@domain/chat';
 import { Injectable } from '@nestjs/common';
+import { Prisma } from '@prisma-clients/chat';
 import { PrismaService } from '../prisma/prisma.service';
 import { ComplaintNotFoundException } from './complaint.error';
 
@@ -18,20 +19,83 @@ export class ComplaintRepository {
     const skip = (page - 1) * limit;
     const take = limit;
 
-    const [totalItems, complaints] = await Promise.all([
-      this.prismaService.complaint.count({ where }),
-      this.prismaService.complaint.findMany({
-        where,
-        skip,
-        take,
-        orderBy: {
-          createdAt: 'desc',
-        },
-      }),
+    // Build WHERE conditions - sử dụng Prisma.sql để join
+    const conditions: Prisma.Sql[] = [Prisma.sql`1=1`];
+
+    if (where.status) {
+      // Cast enum sang text để so sánh
+      conditions.push(Prisma.sql`c.status::text = ${where.status}`);
+    }
+
+    if (where.userId) {
+      conditions.push(Prisma.sql`c."userId" = ${where.userId}`);
+    }
+
+    // Join conditions với AND
+    const whereClause = Prisma.join(conditions, ' AND ');
+
+    // Lấy complaints với lastMessage (chỉ lấy content và createdAt)
+    const complaints$ = this.prismaService.$queryRaw<
+      Array<{
+        id: string;
+        userId: string;
+        title: string;
+        status: string;
+        createdAt: Date;
+        lastMessage: string;
+        lastMessageAt: Date;
+      }>
+    >(Prisma.sql`
+    WITH LastMessages AS (
+      SELECT 
+        cm."complaintId",
+        cm."content" as "lastMessage",
+        cm."createdAt" as "lastMessageAt",
+        ROW_NUMBER() OVER (PARTITION BY cm."complaintId" ORDER BY cm."createdAt" DESC) as rn
+      FROM "ComplaintMessage" cm
+    )
+    SELECT 
+      c.id,
+      c."userId",
+      c.title,
+      c.status::text as status,
+      c."createdAt",
+      lm."lastMessage",
+      lm."lastMessageAt"
+    FROM "Complaint" c
+    LEFT JOIN LastMessages lm ON lm."complaintId" = c.id AND lm.rn = 1
+    WHERE ${whereClause}
+    ORDER BY lm."lastMessageAt" DESC NULLS LAST, c."createdAt" DESC
+    LIMIT ${take}
+    OFFSET ${skip}
+  `);
+
+    // Count total
+    const totalCount$ = this.prismaService.$queryRaw<
+      Array<{ count: bigint }>
+    >(Prisma.sql`
+    SELECT COUNT(*) as count
+    FROM "Complaint" c
+    WHERE ${whereClause}
+  `);
+
+    const [totalCount, complaints] = await Promise.all([
+      totalCount$,
+      complaints$,
     ]);
 
+    const totalItems = Number(totalCount[0].count);
+
     return {
-      complaints,
+      complaints: complaints.map((c) => ({
+        complaintId: c.id,
+        userId: c.userId,
+        title: c.title,
+        status: c.status,
+        createdAt: c.createdAt,
+        lastMessage: c.lastMessage,
+        lastMessageAt: c.lastMessageAt,
+      })),
       page,
       limit,
       totalItems,

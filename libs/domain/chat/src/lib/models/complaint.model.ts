@@ -16,7 +16,14 @@ export const GetManyComplaintsRequestSchema = ComplaintValidatorSchema.pick({
   .extend(PaginationQuerySchema.shape);
 
 export const GetManyComplaintsResponseSchema = z.object({
-  complaints: z.array(ComplaintValidatorSchema),
+  complaints: z.array(
+    ComplaintValidatorSchema.omit({ updatedAt: true, id: true }).extend({
+      status: z.string(),
+      complaintId: z.string().uuid(),
+      lastMessage: z.string(),
+      lastMessageAt: z.coerce.date(),
+    })
+  ),
   page: z.number().int(),
   limit: z.number().int(),
   totalItems: z.number().int(),

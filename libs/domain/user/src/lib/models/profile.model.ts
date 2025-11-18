@@ -47,9 +47,15 @@ export const GetFullNameAndAvatarRequestSchema = z.object({
   userIds: z.array(z.string().uuid()),
 });
 
-export const GetFullNameAndAvatarResponseSchema = z.array(
-  ProfileValidatorSchema.pick({ id: true, fullName: true, avatarUrl: true })
-);
+export const GetFullNameAndAvatarResponseSchema = z.object({
+  users: z.array(
+    z.object({
+      userId: z.string().uuid(),
+      fullName: z.string(),
+      avatarUrl: z.string(),
+    })
+  ),
+});
 
 export type GetProfileRequest = z.infer<typeof GetProfileRequestSchema>;
 export type GetProfileResponse = z.infer<typeof GetProfileResponseSchema>;

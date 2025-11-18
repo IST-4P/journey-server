@@ -3,6 +3,7 @@ import {
   GetAllProfilesResponse,
   GetAllUserIdsResponse,
   GetFullNameAndAvatarRequest,
+  GetFullNameAndAvatarResponse,
   GetProfileRequest,
   GetProfileResponse,
   UpdateProfileRequest,
@@ -38,7 +39,9 @@ export class ProfileGrpcController {
   }
 
   @GrpcMethod('UserService', 'GetFullNameAndAvatar')
-  getFullNameAndAvatar(data: GetFullNameAndAvatarRequest) {
+  getFullNameAndAvatar(
+    data: GetFullNameAndAvatarRequest
+  ): Promise<GetFullNameAndAvatarResponse> {
     return this.profileService.getFullNameAndAvatar(data);
   }
 }

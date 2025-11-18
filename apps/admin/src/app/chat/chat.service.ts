@@ -32,12 +32,11 @@ export class ChatService implements OnModuleInit {
 
   async getManyConversations(
     data: ChatProto.GetManyConversationsRequest
-  ): Promise<ChatProto.GetManyConversationsWithUserIds> {
+  ): Promise<ChatProto.GetManyConversationsWithUserInformation> {
     const conversations = await lastValueFrom(
       this.chatService.getManyConversations(data)
     );
-
-    const userIds = conversations.conversations.map((c) => c.id);
+    const userIds = conversations.conversations.map((c) => c.userId);
     const usersResponse = await lastValueFrom(
       this.userService.getFullNameAndAvatar({
         userIds,
@@ -46,7 +45,7 @@ export class ChatService implements OnModuleInit {
     const result = {
       conversations: usersResponse.users.map((item, index) => {
         return {
-          id: item.id,
+          userId: item.userId,
           fullName: item.fullName,
           avatarUrl: item.avatarUrl,
           lastMessage: conversations.conversations[index].lastMessage,
@@ -67,10 +66,38 @@ export class ChatService implements OnModuleInit {
     return lastValueFrom(this.chatService.updateComplaintStatus(data));
   }
 
-  getManyComplaints(
+  async getManyComplaints(
     data: ChatProto.GetManyComplaintsRequest
-  ): Promise<ChatProto.GetManyComplaintsResponse> {
-    return lastValueFrom(this.chatService.getManyComplaints(data));
+  ): Promise<ChatProto.GetManyComplaintsWithUserInformation> {
+    const complaint = await lastValueFrom(
+      this.chatService.getManyComplaints(data)
+    );
+    const userIds = complaint.complaints.map((c) => c.userId);
+    const usersResponse = await lastValueFrom(
+      this.userService.getFullNameAndAvatar({
+        userIds,
+      })
+    );
+    const result = {
+      complaints: usersResponse.users.map((item, index) => {
+        return {
+          complaintId: complaint.complaints[index].complaintId,
+          userId: item.userId,
+          title: complaint.complaints[index].title,
+          status: complaint.complaints[index].status,
+          fullName: item.fullName,
+          avatarUrl: item.avatarUrl,
+          lastMessage: complaint.complaints[index].lastMessage,
+          lastMessageAt: complaint.complaints[index].lastMessageAt,
+          createdAt: complaint.complaints[index].createdAt,
+        };
+      }),
+      page: complaint.page,
+      limit: complaint.limit,
+      totalItems: complaint.totalItems,
+      totalPages: complaint.totalPages,
+    };
+    return result;
   }
 
   getManyComplaintMessages(

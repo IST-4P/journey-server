@@ -109,7 +109,7 @@ export class ChatRepository {
     const take = data.limit;
 
     // Raw query để lấy conversations hai chiều với lastMessage
-    const conversations = await this.prismaService.$queryRaw<
+    const conversations$ = this.prismaService.$queryRaw<
       Array<{ userId: string; lastMessageAt: Date; lastMessage: string }>
     >`
       WITH ConversationUsers AS (
@@ -138,9 +138,7 @@ export class ChatRepository {
       OFFSET ${skip}
     `;
 
-    const totalCount = await this.prismaService.$queryRaw<
-      Array<{ count: bigint }>
-    >`
+    const totalCount$ = this.prismaService.$queryRaw<Array<{ count: bigint }>>`
       SELECT COUNT(DISTINCT 
         CASE 
           WHEN "fromUserId" = ${data.adminId} THEN "toUserId"
@@ -151,10 +149,15 @@ export class ChatRepository {
       WHERE "fromUserId" = ${data.adminId} OR "toUserId" = ${data.adminId}
     `;
 
+    const [totalCount, conversations] = await Promise.all([
+      totalCount$,
+      conversations$,
+    ]);
+
     const totalItems = Number(totalCount[0].count);
     const result = {
       conversations: conversations.map((c) => ({
-        id: c.userId,
+        userId: c.userId,
         lastMessage: c.lastMessage,
         lastMessageAt: c.lastMessageAt,
       })),

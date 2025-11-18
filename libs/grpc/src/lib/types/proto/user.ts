@@ -235,7 +235,7 @@ export interface GetFullNameAndAvatarRequest {
 }
 
 export interface UserFullNameAndAvatar {
-  id: string;
+  userId: string;
   fullName: string;
   avatarUrl: string;
 }

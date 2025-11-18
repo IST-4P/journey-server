@@ -90,7 +90,15 @@ export class ProfileRepository {
 
     // Sort theo thứ tự của userIds input
     const sortedUsers = data.userIds
-      .map((id) => users.find((user) => user.id === id))
+      .map((id) => {
+        const user = users.find((user) => user.id === id);
+        if (!user) return undefined;
+        return {
+          userId: user.id,
+          fullName: user.fullName,
+          avatarUrl: user.avatarUrl,
+        };
+      })
       .filter((user) => user !== undefined);
     return { users: sortedUsers };
   }

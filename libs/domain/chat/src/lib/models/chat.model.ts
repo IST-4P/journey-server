@@ -32,7 +32,7 @@ export const GetManyConversationsRequestSchema = z
 export const GetManyConversationsResponseSchema = z.object({
   conversations: z.array(
     z.object({
-      id: z.string().uuid(),
+      userId: z.string().uuid(),
       lastMessage: z.string(),
       lastMessageAt: z.coerce.date(),
     })

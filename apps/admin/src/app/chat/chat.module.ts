@@ -12,6 +12,7 @@ import {
 } from './chat.controller';
 import { ChatService } from './chat.service';
 import { ChatListGateway } from './websocket';
+import { ComplaintListGateway } from './websocket/complaint-list.gateway';
 
 @Module({
   imports: [
@@ -56,6 +57,7 @@ import { ChatListGateway } from './websocket';
   providers: [
     ChatService,
     ChatListGateway,
+    ComplaintListGateway,
     {
       provide: 'CHAT_SERVICE',
       useExisting: ChatService,

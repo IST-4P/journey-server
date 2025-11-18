@@ -9,8 +9,8 @@ import { createClient, RedisClientType } from 'redis';
 import { Server, Socket } from 'socket.io';
 import { ChatService } from '../chat.service';
 
-@WebSocketGateway({ namespace: 'chat-list' })
-export class ChatListGateway implements OnGatewayConnection {
+@WebSocketGateway({ namespace: 'complaint-list' })
+export class ComplaintListGateway implements OnGatewayConnection {
   private redisSubscriber?: RedisClientType;
 
   constructor(
@@ -34,8 +34,8 @@ export class ChatListGateway implements OnGatewayConnection {
       this.redisSubscriber = createClient({ url: redisUrl });
       await this.redisSubscriber.connect();
 
-      await this.redisSubscriber.subscribe('chat:conversationUpdated', () => {
-        this.handleConversationUpdatedFromRedis();
+      await this.redisSubscriber.subscribe('complaint:complaintUpdated', () => {
+        this.handleComplaintUpdatedFromRedis();
       });
     } catch (error) {
       console.error('❌ Failed to connect Redis subscriber:', error);
@@ -50,24 +50,20 @@ export class ChatListGateway implements OnGatewayConnection {
     }
   }
 
-  private async handleConversationUpdatedFromRedis() {
+  private async handleComplaintUpdatedFromRedis() {
     try {
       // Lấy tất cả connected sockets và refresh conversations cho từng admin
       const sockets = await this.server.fetchSockets();
 
       for (const socket of sockets) {
-        const adminId = socket.data['userId'];
-        if (adminId) {
-          const conversations = await this.chatService.getManyConversations({
-            adminId,
-            page: 1,
-            limit: 15,
-          });
-          socket.emit('conversationsRefreshed', conversations);
-        }
+        const complaints = await this.chatService.getManyComplaints({
+          page: 1,
+          limit: 15,
+        });
+        socket.emit('complaintsRefreshed', complaints);
       }
     } catch (error) {
-      console.error('❌ Error handling conversationUpdated from Redis:', error);
+      console.error('❌ Error handling complaintUpdated from Redis:', error);
     }
   }
 }

@@ -249,7 +249,7 @@ message GetFullNameAndAvatarRequest {
 }
 
 message UserFullNameAndAvatar {
-  string id = 1;
+  string userId = 1;
   string fullName = 2;
   string avatarUrl = 3;
 }

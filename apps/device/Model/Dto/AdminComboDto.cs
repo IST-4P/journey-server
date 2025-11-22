@@ -18,13 +18,13 @@ namespace device.Model.Dto
 
     public class AdminComboCreateDto
     {
-        public required string Name { get; set; }
-        public required double Price { get; set; }
+        public string Name { get; set; } = string.Empty;
+        public double Price { get; set; }
         public string? Description { get; set; }
         public List<string>? Images { get; set; }
 
         // List of devices to add to combo with their quantities
-        public required List<ComboDeviceInputDto> DeviceItems { get; set; }
+        public List<ComboDeviceInputDto> DeviceItems { get; set; } = new();
     }
 
     public class AdminComboUpdateDto

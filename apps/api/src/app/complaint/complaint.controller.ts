@@ -1,5 +1,4 @@
 import {
-  CreateComplaintMessageRequestDTO,
   CreateComplaintRequestDTO,
   GetManyComplaintMessagesRequestDTO,
   GetManyComplaintsRequestDTO,
@@ -38,13 +37,5 @@ export class ComplaintMessageController {
   @Get()
   getManyComplaintMessages(@Query() query: GetManyComplaintMessagesRequestDTO) {
     return this.complaintService.getManyComplaintMessages(query);
-  }
-
-  @Post()
-  createComplaintMessage(
-    @Body() body: Omit<CreateComplaintMessageRequestDTO, 'senderId'>,
-    @ActiveUser('userId') senderId: string
-  ) {
-    return this.complaintService.createComplaintMessage({ ...body, senderId });
   }
 }

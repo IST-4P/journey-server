@@ -19,9 +19,9 @@ export const DeviceValidatorSchema = z.object({
 
 export const ComboDeviceItemValidatorSchema = z.object({
   deviceId: z.string().uuid(),
-  deviceName: z.string(),
-  devicePrice: z.number().min(0),
   quantity: z.number().int().min(1),
+  deviceName: z.string().min(1),
+  devicePrice: z.number().min(0)
 });
 
 export const ComboValidatorSchema = z.object({

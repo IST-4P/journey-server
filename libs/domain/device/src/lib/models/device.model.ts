@@ -83,7 +83,7 @@ export const GetManyCombosRequestSchema = z
 export const GetManyCombosResponseSchema = z.object({
   combos: z.array(
     ComboValidatorSchema.omit({ devices: true }).extend({
-      deviceCount: z.number().int(),
+      deviceCount: z.number().int()
     })
   ),
   page: z.number().int(),
@@ -98,7 +98,11 @@ export const CreateComboRequestSchema = ComboValidatorSchema.omit({
   updatedAt: true,
   devices: true,
 }).extend({
-  deviceItems: z.array(ComboDeviceItemValidatorSchema),
+  deviceItems: z.array(z.object({
+    deviceId: z.string().uuid(),
+    quantity: z.number().int().min(1),
+    
+  })),
 });
 
 export const UpdateComboRequestSchema = ComboValidatorSchema.omit({

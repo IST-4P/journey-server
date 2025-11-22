@@ -147,11 +147,15 @@ export class AuthService {
   }
 
   async register(body: RegisterRequest) {
-    const user = await this.userRepository.findUnique({
+    const userEmail = await this.userRepository.findUnique({
       email: body.email,
     });
 
-    if (user) {
+    const userPhone = await this.userRepository.findUnique({
+      phone: body.phone,
+    });
+
+    if (userEmail || userPhone) {
       throw EmailAlreadyExistsException;
     }
 

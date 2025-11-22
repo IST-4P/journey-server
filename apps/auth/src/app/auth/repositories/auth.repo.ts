@@ -61,7 +61,7 @@ export class AuthRepository {
   findUniqueRefreshToken(
     token: Prisma.RefreshTokenWhereUniqueInput
   ): Promise<RefreshToken | null> {
-    return this.prismaService.refreshToken.findUniqueOrThrow({
+    return this.prismaService.refreshToken.findUnique({
       where: token,
     });
   }

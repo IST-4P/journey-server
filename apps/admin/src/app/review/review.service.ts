@@ -36,12 +36,6 @@ export class ReviewService implements OnModuleInit {
     return lastValueFrom(this.reviewService.adminDeleteReview(data));
   }
 
-  updateReview(
-    data: ReviewProto.UpdateReviewRequest
-  ): Promise<ReviewProto.ReviewResponse> {
-    return lastValueFrom(this.reviewService.updateReview(data));
-  }
-
   getReviewsByVehicle(
     data: ReviewProto.GetReviewsByVehicleRequest
   ): Promise<ReviewProto.GetReviewsResponse> {

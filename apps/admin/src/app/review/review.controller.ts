@@ -5,18 +5,9 @@ import {
   GetReviewsByComboRequestDTO,
   GetReviewsByDeviceRequestDTO,
   GetReviewsByVehicleRequestDTO,
-  UpdateReviewRequestDTO,
 } from '@domain/review';
 import { ActiveUser, Auth, AuthType } from '@hacmieu-journey/nestjs';
-import {
-  Body,
-  Controller,
-  Delete,
-  Get,
-  Param,
-  Put,
-  Query,
-} from '@nestjs/common';
+import { Controller, Delete, Get, Param, Query } from '@nestjs/common';
 import { ReviewService } from './review.service';
 
 @Controller('review')
@@ -28,7 +19,7 @@ export class ReviewController {
   @Get()
   @Auth([AuthType.Admin])
   getAllReviews(
-    @Query() query: GetAllReviewsRequestDTO,
+    @Query() query: Omit<GetAllReviewsRequestDTO, 'adminId'>,
     @ActiveUser('userId') userId: string
   ) {
     return this.reviewService.getAllReviews({
@@ -37,25 +28,13 @@ export class ReviewController {
     } as any);
   }
 
-  @Get(':id')
+  @Get(':reviewId')
   @Auth([AuthType.Admin])
   getReviewById(@Param() query: GetReviewByIdRequestDTO) {
     return this.reviewService.getReviewById(query);
   }
 
-  @Put()
-  @Auth([AuthType.Admin])
-  updateReview(
-    @Body() body: Omit<UpdateReviewRequestDTO, 'userId'>,
-    @ActiveUser('userId') userId: string
-  ) {
-    return this.reviewService.updateReview({
-      ...body,
-      userId,
-    });
-  }
-
-  @Delete(':id')
+  @Delete(':reviewId')
   @Auth([AuthType.Admin])
   deleteReview(
     @Param() params: Omit<AdminDeleteReviewRequestDTO, 'adminId'>,

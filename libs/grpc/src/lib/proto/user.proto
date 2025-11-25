@@ -8,6 +8,7 @@ service UserService {
   rpc UpdateProfile(UpdateProfileRequest) returns (GetProfileResponse);
   rpc GetAllUserIds(GetAllUserIdsRequest) returns (GetAllUserIdsResponse);
   rpc GetFullNameAndAvatar(GetFullNameAndAvatarRequest) returns (GetFullNameAndAvatarResponse);
+  rpc UserCount(GetAllUserIdsRequest) returns (UserCountResponse);
 
   rpc GetDriverLicense(GetDriverLicenseRequest) returns (GetDriverLicenseResponse);
   rpc CreateDriverLicense(CreateDriverLicenseRequest) returns (GetDriverLicenseResponse);
@@ -84,6 +85,10 @@ message GetAllUserIdsRequest {}
 
 message GetAllUserIdsResponse {
   repeated string userIds = 1;
+}
+
+message UserCountResponse {
+  int32 userCount = 1;
 }
 
 // GetDriverLicense

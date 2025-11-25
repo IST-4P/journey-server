@@ -10,6 +10,7 @@ service BookingService {
   rpc UpdateStatusBooking(UpdateStatusBookingRequest) returns (GetBookingResponse);
   rpc GetInformationBooking(GetInformationBookingRequest) returns (GetInformationBookingResponse);
   rpc GetVehicleNamesByBookingIds(GetVehicleNamesByBookingIdsRequest) returns (GetVehicleNamesByBookingIdsResponse);
+  rpc BookingCount(BookingCountRequest) returns (BookingCountResponse);
 
   rpc GetManyCheckInOuts(GetManyCheckInOutsRequest) returns (GetManyCheckInOutsResponse);
   rpc GetCheckInOut(GetCheckInOutRequest) returns (GetCheckInOutResponse);
@@ -143,6 +144,16 @@ message GetVehicleNamesByBookingIdsRequest {
 
 message GetVehicleNamesByBookingIdsResponse {
   repeated string vehicleNames = 1;
+}
+
+message BookingCountRequest {
+  string status = 1;
+}
+
+message BookingCountResponse {
+  int32 bookingCount = 1;
+  int32 extensionPending = 2;
+  int32 checkOutPending = 3;
 }
 
 // ======================================================== CheckInOut

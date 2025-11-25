@@ -2,6 +2,7 @@ import {
   CreateRefundRequest,
   GetManyRefundsRequest,
   GetRefundRequest,
+  RefundCountRequest,
   UpdateRefundStatusRequest,
 } from '@domain/payment';
 import { Injectable } from '@nestjs/common';
@@ -60,6 +61,14 @@ export class RefundRepository {
         id: data.id,
       },
       data: {
+        status: data.status,
+      },
+    });
+  }
+
+  async refundCount(data: RefundCountRequest) {
+    return this.prismaService.refund.count({
+      where: {
         status: data.status,
       },
     });

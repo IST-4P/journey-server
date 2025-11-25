@@ -72,6 +72,10 @@ export interface GetAllUserIdsResponse {
   userIds: string[];
 }
 
+export interface UserCountResponse {
+  userCount: number;
+}
+
 /** GetDriverLicense */
 export interface GetDriverLicenseRequest {
   userId: string;
@@ -257,6 +261,8 @@ export interface UserServiceClient {
 
   getFullNameAndAvatar(request: GetFullNameAndAvatarRequest): Observable<GetFullNameAndAvatarResponse>;
 
+  userCount(request: GetAllUserIdsRequest): Observable<UserCountResponse>;
+
   getDriverLicense(request: GetDriverLicenseRequest): Observable<GetDriverLicenseResponse>;
 
   createDriverLicense(request: CreateDriverLicenseRequest): Observable<GetDriverLicenseResponse>;
@@ -302,6 +308,10 @@ export interface UserServiceController {
   getFullNameAndAvatar(
     request: GetFullNameAndAvatarRequest,
   ): Promise<GetFullNameAndAvatarResponse> | Observable<GetFullNameAndAvatarResponse> | GetFullNameAndAvatarResponse;
+
+  userCount(
+    request: GetAllUserIdsRequest,
+  ): Promise<UserCountResponse> | Observable<UserCountResponse> | UserCountResponse;
 
   getDriverLicense(
     request: GetDriverLicenseRequest,
@@ -360,6 +370,7 @@ export function UserServiceControllerMethods() {
       "updateProfile",
       "getAllUserIds",
       "getFullNameAndAvatar",
+      "userCount",
       "getDriverLicense",
       "createDriverLicense",
       "updateDriverLicense",

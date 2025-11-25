@@ -57,6 +57,10 @@ export const GetFullNameAndAvatarResponseSchema = z.object({
   ),
 });
 
+export const UserCountResponseSchema = z.object({
+  userCount: z.number().int(),
+});
+
 export type GetProfileRequest = z.infer<typeof GetProfileRequestSchema>;
 export type GetProfileResponse = z.infer<typeof GetProfileResponseSchema>;
 export type UpdateProfileRequest = z.infer<typeof UpdateProfileRequestSchema>;
@@ -71,3 +75,4 @@ export type GetFullNameAndAvatarRequest = z.infer<
 export type GetFullNameAndAvatarResponse = z.infer<
   typeof GetFullNameAndAvatarResponseSchema
 >;
+export type UserCountResponse = z.infer<typeof UserCountResponseSchema>;

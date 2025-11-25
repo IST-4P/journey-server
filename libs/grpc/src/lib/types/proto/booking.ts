@@ -120,6 +120,16 @@ export interface GetVehicleNamesByBookingIdsResponse {
   vehicleNames: string[];
 }
 
+export interface BookingCountRequest {
+  status: string;
+}
+
+export interface BookingCountResponse {
+  bookingCount: number;
+  extensionPending: number;
+  checkOutPending: number;
+}
+
 /**
  * ======================================================== CheckInOut
  * GetManyCheckInOuts
@@ -316,6 +326,8 @@ export interface BookingServiceClient {
     request: GetVehicleNamesByBookingIdsRequest,
   ): Observable<GetVehicleNamesByBookingIdsResponse>;
 
+  bookingCount(request: BookingCountRequest): Observable<BookingCountResponse>;
+
   getManyCheckInOuts(request: GetManyCheckInOutsRequest): Observable<GetManyCheckInOutsResponse>;
 
   getCheckInOut(request: GetCheckInOutRequest): Observable<GetCheckInOutResponse>;
@@ -378,6 +390,10 @@ export interface BookingServiceController {
     | Promise<GetVehicleNamesByBookingIdsResponse>
     | Observable<GetVehicleNamesByBookingIdsResponse>
     | GetVehicleNamesByBookingIdsResponse;
+
+  bookingCount(
+    request: BookingCountRequest,
+  ): Promise<BookingCountResponse> | Observable<BookingCountResponse> | BookingCountResponse;
 
   getManyCheckInOuts(
     request: GetManyCheckInOutsRequest,
@@ -450,6 +466,7 @@ export function BookingServiceControllerMethods() {
       "updateStatusBooking",
       "getInformationBooking",
       "getVehicleNamesByBookingIds",
+      "bookingCount",
       "getManyCheckInOuts",
       "getCheckInOut",
       "checkIn",

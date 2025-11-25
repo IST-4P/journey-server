@@ -83,4 +83,9 @@ export class ProfileService {
   async getFullNameAndAvatar(data: GetFullNameAndAvatarRequest) {
     return this.profileRepo.getFullNameAndAvatar(data);
   }
+
+  async userCount() {
+    const userCount = await this.profileRepo.userCount();
+    return { userCount };
+  }
 }

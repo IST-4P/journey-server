@@ -102,4 +102,8 @@ export class ProfileRepository {
       .filter((user) => user !== undefined);
     return { users: sortedUsers };
   }
+
+  userCount() {
+    return this.prisma.profile.count();
+  }
 }

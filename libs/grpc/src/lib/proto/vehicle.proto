@@ -25,6 +25,7 @@ service VehicleService {
   rpc UpdateVehicle(UpdateVehicleRequest) returns (GetVehicleResponse);
   rpc DeleteVehicle(GetVehicleRequest) returns (MessageResponse);
   rpc CalculateVehiclePrice(CalculateVehiclePriceRequest) returns (CalculateVehiclePriceResponse);
+  rpc VehicleCount(VehicleCountRequest) returns (VehicleCountResponse);
 }
 // ======================================================== Feature
 // GetFeature
@@ -294,4 +295,12 @@ message CalculateVehiclePriceResponse {
   int32 vat = 3;
   int32 totalAmount = 4;
   int32 deposit = 5;
+}
+
+message VehicleCountRequest {
+  string status = 1;
+}
+
+message VehicleCountResponse {
+  int32 vehicleCount = 1;
 }

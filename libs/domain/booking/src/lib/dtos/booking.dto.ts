@@ -1,6 +1,8 @@
 import { createZodDto } from 'nestjs-zod';
 import z from 'zod';
 import {
+  BookingCountRequestSchema,
+  BookingCountResponseSchema,
   CancelBookingRequestSchema,
   CancelBookingResponseSchema,
   CreateBookingRequestSchema,
@@ -44,4 +46,10 @@ export class GetInformationBookingResponseDTO extends createZodDto(
 ) {}
 export class GetVehicleNamesByBookingIdsRequestDTO extends createZodDto(
   GetVehicleNamesByBookingIdsRequestSchema
+) {}
+export class BookingCountRequestDTO extends createZodDto(
+  BookingCountRequestSchema
+) {}
+export class BookingCountResponseDTO extends createZodDto(
+  BookingCountResponseSchema
 ) {}

@@ -151,6 +151,14 @@ export const GetInformationTransactionResponseSchema = z.object({
   difference: z.number(),
 });
 
+export const RefundCountRequestSchema = RefundValidator.pick({
+  status: true,
+});
+
+export const RefundCountResponseSchema = z.object({
+  refundPending: z.number().int(),
+});
+
 export type GetManyPaymentsRequest = z.infer<
   typeof GetManyPaymentsRequestSchema
 >;
@@ -193,3 +201,5 @@ export type GetTransactionResponse = z.infer<
 export type GetInformationTransactionResponse = z.infer<
   typeof GetInformationTransactionResponseSchema
 >;
+export type RefundCountRequest = z.infer<typeof RefundCountRequestSchema>;
+export type RefundCountResponse = z.infer<typeof RefundCountResponseSchema>;

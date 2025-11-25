@@ -7,6 +7,7 @@ import {
   GetProfileRequest,
   GetProfileResponse,
   UpdateProfileRequest,
+  UserCountResponse,
 } from '@domain/user';
 import { Controller } from '@nestjs/common';
 import { GrpcMethod } from '@nestjs/microservices';
@@ -43,5 +44,10 @@ export class ProfileGrpcController {
     data: GetFullNameAndAvatarRequest
   ): Promise<GetFullNameAndAvatarResponse> {
     return this.profileService.getFullNameAndAvatar(data);
+  }
+
+  @GrpcMethod('UserService', 'UserCount')
+  userCount(): Promise<UserCountResponse> {
+    return this.profileService.userCount();
   }
 }

@@ -11,6 +11,7 @@ import { NotificationModule } from './notification/notification.module';
 import { PaymentModule } from './payment/payment.module';
 import { RentalModule } from './rental/rental.module';
 import { ReviewModule } from './review/review.module';
+import { SystemModule } from './system/system.module';
 import { UserModule } from './user/user.module';
 import { VehicleModule } from './vehicle/vehicle.module';
 
@@ -30,6 +31,7 @@ import { VehicleModule } from './vehicle/vehicle.module';
     RentalModule,
     PaymentModule,
     MediaModule,
+    SystemModule,
   ],
 })
 export class AppModule {}

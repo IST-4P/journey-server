@@ -2,6 +2,7 @@ import {
   CreateRefundRequest,
   GetManyRefundsRequest,
   GetRefundRequest,
+  RefundCountRequest,
   UpdateRefundStatusRequest,
 } from '@domain/payment';
 import { Injectable } from '@nestjs/common';
@@ -47,5 +48,10 @@ export class RefundService {
       throw RefundNotFoundException;
     }
     return this.refundRepository.updateRefundStatus(data);
+  }
+
+  async refundCount(data: RefundCountRequest) {
+    const refundCount = await this.refundRepository.refundCount(data);
+    return { refundCount };
   }
 }

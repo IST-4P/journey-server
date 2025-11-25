@@ -8,6 +8,8 @@ import {
   GetVehicleRequest,
   GetVehicleResponse,
   UpdateVehicleRequest,
+  VehicleCountRequest,
+  VehicleCountResponse,
 } from '@domain/vehicle';
 import { MessageResponse } from '@hacmieu-journey/nestjs';
 import { Controller } from '@nestjs/common';
@@ -50,5 +52,10 @@ export class VehicleGrpcController {
     data: CalculateVehiclePriceRequest
   ): Promise<CalculateVehiclePriceResponse> {
     return this.vehicleService.calculatePrice(data);
+  }
+
+  @GrpcMethod('VehicleService', 'VehicleCount')
+  vehicleCount(data: VehicleCountRequest): Promise<VehicleCountResponse> {
+    return this.vehicleService.vehicleCount(data);
   }
 }

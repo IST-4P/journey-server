@@ -1,4 +1,4 @@
-import { BookingProto, ReviewProto } from '@hacmieu-journey/grpc';
+import { BookingProto, RentalProto, ReviewProto } from '@hacmieu-journey/grpc';
 import { Module } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { ClientsModule, Transport } from '@nestjs/microservices';
@@ -33,6 +33,20 @@ import { ReviewService } from './review.service';
               'localhost:5008',
             package: BookingProto.BOOKING_PACKAGE_NAME,
             protoPath: join(__dirname, '../../libs/grpc/proto/booking.proto'),
+          },
+        }),
+        inject: [ConfigService],
+      },
+      {
+        name: RentalProto.RENTAL_PACKAGE_NAME,
+        useFactory: (configService: ConfigService) => ({
+          transport: Transport.GRPC,
+          options: {
+            url:
+              configService.getOrThrow('RENTAL_GRPC_SERVICE_URL') ||
+              'localhost:5007',
+            package: RentalProto.RENTAL_PACKAGE_NAME,
+            protoPath: join(__dirname, '../../libs/grpc/proto/rental.proto'),
           },
         }),
         inject: [ConfigService],

@@ -71,6 +71,14 @@ export const CalculateVehiclePriceResponseSchema = z.object({
   deposit: z.number().min(0),
 });
 
+export const VehicleCountRequestSchema = VehicleValidatorSchema.pick({
+  status: true,
+});
+
+export const VehicleCountResponseSchema = z.object({
+  vehicleCount: z.number().int().min(0),
+});
+
 export type GetVehicleRequest = z.infer<typeof GetVehicleRequestSchema>;
 export type GetVehicleResponse = z.infer<typeof GetVehicleResponseSchema>;
 export type GetManyVehiclesRequest = z.infer<
@@ -88,3 +96,5 @@ export type CalculateVehiclePriceRequest = z.infer<
 export type CalculateVehiclePriceResponse = z.infer<
   typeof CalculateVehiclePriceResponseSchema
 >;
+export type VehicleCountRequest = z.infer<typeof VehicleCountRequestSchema>;
+export type VehicleCountResponse = z.infer<typeof VehicleCountResponseSchema>;

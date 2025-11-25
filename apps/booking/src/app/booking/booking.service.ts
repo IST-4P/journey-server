@@ -1,4 +1,5 @@
 import {
+  BookingCountRequest,
   CancelBookingRequest,
   CreateBookingRequest,
   GetBookingRequest,
@@ -49,5 +50,9 @@ export class BookingService {
 
   async getVehicleNamesByBookingIds(data: GetVehicleNamesByBookingIdsRequest) {
     return this.bookingRepository.getVehicleNamesByBookingIds(data);
+  }
+
+  async bookingCount(data: BookingCountRequest) {
+    return this.bookingRepository.bookingCount(data);
   }
 }

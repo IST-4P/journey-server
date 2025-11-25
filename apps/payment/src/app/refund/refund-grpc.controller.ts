@@ -4,6 +4,7 @@ import {
   GetManyRefundsResponse,
   GetRefundRequest,
   GetRefundResponse,
+  RefundCountRequest,
   UpdateRefundStatusRequest,
 } from '@domain/payment';
 import { Controller } from '@nestjs/common';
@@ -40,5 +41,10 @@ export class RefundGrpcController {
     data: UpdateRefundStatusRequest
   ): Promise<GetRefundResponse> {
     return this.refundService.updateRefundStatus(data);
+  }
+
+  @GrpcMethod('PaymentService', 'RefundCount')
+  refundCount(data: RefundCountRequest): Promise<{ refundCount: number }> {
+    return this.refundService.refundCount(data);
   }
 }

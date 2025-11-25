@@ -9,6 +9,8 @@ import {
   GetVehicleRequestSchema,
   GetVehicleResponseSchema,
   UpdateVehicleRequestSchema,
+  VehicleCountRequestSchema,
+  VehicleCountResponseSchema,
 } from '../models';
 
 export class GetVehicleRequestDTO extends createZodDto(
@@ -45,4 +47,12 @@ export class DeleteVehicleRequestDTO extends createZodDto(
 
 export class CalculateVehiclePriceRequestDTO extends createZodDto(
   CalculateVehiclePriceRequestSchema
+) {}
+
+export class VehicleCountRequestDTO extends createZodDto(
+  VehicleCountRequestSchema
+) {}
+
+export class VehicleCountResponseDTO extends createZodDto(
+  VehicleCountResponseSchema
 ) {}

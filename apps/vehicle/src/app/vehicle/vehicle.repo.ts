@@ -5,6 +5,7 @@ import {
   GetManyVehiclesRequest,
   GetVehicleRequest,
   UpdateVehicleRequest,
+  VehicleCountRequest,
   VehicleStatus,
 } from '@domain/vehicle';
 import { calculateVehiclePrice } from '@hacmieu-journey/nestjs';
@@ -260,6 +261,14 @@ export class VehicleRepository {
       data: {
         totalReviewIds: { push: data.reviewId },
         averageRating: newAverage,
+      },
+    });
+  }
+
+  async vehicleCount(data: VehicleCountRequest) {
+    return this.prisma.vehicle.count({
+      where: {
+        status: data.status,
       },
     });
   }

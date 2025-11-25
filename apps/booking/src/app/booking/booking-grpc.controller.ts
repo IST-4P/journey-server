@@ -1,4 +1,6 @@
 import {
+  BookingCountRequest,
+  BookingCountResponse,
   CancelBookingRequest,
   CreateBookingRequest,
   GetBookingRequest,
@@ -57,5 +59,10 @@ export class BookingGrpcController {
     data: GetVehicleNamesByBookingIdsRequest
   ): Promise<GetVehicleNamesByBookingIdsResponse> {
     return this.bookingService.getVehicleNamesByBookingIds(data);
+  }
+
+  @GrpcMethod('BookingService', 'BookingCount')
+  bookingCount(data: BookingCountRequest): Promise<BookingCountResponse> {
+    return this.bookingService.bookingCount(data);
   }
 }

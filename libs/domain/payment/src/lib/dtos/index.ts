@@ -13,6 +13,8 @@ import {
   GetRefundRequestSchema,
   GetRefundResponseSchema,
   GetTransactionRequestSchema,
+  RefundCountRequestSchema,
+  RefundCountResponseSchema,
   UpdateRefundStatusRequestSchema,
   UpdateStatusPaymentRequestSchema,
   WebhookPaymentRequestSchema,
@@ -75,4 +77,10 @@ export class GetManyTransactionsRequestDTO extends createZodDto(
 ) {}
 export class GetTransactionRequestDTO extends createZodDto(
   GetTransactionRequestSchema
+) {}
+export class RefundCountRequestDTO extends createZodDto(
+  RefundCountRequestSchema
+) {}
+export class RefundCountResponseDTO extends createZodDto(
+  RefundCountResponseSchema
 ) {}

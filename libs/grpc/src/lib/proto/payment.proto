@@ -12,6 +12,7 @@ service PaymentService {
   rpc GetManyRefunds(GetManyRefundsRequest) returns (GetManyRefundsResponse);
   rpc UpdateRefundStatus(UpdateRefundStatusRequest) returns (GetRefundResponse);
   rpc GetRefundAdmin(GetRefundAdminRequest) returns (GetRefundResponse);
+  rpc RefundCount(RefundCountRequest) returns (RefundCountResponse);
 
   rpc GetTransaction(GetTransactionRequest) returns (GetTransactionResponse);
   rpc GetManyTransactions(GetManyTransactionsRequest) returns (GetManyTransactionsResponse);
@@ -148,6 +149,14 @@ message GetManyRefundsResponseWithVehicleName {
 message UpdateRefundStatusRequest {
   string id = 1;
   string status = 2;
+}
+
+message RefundCountRequest {
+  string status = 1;
+}
+
+message RefundCountResponse {
+  int32 refundCount = 1;
 }
 
 // GetTransaction

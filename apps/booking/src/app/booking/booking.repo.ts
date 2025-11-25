@@ -1,4 +1,5 @@
 import {
+  BookingCountRequest,
   BookingStatus,
   BookingStatusValues,
   CancelBookingRequest,
@@ -10,6 +11,7 @@ import {
   PaymentStatusValues,
   UpdateStatusBookingRequest,
 } from '@domain/booking';
+import { ExtensionStatusValues } from '@domain/rental';
 import { NatsClient } from '@hacmieu-journey/nats';
 import {
   calculateDuration,
@@ -401,5 +403,35 @@ export class BookingRepository {
       select: { vehicleName: true },
     });
     return { vehicleNames: vehicleNames.map((item) => item.vehicleName) };
+  }
+
+  async bookingCount(data: BookingCountRequest) {
+    const bookingCount$ = this.prismaService.booking.count({
+      where: {
+        status: data.status,
+      },
+    });
+
+    const extensionPending$ = this.prismaService.bookingExtension.count({
+      where: {
+        status: ExtensionStatusValues.PENDING,
+      },
+    });
+
+    const checkOutPending$ = this.prismaService.checkInOut.count({
+      where: {
+        verified: false,
+      },
+    });
+
+    const [bookingCount, extensionPending, checkOutPending] = await Promise.all(
+      [bookingCount$, extensionPending$, checkOutPending$]
+    );
+
+    return {
+      bookingCount,
+      extensionPending,
+      checkOutPending,
+    };
   }
 }

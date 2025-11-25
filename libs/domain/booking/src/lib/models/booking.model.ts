@@ -73,6 +73,16 @@ export const GetVehicleNamesByBookingIdsResponseSchema = z.object({
   vehicleNames: z.array(z.string()),
 });
 
+export const BookingCountRequestSchema = BookingValidatorSchema.pick({
+  status: true,
+});
+
+export const BookingCountResponseSchema = z.object({
+  bookingCount: z.number().int(),
+  extensionPending: z.number().int(),
+  checkOutPending: z.number().int(),
+});
+
 export type GetBookingRequest = z.infer<typeof GetBookingRequestSchema>;
 export type GetBookingResponse = z.infer<typeof GetBookingResponseSchema>;
 export type GetManyBookingsRequest = z.infer<
@@ -96,3 +106,5 @@ export type GetVehicleNamesByBookingIdsRequest = z.infer<
 export type GetVehicleNamesByBookingIdsResponse = z.infer<
   typeof GetVehicleNamesByBookingIdsResponseSchema
 >;
+export type BookingCountRequest = z.infer<typeof BookingCountRequestSchema>;
+export type BookingCountResponse = z.infer<typeof BookingCountResponseSchema>;

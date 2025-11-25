@@ -142,6 +142,14 @@ export interface UpdateRefundStatusRequest {
   status: string;
 }
 
+export interface RefundCountRequest {
+  status: string;
+}
+
+export interface RefundCountResponse {
+  refundCount: number;
+}
+
 /** GetTransaction */
 export interface GetTransactionRequest {
   id: number;
@@ -220,6 +228,8 @@ export interface PaymentServiceClient {
 
   getRefundAdmin(request: GetRefundAdminRequest): Observable<GetRefundResponse>;
 
+  refundCount(request: RefundCountRequest): Observable<RefundCountResponse>;
+
   getTransaction(request: GetTransactionRequest): Observable<GetTransactionResponse>;
 
   getManyTransactions(request: GetManyTransactionsRequest): Observable<GetManyTransactionsResponse>;
@@ -258,6 +268,10 @@ export interface PaymentServiceController {
     request: GetRefundAdminRequest,
   ): Promise<GetRefundResponse> | Observable<GetRefundResponse> | GetRefundResponse;
 
+  refundCount(
+    request: RefundCountRequest,
+  ): Promise<RefundCountResponse> | Observable<RefundCountResponse> | RefundCountResponse;
+
   getTransaction(
     request: GetTransactionRequest,
   ): Promise<GetTransactionResponse> | Observable<GetTransactionResponse> | GetTransactionResponse;
@@ -285,6 +299,7 @@ export function PaymentServiceControllerMethods() {
       "getManyRefunds",
       "updateRefundStatus",
       "getRefundAdmin",
+      "refundCount",
       "getTransaction",
       "getManyTransactions",
       "getInformationTransaction",

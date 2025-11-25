@@ -5,6 +5,7 @@ import {
   GetManyVehiclesRequest,
   GetVehicleRequest,
   UpdateVehicleRequest,
+  VehicleCountRequest,
 } from '@domain/vehicle';
 import { Injectable } from '@nestjs/common';
 import {
@@ -68,5 +69,10 @@ export class VehicleService {
 
   async calculatePrice(data: CalculateVehiclePriceRequest) {
     return this.vehicleRepo.calculatePrice(data);
+  }
+
+  async vehicleCount(data: VehicleCountRequest) {
+    const vehicleCount = await this.vehicleRepo.vehicleCount(data);
+    return { vehicleCount };
   }
 }

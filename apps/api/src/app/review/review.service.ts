@@ -1,5 +1,6 @@
 import { BookingStatusValues } from '@domain/booking';
-import { BookingProto, ReviewProto } from '@hacmieu-journey/grpc';
+import { RentalStatusValues } from '@domain/rental';
+import { BookingProto, RentalProto, ReviewProto } from '@hacmieu-journey/grpc';
 import { Inject, Injectable, OnModuleInit } from '@nestjs/common';
 import { ClientGrpc } from '@nestjs/microservices';
 import { lastValueFrom } from 'rxjs';
@@ -8,12 +9,15 @@ import { lastValueFrom } from 'rxjs';
 export class ReviewService implements OnModuleInit {
   private reviewService!: ReviewProto.ReviewServiceClient;
   private bookingService!: BookingProto.BookingServiceClient;
+  private rentalService!: RentalProto.RentalServiceClient;
 
   constructor(
     @Inject(ReviewProto.REVIEW_PACKAGE_NAME)
     private reviewClient: ClientGrpc,
     @Inject(BookingProto.BOOKING_PACKAGE_NAME)
-    private bookingClient: ClientGrpc
+    private bookingClient: ClientGrpc,
+    @Inject(RentalProto.RENTAL_PACKAGE_NAME)
+    private rentalClient: ClientGrpc
   ) {}
 
   onModuleInit() {
@@ -24,6 +28,10 @@ export class ReviewService implements OnModuleInit {
     this.bookingService =
       this.bookingClient.getService<BookingProto.BookingServiceClient>(
         BookingProto.BOOKING_SERVICE_NAME
+      );
+    this.rentalService =
+      this.rentalClient.getService<RentalProto.RentalServiceClient>(
+        RentalProto.RENTAL_SERVICE_NAME
       );
   }
 
@@ -49,6 +57,14 @@ export class ReviewService implements OnModuleInit {
 
       if (booking.status !== BookingStatusValues.COMPLETED) {
         throw new Error('Cannot review a booking that is not completed');
+      }
+    } else if (data.rentalId) {
+      const rental = await lastValueFrom(
+        this.rentalService.getRentalById({ rentalId: data.rentalId })
+      );
+
+      if (rental.status !== RentalStatusValues.COMPLETED) {
+        throw new Error('Cannot review a rental that is not completed');
       }
     }
     return lastValueFrom(this.reviewService.createReview(data));

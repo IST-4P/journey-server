@@ -26,5 +26,8 @@ namespace review.Interface
         // Admin operations
         Task<PagedResultDto<ReviewModel>> GetAllReviewsAsync(ReviewQueryDto query, ReviewType? type = null);
         Task<bool> AdminDeleteReviewAsync(Guid reviewId, Guid adminId);
+
+        // Dashboard
+        Task<int> GetTotalReviewsAsync();
     }
 }

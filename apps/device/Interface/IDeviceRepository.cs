@@ -16,6 +16,9 @@ namespace device.Interface
         Task<DeviceEntity?> UpdateDeviceAsync(Guid id, DeviceEntity device);
         Task<bool> DeleteDeviceAsync(Guid id);
 
+        //Dashboard
+        Task<int> GetTotalDevicesAsync();
+
         // User queries
         Task<PagedResult<DeviceEntity>> GetAvailableDevicesAsync(DeviceQuery query);
 

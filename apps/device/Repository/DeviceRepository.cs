@@ -1,6 +1,5 @@
 using device.Data;
 using device.Interface;
-using device.Model.Entities;
 using device.Model.Dto;
 using Microsoft.EntityFrameworkCore;
 using DeviceEntity = device.Model.Entities.Device;
@@ -15,6 +14,11 @@ namespace device.Repository
             _dbContext = dbContext;
         }
 
+        public async Task<int> GetTotalDevicesAsync()
+        {
+            return await _dbContext.Set<DeviceEntity>().CountAsync();
+        }
+        
         private static IQueryable<DeviceEntity> ApplyFilter(IQueryable<DeviceEntity> queryable, DeviceQuery query)
         {
             if (!string.IsNullOrWhiteSpace(query.Search))
@@ -61,21 +65,6 @@ namespace device.Repository
                 "quantity" => desc ? queryable.OrderByDescending(d => d.Quantity) : queryable.OrderBy(d => d.Quantity),
                 "brand" => desc ? queryable.OrderByDescending(d => d.Brand) : queryable.OrderBy(d => d.Brand),
                 _ => desc ? queryable.OrderByDescending(d => d.CreateAt) : queryable.OrderBy(d => d.CreateAt),
-            };
-        }
-
-        private static PagedResult<DeviceEntity> ToPaged<T>(IQueryable<DeviceEntity> source, DeviceQuery query, long totalCount)
-        {
-            var page = query.Page <= 0 ? 1 : query.Page;
-            var pageSize = query.PageSize <= 0 ? 10 : query.PageSize;
-            var totalPages = (int)Math.Ceiling(totalCount / (double)pageSize);
-            return new PagedResult<DeviceEntity>
-            {
-                Page = page,
-                PageSize = pageSize,
-                TotalPages = totalPages,
-                TotalCount = totalCount,
-                Items = source.Skip((page - 1) * pageSize).Take(pageSize).ToList(),
             };
         }
 
@@ -132,7 +121,6 @@ namespace device.Repository
             await _dbContext.SaveChangesAsync();
             return existing;
         }
-
 
         public async Task<bool> DeleteDeviceAsync(Guid id)
         {

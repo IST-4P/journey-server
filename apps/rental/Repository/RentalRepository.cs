@@ -240,5 +240,10 @@ namespace rental.Repository
         {
             await _context.SaveChangesAsync();
         }
+
+        public async Task<int> GetTotalRentalAsync()
+        {
+            return await _context.Set<RentalEntity>().CountAsync();
+        }
     }
 }

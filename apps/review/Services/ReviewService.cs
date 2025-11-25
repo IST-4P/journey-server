@@ -276,5 +276,10 @@ namespace review.Services
                 TotalReviews = reviews.Count
             };
         }
+    
+        public async Task<int> GetTotalReviewsAsync()
+        {
+            return await _repository.GetTotalReviewsAsync();
+        }
     }
 }

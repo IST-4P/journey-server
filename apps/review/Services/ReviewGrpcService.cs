@@ -3,7 +3,6 @@ using Grpc.Core;
 using review.Interface;
 using review.Model.Dto;
 using review.Nats;
-using ReviewModel = review.Model.Review;
 using ReviewType = review.Model.ReviewType;
 using ProtoReviewType = Review.ReviewType;
 
@@ -46,7 +45,7 @@ namespace review.Services
                 // Publish review.created event to NATS
                 try
                 {
-                    var reviewCreatedEvent = new review.Nats.Events.ReviewCreatedEvent
+                    var reviewCreatedEvent = new Nats.Events.ReviewCreatedEvent
                     {
                         reviewId = review.Id.ToString(),
                         bookingId = review.BookingId?.ToString(),
@@ -100,7 +99,7 @@ namespace review.Services
                 // Publish review.updated event to NATS
                 try
                 {
-                    var reviewUpdatedEvent = new review.Nats.Events.ReviewUpdatedEvent
+                    var reviewUpdatedEvent = new Nats.Events.ReviewUpdatedEvent
                     {
                         ReviewId = review.Id.ToString(),
                         Rating = review.Rating,
@@ -149,7 +148,7 @@ namespace review.Services
                 {
                     try
                     {
-                        var reviewDeletedEvent = new review.Nats.Events.ReviewDeletedEvent
+                        var reviewDeletedEvent = new Nats.Events.ReviewDeletedEvent
                         {
                             ReviewId = reviewId.ToString(),
                             DeviceId = review.DeviceId?.ToString(),
@@ -542,6 +541,31 @@ namespace review.Services
             }
         }
 
+        public override async Task<Review.ReviewCountResponse> DashboradReivew(Review.ReviewCountRequest request, ServerCallContext context)
+        {
+            try
+            {
+                var totalReviews = await _reviewService.GetTotalReviewsAsync();
+                if (totalReviews < 0)
+                {
+                    throw new RpcException(new Status(StatusCode.NotFound, "Error.CannotGetTotalReviews"));
+                }
+                return new Review.ReviewCountResponse
+                {
+                    ReviewCount = totalReviews,
+                };
+            }
+            catch (RpcException)
+            {
+                throw;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error.GettingTotalReviews");
+                throw new RpcException(new Status(StatusCode.Internal, "An error occurred while retrieving total reviews"));
+            }
+        }
+
         // Helper methods
         private ReviewQueryDto CreateQueryDto(int page, int limit, string searchText,
             int minRating, int maxRating, string startDate, string endDate,
@@ -602,7 +626,7 @@ namespace review.Services
                 ProtoReviewType.Device => ReviewType.Device,
                 ProtoReviewType.Vehicle => ReviewType.Vehicle,
                 ProtoReviewType.Combo => ReviewType.Combo,
-                _ => ReviewType.Device
+                _ => throw new ArgumentOutOfRangeException(nameof(type), $"Unsupported review type: {type}")
             };
         }
     }

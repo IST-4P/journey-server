@@ -14,7 +14,10 @@ namespace device.Repository
         {
             _dbContext = dbContext;
         }
-
+        public async Task<int> GetTotalCombosAsync()
+        {
+            return await _dbContext.Combos.CountAsync();
+        }
         public async Task<PagedResult<Combo>> GetCombosAsync(DeviceQuery query)
         {
             var q = _dbContext.Combos

@@ -23,6 +23,15 @@ service ReviewService {
   // Admin operations
   rpc GetAllReviews (GetAllReviewsRequest) returns (GetReviewsResponse);
   rpc AdminDeleteReview (AdminDeleteReviewRequest) returns (DeleteReviewResponse);
+  rpc DashboradReivew (ReviewCountRequest) returns (ReviewCountResponse);
+}
+
+message ReviewCountRequest{
+  string status = 1;
+}
+
+message ReviewCountResponse{
+  int32 reviewCount = 1;
 }
 
 enum ReviewType {

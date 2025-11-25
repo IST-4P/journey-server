@@ -54,7 +54,6 @@ export class ReviewService implements OnModuleInit {
       const booking = await lastValueFrom(
         this.bookingService.getBooking({ id: data.bookingId })
       );
-
       if (booking.status !== BookingStatusValues.COMPLETED) {
         throw new Error('Cannot review a booking that is not completed');
       }

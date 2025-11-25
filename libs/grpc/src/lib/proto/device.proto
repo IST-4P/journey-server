@@ -25,7 +25,19 @@ service DeviceService {
   rpc UpdateCategory(UpdateCategoryRequest) returns (UpdateCategoryResponse);
   rpc DeleteCategory(DeleteCategoryRequest) returns (DeleteCategoryResponse);
   
+  // DashboradDevice
+  rpc DashboardDevice(CountRequest) returns (CountResponse);
+  rpc DashboardCombo(CountRequest) returns (CountResponse);
 }
+
+message CountRequest{
+  string status = 1;
+}
+
+message CountResponse{
+  int32 total = 1;
+}
+
 // ============================================
 // CATEGORY MESSAGES
 // ============================================

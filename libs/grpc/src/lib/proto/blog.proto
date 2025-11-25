@@ -8,6 +8,15 @@ service BlogService {
   rpc CreateBlog(CreateBlogRequest) returns (GetBlogResponse);
   rpc UpdateBlog(UpdateBlogRequest) returns (GetBlogResponse);
   rpc DeleteBlog(DeleteBlogRequest) returns (DeleteBlogResponse);
+  rpc DashboardBlog(BlogCountRequest) returns (BlogCountResponse);
+}
+
+message BlogCountRequest{
+  string status = 1;
+}
+
+message BlogCountResponse{
+  int32 totalBlog = 1;
 }
 
 // GetBlog

@@ -16,6 +16,11 @@ namespace review.Repository
             _context = context;
         }
 
+        public async Task<int> GetTotalReviewsAsync()
+        {
+            return await _context.Reviews.CountAsync();
+        }
+
         public async Task<ReviewModel> CreateReviewAsync(ReviewModel review)
         {
             _context.Reviews.Add(review);
@@ -142,11 +147,11 @@ namespace review.Repository
                 .AnyAsync(r => r.Id == reviewId && r.UserId == userId);
         }
 
-        
         public async Task<ReviewModel?> GetReviewByBookingIdAsync(Guid bookingId)
         {
             return await _context.Reviews.FirstOrDefaultAsync(r => r.BookingId == bookingId);
         }
+        
         public async Task<ReviewModel?> GetReviewByRentalIdAsync(Guid rentalId)
         {
             return await _context.Reviews.FirstOrDefaultAsync(r => r.RentalId == rentalId);

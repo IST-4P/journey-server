@@ -31,5 +31,8 @@ namespace review.Interface
         Task<ReviewModel?> GetReviewByBookingIdAsync(Guid bookingId);
         Task<ReviewModel?> GetReviewByRentalIdAsync(Guid rentalId);
 
+        // Dashboard
+        Task<int> GetTotalReviewsAsync();
+
     }
 }

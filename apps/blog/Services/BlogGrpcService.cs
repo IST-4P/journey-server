@@ -4,7 +4,7 @@ using Grpc.Core;
 
 namespace Blog.Services
 {
-    public class BlogGrpcService : global::Blog.BlogService.BlogServiceBase
+    public class BlogGrpcService : BlogService.BlogServiceBase
     {
         private readonly IBlogRepository _blogRepository;
         private readonly IMapper _mapper;
@@ -17,9 +17,28 @@ namespace Blog.Services
             _logger = logger;
         }
 
-        public override async Task<GetBlogResponse> GetBlog(
-            GetBlogRequest request,
-            ServerCallContext context)
+        public override async Task<BlogCountResponse> DashboardBlog(BlogCountRequest request, ServerCallContext context)
+        {
+            try
+            {
+                var totalBlogs = await _blogRepository.GetTotalBlogsAsync();
+                if (totalBlogs < 0)
+                {
+                    throw new RpcException(new Status(StatusCode.NotFound, "Error.NoBlogsFound"));
+                }
+                return new BlogCountResponse
+                {
+                    TotalBlog = totalBlogs
+                };
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error.CannotGetBlogCount");
+                throw new RpcException(new Status(StatusCode.Internal, $"Internal error: {ex.Message}"));
+            }
+        }
+
+        public override async Task<GetBlogResponse> GetBlog( GetBlogRequest request,ServerCallContext context)
         {
             try
             {
@@ -61,9 +80,7 @@ namespace Blog.Services
             }
         }
 
-        public override async Task<GetManyBlogsResponse> GetManyBlogs(
-            GetManyBlogsRequest request,
-            ServerCallContext context)
+        public override async Task<GetManyBlogsResponse> GetManyBlogs(GetManyBlogsRequest request,ServerCallContext context)
         {
             try
             {
@@ -117,9 +134,7 @@ namespace Blog.Services
             }
         }
 
-        public override async Task<GetBlogResponse> CreateBlog(
-            CreateBlogRequest request,
-            ServerCallContext context)
+        public override async Task<GetBlogResponse> CreateBlog(CreateBlogRequest request, ServerCallContext context)
         {
             try
             {
@@ -160,9 +175,7 @@ namespace Blog.Services
             }
         }
 
-        public override async Task<GetBlogResponse> UpdateBlog(
-            UpdateBlogRequest request,
-            ServerCallContext context)
+        public override async Task<GetBlogResponse> UpdateBlog(UpdateBlogRequest request, ServerCallContext context)
         {
             try
             {
@@ -224,9 +237,7 @@ namespace Blog.Services
             }
         }
 
-        public override async Task<DeleteBlogResponse> DeleteBlog(
-            DeleteBlogRequest request,
-            ServerCallContext context)
+        public override async Task<DeleteBlogResponse> DeleteBlog(DeleteBlogRequest request, ServerCallContext context)
         {
             try
             {

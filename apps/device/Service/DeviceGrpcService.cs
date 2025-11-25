@@ -283,5 +283,26 @@ namespace device.Service
             }
         }
 
+        public override async Task<CountResponse> DashboardDevice(CountRequest request, ServerCallContext context)
+        {
+            try
+            {
+                var totalDevices = await _deviceRepository.GetTotalDevicesAsync();
+                if (totalDevices < 0)
+                {
+                    throw new RpcException(new Status(StatusCode.Internal, "Error.CannotGetTotalDevices"));
+                }
+                var response = new CountResponse
+                {
+                    Total = totalDevices
+                };
+                return response;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error.CannotGetTotalDevices");
+                throw new RpcException(new Status(StatusCode.Internal, ex.Message));
+            }
+        }
     }
 }

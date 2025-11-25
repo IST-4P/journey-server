@@ -240,5 +240,25 @@ namespace rental.Service
             }
         }
 
+        public override async Task<RentalCountReponse> DashboradRental(RentalCountRequest request, ServerCallContext context)
+        {
+            try
+            {
+                var totalRentals = await _repository.GetTotalRentalAsync();
+                if (totalRentals < 0)
+                {
+                    throw new RpcException(new Status(StatusCode.NotFound, "Error.CannotGetTotalRentals"));
+                }
+                return new RentalCountReponse
+                {
+                    RentalCount = totalRentals
+                };
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error.CannotGetTotalRentals");
+                throw new RpcException(new Status(StatusCode.Internal, ex.Message));
+            }
+        }
     }
 }

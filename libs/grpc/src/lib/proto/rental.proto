@@ -17,15 +17,22 @@ service RentalService {
   rpc UpdateRental(UpdateRentalRequest) returns (RentalResponse);
   rpc DeleteRental(DeleteRentalRequest) returns (DeleteRentalResponse);
   rpc GetHistoryRental(GetHistoryRentalRequest) returns (GetHistoryRentalResponse);
+  rpc DashboradRental(RentalCountRequest) returns (RentalCountReponse);
 
   // Extensions: Rental time extension
   rpc CreateRentalExtension(CreateRentalExtensionRequest) returns (RentalResponse);
   rpc GetRentalExtensions(GetRentalExtensionsRequest) returns (GetRentalExtensionsResponse);
 
-  // Debug: Test NATS connection
-  rpc PublishDebugEvent(PublishDebugEventRequest) returns (PublishDebugEventResponse);
+
 }
 
+message RentalCountRequest {
+  string status = 1;
+}
+
+message RentalCountReponse {
+  int32 rentalCount = 1;
+}
 
 // User: Cancel Rental
 message CancelRentalRequest {
@@ -232,13 +239,3 @@ message GetHistoryRentalResponse {
   repeated RentalHistoryMessage histories = 1;
 }
 
-// Debug: Publish debug event to NATS
-message PublishDebugEventRequest {
-  string message = 1;
-  optional string rentalId = 2;
-}
-
-message PublishDebugEventResponse {
-  bool success = 1;
-  string message = 2;
-}

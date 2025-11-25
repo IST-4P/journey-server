@@ -14,5 +14,6 @@ namespace device.Interface
         Task<Combo> CreateComboAsync(Combo combo, List<ComboDeviceInputDto> deviceItems);
         Task<Combo?> UpdateComboAsync(Guid id, Combo combo, List<ComboDeviceInputDto>? deviceItems);
         Task<bool> DeleteComboAsync(Guid id);
+        Task<int> GetTotalCombosAsync();
     }
 }

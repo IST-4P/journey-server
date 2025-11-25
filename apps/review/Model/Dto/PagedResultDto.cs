@@ -13,10 +13,6 @@ namespace review.Model.Dto
         public bool HasNextPage => Page < TotalPages;
         public bool HasPreviousPage => Page > 1;
 
-        public PagedResultDto()
-        {
-        }
-
         public PagedResultDto(List<T> items, int page, int limit, int totalItems)
         {
             Items = items;

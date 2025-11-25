@@ -16,6 +16,8 @@ namespace Blog.Repository
         Task<Blog.Models.Blog> AddBlogAsync(AddBlogRequestDto blog);
         Task<Blog.Models.Blog?> UpdateBlogAsync(Guid id, UpdateBlogRequestDto blog);
         Task<bool> DeleteBlogAsync(Guid id);
+
+        Task<int> GetTotalBlogsAsync();
     }
 
     public class BlogRepository : IBlogRepository
@@ -26,7 +28,11 @@ namespace Blog.Repository
         {
             _context = context;
         }
-
+        public async Task<int> GetTotalBlogsAsync()
+        {
+            return await _context.Blogs.CountAsync();
+        }
+        
         public async Task<List<BlogSummaryAdminDto>> GetBlogsAsync()
         {
             return await _context.Blogs

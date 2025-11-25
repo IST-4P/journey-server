@@ -240,5 +240,25 @@ namespace device.Service
             }
         }
 
-    }
+        public override async Task<CountResponse> DashboardCombo(CountRequest request, ServerCallContext context)
+        {
+            try
+            {
+                var totalCombo = await _comboRepository.GetTotalCombosAsync();
+                if (totalCombo < 0)
+                {
+                    throw new RpcException(new Status(StatusCode.Internal, "Error.CannotGetTotalCombos"));
+                }
+                return new CountResponse
+                {
+                    Total = totalCombo
+                };
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error.GetTotalCombos");
+                throw new RpcException(new Status(StatusCode.Internal, ex.Message));
+            }
+        }
+    }   
 }

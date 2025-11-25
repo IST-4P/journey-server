@@ -26,8 +26,8 @@ service DeviceService {
   rpc DeleteCategory(DeleteCategoryRequest) returns (DeleteCategoryResponse);
   
   // DashboradDevice
-  rpc DashboradDevice(CountRequest) returns (CountResponse);
-  rpc DashboradCombo(CountRequest) returns (CountResponse);
+  rpc DashboardDevice(CountRequest) returns (CountResponse);
+  rpc DashboardCombo(CountRequest) returns (CountResponse);
 }
 
 message CountRequest{

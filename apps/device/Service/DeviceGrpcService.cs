@@ -283,7 +283,7 @@ namespace device.Service
             }
         }
 
-        public override async Task<CountResponse> DashboradDevice(CountRequest request, ServerCallContext context)
+        public override async Task<CountResponse> DashboardDevice(CountRequest request, ServerCallContext context)
         {
             try
             {

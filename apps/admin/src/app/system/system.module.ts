@@ -1,6 +1,9 @@
 import {
+  BlogProto,
   BookingProto,
+  DeviceProto,
   PaymentProto,
+  RentalProto,
   UserProto,
   VehicleProto,
 } from '@hacmieu-journey/grpc';
@@ -66,6 +69,48 @@ import { SystemService } from './system.service';
               'localhost:5009',
             package: PaymentProto.PAYMENT_PACKAGE_NAME,
             protoPath: join(__dirname, '../../libs/grpc/proto/payment.proto'),
+          },
+        }),
+        inject: [ConfigService],
+      },
+      {
+        name: BlogProto.BLOG_PACKAGE_NAME,
+        useFactory: (configService: ConfigService) => ({
+          transport: Transport.GRPC,
+          options: {
+            url:
+              configService.getOrThrow('BLOG_GRPC_SERVICE_URL') ||
+              'localhost:5005',
+            package: BlogProto.BLOG_PACKAGE_NAME,
+            protoPath: join(__dirname, '../../libs/grpc/proto/blog.proto'),
+          },
+        }),
+        inject: [ConfigService],
+      },
+      {
+        name: DeviceProto.DEVICE_PACKAGE_NAME,
+        useFactory: (configService: ConfigService) => ({
+          transport: Transport.GRPC,
+          options: {
+            url:
+              configService.getOrThrow('DEVICE_GRPC_SERVICE_URL') ||
+              'localhost:5006',
+            package: DeviceProto.DEVICE_PACKAGE_NAME,
+            protoPath: join(__dirname, '../../libs/grpc/proto/device.proto'),
+          },
+        }),
+        inject: [ConfigService],
+      },
+      {
+        name: RentalProto.RENTAL_PACKAGE_NAME,
+        useFactory: (configService: ConfigService) => ({
+          transport: Transport.GRPC,
+          options: {
+            url:
+              configService.getOrThrow('RENTAL_GRPC_SERVICE_URL') ||
+              'localhost:5007',
+            package: RentalProto.RENTAL_PACKAGE_NAME,
+            protoPath: join(__dirname, '../../libs/grpc/proto/rental.proto'),
           },
         }),
         inject: [ConfigService],

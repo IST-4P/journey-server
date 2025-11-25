@@ -1,9 +1,14 @@
 import { BookingStatusValues } from '@domain/booking';
+import { ComboStatusValues, DeviceStatusValues } from '@domain/device';
 import { RefundStatusValues } from '@domain/payment';
+import { RentalStatusValues } from '@domain/rental';
 import { VehicleStatusValues } from '@domain/vehicle';
 import {
+  BlogProto,
   BookingProto,
+  DeviceProto,
   PaymentProto,
+  RentalProto,
   UserProto,
   VehicleProto,
 } from '@hacmieu-journey/grpc';
@@ -17,6 +22,9 @@ export class SystemService implements OnModuleInit {
   private bookingService!: BookingProto.BookingServiceClient;
   private vehicleService!: VehicleProto.VehicleServiceClient;
   private paymentService!: PaymentProto.PaymentServiceClient;
+  private deviceService!: DeviceProto.DeviceServiceClient;
+  private rentalService!: RentalProto.RentalServiceClient;
+  private blogService!: BlogProto.BlogServiceClient;
 
   constructor(
     @Inject(UserProto.USER_PACKAGE_NAME) private userClient: ClientGrpc,
@@ -24,7 +32,11 @@ export class SystemService implements OnModuleInit {
     private bookingClient: ClientGrpc,
     @Inject(VehicleProto.VEHICLE_PACKAGE_NAME)
     private vehicleClient: ClientGrpc,
-    @Inject(PaymentProto.PAYMENT_PACKAGE_NAME) private paymentClient: ClientGrpc
+    @Inject(PaymentProto.PAYMENT_PACKAGE_NAME)
+    private paymentClient: ClientGrpc,
+    @Inject(DeviceProto.DEVICE_PACKAGE_NAME) private deviceClient: ClientGrpc,
+    @Inject(RentalProto.RENTAL_PACKAGE_NAME) private rentalClient: ClientGrpc,
+    @Inject(BlogProto.BLOG_PACKAGE_NAME) private blogClient: ClientGrpc
   ) {}
 
   onModuleInit() {
@@ -43,6 +55,17 @@ export class SystemService implements OnModuleInit {
       this.paymentClient.getService<PaymentProto.PaymentServiceClient>(
         PaymentProto.PAYMENT_SERVICE_NAME
       );
+    this.deviceService =
+      this.deviceClient.getService<DeviceProto.DeviceServiceClient>(
+        DeviceProto.DEVICE_SERVICE_NAME
+      );
+    this.rentalService =
+      this.rentalClient.getService<RentalProto.RentalServiceClient>(
+        RentalProto.RENTAL_SERVICE_NAME
+      );
+    this.blogService = this.blogClient.getService<BlogProto.BlogServiceClient>(
+      BlogProto.BLOG_SERVICE_NAME
+    );
   }
 
   async dashboard() {
@@ -58,14 +81,42 @@ export class SystemService implements OnModuleInit {
     const refundCount$ = lastValueFrom(
       this.paymentService.refundCount({ status: RefundStatusValues.PENDING })
     );
+    const deviceCount$ = lastValueFrom(
+      this.deviceService.dashboardDevice({
+        status: DeviceStatusValues.AVAILABLE,
+      })
+    );
+    const comboCount$ = lastValueFrom(
+      this.deviceService.dashboardCombo({
+        status: ComboStatusValues.ACTIVE,
+      })
+    );
+    const rentalCount$ = lastValueFrom(
+      this.rentalService.dashboardRental({ status: RentalStatusValues.ACTIVE })
+    );
+    const blogCount$ = lastValueFrom(
+      this.blogService.dashboardBlog({ status: '' })
+    );
 
-    const [userCount, bookingCount, vehicleCount, refundCount] =
-      await Promise.all([
-        userCount$,
-        bookingCount$,
-        vehicleCount$,
-        refundCount$,
-      ]);
+    const [
+      userCount,
+      bookingCount,
+      vehicleCount,
+      refundCount,
+      deviceCount,
+      comboCount,
+      rentalCount,
+      blogCount,
+    ] = await Promise.all([
+      userCount$,
+      bookingCount$,
+      vehicleCount$,
+      refundCount$,
+      deviceCount$,
+      comboCount$,
+      rentalCount$,
+      blogCount$,
+    ]);
     return {
       userCount: userCount.userCount,
       bookingOngoing: bookingCount.bookingCount,
@@ -73,6 +124,10 @@ export class SystemService implements OnModuleInit {
       checkOutPending: bookingCount.checkOutPending,
       vehicleActive: vehicleCount.vehicleCount,
       refundPending: refundCount.refundCount,
+      deviceAvailable: deviceCount.total,
+      comboActive: comboCount.total,
+      rentalActive: rentalCount.rentalCount,
+      blogCount: blogCount.totalBlog,
     };
   }
 }

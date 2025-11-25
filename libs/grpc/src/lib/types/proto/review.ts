@@ -31,6 +31,14 @@ export enum SortOrder {
   UNRECOGNIZED = -1,
 }
 
+export interface ReviewCountRequest {
+  status: string;
+}
+
+export interface ReviewCountResponse {
+  reviewCount: number;
+}
+
 /** Review entity */
 export interface Review {
   id: string;
@@ -77,6 +85,7 @@ export interface CreateReviewRequest {
   type: ReviewType;
   content: string;
   images: string[];
+  vehicleId?: string | undefined;
 }
 
 export interface UpdateReviewRequest {
@@ -259,6 +268,8 @@ export interface ReviewServiceClient {
   getAllReviews(request: GetAllReviewsRequest): Observable<GetReviewsResponse>;
 
   adminDeleteReview(request: AdminDeleteReviewRequest): Observable<DeleteReviewResponse>;
+
+  dashboradReivew(request: ReviewCountRequest): Observable<ReviewCountResponse>;
 }
 
 export interface ReviewServiceController {
@@ -315,6 +326,10 @@ export interface ReviewServiceController {
   adminDeleteReview(
     request: AdminDeleteReviewRequest,
   ): Promise<DeleteReviewResponse> | Observable<DeleteReviewResponse> | DeleteReviewResponse;
+
+  dashboradReivew(
+    request: ReviewCountRequest,
+  ): Promise<ReviewCountResponse> | Observable<ReviewCountResponse> | ReviewCountResponse;
 }
 
 export function ReviewServiceControllerMethods() {
@@ -333,6 +348,7 @@ export function ReviewServiceControllerMethods() {
       "getComboRatingStats",
       "getAllReviews",
       "adminDeleteReview",
+      "dashboradReivew",
     ];
     for (const method of grpcMethods) {
       const descriptor: any = Reflect.getOwnPropertyDescriptor(constructor.prototype, method);

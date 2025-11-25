@@ -104,6 +104,7 @@ message CreateReviewRequest {
   ReviewType type = 6;
   string content = 7;
   repeated string images = 8;
+  optional string vehicleId = 9;
 }
 
 message UpdateReviewRequest {

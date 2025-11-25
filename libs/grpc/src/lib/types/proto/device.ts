@@ -10,6 +10,14 @@ import { Observable } from "rxjs";
 
 export const protobufPackage = "device";
 
+export interface CountRequest {
+  status: string;
+}
+
+export interface CountResponse {
+  total: number;
+}
+
 /** GetCategory */
 export interface GetCategoryRequest {
   categoryId: string;
@@ -325,6 +333,12 @@ export interface DeviceServiceClient {
   updateCategory(request: UpdateCategoryRequest): Observable<UpdateCategoryResponse>;
 
   deleteCategory(request: DeleteCategoryRequest): Observable<DeleteCategoryResponse>;
+
+  /** DashboradDevice */
+
+  dashboardDevice(request: CountRequest): Observable<CountResponse>;
+
+  dashboardCombo(request: CountRequest): Observable<CountResponse>;
 }
 
 export interface DeviceServiceController {
@@ -393,6 +407,12 @@ export interface DeviceServiceController {
   deleteCategory(
     request: DeleteCategoryRequest,
   ): Promise<DeleteCategoryResponse> | Observable<DeleteCategoryResponse> | DeleteCategoryResponse;
+
+  /** DashboradDevice */
+
+  dashboardDevice(request: CountRequest): Promise<CountResponse> | Observable<CountResponse> | CountResponse;
+
+  dashboardCombo(request: CountRequest): Promise<CountResponse> | Observable<CountResponse> | CountResponse;
 }
 
 export function DeviceServiceControllerMethods() {
@@ -414,6 +434,8 @@ export function DeviceServiceControllerMethods() {
       "createCategory",
       "updateCategory",
       "deleteCategory",
+      "dashboardDevice",
+      "dashboardCombo",
     ];
     for (const method of grpcMethods) {
       const descriptor: any = Reflect.getOwnPropertyDescriptor(constructor.prototype, method);

@@ -240,7 +240,7 @@ namespace rental.Service
             }
         }
 
-        public override async Task<RentalCountReponse> DashboradRental(RentalCountRequest request, ServerCallContext context)
+        public override async Task<RentalCountReponse> DashboardRental(RentalCountRequest request, ServerCallContext context)
         {
             try
             {

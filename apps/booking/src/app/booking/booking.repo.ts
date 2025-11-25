@@ -4,6 +4,7 @@ import {
   BookingStatusValues,
   CancelBookingRequest,
   CreateBookingRequest,
+  ExtensionStatusEnumValues,
   GetBookingRequest,
   GetManyBookingsRequest,
   GetVehicleNamesByBookingIdsRequest,
@@ -11,7 +12,6 @@ import {
   PaymentStatusValues,
   UpdateStatusBookingRequest,
 } from '@domain/booking';
-import { ExtensionStatusValues } from '@domain/rental';
 import { NatsClient } from '@hacmieu-journey/nats';
 import {
   calculateDuration,
@@ -414,7 +414,7 @@ export class BookingRepository {
 
     const extensionPending$ = this.prismaService.bookingExtension.count({
       where: {
-        status: ExtensionStatusValues.PENDING,
+        status: ExtensionStatusEnumValues.PENDING,
       },
     });
 

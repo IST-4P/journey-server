@@ -17,7 +17,7 @@ service RentalService {
   rpc UpdateRental(UpdateRentalRequest) returns (RentalResponse);
   rpc DeleteRental(DeleteRentalRequest) returns (DeleteRentalResponse);
   rpc GetHistoryRental(GetHistoryRentalRequest) returns (GetHistoryRentalResponse);
-  rpc DashboradRental(RentalCountRequest) returns (RentalCountReponse);
+  rpc DashboardRental(RentalCountRequest) returns (RentalCountReponse);
 
   // Extensions: Rental time extension
   rpc CreateRentalExtension(CreateRentalExtensionRequest) returns (RentalResponse);

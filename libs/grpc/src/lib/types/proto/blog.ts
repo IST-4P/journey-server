@@ -10,6 +10,14 @@ import { Observable } from "rxjs";
 
 export const protobufPackage = "blog";
 
+export interface BlogCountRequest {
+  status: string;
+}
+
+export interface BlogCountResponse {
+  totalBlog: number;
+}
+
 /** GetBlog */
 export interface GetBlogRequest {
   id: string;
@@ -106,6 +114,8 @@ export interface BlogServiceClient {
   updateBlog(request: UpdateBlogRequest): Observable<GetBlogResponse>;
 
   deleteBlog(request: DeleteBlogRequest): Observable<DeleteBlogResponse>;
+
+  dashboardBlog(request: BlogCountRequest): Observable<BlogCountResponse>;
 }
 
 export interface BlogServiceController {
@@ -122,11 +132,22 @@ export interface BlogServiceController {
   deleteBlog(
     request: DeleteBlogRequest,
   ): Promise<DeleteBlogResponse> | Observable<DeleteBlogResponse> | DeleteBlogResponse;
+
+  dashboardBlog(
+    request: BlogCountRequest,
+  ): Promise<BlogCountResponse> | Observable<BlogCountResponse> | BlogCountResponse;
 }
 
 export function BlogServiceControllerMethods() {
   return function (constructor: Function) {
-    const grpcMethods: string[] = ["getBlog", "getManyBlogs", "createBlog", "updateBlog", "deleteBlog"];
+    const grpcMethods: string[] = [
+      "getBlog",
+      "getManyBlogs",
+      "createBlog",
+      "updateBlog",
+      "deleteBlog",
+      "dashboardBlog",
+    ];
     for (const method of grpcMethods) {
       const descriptor: any = Reflect.getOwnPropertyDescriptor(constructor.prototype, method);
       GrpcMethod("BlogService", method)(constructor.prototype[method], method, descriptor);

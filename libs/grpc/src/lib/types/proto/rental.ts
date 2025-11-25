@@ -11,6 +11,14 @@ import { GetComboResponse, GetDeviceResponse } from "./device";
 
 export const protobufPackage = "rental";
 
+export interface RentalCountRequest {
+  status: string;
+}
+
+export interface RentalCountReponse {
+  rentalCount: number;
+}
+
 /** User: Cancel Rental */
 export interface CancelRentalRequest {
   rentalId: string;
@@ -233,17 +241,6 @@ export interface GetHistoryRentalResponse {
   histories: RentalHistoryMessage[];
 }
 
-/** Debug: Publish debug event to NATS */
-export interface PublishDebugEventRequest {
-  message: string;
-  rentalId?: string | undefined;
-}
-
-export interface PublishDebugEventResponse {
-  success: boolean;
-  message: string;
-}
-
 export const RENTAL_PACKAGE_NAME = "rental";
 
 export interface RentalServiceClient {
@@ -267,15 +264,13 @@ export interface RentalServiceClient {
 
   getHistoryRental(request: GetHistoryRentalRequest): Observable<GetHistoryRentalResponse>;
 
+  dashboardRental(request: RentalCountRequest): Observable<RentalCountReponse>;
+
   /** Extensions: Rental time extension */
 
   createRentalExtension(request: CreateRentalExtensionRequest): Observable<RentalResponse>;
 
   getRentalExtensions(request: GetRentalExtensionsRequest): Observable<GetRentalExtensionsResponse>;
-
-  /** Debug: Test NATS connection */
-
-  publishDebugEvent(request: PublishDebugEventRequest): Observable<PublishDebugEventResponse>;
 }
 
 export interface RentalServiceController {
@@ -309,6 +304,10 @@ export interface RentalServiceController {
     request: GetHistoryRentalRequest,
   ): Promise<GetHistoryRentalResponse> | Observable<GetHistoryRentalResponse> | GetHistoryRentalResponse;
 
+  dashboardRental(
+    request: RentalCountRequest,
+  ): Promise<RentalCountReponse> | Observable<RentalCountReponse> | RentalCountReponse;
+
   /** Extensions: Rental time extension */
 
   createRentalExtension(
@@ -318,12 +317,6 @@ export interface RentalServiceController {
   getRentalExtensions(
     request: GetRentalExtensionsRequest,
   ): Promise<GetRentalExtensionsResponse> | Observable<GetRentalExtensionsResponse> | GetRentalExtensionsResponse;
-
-  /** Debug: Test NATS connection */
-
-  publishDebugEvent(
-    request: PublishDebugEventRequest,
-  ): Promise<PublishDebugEventResponse> | Observable<PublishDebugEventResponse> | PublishDebugEventResponse;
 }
 
 export function RentalServiceControllerMethods() {
@@ -337,9 +330,9 @@ export function RentalServiceControllerMethods() {
       "updateRental",
       "deleteRental",
       "getHistoryRental",
+      "dashboardRental",
       "createRentalExtension",
       "getRentalExtensions",
-      "publishDebugEvent",
     ];
     for (const method of grpcMethods) {
       const descriptor: any = Reflect.getOwnPropertyDescriptor(constructor.prototype, method);

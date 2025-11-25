@@ -1,5 +1,6 @@
 import { BookingStatusValues } from '@domain/booking';
-import { BookingProto, ReviewProto } from '@hacmieu-journey/grpc';
+import { RentalStatusValues } from '@domain/rental';
+import { BookingProto, RentalProto, ReviewProto } from '@hacmieu-journey/grpc';
 import { Inject, Injectable, OnModuleInit } from '@nestjs/common';
 import { ClientGrpc } from '@nestjs/microservices';
 import { lastValueFrom } from 'rxjs';
@@ -8,6 +9,7 @@ import { lastValueFrom } from 'rxjs';
 export class ReviewService implements OnModuleInit {
   private reviewService!: ReviewProto.ReviewServiceClient;
   private bookingService!: BookingProto.BookingServiceClient;
+  private rentalService!: RentalProto.RentalServiceClient;
 
   constructor(
     @Inject(ReviewProto.REVIEW_PACKAGE_NAME)
@@ -46,7 +48,6 @@ export class ReviewService implements OnModuleInit {
       const booking = await lastValueFrom(
         this.bookingService.getBooking({ id: data.bookingId })
       );
-
       if (booking.status !== BookingStatusValues.COMPLETED) {
         throw new Error('Cannot review a booking that is not completed');
       }

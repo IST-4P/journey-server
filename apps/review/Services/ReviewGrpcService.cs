@@ -191,7 +191,7 @@ namespace review.Services
 
                 if (review == null)
                 {
-                    throw new RpcException(new Status(StatusCode.NotFound, "Review not found"));
+                    throw new RpcException(new Status(StatusCode.NotFound, "Error.ReviewNotFound"));
                 }
 
                 var protoReview = _mapper.Map<Review.Review>(review);
@@ -225,7 +225,7 @@ namespace review.Services
                 var pagedResult = await _reviewService.GetMyReviewsAsync(userId, query);
                 if (pagedResult == null)
                 {
-                    throw new RpcException(new Status(StatusCode.NotFound, "GetMyReviews not found"));
+                    throw new RpcException(new Status(StatusCode.NotFound, "Error.CannotGetMyReviews"));
                 }
                 var response = new Review.GetMyReviewsResponse
                 {
@@ -265,7 +265,7 @@ namespace review.Services
                 var pagedResult = await _reviewService.GetReviewsByVehicleIdAsync(vehicleId, query);
                 if (pagedResult == null)
                 {
-                    throw new RpcException(new Status(StatusCode.NotFound, "VehicleReviews not found"));
+                    throw new RpcException(new Status(StatusCode.NotFound, "Error.CannotGetVehicleReviews"));
                 }
                 var response = new Review.GetReviewsResponse
                 {
@@ -306,7 +306,7 @@ namespace review.Services
 
                 if (pagedResult == null)
                 {
-                    throw new RpcException(new Status(StatusCode.NotFound, "DeviceReviews not found"));
+                    throw new RpcException(new Status(StatusCode.NotFound, "Error.CannotGetDeviceReviews"));
                 }
                 var response = new Review.GetReviewsResponse
                 {
@@ -346,7 +346,7 @@ namespace review.Services
                 var pagedResult = await _reviewService.GetReviewsByComboIdAsync(comboId, query);
                 if (pagedResult == null)
                 {
-                    throw new RpcException(new Status(StatusCode.NotFound, "ComboReviews not found"));
+                    throw new RpcException(new Status(StatusCode.NotFound, "Error.CannotGetComboReviews"));
                 }
                 var response = new Review.GetReviewsResponse
                 {
@@ -390,7 +390,7 @@ namespace review.Services
                 var pagedResult = await _reviewService.GetAllReviewsAsync(query, type);
                 if (pagedResult == null)
                 {
-                    throw new RpcException(new Status(StatusCode.NotFound, "AllReviews not found"));
+                    throw new RpcException(new Status(StatusCode.NotFound, "Error.CannotGetAllReviews"));
                 }
                 var response = new Review.GetReviewsResponse
                 {
@@ -404,7 +404,6 @@ namespace review.Services
                 {
                     response.Reviews.Add(_mapper.Map<Review.Review>(review));
                 }
-
                 return response;
             }
             catch (RpcException)
@@ -452,7 +451,7 @@ namespace review.Services
                 var stats = await _reviewService.GetVehicleRatingStatsAsync(vehicleId);
                 if (stats == null)
                 {
-                    throw new RpcException(new Status(StatusCode.NotFound, " VehicleRating not found"));
+                    throw new RpcException(new Status(StatusCode.NotFound, "Error.CannotGetVehhicleRating"));
                 }
                 return new Review.RatingStatsResponse
                 {
@@ -463,7 +462,7 @@ namespace review.Services
                         AverageRating = stats.AverageRating,
                         TotalReviews = stats.TotalReviews
                     },
-                    Message = "Successfully retrieved vehicle rating statistics"
+                    Message = "Successfully.RetrivedVehicleRating"
                 };
             }
             catch (RpcException)
@@ -485,7 +484,7 @@ namespace review.Services
                 var stats = await _reviewService.GetDeviceRatingStatsAsync(deviceId);
                 if (stats == null)
                 {
-                    throw new RpcException(new Status(StatusCode.NotFound, " DeviceRating not found"));
+                    throw new RpcException(new Status(StatusCode.NotFound, "Error.CannotGetDeviceRating"));
                 }
                 return new Review.RatingStatsResponse
                 {
@@ -496,7 +495,7 @@ namespace review.Services
                         AverageRating = stats.AverageRating,
                         TotalReviews = stats.TotalReviews
                     },
-                    Message = "Successfully retrieved device rating statistics"
+                    Message = "Successfully.RetrivedDeviceRating"
                 };
             }
             catch (RpcException)
@@ -518,7 +517,7 @@ namespace review.Services
                 var stats = await _reviewService.GetComboRatingStatsAsync(comboId);
                 if (stats == null)
                 {
-                    throw new RpcException(new Status(StatusCode.NotFound, " ComboRating not found"));
+                    throw new RpcException(new Status(StatusCode.NotFound, "Error.CannotGetComboRating"));
                 }
                 return new Review.RatingStatsResponse
                 {
@@ -529,7 +528,7 @@ namespace review.Services
                         AverageRating = stats.AverageRating,
                         TotalReviews = stats.TotalReviews
                     },
-                    Message = "Successfully retrieved combo rating statistics"
+                    Message = "Successfully.RetrivedComboRating"
                 };
             }
             catch (RpcException)

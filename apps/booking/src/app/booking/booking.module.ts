@@ -7,6 +7,7 @@ import {
   BookingExpiredConsumer,
   BookingExtensionConsumer,
   BookingPaidConsumer,
+  BookingReviewConsumer,
 } from './consumers';
 
 @Module({
@@ -18,6 +19,7 @@ import {
     BookingPaidConsumer,
     BookingExpiredConsumer,
     BookingExtensionConsumer,
+    BookingReviewConsumer,
   ],
 })
 export class BookingModule {}

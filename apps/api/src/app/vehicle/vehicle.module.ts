@@ -1,4 +1,4 @@
-import { VehicleProto } from '@hacmieu-journey/grpc';
+import { ReviewProto, VehicleProto } from '@hacmieu-journey/grpc';
 import { NatsModule } from '@hacmieu-journey/nats';
 import { Module } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
@@ -27,6 +27,20 @@ import { VehicleService } from './vehicle.service';
               'localhost:5004',
             package: VehicleProto.VEHICLE_PACKAGE_NAME,
             protoPath: join(__dirname, '../../libs/grpc/proto/vehicle.proto'),
+          },
+        }),
+        inject: [ConfigService],
+      },
+      {
+        name: ReviewProto.REVIEW_PACKAGE_NAME,
+        useFactory: (configService: ConfigService) => ({
+          transport: Transport.GRPC,
+          options: {
+            url:
+              configService.getOrThrow('REVIEW_GRPC_SERVICE_URL') ||
+              'localhost:5010',
+            package: ReviewProto.REVIEW_PACKAGE_NAME,
+            protoPath: join(__dirname, '../../libs/grpc/proto/review.proto'),
           },
         }),
         inject: [ConfigService],

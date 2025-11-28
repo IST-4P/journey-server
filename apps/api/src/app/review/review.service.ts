@@ -1,6 +1,7 @@
 import { BookingStatusValues } from '@domain/booking';
 import { RentalStatusValues } from '@domain/rental';
 import { BookingProto, RentalProto, ReviewProto } from '@hacmieu-journey/grpc';
+import { NatsClient } from '@hacmieu-journey/nats';
 import { Inject, Injectable, OnModuleInit } from '@nestjs/common';
 import { ClientGrpc } from '@nestjs/microservices';
 import { lastValueFrom } from 'rxjs';
@@ -17,7 +18,8 @@ export class ReviewService implements OnModuleInit {
     @Inject(BookingProto.BOOKING_PACKAGE_NAME)
     private bookingClient: ClientGrpc,
     @Inject(RentalProto.RENTAL_PACKAGE_NAME)
-    private rentalClient: ClientGrpc
+    private rentalClient: ClientGrpc,
+    private readonly natsClient: NatsClient
   ) {}
 
   onModuleInit() {
@@ -62,12 +64,18 @@ export class ReviewService implements OnModuleInit {
       const rental = await lastValueFrom(
         this.rentalService.getRentalById({ rentalId: data.rentalId })
       );
-
       if (rental.status !== RentalStatusValues.COMPLETED) {
         throw new Error('Cannot review a rental that is not completed');
       }
     }
-    return lastValueFrom(this.reviewService.createReview(data));
+    const review = await lastValueFrom(this.reviewService.createReview(data));
+    await this.natsClient.publish('journey.events.review-booking', {
+      reviewId: review.review?.id,
+      bookingId: review.review?.bookingId,
+      vehicleId: data.vehicleId,
+      rating: review.review?.rating,
+    });
+    return review;
   }
 
   updateReview(

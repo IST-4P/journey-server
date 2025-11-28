@@ -434,4 +434,28 @@ export class BookingRepository {
       checkOutPending,
     };
   }
+
+  async addReviewBooking(event: {
+    bookingId: string;
+    reviewId: string;
+    vehicleId: string;
+    rating: number;
+  }) {
+    const booking = await this.prismaService.booking.findUnique({
+      where: {
+        id: event.bookingId,
+      },
+    });
+    if (!booking) {
+      throw BookingNotFoundException;
+    }
+    await this.prismaService.booking.update({
+      where: {
+        id: event.bookingId,
+      },
+      data: {
+        reviewId: event.reviewId,
+      },
+    });
+  }
 }

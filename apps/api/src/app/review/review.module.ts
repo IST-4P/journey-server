@@ -1,4 +1,5 @@
 import { BookingProto, RentalProto, ReviewProto } from '@hacmieu-journey/grpc';
+import { NatsModule } from '@hacmieu-journey/nats';
 import { Module } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { ClientsModule, Transport } from '@nestjs/microservices';
@@ -8,6 +9,7 @@ import { ReviewService } from './review.service';
 
 @Module({
   imports: [
+    NatsModule,
     ClientsModule.registerAsync([
       {
         name: ReviewProto.REVIEW_PACKAGE_NAME,

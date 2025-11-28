@@ -1,5 +1,11 @@
-import { VehicleProto } from '@hacmieu-journey/grpc';
-import { Inject, Injectable, Logger, OnModuleInit } from '@nestjs/common';
+import { ReviewProto, VehicleProto } from '@hacmieu-journey/grpc';
+import {
+  Inject,
+  Injectable,
+  Logger,
+  NotFoundException,
+  OnModuleInit,
+} from '@nestjs/common';
 import { ClientGrpc } from '@nestjs/microservices';
 import { lastValueFrom } from 'rxjs';
 
@@ -7,16 +13,23 @@ import { lastValueFrom } from 'rxjs';
 export class VehicleService implements OnModuleInit {
   private readonly logger = new Logger(VehicleService.name);
   private vehicleService!: VehicleProto.VehicleServiceClient;
+  private reviewService!: ReviewProto.ReviewServiceClient;
 
   constructor(
     @Inject(VehicleProto.VEHICLE_PACKAGE_NAME)
-    private client: ClientGrpc
+    private client: ClientGrpc,
+    @Inject(ReviewProto.REVIEW_PACKAGE_NAME)
+    private reviewClient: ClientGrpc
   ) {}
 
   onModuleInit() {
     this.vehicleService =
       this.client.getService<VehicleProto.VehicleServiceClient>(
         VehicleProto.VEHICLE_SERVICE_NAME
+      );
+    this.reviewService =
+      this.reviewClient.getService<ReviewProto.ReviewServiceClient>(
+        ReviewProto.REVIEW_SERVICE_NAME
       );
   }
 
@@ -28,10 +41,22 @@ export class VehicleService implements OnModuleInit {
     return lastValueFrom(this.vehicleService.getManyVehicles(data));
   }
 
-  getVehicle(
-    data: VehicleProto.GetVehicleRequest
-  ): Promise<VehicleProto.GetVehicleResponse> {
-    return lastValueFrom(this.vehicleService.getVehicle(data));
+  async getVehicle(data: VehicleProto.GetVehicleRequest) {
+    const vehicle = await lastValueFrom(this.vehicleService.getVehicle(data));
+    if (!vehicle) {
+      throw new NotFoundException('Error.VehicleNotFound');
+    }
+    const reviews = await lastValueFrom(
+      this.reviewService.getReviewsByVehicle({
+        vehicleId: vehicle.id,
+        page: 1,
+        limit: 10,
+      })
+    );
+    return {
+      ...vehicle,
+      reviews: reviews.reviews,
+    };
   }
 
   calculateVehiclePrice(

@@ -3,19 +3,16 @@ import { Injectable, OnModuleInit } from '@nestjs/common';
 import { AckPolicy, DeliverPolicy } from 'nats';
 import { VehicleRepository } from '../vehicle.repo';
 
-interface ReviewCreatedEvent {
+interface VehicleReviewEvent {
+  bookingId: string;
   reviewId: string;
+  vehicleId: string;
   rating: number;
-  bookingId?: string;
-  rentalId?: string;
-  deviceId?: string;
-  comboId?: string;
-  vehicleId?: string;
 }
 
 @Injectable()
-export class ReviewCreatedConsumer
-  extends NatsConsumer<ReviewCreatedEvent>
+export class VehicleReviewConsumer
+  extends NatsConsumer<VehicleReviewEvent>
   implements OnModuleInit
 {
   constructor(
@@ -24,8 +21,8 @@ export class ReviewCreatedConsumer
   ) {
     super(natsClient, {
       streamName: 'JOURNEY_EVENTS',
-      consumerName: 'vehicle-service-review-created',
-      filterSubject: 'journey.events.review-created',
+      consumerName: 'vehicle-service-vehicle-review',
+      filterSubject: 'journey.events.review-booking',
       ackPolicy: AckPolicy.Explicit, // Phải ack thủ công
       deliverPolicy: DeliverPolicy.All, // Nhận tất cả message (kể cả cũ)
       maxDeliver: 3, // Retry tối đa 3 lần
@@ -33,14 +30,8 @@ export class ReviewCreatedConsumer
     });
   }
 
-  protected async onMessage(event: ReviewCreatedEvent): Promise<void> {
-    if (!event.vehicleId) {
-      return;
-    }
-    return this.vehicleRepository.reviewVehicle({
-      reviewId: event.reviewId,
-      vehicleId: event.vehicleId,
-      rating: event.rating,
-    });
+  protected async onMessage(event: VehicleReviewEvent): Promise<void> {
+    console.log(event);
+    return this.vehicleRepository.addReviewVehicle(event);
   }
 }

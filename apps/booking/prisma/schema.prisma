@@ -62,6 +62,7 @@ model Booking {
     vehicleId   String        @map("vehicle_id") // Reference to Vehicle Service
     vehicleName String        @map("vehicle_name") // Tên xe tại thời điểm booking
     status      BookingStatus @default(PENDING)
+    reviewId    String?       @map("review_id") // Reference to Review Service
 
     // Thời gian thuê
     startTime DateTime @map("start_time")

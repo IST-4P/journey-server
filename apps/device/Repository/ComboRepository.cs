@@ -171,5 +171,27 @@ namespace device.Repository
             await _dbContext.SaveChangesAsync();
             return true;
         }
+
+        public async Task<bool> AddReviewIdAsync(Guid comboId, Guid reviewId)
+        {
+            var combo = await _dbContext.Combos.FindAsync(comboId);
+            if (combo == null)
+            {
+                return false;
+            }
+
+            // Initialize ReviewIds list if null
+            combo.ReviewIds ??= new List<Guid>();
+
+            // Add reviewId if not already present
+            if (!combo.ReviewIds.Contains(reviewId))
+            {
+                combo.ReviewIds.Add(reviewId);
+                combo.UpdateAt = DateTime.UtcNow;
+                await _dbContext.SaveChangesAsync();
+            }
+
+            return true;
+        }
     }
 }

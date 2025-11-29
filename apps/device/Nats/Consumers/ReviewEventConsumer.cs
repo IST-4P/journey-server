@@ -24,22 +24,10 @@ namespace device.Nats.Consumers
 
         protected override async Task HandleEventAsync(ReviewCreatedEvent reviewEvent, CancellationToken cancellationToken)
         {
-            if (string.IsNullOrEmpty(reviewEvent.DeviceId))
+            // Skip if neither DeviceId nor ComboId is present
+            if (string.IsNullOrEmpty(reviewEvent.DeviceId) && string.IsNullOrEmpty(reviewEvent.ComboId))
             {
-                Logger.LogInformation("[Device] Skipping review event - no DeviceId");
-                return;
-            }
-
-            Logger.LogInformation(
-                "[Device] Received review.created for DeviceId: {DeviceId}, ReviewId: {ReviewId}",
-                reviewEvent.DeviceId, reviewEvent.ReviewId);
-
-            using var scope = ServiceProvider.CreateScope();
-            var deviceRepository = scope.ServiceProvider.GetRequiredService<IDeviceRepository>();
-
-            if (!Guid.TryParse(reviewEvent.DeviceId, out var deviceId))
-            {
-                Logger.LogWarning("[Device] Invalid DeviceId: {DeviceId}", reviewEvent.DeviceId);
+                Logger.LogInformation("[Device] Skipping review event - no DeviceId or ComboId");
                 return;
             }
 
@@ -49,15 +37,60 @@ namespace device.Nats.Consumers
                 return;
             }
 
-            try
+            using var scope = ServiceProvider.CreateScope();
+
+            // Handle Device review
+            if (!string.IsNullOrEmpty(reviewEvent.DeviceId))
             {
-                await deviceRepository.AddReviewIdAsync(deviceId, reviewId);
-                Logger.LogInformation("[Device] Added ReviewId {ReviewId} to Device {DeviceId}", reviewId, deviceId);
+                Logger.LogInformation(
+                    "[Device] Received review.created for DeviceId: {DeviceId}, ReviewId: {ReviewId}",
+                    reviewEvent.DeviceId, reviewEvent.ReviewId);
+
+                if (!Guid.TryParse(reviewEvent.DeviceId, out var deviceId))
+                {
+                    Logger.LogWarning("[Device] Invalid DeviceId: {DeviceId}", reviewEvent.DeviceId);
+                }
+                else
+                {
+                    try
+                    {
+                        var deviceRepository = scope.ServiceProvider.GetRequiredService<IDeviceRepository>();
+                        await deviceRepository.AddReviewIdAsync(deviceId, reviewId);
+                        Logger.LogInformation("[Device] Added ReviewId {ReviewId} to Device {DeviceId}", reviewId, deviceId);
+                    }
+                    catch (Exception ex)
+                    {
+                        Logger.LogError(ex, "[Device] Failed to add ReviewId to Device {DeviceId}", deviceId);
+                        throw;
+                    }
+                }
             }
-            catch (Exception ex)
+
+            // Handle Combo review
+            if (!string.IsNullOrEmpty(reviewEvent.ComboId))
             {
-                Logger.LogError(ex, "[Device] Failed to add ReviewId to Device {DeviceId}", deviceId);
-                throw;
+                Logger.LogInformation(
+                    "[Device] Received review.created for ComboId: {ComboId}, ReviewId: {ReviewId}",
+                    reviewEvent.ComboId, reviewEvent.ReviewId);
+
+                if (!Guid.TryParse(reviewEvent.ComboId, out var comboId))
+                {
+                    Logger.LogWarning("[Device] Invalid ComboId: {ComboId}", reviewEvent.ComboId);
+                }
+                else
+                {
+                    try
+                    {
+                        var comboRepository = scope.ServiceProvider.GetRequiredService<IComboRepository>();
+                        await comboRepository.AddReviewIdAsync(comboId, reviewId);
+                        Logger.LogInformation("[Device] Added ReviewId {ReviewId} to Combo {ComboId}", reviewId, comboId);
+                    }
+                    catch (Exception ex)
+                    {
+                        Logger.LogError(ex, "[Device] Failed to add ReviewId to Combo {ComboId}", comboId);
+                        throw;
+                    }
+                }
             }
         }
     }

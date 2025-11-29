@@ -25,7 +25,7 @@ export class RentalController {
 
   @Get()
   getAllRentals(
-    @Query() query: GetAllRentalsRequestDTO,
+    @Query() query: Omit<GetAllRentalsRequestDTO, 'requesterId'>,
     @ActiveUser('userId') requesterId: string
   ) {
     return this.rentalService.getAllRentals({

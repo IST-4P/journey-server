@@ -32,4 +32,5 @@ data:
   RENTAL_GRPC_SERVICE_URL_NET: {{ .Values.config.rentalGrpcServiceUrlNet | quote }}
   BOOKING_GRPC_SERVICE_URL_NET: {{ .Values.config.bookingGrpcServiceUrlNet | quote }}
   PAYMENT_GRPC_SERVICE_URL_NET: {{ .Values.config.paymentGrpcServiceUrlNet | quote }}
+  REVIEW_GRPC_SERVICE_URL_NET: {{ .Values.config.reviewGrpcServiceUrlNet | quote }}
 

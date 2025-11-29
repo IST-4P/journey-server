@@ -71,7 +71,7 @@ catch (Exception ex)
 }
 
 // Configure gRPC endpoint
-var grpcUrl = Environment.GetEnvironmentVariable("DEVICE_GRPC_SERVICE_URL") ?? "0.0.0.0:5006";
+var grpcUrl = Environment.GetEnvironmentVariable("DEVICE_GRPC_SERVICE_URL_NET") ?? "0.0.0.0:5006";
 Console.WriteLine($"Device gRPC Service listening on: {grpcUrl}");
 
 // Map gRPC service

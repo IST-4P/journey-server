@@ -37,7 +37,7 @@ namespace review.Nats
                     MaxAge = TimeSpan.FromDays(30),
                     MaxMsgs = 1000000,
                     MaxBytes = 1073741824, // 1GB
-                    NumReplicas = 2
+                    NumReplicas = 1
                 };
 
                 try

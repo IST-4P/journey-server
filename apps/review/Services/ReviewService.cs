@@ -62,12 +62,74 @@ namespace review.Services
                 UpdateCount = 0
             };
 
+            // Fetch target IDs from booking/rental services
+            await PopulateTargetIds(review);
+
             var createdReview = await _repository.CreateReviewAsync(review);
 
             // Publish event to NATS
             await PublishReviewCreatedEvent(createdReview);
 
             return createdReview;
+        }
+
+        private async Task PopulateTargetIds(ReviewModel review)
+        {
+            try
+            {
+                // If bookingId is provided, fetch vehicleId from booking service
+                if (review.BookingId.HasValue)
+                {
+                    var bookingRequest = new Booking.GetBookingRequest
+                    {
+                        Id = review.BookingId.Value.ToString()
+                    };
+
+                    var bookingResponse = await _bookingClient.GetBookingAsync(bookingRequest);
+                    if (bookingResponse != null && !string.IsNullOrEmpty(bookingResponse.VehicleId))
+                    {
+                        if (Guid.TryParse(bookingResponse.VehicleId, out var vehicleId))
+                        {
+                            review.VehicleId = vehicleId;
+                            _logger.LogInformation($"Populated VehicleId {vehicleId} from BookingId {review.BookingId}");
+                        }
+                    }
+                }
+
+                // If rentalId is provided, fetch deviceId/comboId from rental service
+                if (review.RentalId.HasValue)
+                {
+                    var rentalRequest = new Rental.GetRentalByIdRequest
+                    {
+                        RentalId = review.RentalId.Value.ToString()
+                    };
+
+                    var rentalResponse = await _rentalClient.GetRentalByIdAsync(rentalRequest);
+                    if (rentalResponse != null && rentalResponse.Items.Count > 0)
+                    {
+                        // Get the first item's ID (assuming single item reviews for now)
+                        var firstItem = rentalResponse.Items[0];
+                        if (Guid.TryParse(firstItem.TargetId, out var targetId))
+                        {
+                            if (firstItem.IsCombo)
+                            {
+                                review.ComboId = targetId;
+                                _logger.LogInformation($"Populated ComboId {targetId} from RentalId {review.RentalId}");
+                            }
+                            else
+                            {
+                                review.DeviceId = targetId;
+                                _logger.LogInformation($"Populated DeviceId {targetId} from RentalId {review.RentalId}");
+                            }
+                        }
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Failed to populate target IDs for review");
+                // Don't throw - allow review creation to continue even if we can't fetch target IDs
+            }
         }
 
         private async Task PublishReviewCreatedEvent(ReviewModel review)
@@ -276,7 +338,7 @@ namespace review.Services
                 TotalReviews = reviews.Count
             };
         }
-    
+
         public async Task<int> GetTotalReviewsAsync()
         {
             return await _repository.GetTotalReviewsAsync();

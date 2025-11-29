@@ -43,10 +43,11 @@ namespace device.Model.Entities
     public class Combo
     {
         public Guid Id { get; set; }
-        public  string Name { get; set; } = string.Empty;   
-        public  double Price { get; set; }
+        public string Name { get; set; } = string.Empty;
+        public double Price { get; set; }
         public string? Description { get; set; }
         public List<string>? Images { get; set; }
+        public List<Guid>? ReviewIds { get; set; }
 
         public ICollection<ComboDevice>? ComboDevices { get; set; }
 

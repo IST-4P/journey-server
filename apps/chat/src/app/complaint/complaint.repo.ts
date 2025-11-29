@@ -2,6 +2,7 @@ import {
   ComplaintMessageTypeValues,
   CreateComplaintMessageRequest,
   CreateComplaintRequest,
+  GetComplaintRequest,
   GetManyComplaintMessagesRequest,
   GetManyComplaintsRequest,
   UpdateComplaintStatusRequest,
@@ -101,6 +102,12 @@ export class ComplaintRepository {
       totalItems,
       totalPages: Math.ceil(totalItems / limit),
     };
+  }
+
+  getComplaint(data: GetComplaintRequest) {
+    return this.prismaService.complaint.findUnique({
+      where: { id: data.id },
+    });
   }
 
   async createComplaint(data: CreateComplaintRequest) {

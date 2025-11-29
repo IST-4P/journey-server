@@ -98,6 +98,11 @@ export interface Complaint {
   createdAt: string;
 }
 
+/** GetComplaint */
+export interface GetComplaintRequest {
+  id: string;
+}
+
 /** GetManyComplaints */
 export interface GetManyComplaintsRequest {
   status?: string | undefined;
@@ -198,6 +203,8 @@ export interface ChatServiceClient {
 
   getManyComplaints(request: GetManyComplaintsRequest): Observable<GetManyComplaintsResponse>;
 
+  getComplaint(request: GetComplaintRequest): Observable<GetComplaintResponse>;
+
   createComplaint(request: CreateComplaintRequest): Observable<GetComplaintResponse>;
 
   updateComplaintStatus(request: UpdateComplaintStatusRequest): Observable<GetComplaintResponse>;
@@ -221,6 +228,10 @@ export interface ChatServiceController {
   getManyComplaints(
     request: GetManyComplaintsRequest,
   ): Promise<GetManyComplaintsResponse> | Observable<GetManyComplaintsResponse> | GetManyComplaintsResponse;
+
+  getComplaint(
+    request: GetComplaintRequest,
+  ): Promise<GetComplaintResponse> | Observable<GetComplaintResponse> | GetComplaintResponse;
 
   createComplaint(
     request: CreateComplaintRequest,
@@ -249,6 +260,7 @@ export function ChatServiceControllerMethods() {
       "createChat",
       "getManyConversations",
       "getManyComplaints",
+      "getComplaint",
       "createComplaint",
       "updateComplaintStatus",
       "getManyComplaintMessages",

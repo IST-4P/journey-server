@@ -24,6 +24,12 @@ export class ComplaintService implements OnModuleInit {
     return lastValueFrom(this.chatService.getManyComplaints(data));
   }
 
+  getComplaint(
+    data: ChatProto.GetComplaintRequest
+  ): Promise<ChatProto.GetComplaintResponse> {
+    return lastValueFrom(this.chatService.getComplaint(data));
+  }
+
   createComplaint(
     data: ChatProto.CreateComplaintRequest
   ): Promise<ChatProto.GetComplaintResponse> {

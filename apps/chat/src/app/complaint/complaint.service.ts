@@ -1,6 +1,7 @@
 import {
   CreateComplaintMessageRequest,
   CreateComplaintRequest,
+  GetComplaintRequest,
   GetManyComplaintMessagesRequest,
   GetManyComplaintsRequest,
   UpdateComplaintStatusRequest,
@@ -19,6 +20,14 @@ export class ComplaintService {
       throw ComplaintNotFoundException;
     }
     return complaints;
+  }
+
+  async getComplaint(data: GetComplaintRequest) {
+    const complaint = await this.complaintRepository.getComplaint(data);
+    if (!complaint) {
+      throw ComplaintNotFoundException;
+    }
+    return complaint;
   }
 
   createComplaint(data: CreateComplaintRequest) {

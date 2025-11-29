@@ -8,6 +8,7 @@ service ChatService {
   rpc GetManyConversations(GetManyConversationsRequest) returns (GetManyConversationsResponse);
 
   rpc GetManyComplaints(GetManyComplaintsRequest) returns (GetManyComplaintsResponse);
+  rpc GetComplaint(GetComplaintRequest) returns (GetComplaintResponse);
   rpc CreateComplaint(CreateComplaintRequest) returns (GetComplaintResponse);
   rpc UpdateComplaintStatus(UpdateComplaintStatusRequest) returns (GetComplaintResponse);
   rpc GetManyComplaintMessages(GetManyComplaintMessagesRequest) returns (GetManyComplaintMessagesResponse);
@@ -101,6 +102,11 @@ message Complaint {
   string lastMessage = 5;
   string lastMessageAt = 6;
   string createdAt = 7;
+}
+
+// GetComplaint
+message GetComplaintRequest {
+  string id = 1;
 }
 
 // GetManyComplaints

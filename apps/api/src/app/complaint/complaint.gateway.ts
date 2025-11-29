@@ -1,5 +1,9 @@
-import { CreateComplaintMessageRequestDTO } from '@domain/chat';
+import {
+  ComplaintStatusValues,
+  CreateComplaintMessageRequestDTO,
+} from '@domain/chat';
 import { generateRoomComplaintId } from '@hacmieu-journey/websocket';
+import { NotFoundException, UnauthorizedException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import {
   ConnectedSocket,
@@ -55,6 +59,17 @@ export class ComplaintGateway implements OnGatewayConnection {
     @MessageBody() message: Omit<CreateComplaintMessageRequestDTO, 'senderId'>,
     @ConnectedSocket() client: Socket
   ) {
+    const complaint = await this.complaintService.getComplaint({
+      id: message.complaintId,
+    });
+    if (!complaint) {
+      throw new NotFoundException('Error.ComplaintNotFound');
+    }
+
+    if (complaint.status === ComplaintStatusValues.CLOSED) {
+      throw new UnauthorizedException('Error.ComplaintClosed');
+    }
+
     const senderId = client.data['userId'];
 
     // Tạo message mới trong complaint

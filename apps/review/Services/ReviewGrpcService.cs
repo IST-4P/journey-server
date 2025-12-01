@@ -99,15 +99,39 @@ namespace review.Services
                 // Publish review.updated event to NATS
                 try
                 {
+                    // Calculate average rating based on the target type
+                    double? averageRating = null;
+
+                    if (review.DeviceId.HasValue)
+                    {
+                        var stats = await _reviewService.GetDeviceRatingStatsAsync(review.DeviceId.Value);
+                        averageRating = stats.AverageRating;
+                    }
+                    else if (review.ComboId.HasValue)
+                    {
+                        var stats = await _reviewService.GetComboRatingStatsAsync(review.ComboId.Value);
+                        averageRating = stats.AverageRating;
+                    }
+                    else if (review.VehicleId.HasValue)
+                    {
+                        var stats = await _reviewService.GetVehicleRatingStatsAsync(review.VehicleId.Value);
+                        averageRating = stats.AverageRating;
+                    }
+
                     var reviewUpdatedEvent = new Nats.Events.ReviewUpdatedEvent
                     {
                         ReviewId = review.Id.ToString(),
                         Rating = review.Rating,
                         Title = review.Title,
                         Content = review.Content,
-                        UpdatedAt = DateTime.UtcNow.ToString("O")
+                        UpdatedAt = DateTime.UtcNow.ToString("O"),
+                        DeviceId = review.DeviceId?.ToString(),
+                        ComboId = review.ComboId?.ToString(),
+                        VehicleId = review.VehicleId?.ToString(),
+                        AverageRating = averageRating
                     };
                     await _natsPublisher.PublishAsync("journey.events.review.updated", reviewUpdatedEvent);
+                    _logger.LogInformation($"Published journey.events.review.updated event for review {review.Id} with AverageRating: {averageRating}");
                 }
                 catch (Exception ex)
                 {
@@ -148,15 +172,36 @@ namespace review.Services
                 {
                     try
                     {
+                        // Calculate average rating after deletion based on the target type
+                        double? averageRating = null;
+
+                        if (review.DeviceId.HasValue)
+                        {
+                            var stats = await _reviewService.GetDeviceRatingStatsAsync(review.DeviceId.Value);
+                            averageRating = stats.AverageRating;
+                        }
+                        else if (review.ComboId.HasValue)
+                        {
+                            var stats = await _reviewService.GetComboRatingStatsAsync(review.ComboId.Value);
+                            averageRating = stats.AverageRating;
+                        }
+                        else if (review.VehicleId.HasValue)
+                        {
+                            var stats = await _reviewService.GetVehicleRatingStatsAsync(review.VehicleId.Value);
+                            averageRating = stats.AverageRating;
+                        }
+
                         var reviewDeletedEvent = new Nats.Events.ReviewDeletedEvent
                         {
                             ReviewId = reviewId.ToString(),
                             DeviceId = review.DeviceId?.ToString(),
                             VehicleId = review.VehicleId?.ToString(),
                             ComboId = review.ComboId?.ToString(),
-                            DeletedAt = DateTime.UtcNow.ToString("O")
+                            DeletedAt = DateTime.UtcNow.ToString("O"),
+                            AverageRating = averageRating
                         };
                         await _natsPublisher.PublishAsync("journey.events.review.deleted", reviewDeletedEvent);
+                        _logger.LogInformation($"Published journey.events.review.deleted event for review {reviewId} with AverageRating: {averageRating}");
                     }
                     catch (Exception ex)
                     {

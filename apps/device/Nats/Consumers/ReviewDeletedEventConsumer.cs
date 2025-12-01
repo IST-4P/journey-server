@@ -6,28 +6,28 @@ using device.Nats.Base;
 namespace device.Nats.Consumers
 {
     /// <summary>
-    /// Consumer to handle review.created events from Review service
-    /// Updates device with ReviewId when a review is created
+    /// Consumer to handle review.deleted events from Review service
+    /// Updates device/combo AverageReview and removes ReviewId when a review is deleted
     /// </summary>
-    public class ReviewEventConsumer : NatsConsumerBase<ReviewCreatedEvent>
+    public class ReviewDeletedEventConsumer : NatsConsumerBase<ReviewDeletedEvent>
     {
-        protected override string ConsumerName => "device-review-created";
-        protected override string FilterSubject => "journey.events.review.created";
+        protected override string ConsumerName => "device-review-deleted";
+        protected override string FilterSubject => "journey.events.review.deleted";
 
-        public ReviewEventConsumer(
+        public ReviewDeletedEventConsumer(
             NatsConnection natsConnection,
             IServiceProvider serviceProvider,
-            ILogger<ReviewEventConsumer> logger)
+            ILogger<ReviewDeletedEventConsumer> logger)
             : base(natsConnection, serviceProvider, logger)
         {
         }
 
-        protected override async Task HandleEventAsync(ReviewCreatedEvent reviewEvent, CancellationToken cancellationToken)
+        protected override async Task HandleEventAsync(ReviewDeletedEvent reviewEvent, CancellationToken cancellationToken)
         {
             // Skip if neither DeviceId nor ComboId is present
             if (string.IsNullOrEmpty(reviewEvent.DeviceId) && string.IsNullOrEmpty(reviewEvent.ComboId))
             {
-                Logger.LogInformation("[Device] Skipping review event - no DeviceId or ComboId");
+                Logger.LogInformation("[Device] Skipping review.deleted event - no DeviceId or ComboId");
                 return;
             }
 
@@ -39,13 +39,9 @@ namespace device.Nats.Consumers
 
             using var scope = ServiceProvider.CreateScope();
 
-            // Handle Device review
+            // Handle Device review deletion
             if (!string.IsNullOrEmpty(reviewEvent.DeviceId))
             {
-                Logger.LogInformation(
-                    "[Device] Received review.created for DeviceId: {DeviceId}, ReviewId: {ReviewId}",
-                    reviewEvent.DeviceId, reviewEvent.ReviewId);
-
                 if (!Guid.TryParse(reviewEvent.DeviceId, out var deviceId))
                 {
                     Logger.LogWarning("[Device] Invalid DeviceId: {DeviceId}", reviewEvent.DeviceId);
@@ -55,8 +51,10 @@ namespace device.Nats.Consumers
                     try
                     {
                         var deviceRepository = scope.ServiceProvider.GetRequiredService<IDeviceRepository>();
-                        await deviceRepository.AddReviewIdAsync(deviceId, reviewId);
-                        Logger.LogInformation("[Device] Added ReviewId {ReviewId} to Device {DeviceId}", reviewId, deviceId);
+
+                        // Remove reviewId from device's review list
+                        await deviceRepository.RemoveReviewIdAsync(deviceId, reviewId);
+                        Logger.LogInformation("[Device] Removed ReviewId {ReviewId} from Device {DeviceId}", reviewId, deviceId);
 
                         // Update average review if provided
                         if (reviewEvent.AverageRating.HasValue)
@@ -68,19 +66,15 @@ namespace device.Nats.Consumers
                     }
                     catch (Exception ex)
                     {
-                        Logger.LogError(ex, "[Device] Failed to add ReviewId to Device {DeviceId}", deviceId);
+                        Logger.LogError(ex, "[Device] Failed to handle review deletion for Device {DeviceId}", deviceId);
                         throw;
                     }
                 }
             }
 
-            // Handle Combo review
+            // Handle Combo review deletion
             if (!string.IsNullOrEmpty(reviewEvent.ComboId))
             {
-                Logger.LogInformation(
-                    "[Device] Received review.created for ComboId: {ComboId}, ReviewId: {ReviewId}",
-                    reviewEvent.ComboId, reviewEvent.ReviewId);
-
                 if (!Guid.TryParse(reviewEvent.ComboId, out var comboId))
                 {
                     Logger.LogWarning("[Device] Invalid ComboId: {ComboId}", reviewEvent.ComboId);
@@ -90,8 +84,10 @@ namespace device.Nats.Consumers
                     try
                     {
                         var comboRepository = scope.ServiceProvider.GetRequiredService<IComboRepository>();
-                        await comboRepository.AddReviewIdAsync(comboId, reviewId);
-                        Logger.LogInformation("[Device] Added ReviewId {ReviewId} to Combo {ComboId}", reviewId, comboId);
+
+                        // Remove reviewId from combo's review list
+                        await comboRepository.RemoveReviewIdAsync(comboId, reviewId);
+                        Logger.LogInformation("[Device] Removed ReviewId {ReviewId} from Combo {ComboId}", reviewId, comboId);
 
                         // Update average review if provided
                         if (reviewEvent.AverageRating.HasValue)
@@ -103,7 +99,7 @@ namespace device.Nats.Consumers
                     }
                     catch (Exception ex)
                     {
-                        Logger.LogError(ex, "[Device] Failed to add ReviewId to Combo {ComboId}", comboId);
+                        Logger.LogError(ex, "[Device] Failed to handle review deletion for Combo {ComboId}", comboId);
                         throw;
                     }
                 }

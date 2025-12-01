@@ -15,6 +15,7 @@ namespace device.Model.Entities
         public string? Status { get; set; }
         public List<string>? Images { get; set; }
         public List<string>? TotalReviewIds { get; set; }
+        public double? AverageReview { get; set; }
 
         public DateTime CreateAt { get; set; } = DateTime.UtcNow;
         public DateTime UpdateAt { get; set; } = DateTime.UtcNow;
@@ -48,6 +49,8 @@ namespace device.Model.Entities
         public string? Description { get; set; }
         public List<string>? Images { get; set; }
         public List<Guid>? ReviewIds { get; set; }
+        public int? Quantity { get; set; } // Số lượng combo có sẵn
+        public double? AverageReview { get; set; }
 
         public ICollection<ComboDevice>? ComboDevices { get; set; }
 

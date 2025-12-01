@@ -257,6 +257,8 @@ message GetComboResponse {
   repeated ComboDeviceItem devices = 6;
   string createdAt = 7;
   string updatedAt = 8;
+  int32 quantity = 9;
+  double averageReview = 10;
 }
 
 // GetManyCombos
@@ -275,6 +277,8 @@ message GetManyCombos {
   int32 deviceCount = 6;
   string createdAt = 7;
   string updatedAt = 8;
+  int32 quantity = 9;
+  double averageReview = 10;
 }
 
 message GetManyCombosResponse {
@@ -297,6 +301,7 @@ message CreateComboRequest {
   string description = 3;
   repeated string images = 4;
   repeated ComboDeviceInput deviceItems = 5;
+  int32 quantity = 6;
 }
 
 // UpdateCombo
@@ -307,6 +312,7 @@ message UpdateComboRequest {
   optional string description = 4;
   repeated string images = 5;
   repeated ComboDeviceInput deviceItems = 6;
+  optional int32 quantity = 7;
 }
 
 // DeleteCombo

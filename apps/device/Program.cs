@@ -31,6 +31,8 @@ builder.Services.AddSingleton(sp =>
 builder.Services.AddSingleton<NatsPublisher>();
 builder.Services.AddSingleton<NatsStreamSetup>();
 builder.Services.AddHostedService<ReviewEventConsumer>();
+builder.Services.AddHostedService<ReviewUpdatedEventConsumer>();
+builder.Services.AddHostedService<ReviewDeletedEventConsumer>();
 builder.Services.AddHostedService<RentalQuantityChangeConsumer>();
 
 // Load connection string

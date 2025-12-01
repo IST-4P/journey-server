@@ -29,7 +29,9 @@ namespace device.Service
                     Description = dto.Description ?? string.Empty,
                     Images = { dto.Images ?? new List<string>() },
                     CreatedAt = dto.CreateAt.ToString("O"),
-                    UpdatedAt = dto.UpdateAt.ToString("O")
+                    UpdatedAt = dto.UpdateAt.ToString("O"),
+                    Quantity = combo.Quantity ?? 0,
+                    AverageReview = combo.AverageReview ?? 0
                 };
 
                 var devices = dto.Devices ?? new List<ComboDeviceItemDto>();
@@ -89,7 +91,9 @@ namespace device.Service
                         Description = combo.Description ?? string.Empty,
                         Images = { combo.Images ?? new List<string>() },
                         CreatedAt = combo.CreateAt.ToString("O"),
-                        UpdatedAt = combo.UpdateAt.ToString("O")
+                        UpdatedAt = combo.UpdateAt.ToString("O"),
+                        Quantity = paged.Items.FirstOrDefault(c => c.Id == combo.Id)?.Quantity ?? 0,
+                        AverageReview = paged.Items.FirstOrDefault(c => c.Id == combo.Id)?.AverageReview ?? 0
                     });
                 }
 
@@ -120,6 +124,7 @@ namespace device.Service
                 };
 
                 var entity = _mapper.Map<Combo>(dto);
+                entity.Quantity = request.Quantity;
                 var created = await _comboRepository.CreateComboAsync(entity, dto.DeviceItems);
                 var result = _mapper.Map<AdminComboDto>(created);
 
@@ -131,7 +136,9 @@ namespace device.Service
                     Description = result.Description ?? string.Empty,
                     Images = { result.Images ?? new List<string>() },
                     CreatedAt = result.CreateAt.ToString("O"),
-                    UpdatedAt = result.UpdateAt.ToString("O")
+                    UpdatedAt = result.UpdateAt.ToString("O"),
+                    Quantity = created.Quantity ?? 0,
+                    AverageReview = created.AverageReview ?? 0
                 };
 
                 var devices = result.Devices ?? new List<ComboDeviceItemDto>();
@@ -176,6 +183,10 @@ namespace device.Service
                 };
 
                 var entity = _mapper.Map<Combo>(dto);
+                if (request.Quantity > 0)
+                {
+                    entity.Quantity = request.Quantity;
+                }
                 var updated = await _comboRepository.UpdateComboAsync(id, entity, dto.DeviceItems);
 
                 if (updated is null)
@@ -191,7 +202,9 @@ namespace device.Service
                     Description = result.Description ?? string.Empty,
                     Images = { result.Images ?? new List<string>() },
                     CreatedAt = result.CreateAt.ToString("O"),
-                    UpdatedAt = result.UpdateAt.ToString("O")
+                    UpdatedAt = result.UpdateAt.ToString("O"),
+                    Quantity = updated.Quantity ?? 0,
+                    AverageReview = updated.AverageReview ?? 0
                 };
 
                 var devices = result.Devices ?? new List<ComboDeviceItemDto>();
@@ -260,5 +273,5 @@ namespace device.Service
                 throw new RpcException(new Status(StatusCode.Internal, ex.Message));
             }
         }
-    }   
+    }
 }

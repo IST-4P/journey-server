@@ -121,6 +121,7 @@ namespace device.Repository
             existing.Price = combo.Price != 0 ? combo.Price : existing.Price;
             existing.Description = combo.Description ?? existing.Description;
             existing.Images = combo.Images ?? existing.Images;
+            existing.Quantity = combo.Quantity ?? existing.Quantity;
             existing.UpdateAt = DateTime.UtcNow;
 
             // Update device items if provided
@@ -190,6 +191,38 @@ namespace device.Repository
                 combo.UpdateAt = DateTime.UtcNow;
                 await _dbContext.SaveChangesAsync();
             }
+
+            return true;
+        }
+
+        public async Task<bool> RemoveReviewIdAsync(Guid comboId, Guid reviewId)
+        {
+            var combo = await _dbContext.Combos.FirstOrDefaultAsync(x => x.Id == comboId);
+            if (combo == null) return false;
+
+            if (combo.ReviewIds != null)
+            {
+                if (combo.ReviewIds.Remove(reviewId))
+                {
+                    combo.UpdateAt = DateTime.UtcNow;
+                    await _dbContext.SaveChangesAsync();
+                }
+            }
+
+            return true;
+        }
+
+        public async Task<bool> UpdateAverageReviewAsync(Guid comboId, double averageRating)
+        {
+            var combo = await _dbContext.Combos.FindAsync(comboId);
+            if (combo == null)
+            {
+                return false;
+            }
+
+            combo.AverageReview = averageRating;
+            combo.UpdateAt = DateTime.UtcNow;
+            await _dbContext.SaveChangesAsync();
 
             return true;
         }

@@ -18,7 +18,7 @@ namespace device.Repository
         {
             return await _dbContext.Set<DeviceEntity>().CountAsync();
         }
-        
+
         private static IQueryable<DeviceEntity> ApplyFilter(IQueryable<DeviceEntity> queryable, DeviceQuery query)
         {
             if (!string.IsNullOrWhiteSpace(query.Search))
@@ -174,6 +174,36 @@ namespace device.Repository
                 device.UpdateAt = DateTime.UtcNow;
                 await _dbContext.SaveChangesAsync();
             }
+
+            return true;
+        }
+
+        public async Task<bool> RemoveReviewIdAsync(Guid deviceId, Guid reviewId)
+        {
+            var device = await _dbContext.Set<DeviceEntity>().FirstOrDefaultAsync(x => x.Id == deviceId);
+            if (device == null) return false;
+
+            if (device.TotalReviewIds != null)
+            {
+                var reviewIdString = reviewId.ToString();
+                if (device.TotalReviewIds.Remove(reviewIdString))
+                {
+                    device.UpdateAt = DateTime.UtcNow;
+                    await _dbContext.SaveChangesAsync();
+                }
+            }
+
+            return true;
+        }
+
+        public async Task<bool> UpdateAverageReviewAsync(Guid deviceId, double averageRating)
+        {
+            var device = await _dbContext.Set<DeviceEntity>().FirstOrDefaultAsync(x => x.Id == deviceId);
+            if (device == null) return false;
+
+            device.AverageReview = averageRating;
+            device.UpdateAt = DateTime.UtcNow;
+            await _dbContext.SaveChangesAsync();
 
             return true;
         }

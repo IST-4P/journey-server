@@ -136,6 +136,25 @@ namespace review.Services
         {
             try
             {
+                // Calculate average rating based on the target type
+                double? averageRating = null;
+
+                if (review.DeviceId.HasValue)
+                {
+                    var stats = await GetDeviceRatingStatsAsync(review.DeviceId.Value);
+                    averageRating = stats.AverageRating;
+                }
+                else if (review.ComboId.HasValue)
+                {
+                    var stats = await GetComboRatingStatsAsync(review.ComboId.Value);
+                    averageRating = stats.AverageRating;
+                }
+                else if (review.VehicleId.HasValue)
+                {
+                    var stats = await GetVehicleRatingStatsAsync(review.VehicleId.Value);
+                    averageRating = stats.AverageRating;
+                }
+
                 var reviewEvent = new ReviewCreatedEvent
                 {
                     reviewId = review.Id.ToString(),
@@ -144,11 +163,12 @@ namespace review.Services
                     deviceId = review.DeviceId?.ToString(),
                     comboId = review.ComboId?.ToString(),
                     vehicleId = review.VehicleId?.ToString(),
-                    rating = review.Rating
+                    rating = review.Rating,
+                    AverageRating = averageRating
                 };
 
                 await _natsPublisher.PublishAsync("journey.events.review.created", reviewEvent);
-                _logger.LogInformation($"Published journey.events.review.created event for review {review.Id}");
+                _logger.LogInformation($"Published journey.events.review.created event for review {review.Id} with AverageRating: {averageRating}");
             }
             catch (Exception ex)
             {

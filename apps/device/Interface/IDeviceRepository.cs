@@ -24,5 +24,7 @@ namespace device.Interface
 
         // Review management
         Task<bool> AddReviewIdAsync(Guid deviceId, Guid reviewId);
+        Task<bool> RemoveReviewIdAsync(Guid deviceId, Guid reviewId);
+        Task<bool> UpdateAverageReviewAsync(Guid deviceId, double averageRating);
     }
 }

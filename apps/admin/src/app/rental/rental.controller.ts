@@ -36,7 +36,7 @@ export class RentalController {
     });
   }
 
-  @Get(':id')
+  @Get(':rentalId')
   getRentalById(@Param() query: GetRentalByIdRequestDTO) {
     return this.rentalService.getRentalById(query);
   }
@@ -52,7 +52,7 @@ export class RentalController {
     });
   }
 
-  @Delete(':id')
+  @Delete(':rentalId')
   deleteRental(@Param() params: DeleteRentalRequestDTO) {
     return this.rentalService.deleteRental(params);
   }
@@ -64,26 +64,25 @@ export class ExtensionController {
 
   constructor(private readonly rentalService: RentalService) {}
 
-  @Get(':id')
+  @Get(':extensionId')
   getRentalExtensions(@Param() params: GetRentalExtensionsRequestDTO) {
     return this.rentalService.getRentalExtensions(params);
   }
 
-  @Put(':id/approve')
+  @Put('/approve/:extensionId')
   approveExtension(
-    @Param('id') extensionId: string,
+    @Param('extensionId') extensionId: string,
     @Body() body: Omit<ApproveExtensionRequestDTO, 'extensionId'>
   ) {
     return this.rentalService.updateExtensionStatus({
       extensionId,
       status: 'APPROVED',
-      adminNotes: body.adminNotes,
     });
   }
 
-  @Put(':id/reject')
+  @Put('/reject/:extensionId')
   rejectExtension(
-    @Param('id') extensionId: string,
+    @Param('extensionId') extensionId: string,
     @Body() body: Omit<RejectExtensionRequestDTO, 'extensionId'>
   ) {
     return this.rentalService.updateExtensionStatus({

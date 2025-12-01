@@ -191,6 +191,7 @@ namespace rental.Service
                     EndDate = updated.EndDate.ToString("O"),
                     CreatedAt = updated.CreatedAt.ToString("O"),
                     ActualEndDate = updated.ActualEndDate?.ToString("O") ?? string.Empty,
+                    ReviewId = updated.ReviewId?.ToString() ?? "NULL"
                 };
 
                 foreach (var item in itemDetails)

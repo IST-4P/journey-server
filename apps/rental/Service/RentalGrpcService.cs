@@ -218,6 +218,7 @@ namespace rental.Service
                     EndDate = created.EndDate.ToString("O"),
                     CreatedAt = created.CreatedAt.ToString("O"),
                     ActualEndDate = created.ActualEndDate?.ToString("O") ?? string.Empty,
+                    ReviewId = created.ReviewId?.ToString() ?? "NULL"
                 };
 
                 response.Items.AddRange(itemDetailsList);
@@ -430,17 +431,12 @@ namespace rental.Service
                     EndDate = rental.EndDate.ToString("O"),
                     CreatedAt = rental.CreatedAt.ToString("O"),
                     ActualEndDate = rental.ActualEndDate?.ToString("O") ?? string.Empty,
+                    ReviewId = rental.ReviewId?.ToString() ?? "NULL"
                 };
 
                 foreach (var item in itemDetails)
                 {
                     response.Items.Add(item);
-                }
-
-                // Add ReviewId if exists
-                if (rental.ReviewId.HasValue)
-                {
-                    response.ReviewId = rental.ReviewId.Value.ToString();
                 }
 
                 return response;
@@ -456,7 +452,7 @@ namespace rental.Service
             }
         }
 
-       
+
 
 
     }

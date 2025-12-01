@@ -175,10 +175,10 @@ namespace rental.Service
                 StartDate = rental.StartDate,
                 EndDate = rental.EndDate,
                 CreatedAt = rental.CreatedAt,
-                ReviewId = rental.ReviewId
+                ReviewId = rental.ReviewId != Guid.Empty ? rental.ReviewId : null
             };
         }
-        
+
         private async Task<UserRental> MapToUserRental(RentalEntity rental)
         {
             var dto = await MapToUserRentalDto(rental);
@@ -191,14 +191,9 @@ namespace rental.Service
                 StartDate = dto.StartDate.ToString("O"),
                 EndDate = dto.EndDate.ToString("O"),
                 CreatedAt = dto.CreatedAt.ToString("O"),
-                DiscountPercent = rental.DiscountPercent
+                DiscountPercent = rental.DiscountPercent,
+                ReviewId = dto.ReviewId?.ToString() ?? "NULL"
             };
-
-            // Add ReviewId if exists
-            if (dto.ReviewId.HasValue)
-            {
-                response.ReviewId = dto.ReviewId.Value.ToString();
-            }
 
             return response;
         }

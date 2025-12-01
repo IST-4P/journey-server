@@ -57,6 +57,7 @@ namespace device.Service
 
                 foreach (var d in dtos)
                 {
+                    var device = paged.Items.FirstOrDefault(dev => dev.Id == d.Id);
                     res.Devices.Add(new GetManyDevicesAdmin
                     {
                         Id = d.Id.ToString(),
@@ -70,7 +71,8 @@ namespace device.Service
                         CategoryId = d.CategoryId.ToString(),
                         CategoryName = d.CategoryName ?? string.Empty,
                         CreatedAt = d.CreateAt.ToString("O"),
-                        UpdatedAt = d.UpdateAt.ToString("O")
+                        UpdatedAt = d.UpdateAt.ToString("O"),
+                        ReviewIds = { device?.TotalReviewIds ?? new List<string>() }
                     });
                 }
 
@@ -110,7 +112,8 @@ namespace device.Service
                     CategoryId = dto.CategoryId.ToString(),
                     CategoryName = dto.CategoryName ?? "",
                     CreatedAt = dto.CreateAt.ToString("O"),
-                    UpdatedAt = dto.UpdateAt.ToString("O")
+                    UpdatedAt = dto.UpdateAt.ToString("O"),
+                    ReviewIds = { device.TotalReviewIds ?? new List<string>() }
                 };
             }
             catch (RpcException) { throw; }
@@ -147,6 +150,7 @@ namespace device.Service
 
                 foreach (var d in dtos)
                 {
+                    var device = paged.Items.FirstOrDefault(dev => dev.Id == d.Id);
                     res.Devices.Add(new GetManyDevices
                     {
                         Id = d.Id.ToString(),
@@ -159,6 +163,7 @@ namespace device.Service
                         Images = { d.Images ?? new List<string>() },
                         CategoryName = d.CategoryName ?? "",
                         Brand = d.Brand ?? "",
+                        ReviewIds = { device?.TotalReviewIds ?? new List<string>() }
                     });
                 }
 
@@ -206,7 +211,8 @@ namespace device.Service
                     CategoryId = res.CategoryId.ToString(),
                     CategoryName = res.CategoryName ?? "",
                     CreatedAt = res.CreateAt.ToString("O"),
-                    UpdatedAt = res.UpdateAt.ToString("O")
+                    UpdatedAt = res.UpdateAt.ToString("O"),
+                    ReviewIds = { created.TotalReviewIds ?? new List<string>() }
                 };
             }
             catch (Exception ex)
@@ -253,7 +259,8 @@ namespace device.Service
                     CategoryId = res.CategoryId.ToString(),
                     CategoryName = res.CategoryName ?? "",
                     CreatedAt = res.CreateAt.ToString("O"),
-                    UpdatedAt = res.UpdateAt.ToString("O")
+                    UpdatedAt = res.UpdateAt.ToString("O"),
+                    ReviewIds = { updated.TotalReviewIds ?? new List<string>() }
                 };
             }
             catch (Exception ex)

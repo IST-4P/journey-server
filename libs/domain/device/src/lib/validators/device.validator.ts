@@ -15,6 +15,7 @@ export const DeviceValidatorSchema = z.object({
   createdAt: z.string(),
   updatedAt: z.string(),
   brand: z.string(),
+  reviewIds: z.array(z.string()),
 });
 
 export const ComboDeviceItemValidatorSchema = z.object({
@@ -33,6 +34,9 @@ export const ComboValidatorSchema = z.object({
   devices: z.array(ComboDeviceItemValidatorSchema),
   createdAt: z.string(),
   updatedAt: z.string(),
+  quantity: z.number().int().min(0),
+  averageReview: z.number().min(0).max(5),
+  reviewIds: z.array(z.string()),
 });
 
 export type DeviceValidator = z.infer<typeof DeviceValidatorSchema>;

@@ -138,6 +138,7 @@ message GetDeviceResponse {
   string createdAt = 11;
   string updatedAt = 12;
   string brand = 13;
+  repeated string reviewIds = 14;
 }
 
 // GetManyDevices (User)
@@ -161,6 +162,7 @@ message GetManyDevices {
   string categoryName = 8;
   string id = 9;
   string brand = 10;
+  repeated string reviewIds = 11;
 }
 
 message GetManyDevicesResponse {
@@ -186,6 +188,7 @@ message GetManyDevicesAdmin {
   string createdAt = 11;
   string updatedAt = 12;
   string brand = 13;
+  repeated string reviewIds = 14;
 }
 
 message GetManyDevicesAdminResponse {
@@ -259,6 +262,7 @@ message GetComboResponse {
   string updatedAt = 8;
   int32 quantity = 9;
   double averageReview = 10;
+  repeated string reviewIds = 11;
 }
 
 // GetManyCombos
@@ -279,6 +283,7 @@ message GetManyCombos {
   string updatedAt = 8;
   int32 quantity = 9;
   double averageReview = 10;
+  repeated string reviewIds = 11;
 }
 
 message GetManyCombosResponse {

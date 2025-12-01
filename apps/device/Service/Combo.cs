@@ -31,7 +31,8 @@ namespace device.Service
                     CreatedAt = dto.CreateAt.ToString("O"),
                     UpdatedAt = dto.UpdateAt.ToString("O"),
                     Quantity = combo.Quantity ?? 0,
-                    AverageReview = combo.AverageReview ?? 0
+                    AverageReview = combo.AverageReview ?? 0,
+                    ReviewIds = { combo.ReviewIds?.Select(r => r.ToString()) ?? new List<string>() }
                 };
 
                 var devices = dto.Devices ?? new List<ComboDeviceItemDto>();
@@ -82,6 +83,7 @@ namespace device.Service
                 foreach (var combo in dtos)
                 {
                     var deviceCount = combo.Devices?.Count ?? 0;
+                    var comboEntity = paged.Items.FirstOrDefault(c => c.Id == combo.Id);
 
                     response.Combos.Add(new GetManyCombos
                     {
@@ -93,7 +95,8 @@ namespace device.Service
                         CreatedAt = combo.CreateAt.ToString("O"),
                         UpdatedAt = combo.UpdateAt.ToString("O"),
                         Quantity = paged.Items.FirstOrDefault(c => c.Id == combo.Id)?.Quantity ?? 0,
-                        AverageReview = paged.Items.FirstOrDefault(c => c.Id == combo.Id)?.AverageReview ?? 0
+                        AverageReview = paged.Items.FirstOrDefault(c => c.Id == combo.Id)?.AverageReview ?? 0,
+                        ReviewIds = { comboEntity?.ReviewIds?.Select(r => r.ToString()) ?? new List<string>() }
                     });
                 }
 
@@ -138,7 +141,8 @@ namespace device.Service
                     CreatedAt = result.CreateAt.ToString("O"),
                     UpdatedAt = result.UpdateAt.ToString("O"),
                     Quantity = created.Quantity ?? 0,
-                    AverageReview = created.AverageReview ?? 0
+                    AverageReview = created.AverageReview ?? 0,
+                    ReviewIds = { created.ReviewIds?.Select(r => r.ToString()) ?? new List<string>() }
                 };
 
                 var devices = result.Devices ?? new List<ComboDeviceItemDto>();
@@ -204,7 +208,8 @@ namespace device.Service
                     CreatedAt = result.CreateAt.ToString("O"),
                     UpdatedAt = result.UpdateAt.ToString("O"),
                     Quantity = updated.Quantity ?? 0,
-                    AverageReview = updated.AverageReview ?? 0
+                    AverageReview = updated.AverageReview ?? 0,
+                    ReviewIds = { updated.ReviewIds?.Select(r => r.ToString()) ?? new List<string>() }
                 };
 
                 var devices = result.Devices ?? new List<ComboDeviceItemDto>();

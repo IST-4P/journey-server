@@ -113,6 +113,7 @@ export interface GetDeviceResponse {
   createdAt: string;
   updatedAt: string;
   brand: string;
+  reviewIds: string[];
 }
 
 /** GetManyDevices (User) */
@@ -136,6 +137,7 @@ export interface GetManyDevices {
   categoryName: string;
   id: string;
   brand: string;
+  reviewIds: string[];
 }
 
 export interface GetManyDevicesResponse {
@@ -161,6 +163,7 @@ export interface GetManyDevicesAdmin {
   createdAt: string;
   updatedAt: string;
   brand: string;
+  reviewIds: string[];
 }
 
 export interface GetManyDevicesAdminResponse {
@@ -228,6 +231,9 @@ export interface GetComboResponse {
   devices: ComboDeviceItem[];
   createdAt: string;
   updatedAt: string;
+  quantity: number;
+  averageReview: number;
+  reviewIds: string[];
 }
 
 /** GetManyCombos */
@@ -246,6 +252,9 @@ export interface GetManyCombos {
   deviceCount: number;
   createdAt: string;
   updatedAt: string;
+  quantity: number;
+  averageReview: number;
+  reviewIds: string[];
 }
 
 export interface GetManyCombosResponse {
@@ -268,6 +277,7 @@ export interface CreateComboRequest {
   description: string;
   images: string[];
   deviceItems: ComboDeviceInput[];
+  quantity: number;
 }
 
 /** UpdateCombo */
@@ -278,6 +288,7 @@ export interface UpdateComboRequest {
   description?: string | undefined;
   images: string[];
   deviceItems: ComboDeviceInput[];
+  quantity?: number | undefined;
 }
 
 /** DeleteCombo */

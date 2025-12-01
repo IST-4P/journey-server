@@ -55,8 +55,4 @@ namespace rental.Data
             });
         }
     }
-
-
-
-
 }

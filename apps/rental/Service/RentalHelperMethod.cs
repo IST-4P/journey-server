@@ -12,10 +12,6 @@ namespace rental.Service
         private async Task<AdminRental> MapToAdminRental(RentalEntity rental)
         {
             var dto = await MapToAdminRentalDto(rental);
-
-            var userName = "Unknown";
-            var userEmail = "";
-
             try
             {
                 // Fetch user info
@@ -23,8 +19,7 @@ namespace rental.Service
                 {
                     UserId = rental.UserId.ToString()
                 });
-                userName = userResponse.FullName;
-                userEmail = userResponse.Email;
+
             }
             catch (Exception ex)
             {
@@ -35,8 +30,6 @@ namespace rental.Service
             {
                 Id = dto.Id.ToString(),
                 UserId = dto.UserId.ToString(),
-                UserName = userName,
-                UserEmail = userEmail,
                 TotalPrice = dto.TotalPrice,
                 MaxDiscount = dto.MaxDiscount,
                 DiscountPercent = dto.DiscountPercent,
@@ -162,7 +155,7 @@ namespace rental.Service
                         TargetId = item.TargetId.ToString(),
                         IsCombo = item.IsCombo,
                         Quantity = item.Quantity,
-                        Name = "Unknown",
+                        Name = "Unknown Device/Combo",
                         UnitPrice = 0,
                         Subtotal = 0
                     });

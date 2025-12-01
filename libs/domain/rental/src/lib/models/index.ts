@@ -150,6 +150,22 @@ export const GetRentalExtensionsResponseSchema = z.object({
   extensions: z.array(RentalExtensionValidatorSchema),
 });
 
+export const ApproveExtensionRequestSchema = z.object({
+  extensionId: z.string().uuid(),
+  adminNotes: z.string().optional(),
+});
+
+export const RejectExtensionRequestSchema = z.object({
+  extensionId: z.string().uuid(),
+  rejectionReason: z.string().min(1, 'Rejection reason is required'),
+});
+
+export const ExtensionStatusResponseSchema = z.object({
+  success: z.boolean(),
+  message: z.string(),
+  extension: RentalExtensionValidatorSchema,
+});
+
 // Rental types
 export type CreateRentalRequest = z.infer<typeof CreateRentalRequestSchema>;
 export type RentalResponse = z.infer<typeof RentalResponseSchema>;
@@ -175,4 +191,13 @@ export type GetRentalExtensionsRequest = z.infer<
 >;
 export type GetRentalExtensionsResponse = z.infer<
   typeof GetRentalExtensionsResponseSchema
+>;
+export type ApproveExtensionRequest = z.infer<
+  typeof ApproveExtensionRequestSchema
+>;
+export type RejectExtensionRequest = z.infer<
+  typeof RejectExtensionRequestSchema
+>;
+export type ExtensionStatusResponse = z.infer<
+  typeof ExtensionStatusResponseSchema
 >;

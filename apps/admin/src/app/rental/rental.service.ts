@@ -47,4 +47,10 @@ export class RentalService implements OnModuleInit {
   ): Promise<RentalProto.GetRentalExtensionsResponse> {
     return lastValueFrom(this.rentalService.getRentalExtensions(data));
   }
+
+  updateExtensionStatus(
+    data: RentalProto.UpdateExtensionStatusRequest
+  ): Promise<RentalProto.UpdateExtensionStatusResponse> {
+    return lastValueFrom(this.rentalService.updateExtensionStatus(data));
+  }
 }

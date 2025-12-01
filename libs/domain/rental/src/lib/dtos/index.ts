@@ -14,6 +14,9 @@ import {
   GetRentalExtensionsRequestSchema,
   GetRentalExtensionsResponseSchema,
   RentalResponseSchema,
+  ApproveExtensionRequestSchema,
+  RejectExtensionRequestSchema,
+  ExtensionStatusResponseSchema,
   UpdateRentalRequestSchema,
 } from '../models';
 
@@ -62,4 +65,13 @@ export class GetRentalExtensionsRequestDTO extends createZodDto(
 ) {}
 export class GetRentalExtensionsResponseDTO extends createZodDto(
   GetRentalExtensionsResponseSchema
+) {}
+export class ApproveExtensionRequestDTO extends createZodDto(
+  ApproveExtensionRequestSchema
+) {}
+export class RejectExtensionRequestDTO extends createZodDto(
+  RejectExtensionRequestSchema
+) {}
+export class ExtensionStatusResponseDTO extends createZodDto(
+  ExtensionStatusResponseSchema
 ) {}

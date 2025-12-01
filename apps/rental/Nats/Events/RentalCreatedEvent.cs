@@ -4,9 +4,25 @@ namespace rental.Nats.Events
     {
         public string id { get; set; } = string.Empty;
         public string userId { get; set; } = string.Empty;
-        public  required string type { get; set; } 
+        public string type { get; set; } = string.Empty;
         public string rentalId { get; set; } = string.Empty;
         public double totalAmount { get; set; }
+    }
+
+    public class RentalRejectedEvent
+    {
+        public string rentalId { get; set; } = string.Empty;
+        public string userId { get; set; } = string.Empty;
+        public string reason { get; set; } = string.Empty;
+        public DateTime rejectedAt { get; set; }
+    }
+
+    public class NotificationCreatedEvent
+    {
+        public string userId { get; set; } = string.Empty;
+        public string title { get; set; } = string.Empty;
+        public string content { get; set; } = string.Empty;
+        public string type { get; set; } = string.Empty;
     }
 }
 

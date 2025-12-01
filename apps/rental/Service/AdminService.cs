@@ -109,14 +109,14 @@ namespace rental.Service
                             double refundPercent = 0;
                             if (newStatus == RentalStatus.CANCELLED)
                             {
-                                refundPercent = RentalCalculationHelper.CalculateRefundPercent(updated.StartDate, DateTime.UtcNow);
+                                refundPercent = RentalCalculationHelper.CalculateRefundPercent(updated!.StartDate, DateTime.UtcNow);
                             }
                             else if (newStatus == RentalStatus.COMPLETED)
                             {
                                 refundPercent = 100; // Full refund on completion
                             }
 
-                            double refundAmount = RentalCalculationHelper.CalculateRefundAmount(updated.Deposit ?? 0, refundPercent);
+                            double refundAmount = RentalCalculationHelper.CalculateRefundAmount(updated!.Deposit ?? 0, refundPercent);
                             _logger.LogInformation("Rental {RentalId} status changed to {NewStatus}. Refund: {RefundPercent}% = {RefundAmount} VND",
                                 rentalId, newStatus, refundPercent, refundAmount);
 
@@ -128,7 +128,7 @@ namespace rental.Service
                         {
                             var rentalUpdatedEvent = new RentalUpdatedEvent
                             {
-                                rentalId = updated.Id.ToString(),
+                                rentalId = updated!.Id.ToString(),
                                 status = newStatus.ToString(),
                                 updatedAt = DateTime.UtcNow
                             };
@@ -159,7 +159,7 @@ namespace rental.Service
                             {
                                 var rentalCompletedEvent = new RentalCompletedEvent
                                 {
-                                    rentalId = updated.Id.ToString(),
+                                    rentalId = updated!.Id.ToString(),
                                     userId = updated.UserId.ToString(),
                                     completedAt = DateTime.UtcNow
                                 };
@@ -174,7 +174,7 @@ namespace rental.Service
                 }
 
                 // Defensive JSON parsing for rental items
-                var itemDetails = await BuildItemDetails(DeserializeItemsSafe(updated.Items));
+                var itemDetails = await BuildItemDetails(DeserializeItemsSafe(updated!.Items));
 
                 var response = new RentalResponse
                 {
@@ -240,6 +240,126 @@ namespace rental.Service
             }
         }
 
+        // Admin: Update extension status (APPROVED or REJECTED)
+        public override async Task<UpdateExtensionStatusResponse> UpdateExtensionStatus(UpdateExtensionStatusRequest request, ServerCallContext context)
+        {
+            try
+            {
+                if (!Guid.TryParse(request.ExtensionId, out var extensionId))
+                {
+                    throw new RpcException(new Status(StatusCode.InvalidArgument, "Invalid extension ID"));
+                }
+
+                // Validate status
+                if (!Enum.TryParse<ExtensionStatus>(request.Status, true, out var newStatus))
+                {
+                    throw new RpcException(new Status(StatusCode.InvalidArgument, "Invalid status. Use APPROVED or REJECTED"));
+                }
+
+                if (newStatus != ExtensionStatus.APPROVED && newStatus != ExtensionStatus.REJECTED)
+                {
+                    throw new RpcException(new Status(StatusCode.InvalidArgument, "Status must be APPROVED or REJECTED"));
+                }
+
+                // Get extension
+                var extension = await _repository.GetExtensionByIdAsync(extensionId);
+
+                if (extension == null)
+                {
+                    throw new RpcException(new Status(StatusCode.NotFound, "Extension not found"));
+                }
+
+                if (extension.Status != ExtensionStatus.PENDING)
+                {
+                    throw new RpcException(new Status(StatusCode.FailedPrecondition,
+                        $"Extension already {extension.Status}. Only PENDING extensions can be updated"));
+                }
+
+                // Get rental
+                var rental = await _repository.GetByIdAsync(extension.RentalId ?? Guid.Empty);
+                if (rental == null)
+                {
+                    throw new RpcException(new Status(StatusCode.NotFound, "Rental not found"));
+                }
+
+                // Update extension status
+                extension.Status = newStatus;
+                if (!string.IsNullOrWhiteSpace(request.AdminNotes))
+                {
+                    extension.Notes = request.AdminNotes;
+                }
+                await _repository.SaveChangesAsync();
+
+                string message;
+                if (newStatus == ExtensionStatus.APPROVED)
+                {
+                    message = "Extension approved successfully";
+                    _logger.LogInformation("[Rental] Extension {ExtensionId} approved for rental {RentalId}", extensionId, rental.Id);
+                }
+                else // REJECTED
+                {
+                    message = "Extension rejected";
+
+                    // Restore original end date if this was the latest extension
+                    if (rental.ActualEndDate.HasValue)
+                    {
+                        rental.EndDate = rental.ActualEndDate.Value;
+                        await _repository.UpdateAsync(rental.Id, new UpdateRentalRequestDto { EndDate = rental.ActualEndDate.Value });
+                    }
+
+                    _logger.LogInformation("[Rental] Extension {ExtensionId} rejected for rental {RentalId}", extensionId, rental.Id);
+
+                    // Send notification to user about rejection
+                    try
+                    {
+                        var notificationEvent = new Nats.Events.NotificationCreatedEvent
+                        {
+                            userId = rental.UserId.ToString(),
+                            title = "Rental Extension Rejected",
+                            content = $"Your rental extension request has been rejected. {(string.IsNullOrWhiteSpace(request.AdminNotes) ? "" : "Reason: " + request.AdminNotes)}",
+                            type = "RENTAL_EXTENSION_REJECTED"
+                        };
+                        await _natsPublisher.PublishAsync("journey.events.notification-created", notificationEvent);
+                        _logger.LogInformation("[Rental] Published notification for rejected extension {ExtensionId}", extensionId);
+                    }
+                    catch (Exception ex)
+                    {
+                        _logger.LogWarning(ex, "[Rental] Failed to publish notification for rejected extension {ExtensionId}", extensionId);
+                    }
+                }
+
+                var response = new UpdateExtensionStatusResponse
+                {
+                    Success = true,
+                    Message = message,
+                    Extension = new RentalExtensionMessage
+                    {
+                        Id = extension.Id.ToString(),
+                        RentalId = extension.RentalId?.ToString() ?? string.Empty,
+                        NewEndDate = extension.NewEndDate?.ToString("O") ?? string.Empty,
+                        AdditionalDays = extension.AdditionalDays ?? 0,
+                        TotalPrice = extension.TotalPrice ?? 0,
+                        RequestedBy = extension.RequestedBy?.ToString() ?? string.Empty,
+                        CreatedAt = extension.CreatedAt?.ToString("O") ?? string.Empty,
+                        Notes = extension.Notes ?? string.Empty,
+                        Status = extension.Status.ToString()
+                    }
+                };
+
+                return response;
+            }
+            catch (RpcException)
+            {
+                throw;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error updating extension status");
+                throw new RpcException(new Status(StatusCode.Internal, ex.Message));
+            }
+        }
+
+        // Admin: Get total rental count for dashboard
         public override async Task<RentalCountReponse> DashboardRental(RentalCountRequest request, ServerCallContext context)
         {
             try

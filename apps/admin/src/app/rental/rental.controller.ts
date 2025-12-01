@@ -3,6 +3,8 @@ import {
   GetAllRentalsRequestDTO,
   GetRentalByIdRequestDTO,
   GetRentalExtensionsRequestDTO,
+  ApproveExtensionRequestDTO,
+  RejectExtensionRequestDTO,
   UpdateRentalRequestDTO,
 } from '@domain/rental';
 import { ActiveUser } from '@hacmieu-journey/nestjs';
@@ -56,7 +58,7 @@ export class RentalController {
   }
 }
 
-@Controller('extension')
+@Controller('rental-extension')
 export class ExtensionController {
   // private readonly logger = new Logger(ExtensionController.name);
 
@@ -65,5 +67,29 @@ export class ExtensionController {
   @Get(':id')
   getRentalExtensions(@Param() params: GetRentalExtensionsRequestDTO) {
     return this.rentalService.getRentalExtensions(params);
+  }
+
+  @Put(':id/approve')
+  approveExtension(
+    @Param('id') extensionId: string,
+    @Body() body: Omit<ApproveExtensionRequestDTO, 'extensionId'>
+  ) {
+    return this.rentalService.updateExtensionStatus({
+      extensionId,
+      status: 'APPROVED',
+      adminNotes: body.adminNotes,
+    });
+  }
+
+  @Put(':id/reject')
+  rejectExtension(
+    @Param('id') extensionId: string,
+    @Body() body: Omit<RejectExtensionRequestDTO, 'extensionId'>
+  ) {
+    return this.rentalService.updateExtensionStatus({
+      extensionId,
+      status: 'REJECTED',
+      adminNotes: body.rejectionReason,
+    });
   }
 }

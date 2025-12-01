@@ -59,6 +59,13 @@ namespace rental.Repository
                 .ToListAsync();
         }
 
+        // Get rental extension by ID
+        public async Task<RentalExtensionEntity?> GetExtensionByIdAsync(Guid extensionId)
+        {
+            return await _context.Set<RentalExtensionEntity>()
+                .FirstOrDefaultAsync(e => e.Id == extensionId);
+        }
+
 
         // User: Get own rentals
         public async Task<PagedResult<RentalEntity>> GetUserRentalsAsync(Guid userId, RentalQueryDto query)

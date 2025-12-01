@@ -22,6 +22,7 @@ service RentalService {
   // Extensions: Rental time extension
   rpc CreateRentalExtension(CreateRentalExtensionRequest) returns (RentalResponse);
   rpc GetRentalExtensions(GetRentalExtensionsRequest) returns (GetRentalExtensionsResponse);
+  rpc UpdateExtensionStatus(UpdateExtensionStatusRequest) returns (UpdateExtensionStatusResponse);
 
 
 }
@@ -199,6 +200,19 @@ message GetRentalExtensionsRequest {
 
 message GetRentalExtensionsResponse {
   repeated RentalExtensionMessage extensions = 1;
+}
+
+// Admin: Update Extension Status
+message UpdateExtensionStatusRequest {
+  string extensionId = 1;
+  string status = 2; // APPROVED or REJECTED
+  optional string adminNotes = 3;
+}
+
+message UpdateExtensionStatusResponse {
+  bool success = 1;
+  string message = 2;
+  RentalExtensionMessage extension = 3;
 }
 
 // Admin: Update Rental

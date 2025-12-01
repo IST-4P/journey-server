@@ -2,7 +2,7 @@ import { z } from 'zod';
 
 export const BookingStatusValues = {
   PENDING: 'PENDING',
-  PENDING_REFUND: 'PENDING_REFUND',
+  PENDING_VERIFY: 'PENDING_VERIFY',
   DEPOSIT_PAID: 'DEPOSIT_PAID',
   FULLY_PAID: 'FULLY_PAID',
   ONGOING: 'ONGOING',
@@ -14,7 +14,7 @@ export const BookingStatusValues = {
 
 export const BookingStatusEnum = z.enum([
   BookingStatusValues.PENDING,
-  BookingStatusValues.PENDING_REFUND,
+  BookingStatusValues.PENDING_VERIFY,
   BookingStatusValues.DEPOSIT_PAID,
   BookingStatusValues.FULLY_PAID,
   BookingStatusValues.ONGOING,

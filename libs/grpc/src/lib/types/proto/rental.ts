@@ -206,6 +206,20 @@ export interface GetRentalExtensionsResponse {
   extensions: RentalExtensionMessage[];
 }
 
+/** Admin: Update Extension Status */
+export interface UpdateExtensionStatusRequest {
+  extensionId: string;
+  /** APPROVED or REJECTED */
+  status: string;
+  adminNotes?: string | undefined;
+}
+
+export interface UpdateExtensionStatusResponse {
+  success: boolean;
+  message: string;
+  extension: RentalExtensionMessage | undefined;
+}
+
 /** Admin: Update Rental */
 export interface UpdateRentalRequest {
   rentalId: string;
@@ -271,6 +285,8 @@ export interface RentalServiceClient {
   createRentalExtension(request: CreateRentalExtensionRequest): Observable<RentalResponse>;
 
   getRentalExtensions(request: GetRentalExtensionsRequest): Observable<GetRentalExtensionsResponse>;
+
+  updateExtensionStatus(request: UpdateExtensionStatusRequest): Observable<UpdateExtensionStatusResponse>;
 }
 
 export interface RentalServiceController {
@@ -317,6 +333,10 @@ export interface RentalServiceController {
   getRentalExtensions(
     request: GetRentalExtensionsRequest,
   ): Promise<GetRentalExtensionsResponse> | Observable<GetRentalExtensionsResponse> | GetRentalExtensionsResponse;
+
+  updateExtensionStatus(
+    request: UpdateExtensionStatusRequest,
+  ): Promise<UpdateExtensionStatusResponse> | Observable<UpdateExtensionStatusResponse> | UpdateExtensionStatusResponse;
 }
 
 export function RentalServiceControllerMethods() {
@@ -333,6 +353,7 @@ export function RentalServiceControllerMethods() {
       "dashboardRental",
       "createRentalExtension",
       "getRentalExtensions",
+      "updateExtensionStatus",
     ];
     for (const method of grpcMethods) {
       const descriptor: any = Reflect.getOwnPropertyDescriptor(constructor.prototype, method);

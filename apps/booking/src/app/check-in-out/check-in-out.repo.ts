@@ -227,7 +227,7 @@ export class CheckInOutRepository {
           overtimeAmount: {
             increment: overtimeAmount,
           },
-          status: BookingStatusValues.PENDING_REFUND,
+          status: BookingStatusValues.PENDING_VERIFY,
         },
       });
 

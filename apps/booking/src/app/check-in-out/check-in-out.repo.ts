@@ -117,7 +117,11 @@ export class CheckInOutRepository {
       console.log('checkDate: ', checkDate);
       console.log('booking.startTime: ', booking.startTime);
 
-      if (checkDate < booking.startTime) {
+      // Allow check-in up to 1 hour before booking start time
+      const oneHourBeforeStart = new Date(
+        booking.startTime.getTime() - 60 * 60 * 1000
+      );
+      if (checkDate < oneHourBeforeStart) {
         throw CheckInWrongTimeException;
       }
 
@@ -198,11 +202,14 @@ export class CheckInOutRepository {
 
       let overtimeAmount = 0;
 
-      // Nếu trả xe qua giờ, tính phí phạt
+      // Nếu trả xe qua giờ, tính phí phạt (cho phép trả muộn 1 tiếng)
       const checkDate = new Date(data.checkDate!);
-      if (checkDate > booking.endTime) {
+      const oneHourAfterEnd = new Date(
+        booking.endTime.getTime() + 60 * 60 * 1000
+      );
+      if (checkDate > oneHourAfterEnd) {
         const diffInHours =
-          (checkDate.getTime() - booking.endTime.getTime()) / (1000 * 60 * 60);
+          (checkDate.getTime() - oneHourAfterEnd.getTime()) / (1000 * 60 * 60);
         const formattedHours = Number(diffInHours.toFixed(1));
         overtimeAmount = formattedHours * booking.vehicleFeeHour * 1.5;
       }
@@ -317,19 +324,30 @@ export class CheckInOutRepository {
           longitude: checkInOut.longitude.toNumber(),
         };
       });
-    await this.prismaService.booking.update({
+    const updateBooking = await this.prismaService.booking.update({
       where: { id: verified.booking.id },
       data: { status: BookingStatusValues.COMPLETED },
     });
-    await this.natsClient.publish('journey.events.refund-created', {
-      bookingId: verified.booking.id,
-      userId: verified.booking.userId,
-      penaltyAmount: verified.booking.penaltyAmount,
-      damageAmount: verified.booking.damageAmount,
-      overtimeAmount: verified.booking.overtimeAmount,
-      collateral: 0,
-      deposit: verified.booking.deposit,
-    });
+    const createdRefund$ = this.natsClient.publish(
+      'journey.events.refund-created',
+      {
+        bookingId: verified.booking.id,
+        userId: verified.booking.userId,
+        penaltyAmount: verified.booking.penaltyAmount,
+        damageAmount: verified.booking.damageAmount,
+        overtimeAmount: verified.booking.overtimeAmount,
+        collateral: 0,
+        deposit: verified.booking.deposit,
+      }
+    );
+
+    const vehicleMaintenance$ = this.natsClient.publish(
+      'journey.events.vehicle-maintenance',
+      {
+        id: updateBooking.vehicleId,
+      }
+    );
+    await Promise.all([createdRefund$, vehicleMaintenance$]);
     return verified;
   }
 }

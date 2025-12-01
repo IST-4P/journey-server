@@ -77,6 +77,8 @@ message GetBookingResponse {
   string updatedAt = 31;
   optional string cancelledAt = 32;
   optional string expiredAt = 33;
+
+  optional string reviewId = 34;
 }
 
 // GetManyBookings

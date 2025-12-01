@@ -53,6 +53,7 @@ export interface GetBookingResponse {
   updatedAt: string;
   cancelledAt?: string | undefined;
   expiredAt?: string | undefined;
+  reviewId?: string | undefined;
 }
 
 /** GetManyBookings */

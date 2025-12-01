@@ -84,7 +84,6 @@ namespace rental.Model.Entities
     {
         PENDING,  // Chờ duyệt
         APPROVED, // Đã duyệt
-        REJECTED // Đã từ chối
     }
 
     public enum RentalStatus

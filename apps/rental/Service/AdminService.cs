@@ -240,7 +240,7 @@ namespace rental.Service
             }
         }
 
-        // Admin: Update extension status (APPROVED or REJECTED)
+        // Admin: Update extension status 
         public override async Task<UpdateExtensionStatusResponse> UpdateExtensionStatus(UpdateExtensionStatusRequest request, ServerCallContext context)
         {
             try
@@ -380,5 +380,53 @@ namespace rental.Service
                 throw new RpcException(new Status(StatusCode.Internal, ex.Message));
             }
         }
+
+        // Admin: Get rental history
+        public override async Task<GetHistoryRentalResponse> GetHistoryRental(GetHistoryRentalRequest request, ServerCallContext context)
+        {
+            try
+            {
+                if (!Guid.TryParse(request.RentalId, out var rentalId))
+                {
+                    throw new RpcException(new Status(StatusCode.InvalidArgument, "Invalid rental ID format"));
+                }
+
+                // Verify rental exists
+                var rental = await _repository.GetByIdAsync(rentalId);
+                if (rental == null)
+                {
+                    throw new RpcException(new Status(StatusCode.NotFound, "Rental not found"));
+                }
+
+                // Get history records
+                var histories = await _repository.GetRentalHistoryAsync(rentalId);
+
+                var response = new GetHistoryRentalResponse();
+                foreach (var history in histories)
+                {
+                    response.Histories.Add(new RentalHistoryMessage
+                    {
+                        Id = history.Id.ToString(),
+                        RentalId = history.RentalId.ToString(),
+                        OldStatus = history.OldStatus.ToString(),
+                        NewStatus = history.NewStatus.ToString(),
+                        ChangedAt = history.ChangedAt.ToString("o"), // ISO 8601 format
+                        Notes = history.Notes ?? ""
+                    });
+                }
+
+                return response;
+            }
+            catch (RpcException)
+            {
+                throw;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error getting rental history for rental {RentalId}", request.RentalId);
+                throw new RpcException(new Status(StatusCode.Internal, "Failed to get rental history"));
+            }
+        }
+
     }
 }

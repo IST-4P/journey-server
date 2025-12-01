@@ -64,7 +64,7 @@ export class ExtensionController {
 
   constructor(private readonly rentalService: RentalService) {}
 
-  @Get(':extensionId')
+  @Get(':rentalId')
   getRentalExtensions(@Param() params: GetRentalExtensionsRequestDTO) {
     return this.rentalService.getRentalExtensions(params);
   }

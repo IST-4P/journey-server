@@ -1,24 +1,26 @@
 using Microsoft.EntityFrameworkCore;
-using rental.Model.Entities;
 
 namespace rental.Data
 {
     public class RentalDbContext : DbContext
     {
         public RentalDbContext(DbContextOptions<RentalDbContext> options) : base(options) { }
-        public DbSet<rental.Model.Entities.Rental> Rentals { get; set; }
-        public DbSet<rental.Model.Entities.RentalExtension> RentalExtensions { get; set; }
-        public DbSet<rental.Model.Entities.RentalHistory> RentalHistories { get; set; }
+        public DbSet<Model.Entities.Rental> Rentals { get; set; }
+        public DbSet<Model.Entities.RentalExtension> RentalExtensions { get; set; }
+        public DbSet<Model.Entities.RentalHistory> RentalHistories { get; set; }
 
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
 
-            modelBuilder.Entity<rental.Model.Entities.Rental>(entity =>
+            modelBuilder.Entity<Model.Entities.Rental>(entity =>
             {
                 entity.HasKey(e => e.Id);
                 entity.Property(e => e.Id).ValueGeneratedOnAdd();
+
+                entity.Property(e => e.Status)
+                .HasConversion<string>();
 
                 // Relationship with RentalExtension
                 entity.HasOne(e => e.Rentals)
@@ -34,20 +36,20 @@ namespace rental.Data
             });
 
 
-            modelBuilder.Entity<rental.Model.Entities.RentalExtension>(entity =>
+            modelBuilder.Entity<Model.Entities.RentalExtension>(entity =>
             {
                 entity.HasKey(e => e.Id);
                 entity.Property(e => e.Id).ValueGeneratedOnAdd();
 
             });
 
-            modelBuilder.Entity<rental.Model.Entities.RentalHistory>(entity =>
+            modelBuilder.Entity<Model.Entities.RentalHistory>(entity =>
             {
                 entity.HasKey(e => e.Id);
                 entity.Property(e => e.Id).ValueGeneratedOnAdd();
                 entity.Property(e => e.RentalId).IsRequired();
-                entity.Property(e => e.OldStatus).IsRequired();
-                entity.Property(e => e.NewStatus).IsRequired();
+                entity.Property(e => e.OldStatus).HasConversion<string>(); 
+                entity.Property(e => e.NewStatus).HasConversion<string>();
                 entity.Property(e => e.ChangedAt).IsRequired();
             });
         }

@@ -117,19 +117,6 @@ namespace rental.Repository
             return await _context.Set<RentalEntity>().FindAsync(id);
         }
 
-        // User: Cancel rental
-        public async Task<RentalEntity?> CancelRentalAsync(Guid id)
-        {
-            var rental = await _context.Set<RentalEntity>().FindAsync(id);
-            if (rental == null) return null;
-
-            rental.Status = RentalStatus.CANCELLED;
-            await _context.SaveChangesAsync();
-            return rental;
-        }
-
-
-
         // Admin: Get all rentals
         public async Task<PagedResult<RentalEntity>> GetAllRentalsAsync(RentalQueryDto query)
         {

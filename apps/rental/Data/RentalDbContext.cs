@@ -40,7 +40,8 @@ namespace rental.Data
             {
                 entity.HasKey(e => e.Id);
                 entity.Property(e => e.Id).ValueGeneratedOnAdd();
-
+                entity.Property(e => e.Status)
+                    .HasConversion<string>();
             });
 
             modelBuilder.Entity<Model.Entities.RentalHistory>(entity =>
@@ -48,7 +49,7 @@ namespace rental.Data
                 entity.HasKey(e => e.Id);
                 entity.Property(e => e.Id).ValueGeneratedOnAdd();
                 entity.Property(e => e.RentalId).IsRequired();
-                entity.Property(e => e.OldStatus).HasConversion<string>(); 
+                entity.Property(e => e.OldStatus).HasConversion<string>();
                 entity.Property(e => e.NewStatus).HasConversion<string>();
                 entity.Property(e => e.ChangedAt).IsRequired();
             });

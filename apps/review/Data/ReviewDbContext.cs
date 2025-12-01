@@ -35,7 +35,7 @@ namespace review.Data
 
                 entity.Property(e => e.Type)
                     .IsRequired()
-                    .HasConversion<int>();
+                    .HasConversion<string>();
 
                 // Store images as JSON
                 entity.Property(e => e.Images)

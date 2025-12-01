@@ -71,9 +71,4 @@ namespace device.Model.Entities
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
     }
 
-    public enum DeviceStatus
-    {
-        Available,
-        Unavailable
-    }
 }

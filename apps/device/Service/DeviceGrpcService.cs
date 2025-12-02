@@ -72,7 +72,9 @@ namespace device.Service
                         CategoryName = d.CategoryName ?? string.Empty,
                         CreatedAt = d.CreateAt.ToString("O"),
                         UpdatedAt = d.UpdateAt.ToString("O"),
-                        ReviewIds = { device?.TotalReviewIds ?? new List<string>() }
+                        ReviewIds = { (device?.TotalReviewIds == null || device.TotalReviewIds.Count == 0)
+                            ? new List<string> { "NULL" }
+                            : device.TotalReviewIds }
                     });
                 }
 
@@ -113,7 +115,9 @@ namespace device.Service
                     CategoryName = dto.CategoryName ?? "",
                     CreatedAt = dto.CreateAt.ToString("O"),
                     UpdatedAt = dto.UpdateAt.ToString("O"),
-                    ReviewIds = { device.TotalReviewIds ?? new List<string>() }
+                    ReviewIds = { (device.TotalReviewIds == null || device.TotalReviewIds.Count == 0)
+                        ? new List<string> { "NULL" }
+                        : device.TotalReviewIds }
                 };
             }
             catch (RpcException) { throw; }
@@ -163,7 +167,9 @@ namespace device.Service
                         Images = { d.Images ?? new List<string>() },
                         CategoryName = d.CategoryName ?? "",
                         Brand = d.Brand ?? "",
-                        ReviewIds = { device?.TotalReviewIds ?? new List<string>() }
+                        ReviewIds = { (device?.TotalReviewIds == null || device.TotalReviewIds.Count == 0)
+                            ? new List<string> { "NULL" }
+                            : device.TotalReviewIds }
                     });
                 }
 
@@ -212,7 +218,9 @@ namespace device.Service
                     CategoryName = res.CategoryName ?? "",
                     CreatedAt = res.CreateAt.ToString("O"),
                     UpdatedAt = res.UpdateAt.ToString("O"),
-                    ReviewIds = { created.TotalReviewIds ?? new List<string>() }
+                    ReviewIds = { (created.TotalReviewIds == null || created.TotalReviewIds.Count == 0)
+                        ? new List<string> { "NULL" }
+                        : created.TotalReviewIds }
                 };
             }
             catch (Exception ex)
@@ -260,7 +268,9 @@ namespace device.Service
                     CategoryName = res.CategoryName ?? "",
                     CreatedAt = res.CreateAt.ToString("O"),
                     UpdatedAt = res.UpdateAt.ToString("O"),
-                    ReviewIds = { updated.TotalReviewIds ?? new List<string>() }
+                    ReviewIds = { (updated.TotalReviewIds == null || updated.TotalReviewIds.Count == 0)
+                        ? new List<string> { "NULL" }
+                        : updated.TotalReviewIds }
                 };
             }
             catch (Exception ex)

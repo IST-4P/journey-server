@@ -25,6 +25,9 @@ export class RefundRepository {
         where,
         skip,
         take,
+        orderBy: {
+          createdAt: 'desc',
+        },
       }),
     ]);
 

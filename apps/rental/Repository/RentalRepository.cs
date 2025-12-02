@@ -66,6 +66,25 @@ namespace rental.Repository
                 .FirstOrDefaultAsync(e => e.Id == extensionId);
         }
 
+        // Update extension status
+        public async Task UpdateExtensionStatusAsync(Guid extensionId, ExtensionStatus status, string? adminNotes)
+        {
+            var extension = await _context.Set<RentalExtensionEntity>()
+                .FirstOrDefaultAsync(e => e.Id == extensionId);
+
+            if (extension != null)
+            {
+                extension.Status = status;
+                if (!string.IsNullOrWhiteSpace(adminNotes))
+                {
+                    extension.Notes = string.IsNullOrWhiteSpace(extension.Notes)
+                        ? adminNotes
+                        : extension.Notes + "\n[Admin]: " + adminNotes;
+                }
+                await _context.SaveChangesAsync();
+            }
+        }
+
 
         // User: Get own rentals
         public async Task<PagedResult<RentalEntity>> GetUserRentalsAsync(Guid userId, RentalQueryDto query)

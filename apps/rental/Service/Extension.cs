@@ -68,33 +68,8 @@ namespace rental.Service
                 rental.EndDate = newEnd;
                 await _repository.UpdateAsync(rental.Id, new UpdateRentalRequestDto { EndDate = newEnd });
 
-                // Publish rental extension event to NATS for payment service
-                if (additionalDays > 0)
-                {
-                    try
-                    {
-                        var extensionEvent = new RentalExtensionCreatedEvent
-                        {
-                            id = Guid.NewGuid().ToString(),
-                            userId = rental.UserId.ToString(),
-                            type = "EXTENSION",
-                            rentalId = rental.Id.ToString(),
-                            totalAmount = extensionTotalPrice
-                        };
-                        await _natsPublisher.PublishAsync("journey.events.payment-extension", extensionEvent);
-                        _logger.LogInformation("[Rental] Published payment-extension event for rental {RentalId} with totalPrice {ExtensionTotalPrice}", extensionEvent.id, extensionTotalPrice);
-                    }
-                    catch (Exception ex)
-                    {
-                        _logger.LogWarning(ex, "[Rental] Failed to publish payment-extension event for rental {RentalId}", rental.Id);
-                    }
-                }
-
-                // Return the updated rental
-                var items = JsonSerializer.Deserialize<List<RentalItemData>>(rental.Items) ?? new List<RentalItemData>();
-                var itemDetails = await BuildItemDetails(items);
-
-                var response = new RentalResponse
+                // Return the created extension with all details
+                var extensionResponse = new RentalResponse
                 {
                     Id = rental.Id.ToString(),
                     UserId = rental.UserId.ToString(),
@@ -111,12 +86,16 @@ namespace rental.Service
                     ActualEndDate = rental.ActualEndDate?.ToString("O") ?? string.Empty,
                 };
 
+                var items = JsonSerializer.Deserialize<List<RentalItemData>>(rental.Items) ?? new List<RentalItemData>();
+                var itemDetails = await BuildItemDetails(items);
                 foreach (var item in itemDetails)
                 {
-                    response.Items.Add(item);
+                    extensionResponse.Items.Add(item);
                 }
 
-                return response;
+                _logger.LogInformation("[Rental] Created extension {ExtensionId} for rental {RentalId} with totalPrice {TotalPrice}", extensionCreated.Id, rental.Id, extensionTotalPrice);
+
+                return extensionResponse;
             }
             catch (RpcException) { throw; }
             catch (Exception ex)
@@ -142,6 +121,7 @@ namespace rental.Service
                         RentalId = (e.RentalId?.ToString()) ?? string.Empty,
                         NewEndDate = e.NewEndDate?.ToString("O") ?? string.Empty,
                         AdditionalDays = e.AdditionalDays ?? 0,
+                        TotalPrice = e.TotalPrice ?? 0,
                         RequestedBy = e.RequestedBy?.ToString() ?? string.Empty,
                         CreatedAt = e.CreatedAt?.ToString("O") ?? string.Empty,
                         Notes = e.Notes ?? string.Empty,
@@ -157,6 +137,79 @@ namespace rental.Service
             }
         }
 
-        
-    }
-}
+        // Extensions: Update extension status (Admin only)
+        public override async Task<UpdateExtensionStatusResponse> UpdateExtensionStatus(UpdateExtensionStatusRequest request, ServerCallContext context)
+        {
+            try
+            {
+                var extensionId = Guid.Parse(request.ExtensionId);
+                var extension = await _repository.GetExtensionByIdAsync(extensionId);
+
+                if (extension is null)
+                {
+                    throw new RpcException(new Status(StatusCode.NotFound, "Extension not found"));
+                }
+
+                if (!Enum.TryParse<ExtensionStatus>(request.Status, true, out var newStatus))
+                {
+                    throw new RpcException(new Status(StatusCode.InvalidArgument, "Invalid status"));
+                }
+
+                // Update extension status
+                await _repository.UpdateExtensionStatusAsync(extensionId, newStatus, request.AdminNotes);
+                extension.Status = newStatus;
+
+                // If APPROVED, publish payment event to NATS
+                if (newStatus == ExtensionStatus.APPROVED && extension.RentalId.HasValue)
+                {
+                    var rental = await _repository.GetByIdAsync(extension.RentalId.Value);
+                    if (rental != null)
+                    {
+                        try
+                        {
+                            var extensionEvent = new RentalExtensionCreatedEvent
+                            {
+                                id = extensionId.ToString(),
+                                userId = rental.UserId.ToString(),
+                                type = "EXTENSION",
+                                rentalId = rental.Id.ToString(),
+                                totalAmount = extension.TotalPrice ?? 0
+                            };
+                            await _natsPublisher.PublishAsync("journey.events.payment-extension", extensionEvent);
+                            _logger.LogInformation("[Rental] Published payment-extension event for extension {ExtensionId} with totalPrice {TotalPrice}",
+                                extensionId, extension.TotalPrice);
+                        }
+                        catch (Exception ex)
+                        {
+                            _logger.LogWarning(ex, "[Rental] Failed to publish payment-extension event for extension {ExtensionId}", extensionId);
+                        }
+                    }
+                }
+
+                var response = new UpdateExtensionStatusResponse
+                {
+                    Success = true,
+                    Message = $"Extension status updated to {newStatus}",
+                    Extension = new RentalExtensionMessage
+                    {
+                        Id = extension.Id.ToString(),
+                        RentalId = extension.RentalId?.ToString() ?? string.Empty,
+                        NewEndDate = extension.NewEndDate?.ToString("O") ?? string.Empty,
+                        AdditionalDays = extension.AdditionalDays ?? 0,
+                        TotalPrice = extension.TotalPrice ?? 0,
+                        RequestedBy = extension.RequestedBy?.ToString() ?? string.Empty,
+                        CreatedAt = extension.CreatedAt?.ToString("O") ?? string.Empty,
+                        Notes = extension.Notes ?? string.Empty,
+                        Status = extension.Status.ToString()
+                    }
+                };
+
+                return response;
+            }
+            catch (RpcException) { throw; }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error updating extension status");
+                throw new RpcException(new Status(StatusCode.Internal, ex.Message));
+            }
+        }

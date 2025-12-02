@@ -316,6 +316,24 @@ namespace rental.Service
                     {
                         _logger.LogWarning(ex, "[Rental] Failed to publish payment-extension event for extension {ExtensionId}", extensionId);
                     }
+
+                    // Send notification to user about approved extension
+                    try
+                    {
+                        var notificationEvent = new Nats.Events.NotificationCreatedEvent
+                        {
+                            userId = rental.UserId.ToString(),
+                            title = "Rental Extension Approved",
+                            content = $"Your rental extension request has been approved. Please proceed with payment to confirm the extension.",
+                            type = "RENTAL_EXTENSION_APPROVED"
+                        };
+                        await _natsPublisher.PublishAsync("journey.events.notification-created", notificationEvent);
+                        _logger.LogInformation("[Rental] Published notification for approved extension {ExtensionId}", extensionId);
+                    }
+                    catch (Exception ex)
+                    {
+                        _logger.LogWarning(ex, "[Rental] Failed to publish notification for approved extension {ExtensionId}", extensionId);
+                    }
                 }
                 else // REJECTED
                 {

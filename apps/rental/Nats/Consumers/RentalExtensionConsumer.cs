@@ -95,6 +95,25 @@ namespace rental.Nats.Consumers
 
                 Logger.LogInformation("[Rental] Successfully processed extension payment for rental {RentalId}, ExtensionId: {ExtensionId}",
                     rentalId, extension.Id);
+
+                // Send notification to user about successful extension payment
+                try
+                {
+                    var publisher = scope.ServiceProvider.GetRequiredService<rental.Nats.NatsPublisher>();
+                    var notificationEvent = new rental.Nats.Events.NotificationCreatedEvent
+                    {
+                        userId = rentalEntity.UserId.ToString(),
+                        title = "Rental Extension Confirmed",
+                        content = $"Your rental extension payment has been confirmed. Your new rental end date is {extension.NewEndDate?.ToString("yyyy-MM-dd HH:mm")}.",
+                        type = "RENTAL_EXTENSION_PAID"
+                    };
+                    await publisher.PublishAsync("journey.events.notification-created", notificationEvent);
+                    Logger.LogInformation("[Rental] Published notification for paid extension {ExtensionId}", extension.Id);
+                }
+                catch (Exception ex)
+                {
+                    Logger.LogWarning(ex, "[Rental] Failed to publish notification for paid extension {ExtensionId}", extension.Id);
+                }
             }
             catch (Exception ex)
             {

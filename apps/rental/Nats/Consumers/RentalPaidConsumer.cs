@@ -106,6 +106,25 @@ namespace rental.Nats.Consumers
                     await publisher.PublishAsync("journey.events.rental-quantity-change", quantityChangeEvent);
                     Logger.LogInformation("[Rental] Published quantity decrease event for rental {RentalId}", rentalEntity.Id);
                 }
+
+                // Send notification to user about successful payment
+                try
+                {
+                    var publisher = scope.ServiceProvider.GetRequiredService<rental.Nats.NatsPublisher>();
+                    var notificationEvent = new NotificationCreatedEvent
+                    {
+                        userId = rentalEntity.UserId.ToString(),
+                        title = "Rental Payment Confirmed",
+                        content = $"Your rental payment has been confirmed. Your rental is now active.",
+                        type = "RENTAL_PAID"
+                    };
+                    await publisher.PublishAsync("journey.events.notification-created", notificationEvent);
+                    Logger.LogInformation("[Rental] Published notification for paid rental {RentalId}", rentalEntity.Id);
+                }
+                catch (Exception ex)
+                {
+                    Logger.LogWarning(ex, "[Rental] Failed to publish notification for paid rental {RentalId}", rentalEntity.Id);
+                }
             }
             catch (Exception ex)
             {

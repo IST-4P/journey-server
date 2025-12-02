@@ -95,6 +95,24 @@ namespace rental.Service
 
                 _logger.LogInformation("[Rental] Created extension {ExtensionId} for rental {RentalId} with totalPrice {TotalPrice}", extensionCreated.Id, rental.Id, extensionTotalPrice);
 
+                // Send notification to user about extension request created
+                try
+                {
+                    var notificationEvent = new rental.Nats.Events.NotificationCreatedEvent
+                    {
+                        userId = rental.UserId.ToString(),
+                        title = "Rental Extension Requested",
+                        content = $"Your rental extension request for {additionalDays} day(s) has been submitted and is awaiting approval.",
+                        type = "RENTAL_EXTENSION_REQUESTED"
+                    };
+                    await _natsPublisher.PublishAsync("journey.events.notification-created", notificationEvent);
+                    _logger.LogInformation("[Rental] Published notification for extension request {ExtensionId}", extensionCreated.Id);
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogWarning(ex, "[Rental] Failed to publish notification for extension request {ExtensionId}", extensionCreated.Id);
+                }
+
                 return extensionResponse;
             }
             catch (RpcException) { throw; }

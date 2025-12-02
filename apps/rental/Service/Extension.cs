@@ -3,6 +3,7 @@ using rental.Model.Dto;
 using Rental;
 using rental.Model.Entities;
 using System.Text.Json;
+using Google.Protobuf;
 
 
 namespace rental.Service
@@ -18,7 +19,7 @@ namespace rental.Service
                 var rental = await _repository.GetByIdAsync(rentalId);
                 if (rental is null)
                 {
-                    throw new RpcException(new Status(StatusCode.NotFound, "Rental not found"));
+                    throw new RpcException(new Status(StatusCode.NotFound, "Error.RentalNotFound"));
                 }
 
                 DateTime newEnd;
@@ -81,7 +82,7 @@ namespace rental.Service
                             totalAmount = extensionTotalPrice
                         };
                         await _natsPublisher.PublishAsync("journey.events.payment-extension", extensionEvent);
-                        _logger.LogInformation("[Rental] Published payment-extension event for rental {RentalId} with totalPrice {ExtensionTotalPrice}", rental.Id, extensionTotalPrice);
+                        _logger.LogInformation("[Rental] Published payment-extension event for rental {RentalId} with totalPrice {ExtensionTotalPrice}", extensionEvent.id, extensionTotalPrice);
                     }
                     catch (Exception ex)
                     {

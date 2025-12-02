@@ -7,7 +7,7 @@ namespace rental.Model.Entities
     public class Rental
     {
 
-        public Guid Id { get; set; } = Guid.NewGuid();
+        public Guid Id { get; set; }
         public Guid UserId { get; set; }
 
         // Multiple items allowed per rental
@@ -47,7 +47,7 @@ namespace rental.Model.Entities
 
     public class RentalExtension //gia hạn
     {
-        public Guid Id { get; set; } = Guid.NewGuid();
+        public Guid Id { get; set; } 
         public DateTime? NewEndDate { get; set; }
         public double? TotalPrice { get; set; } // Extension total price (calculated like rental)
         public int? AdditionalDays { get; set; }

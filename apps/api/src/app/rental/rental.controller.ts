@@ -5,6 +5,7 @@ import {
   GetMyRentalsRequestDTO,
   GetRentalByIdRequestDTO,
   GetRentalExtensionsRequestDTO,
+  GetAllRentalExtensionsRequestDTO,
 } from '@domain/rental';
 import { ActiveUser } from '@hacmieu-journey/nestjs';
 import { Body, Controller, Get, Param, Post, Put, Query } from '@nestjs/common';
@@ -57,6 +58,17 @@ export class ExtensionController {
   // private readonly logger = new Logger(ExtensionController.name);
 
   constructor(private readonly rentalService: RentalService) {}
+
+  @Get()
+  getAllRentalExtensions(
+    @Query() query: Omit<GetAllRentalExtensionsRequestDTO, 'requesterId'>,
+    @ActiveUser('userId') userId: string
+  ) {
+    return this.rentalService.getAllRentalExtensions({
+      ...query,
+      requesterId: userId,
+    });
+  }
 
   @Get(':rentalId')
   getRentalExtensions(@Param() params: GetRentalExtensionsRequestDTO) {

@@ -64,6 +64,20 @@ export class ExtensionController {
 
   constructor(private readonly rentalService: RentalService) {}
 
+   @Get()
+    getManyExtensions(
+      @Query() query: Omit<GetRentalExtensionsRequestDTO, 'requesterId'>,
+      @ActiveUser('userId') requesterId: string
+    ) {
+      return this.rentalService.getAllRentalExtensions({
+        ...query,
+        requesterId,
+        page: 0,
+        limit: 0
+      });
+    }
+
+
   @Get(':rentalId')
   getRentalExtensions(@Param() params: GetRentalExtensionsRequestDTO) {
     return this.rentalService.getRentalExtensions(params);

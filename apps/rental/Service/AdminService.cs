@@ -467,5 +467,80 @@ namespace rental.Service
             }
         }
 
+        // Admin: Get all rental extensions with filters
+        public override async Task<GetAllRentalExtensionsResponse> GetAllRentalExtensions(GetAllRentalExtensionsRequest request, ServerCallContext context)
+        {
+            try
+            {
+                // Permission: requester must be admin
+                if (string.IsNullOrEmpty(request.RequesterId))
+                {
+                    throw new RpcException(new Status(StatusCode.PermissionDenied, "RequesterId is required"));
+                }
+                try
+                {
+                    var requester = await _userClient.GetProfileAsync(new User.GetProfileRequest { UserId = request.RequesterId });
+                    if (!string.Equals(requester.Role, "ADMIN", StringComparison.OrdinalIgnoreCase))
+                    {
+                        throw new RpcException(new Status(StatusCode.PermissionDenied, "Only admin can access this resource"));
+                    }
+                }
+                catch (RpcException) { throw; }
+                catch (Exception ex)
+                {
+                    _logger.LogWarning(ex, "Failed to validate admin role for requester {RequesterId}", request.RequesterId);
+                    throw new RpcException(new Status(StatusCode.PermissionDenied, "Permission denied"));
+                }
+
+                var queryDto = new RentalExtensionQueryDto
+                {
+                    RentalId = !string.IsNullOrEmpty(request.RentalId) ? Guid.Parse(request.RentalId) : null,
+                    RequestedBy = !string.IsNullOrEmpty(request.RequestedBy) ? Guid.Parse(request.RequestedBy) : null,
+                    Status = string.IsNullOrEmpty(request.Status) ? null : request.Status,
+                    Page = request.Page > 0 ? request.Page : 1,
+                    PageSize = request.Limit > 0 ? request.Limit : 10,
+                    SortBy = string.IsNullOrEmpty(request.SortBy) ? "CreatedAt" : request.SortBy,
+                    SortDirection = string.IsNullOrEmpty(request.SortDirection) ? "desc" : request.SortDirection
+                };
+
+                var pagedResult = await _repository.GetAllExtensionsAsync(queryDto);
+
+                var response = new GetAllRentalExtensionsResponse
+                {
+                    TotalItems = (int)pagedResult.TotalCount,
+                    Page = pagedResult.Page,
+                    Limit = pagedResult.PageSize,
+                    TotalPages = (int)Math.Ceiling((double)pagedResult.TotalCount / pagedResult.PageSize)
+                };
+
+                foreach (var extension in pagedResult.Items)
+                {
+                    response.Extensions.Add(new RentalExtensionMessage
+                    {
+                        Id = extension.Id.ToString(),
+                        RentalId = extension.RentalId?.ToString() ?? string.Empty,
+                        NewEndDate = extension.NewEndDate?.ToString("O") ?? string.Empty,
+                        AdditionalDays = extension.AdditionalDays ?? 0,
+                        TotalPrice = extension.TotalPrice ?? 0,
+                        RequestedBy = extension.RequestedBy?.ToString() ?? string.Empty,
+                        CreatedAt = extension.CreatedAt?.ToString("O") ?? string.Empty,
+                        Notes = extension.Notes ?? string.Empty,
+                        Status = extension.Status.ToString()
+                    });
+                }
+
+                return response;
+            }
+            catch (RpcException)
+            {
+                throw;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error getting all rental extensions");
+                throw new RpcException(new Status(StatusCode.Internal, "Failed to get all rental extensions"));
+            }
+        }
+
     }
 }

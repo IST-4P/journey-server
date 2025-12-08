@@ -48,6 +48,12 @@ export class RentalService implements OnModuleInit {
     return lastValueFrom(this.rentalService.getRentalExtensions(data));
   }
 
+  getAllRentalExtensions(
+    data: RentalProto.GetAllRentalExtensionsRequest
+  ): Promise<RentalProto.GetAllRentalExtensionsResponse> {
+    return lastValueFrom(this.rentalService.getAllRentalExtensions(data));
+  }
+
   createRentalExtension(
     data: RentalProto.CreateRentalExtensionRequest
   ): Promise<RentalProto.RentalResponse> {

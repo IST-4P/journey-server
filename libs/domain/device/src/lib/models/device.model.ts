@@ -47,8 +47,6 @@ export const CreateDeviceRequestSchema = DeviceValidatorSchema.omit({
   updatedAt: true,
   categoryName: true,
   reviewIds: true,
-  categoryId: true,
-  brand: true,
 });
 
 export const UpdateDeviceRequestSchema = DeviceValidatorSchema.omit({

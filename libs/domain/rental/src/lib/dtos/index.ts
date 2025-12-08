@@ -13,6 +13,8 @@ import {
   GetRentalByIdRequestSchema,
   GetRentalExtensionsRequestSchema,
   GetRentalExtensionsResponseSchema,
+  GetAllRentalExtensionsRequestSchema,
+  GetAllRentalExtensionsResponseSchema,
   RentalResponseSchema,
   ApproveExtensionRequestSchema,
   RejectExtensionRequestSchema,
@@ -65,6 +67,12 @@ export class GetRentalExtensionsRequestDTO extends createZodDto(
 ) {}
 export class GetRentalExtensionsResponseDTO extends createZodDto(
   GetRentalExtensionsResponseSchema
+) {}
+export class GetAllRentalExtensionsRequestDTO extends createZodDto(
+  GetAllRentalExtensionsRequestSchema
+) {}
+export class GetAllRentalExtensionsResponseDTO extends createZodDto(
+  GetAllRentalExtensionsResponseSchema
 ) {}
 export class ApproveExtensionRequestDTO extends createZodDto(
   ApproveExtensionRequestSchema

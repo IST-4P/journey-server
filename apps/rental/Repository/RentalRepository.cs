@@ -59,6 +59,58 @@ namespace rental.Repository
                 .ToListAsync();
         }
 
+        public async Task<PagedResult<RentalExtensionEntity>> GetAllExtensionsAsync(RentalExtensionQueryDto query)
+        {
+            var q = _context.Set<RentalExtensionEntity>().AsQueryable();
+
+            if (query.RentalId.HasValue)
+            {
+                q = q.Where(r => r.RentalId == query.RentalId.Value);
+            }
+
+            if (query.RequestedBy.HasValue)
+            {
+                q = q.Where(r => r.RequestedBy == query.RequestedBy.Value);
+            }
+
+            if (!string.IsNullOrEmpty(query.Status))
+            {
+                if (Enum.TryParse<ExtensionStatus>(query.Status, true, out var status))
+                {
+                    q = q.Where(r => r.Status == status);
+                }
+            }
+            
+
+            var totalCount = await q.CountAsync();
+
+            var sortBy = (query.SortBy ?? "CreatedAt").ToLower();
+            var desc = string.Equals(query.SortDirection, "desc", StringComparison.OrdinalIgnoreCase);
+
+            q = sortBy switch
+            {
+                "newenddate" => desc ? q.OrderByDescending(r => r.NewEndDate) : q.OrderBy(r => r.NewEndDate),
+                "additionaldays" => desc ? q.OrderByDescending(r => r.AdditionalDays) : q.OrderBy(r => r.AdditionalDays),
+                "totalprice" => desc ? q.OrderByDescending(r => r.TotalPrice) : q.OrderBy(r => r.TotalPrice),
+                _ => desc ? q.OrderByDescending(r => r.CreatedAt) : q.OrderBy(r => r.CreatedAt)
+            };
+
+            var items = await q
+                .Skip((query.Page - 1) * query.PageSize)
+                .Take(query.PageSize)
+                .ToListAsync();
+
+            return new PagedResult<RentalExtensionEntity>
+            {
+                Items = items,
+                TotalCount = totalCount,
+                Page = query.Page,
+                PageSize = query.PageSize
+            };
+        }
+
+        
+
         // Get rental extension by ID
         public async Task<RentalExtensionEntity?> GetExtensionByIdAsync(Guid extensionId)
         {

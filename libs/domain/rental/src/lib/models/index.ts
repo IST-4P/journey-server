@@ -150,6 +150,25 @@ export const GetRentalExtensionsResponseSchema = z.object({
   extensions: z.array(RentalExtensionValidatorSchema),
 });
 
+export const GetAllRentalExtensionsRequestSchema = z
+  .object({
+    requesterId: z.string().uuid(),
+    rentalId: z.string().uuid().optional(),
+    requestedBy: z.string().uuid().optional(),
+    status: z.string().optional(),
+    sortBy: z.string().optional(),
+    sortDirection: z.enum(['asc', 'desc']).optional(),
+  })
+  .extend(PaginationQuerySchema.shape);
+
+export const GetAllRentalExtensionsResponseSchema = z.object({
+  extensions: z.array(RentalExtensionValidatorSchema),
+  page: z.number().int(),
+  limit: z.number().int(),
+  totalItems: z.number().int(),
+  totalPages: z.number().int(),
+});
+
 export const ApproveExtensionRequestSchema = z.object({
   extensionId: z.string().uuid(),
   adminNotes: z.string().optional(),
@@ -191,6 +210,12 @@ export type GetRentalExtensionsRequest = z.infer<
 >;
 export type GetRentalExtensionsResponse = z.infer<
   typeof GetRentalExtensionsResponseSchema
+>;
+export type GetAllRentalExtensionsRequest = z.infer<
+  typeof GetAllRentalExtensionsRequestSchema
+>;
+export type GetAllRentalExtensionsResponse = z.infer<
+  typeof GetAllRentalExtensionsResponseSchema
 >;
 export type ApproveExtensionRequest = z.infer<
   typeof ApproveExtensionRequestSchema

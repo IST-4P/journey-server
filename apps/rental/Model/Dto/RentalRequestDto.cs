@@ -55,6 +55,18 @@ namespace rental.Model.Dto
         public string? SortDirection { get; set; } = "desc";
     }
 
+    // Filter/Query DTO for Rental Extensions
+    public class RentalExtensionQueryDto
+    {
+        public Guid? RentalId { get; set; }
+        public Guid? RequestedBy { get; set; } // Filter by user who requested the extension
+        public string? Status { get; set; } // PENDING, APPROVED, REJECTED
+        public int Page { get; set; } = 1;
+        public int PageSize { get; set; } = 10;
+        public string? SortBy { get; set; } = "CreatedAt";
+        public string? SortDirection { get; set; } = "desc";
+    }
+
     // Paged result
     public class PagedResult<T>
     {

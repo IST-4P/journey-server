@@ -22,6 +22,7 @@ service RentalService {
   // Extensions: Rental time extension
   rpc CreateRentalExtension(CreateRentalExtensionRequest) returns (RentalResponse);
   rpc GetRentalExtensions(GetRentalExtensionsRequest) returns (GetRentalExtensionsResponse);
+  rpc GetAllRentalExtensions(GetAllRentalExtensionsRequest) returns (GetAllRentalExtensionsResponse);
   rpc UpdateExtensionStatus(UpdateExtensionStatusRequest) returns (UpdateExtensionStatusResponse);
 
 
@@ -200,6 +201,26 @@ message GetRentalExtensionsRequest {
 
 message GetRentalExtensionsResponse {
   repeated RentalExtensionMessage extensions = 1;
+}
+
+// Admin: Get All Rental Extensions with filters
+message GetAllRentalExtensionsRequest {
+  string requesterId = 1; // Admin user ID for permission check
+  optional string rentalId = 2; // Filter by rental ID
+  optional string requestedBy = 3; // Filter by user who requested extension
+  optional string status = 4; // Filter by status (PENDING, APPROVED, REJECTED)
+  int32 page = 5;
+  int32 limit = 6;
+  optional string sortBy = 7; // createdAt, newEndDate, additionalDays, totalPrice
+  optional string sortDirection = 8; // asc or desc
+}
+
+message GetAllRentalExtensionsResponse {
+  repeated RentalExtensionMessage extensions = 1;
+  int32 page = 2;
+  int32 limit = 3;
+  int32 totalItems = 4;
+  int32 totalPages = 5;
 }
 
 // Admin: Update Extension Status

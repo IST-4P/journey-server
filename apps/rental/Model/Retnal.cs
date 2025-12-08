@@ -12,7 +12,7 @@ namespace rental.Model.Entities
 
         // Multiple items allowed per rental
         public string Items { get; set; } = "[]";
-
+    
         //chi phí
         public double RentalFee { get; set; } // Tổng giá trị thuê (sum of all items)
         public double? Deposit { get; set; } // 20% of RentalFee

@@ -206,6 +206,38 @@ export interface GetRentalExtensionsResponse {
   extensions: RentalExtensionMessage[];
 }
 
+/** Admin: Get All Rental Extensions with filters */
+export interface GetAllRentalExtensionsRequest {
+  /** Admin user ID for permission check */
+  requesterId: string;
+  /** Filter by rental ID */
+  rentalId?:
+    | string
+    | undefined;
+  /** Filter by user who requested extension */
+  requestedBy?:
+    | string
+    | undefined;
+  /** Filter by status (PENDING, APPROVED, REJECTED) */
+  status?: string | undefined;
+  page: number;
+  limit: number;
+  /** createdAt, newEndDate, additionalDays, totalPrice */
+  sortBy?:
+    | string
+    | undefined;
+  /** asc or desc */
+  sortDirection?: string | undefined;
+}
+
+export interface GetAllRentalExtensionsResponse {
+  extensions: RentalExtensionMessage[];
+  page: number;
+  limit: number;
+  totalItems: number;
+  totalPages: number;
+}
+
 /** Admin: Update Extension Status */
 export interface UpdateExtensionStatusRequest {
   extensionId: string;
@@ -286,6 +318,8 @@ export interface RentalServiceClient {
 
   getRentalExtensions(request: GetRentalExtensionsRequest): Observable<GetRentalExtensionsResponse>;
 
+  getAllRentalExtensions(request: GetAllRentalExtensionsRequest): Observable<GetAllRentalExtensionsResponse>;
+
   updateExtensionStatus(request: UpdateExtensionStatusRequest): Observable<UpdateExtensionStatusResponse>;
 }
 
@@ -334,6 +368,13 @@ export interface RentalServiceController {
     request: GetRentalExtensionsRequest,
   ): Promise<GetRentalExtensionsResponse> | Observable<GetRentalExtensionsResponse> | GetRentalExtensionsResponse;
 
+  getAllRentalExtensions(
+    request: GetAllRentalExtensionsRequest,
+  ):
+    | Promise<GetAllRentalExtensionsResponse>
+    | Observable<GetAllRentalExtensionsResponse>
+    | GetAllRentalExtensionsResponse;
+
   updateExtensionStatus(
     request: UpdateExtensionStatusRequest,
   ): Promise<UpdateExtensionStatusResponse> | Observable<UpdateExtensionStatusResponse> | UpdateExtensionStatusResponse;
@@ -353,6 +394,7 @@ export function RentalServiceControllerMethods() {
       "dashboardRental",
       "createRentalExtension",
       "getRentalExtensions",
+      "getAllRentalExtensions",
       "updateExtensionStatus",
     ];
     for (const method of grpcMethods) {

@@ -27,6 +27,7 @@ export class NotificationGateway implements OnGatewayConnection {
   }
 
   handleNotificationCreated(notification: NotificationType) {
+    console.log('New Notification: ', notification);
     const room = generateRoomUserId(notification.userId);
     this.server.to(room).emit('newNotification', notification);
   }
